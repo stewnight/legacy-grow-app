@@ -8,6 +8,13 @@
       "when": 1730845388418,
       "tag": "0000_clammy_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1730847950891,
+      "tag": "0001_clever_meltdown",
+      "breakpoints": true
     }
   ]
 }
