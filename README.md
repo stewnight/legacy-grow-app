@@ -1,29 +1,99 @@
-# Create T3 App
+# Legacy Grow App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A modern cultivation management system built with the T3 Stack, focusing on cannabis plant tracking and cultivation logging.
 
-## What's next? How do I make an app with this?
+## Tech Stack
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
-
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
-
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
+- [Next.js 15](https://nextjs.org)
+- [NextAuth.js 5](https://next-auth.js.org)
+- [Drizzle ORM](https://orm.drizzle.team)
+- [Tanstack React Query](https://tanstack.com/query)
 - [tRPC](https://trpc.io)
+- [Shadcn/ui](https://ui.shadcn.com)
+- [Tailwind CSS](https://tailwindcss.com)
 
-## Learn More
+## Core Features
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+The app provides comprehensive tracking and management for cannabis cultivation:
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- Plant lifecycle tracking from seed/clone to harvest
+- Genetic strain management and lineage tracking
+- Location and environment monitoring
+- Task management and scheduling
+- Compliance logging and reporting
+- Input and supply chain management
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## MVP Roadmap
 
-## How do I deploy this?
+### Phase 1: Basic Plant Logging
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- [ ] Plant creation and basic details entry
+- [ ] Growth stage tracking (seedling, vegetative, flowering)
+- [ ] Daily/weekly logging functionality
+- [ ] Basic location tracking
+- [ ] Mobile-friendly image upload
+- [ ] Simple task creation and completion
+
+### Phase 2: Enhanced Tracking
+
+- [ ] Genetic strain database
+- [ ] Environmental data logging
+- [ ] Nutrient schedules
+- [ ] Growth metrics tracking
+- [ ] Basic reporting
+- [ ] Offline functionality
+
+### Phase 3: Advanced Features
+
+- [ ] Harvest tracking
+- [ ] Processing workflows
+- [ ] Compliance reporting
+- [ ] Advanced analytics
+- [ ] Multi-facility support
+- [ ] Batch operations
+
+## Development
+
+### Getting Started
+
+# Install dependencies
+
+pnpm install
+
+# Set up environment variables
+
+cp [.env.example] .env
+
+# Push database schema
+
+pnpm db:push
+
+# Start development server
+
+pnpm dev
+
+## Mobile-First Features
+
+- Progressive Web App (PWA) support
+- Offline-first architecture using React Query
+- Touch-friendly UI components
+- Quick-action buttons for common tasks
+- Camera integration for plant photos
+- Simple data entry forms
+
+## Calculators & Tools
+
+- Nutrient ratio calculator
+- Growth phase timeline
+- Environmental condition optimizer
+- Yield estimator
+- Harvest scheduling
+- Drying room conditions
+
+## Next steps
+
+1. Implement basic CRUD operations for plants using the existing schema
+2. Create mobile-friendly forms for daily logging
+3. Set up image upload and storage
+4. Implement offline functionality using React Query
+5. Add basic reporting and visualization
