@@ -9,34 +9,6 @@ export default async function Home() {
   return (
     <HydrateClient>
       <main className="flex min-h-screen flex-col bg-white">
-        {/* Navigation Bar */}
-        <nav className="border-b">
-          <div className="container mx-auto flex h-16 items-center px-4">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold">LegacyAG</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              {session ? (
-                <>
-                  <Link href="/batches">
-                    <Button variant="ghost">Batches</Button>
-                  </Link>
-                  <Link href="/plants">
-                    <Button variant="ghost">Plants</Button>
-                  </Link>
-                  <Link href="/api/auth/signout">
-                    <Button variant="outline">Sign out</Button>
-                  </Link>
-                </>
-              ) : (
-                <Link href="/api/auth/signin">
-                  <Button>Sign in</Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </nav>
-
         {/* Hero Section */}
         <div className="container mx-auto flex flex-1 px-4">
           <div className="flex flex-col items-center justify-center space-y-8 py-16 text-center">
