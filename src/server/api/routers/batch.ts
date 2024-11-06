@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches, plants } from '~/server/db/schema'
+import { batches, plants, type Batch, type Plant } from '~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { format } from 'date-fns'
 
@@ -25,7 +25,7 @@ export const batchRouter = createTRPCRouter({
         locationId: z.number().optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }): Promise<Batch> => {
       const { name, strain, plantCount, notes, ...plantData } = input
 
       // Create the batch first
@@ -37,16 +37,21 @@ export const batchRouter = createTRPCRouter({
           plantCount,
           notes,
           userId: ctx.session.user.id,
-        })
+        } satisfies Partial<Batch>)
         .returning()
 
-      // Create the specified number of plants with formatted date
-      const plantsToCreate = Array(plantCount).fill({
-        ...plantData,
-        plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
-        batchId: batch?.id,
-        createdById: ctx.session.user.id,
-      })
+      if (!batch) {
+        throw new Error('Failed to create batch')
+      }
+
+      // Create plants with proper type checking
+      const plantsToCreate: Omit<Plant, 'id' | 'updatedAt' | 'createdAt'>[] =
+        Array(plantCount).fill({
+          ...plantData,
+          plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
+          batchId: batch.id,
+          createdById: ctx.session.user.id,
+        })
 
       await ctx.db.insert(plants).values(plantsToCreate)
 

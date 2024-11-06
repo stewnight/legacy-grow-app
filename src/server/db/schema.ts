@@ -258,8 +258,11 @@ export const verificationTokens = createTable(
 
 // ================== PLANTS & GENETICS ==================
 export type Batch = typeof batches.$inferSelect
+export type NewBatch = Omit<Batch, 'id' | 'createdAt' | 'updatedAt'>
 export type Genetic = typeof genetics.$inferSelect
+export type NewGenetic = Omit<Genetic, 'id' | 'createdAt' | 'updatedAt'>
 export type Plant = typeof plants.$inferSelect
+export type NewPlant = Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>
 
 /**
  * Plant batches for grouping plants together
@@ -297,7 +300,7 @@ export const genetics = createTable(
     floweringTime: integer('flowering_time'),
     thcPotential: decimal('thc_potential'),
     cbdPotential: decimal('cbd_potential'),
-    terpeneProfie: json('terpene_profile').$type<Record<string, number>>(), // Fix typo
+    terpeneProfie: json('terpene_profile').$type<Record<string, number>>(),
     growthCharacteristics: json('growth_characteristics').$type<{
       height?: number
       spread?: number
@@ -373,8 +376,11 @@ export const plants = createTable(
 
 // ================== LOCATIONS & AREAS ==================
 export type Facility = typeof facilities.$inferSelect
+export type NewFacility = Omit<Facility, 'id' | 'createdAt' | 'updatedAt'>
 export type Area = typeof areas.$inferSelect
+export type NewArea = Omit<Area, 'id' | 'createdAt' | 'updatedAt'>
 export type Location = typeof locations.$inferSelect
+export type NewLocation = Omit<Location, 'id' | 'createdAt' | 'updatedAt'>
 
 export const facilities = createTable(
   'facility',
@@ -475,6 +481,7 @@ export const locations = createTable(
 
 // ================== SENSORS & MONITORING ==================
 export type Sensor = typeof sensors.$inferSelect
+export type NewSensor = Omit<Sensor, 'id' | 'createdAt' | 'updatedAt'>
 export type SensorReading = typeof sensorReadings.$inferSelect
 
 /**
@@ -539,7 +546,12 @@ export const sensorReadings = createTable(
 
 // ================== TASKS & MAINTENANCE ==================
 export type TaskTemplate = typeof taskTemplates.$inferSelect
+export type NewTaskTemplate = Omit<
+  TaskTemplate,
+  'id' | 'createdAt' | 'updatedAt'
+>
 export type Task = typeof tasks.$inferSelect
+export type NewTask = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>
 
 /**
  * Task templates for common cultivation tasks
@@ -613,7 +625,9 @@ export const tasks = createTable(
 
 // ================== INPUTS & SUPPLIES ==================
 export type Supplier = typeof suppliers.$inferSelect
+export type NewSupplier = Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'>
 export type Input = typeof inputs.$inferSelect
+export type NewInput = Omit<Input, 'id' | 'createdAt' | 'updatedAt'>
 
 export const suppliers = createTable(
   'supplier',
@@ -676,7 +690,9 @@ export const inputs = createTable(
 
 // ================== HARVESTS & PROCESSING ==================
 export type Harvest = typeof harvests.$inferSelect
+export type NewHarvest = Omit<Harvest, 'id' | 'createdAt' | 'updatedAt'>
 export type Processing = typeof processing.$inferSelect
+export type NewProcessing = Omit<Processing, 'id' | 'createdAt' | 'updatedAt'>
 
 /**
  * Harvests tracking
@@ -867,12 +883,12 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   assignedTo: one(users, {
     fields: [tasks.assignedToId],
     references: [users.id],
-    relationName: 'assignedTasks', // Add relationName
+    relationName: 'assignedTasks',
   }),
   createdBy: one(users, {
     fields: [tasks.createdById],
     references: [users.id],
-    relationName: 'createdTasks', // Add relationName
+    relationName: 'createdTasks',
   }),
 }))
 

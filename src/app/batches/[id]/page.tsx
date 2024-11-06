@@ -10,14 +10,6 @@ import { format } from 'date-fns'
 import { Button } from '~/components/ui/button'
 import { Textarea } from '~/components/ui/textarea'
 
-interface Plant {
-  id: number
-  plantDate: Date
-  source: 'seed' | 'clone' | 'mother'
-  stage: 'seedling' | 'vegetative' | 'flowering'
-  healthStatus: 'healthy' | 'sick' | 'pest' | 'nutrient'
-}
-
 export default async function BatchPage({
   params,
 }: {
