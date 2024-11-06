@@ -11,21 +11,116 @@ import {
   decimal,
   json,
   date,
+  pgEnum,
 } from 'drizzle-orm/pg-core'
 import { type AdapterAccount } from 'next-auth/adapters'
 
 export const createTable = pgTableCreator((name) => `legacy-grow-app_${name}`)
 
+// Define enums first
+export const logLevelEnum = pgEnum('log_level', [
+  'debug',
+  'info',
+  'warn',
+  'error',
+])
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'manager'])
+export const batchStatusEnum = pgEnum('batch_status', [
+  'active',
+  'completed',
+  'cancelled',
+])
+export const plantSourceEnum = pgEnum('plant_source', [
+  'seed',
+  'clone',
+  'mother',
+])
+export const plantStageEnum = pgEnum('plant_stage', [
+  'seedling',
+  'vegetative',
+  'flowering',
+  'harvested',
+])
+export const plantSexEnum = pgEnum('plant_sex', [
+  'unknown',
+  'male',
+  'female',
+  'hermaphrodite',
+])
+export const healthStatusEnum = pgEnum('health_status', [
+  'healthy',
+  'sick',
+  'pest',
+  'nutrient',
+  'dead',
+])
+export const taskStatusEnum = pgEnum('task_status', [
+  'pending',
+  'in_progress',
+  'completed',
+  'cancelled',
+])
+export const taskPriorityEnum = pgEnum('task_priority', [
+  'low',
+  'medium',
+  'high',
+  'urgent',
+])
+export const geneticTypeEnum = pgEnum('genetic_type', [
+  'sativa',
+  'indica',
+  'hybrid',
+])
+export const locationTypeEnum = pgEnum('location_type', [
+  'room',
+  'section',
+  'bench',
+  'shelf',
+])
+export const sensorTypeEnum = pgEnum('sensor_type', [
+  'temperature',
+  'humidity',
+  'co2',
+  'light',
+  'ph',
+  'ec',
+])
+export const harvestQualityEnum = pgEnum('harvest_quality', [
+  'A',
+  'B',
+  'C',
+  'D',
+])
+export const systemLogSourceEnum = pgEnum('system_log_source', [
+  'plants',
+  'harvests',
+  'tasks',
+  'system',
+  'auth',
+  'sensors',
+])
+export const taskCategoryEnum = pgEnum('task_category', [
+  'maintenance',
+  'feeding',
+  'environmental',
+  'harvest',
+])
+
 // ================== CORE SYSTEM ==================
 
 export type SystemLog = typeof systemLogs.$inferSelect
 
+/**
+ * System logging schema for tracking application events
+ * Level options: debug, info, warn, error
+ * Source: tracks the origin of the log (e.g., 'plants', 'harvests', 'system')
+ */
 export const systemLogs = createTable(
   'system_log',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    level: varchar('level', { length: 50 }).notNull(),
-    source: varchar('source', { length: 255 }).notNull(),
+    level: logLevelEnum('level').notNull(),
+    source: systemLogSourceEnum('source').notNull(),
     message: text('message').notNull(),
     metadata: json('metadata'),
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -45,6 +140,12 @@ export type Account = typeof accounts.$inferSelect
 export type Session = typeof sessions.$inferSelect
 export type VerificationToken = typeof verificationTokens.$inferSelect
 
+/**
+ * Core user schema with authentication and authorization
+ * Role options: user, admin, manager
+ * Permissions: JSON array of string permissions
+ * Preferences: User specific settings as JSON
+ */
 export const users = createTable('user', {
   id: varchar('id', { length: 255 })
     .notNull()
@@ -57,10 +158,14 @@ export const users = createTable('user', {
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar('image', { length: 255 }),
-  role: varchar('role', { length: 50 }).notNull().default('user'),
+  role: userRoleEnum('role').notNull().default('user'),
   active: boolean('active').default(true),
-  permissions: json('permissions'),
-  preferences: json('preferences'),
+  permissions: json('permissions').$type<string[]>(),
+  preferences: json('preferences').$type<{
+    theme?: 'light' | 'dark'
+    notifications?: boolean
+    units?: 'metric' | 'imperial'
+  }>(),
   lastLogin: timestamp('last_login', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
@@ -152,23 +257,58 @@ export const verificationTokens = createTable(
 )
 
 // ================== PLANTS & GENETICS ==================
+export type Batch = typeof batches.$inferSelect
 export type Genetic = typeof genetics.$inferSelect
 export type Plant = typeof plants.$inferSelect
 
+/**
+ * Plant batches for grouping plants together
+ * Status options: active, completed, cancelled
+ * Plant count: Number of plants in the batch
+ */
+export const batches = createTable('batches', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  name: varchar('name', { length: 255 }).notNull(),
+  strain: varchar('strain', { length: 255 }).notNull(),
+  startDate: timestamp('start_date', { withTimezone: true }).defaultNow(),
+  endDate: timestamp('end_date', { withTimezone: true }),
+  status: batchStatusEnum('status').notNull().default('active'),
+  plantCount: integer('plant_count').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+})
+
+/**
+ * Plant genetics/strains schema
+ * Type options: sativa, indica, hybrid
+ * Flowering time: in days
+ * THC/CBD potential: percentage values 0-100
+ */
 export const genetics = createTable(
   'genetic',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
+    type: geneticTypeEnum('type').notNull(),
     breeder: varchar('breeder', { length: 255 }),
     description: text('description'),
     floweringTime: integer('flowering_time'),
     thcPotential: decimal('thc_potential'),
     cbdPotential: decimal('cbd_potential'),
-    terpeneProfie: json('terpene_profile'),
-    growthCharacteristics: json('growth_characteristics'),
-    lineage: json('lineage'),
+    terpeneProfie: json('terpene_profile').$type<Record<string, number>>(), // Fix typo
+    growthCharacteristics: json('growth_characteristics').$type<{
+      height?: number
+      spread?: number
+      internodeSpacing?: number
+      leafPattern?: string
+    }>(),
+    lineage: json('lineage').$type<{
+      mother?: string
+      father?: string
+      generation?: number
+    }>(),
     createdById: varchar('created_by', { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -186,21 +326,29 @@ export const genetics = createTable(
   })
 )
 
+/**
+ * Individual plants
+ * Source options: seed, clone, mother
+ * Stage options: seedling, vegetative, flowering, harvested
+ * Sex options: unknown, male, female, hermaphrodite
+ */
 export const plants = createTable(
   'plant',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     geneticId: integer('genetic_id').references(() => genetics.id),
-    batchId: varchar('batch_id', { length: 255 }),
-    source: varchar('source', { length: 50 }), // seed, clone, mother
-    stage: varchar('stage', { length: 50 }), // seedling, vegetative, flowering
+    batchId: integer('batch_id').references(() => batches.id),
+    source: plantSourceEnum('source').notNull(),
+    stage: plantStageEnum('stage').notNull(),
     plantDate: date('plant_date'),
     harvestDate: date('harvest_date'),
     motherId: integer('mother_id'),
     generation: integer('generation'),
-    sex: varchar('sex', { length: 50 }),
+    sex: plantSexEnum('sex'),
     phenotype: varchar('phenotype', { length: 255 }),
-    healthStatus: varchar('health_status', { length: 50 }),
+    healthStatus: healthStatusEnum('health_status')
+      .notNull()
+      .default('healthy'),
     quarantine: boolean('quarantine').default(false),
     destroyReason: varchar('destroy_reason', { length: 255 }),
     locationId: integer('location_id').references(() => locations.id),
@@ -284,15 +432,30 @@ export const areas = createTable(
   })
 )
 
+/**
+ * Location tracking schema
+ * Type options: room, section, bench, shelf
+ * Coordinates: JSON object with position data
+ * Properties: Environmental conditions and requirements
+ */
 export const locations = createTable(
   'location',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     areaId: integer('area_id').references(() => areas.id),
     name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
-    coordinates: json('coordinates'),
-    properties: json('properties'),
+    type: locationTypeEnum('type').notNull(),
+    coordinates: json('coordinates').$type<{
+      x: number
+      y: number
+      z?: number
+      level?: number
+    }>(),
+    properties: json('properties').$type<{
+      temperature?: { min: number; max: number }
+      humidity?: { min: number; max: number }
+      light?: { type: string; intensity: number }
+    }>(),
     createdById: varchar('created_by', { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -314,19 +477,30 @@ export const locations = createTable(
 export type Sensor = typeof sensors.$inferSelect
 export type SensorReading = typeof sensorReadings.$inferSelect
 
+/**
+ * Sensor data collection schema
+ * Type options: temperature, humidity, co2, light, ph, ec
+ * Range: Min/max values the sensor can measure
+ * Metadata: Additional sensor specific data
+ */
 export const sensors = createTable(
   'sensor',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
+    type: sensorTypeEnum('type').notNull(),
     model: varchar('model', { length: 255 }),
     locationId: integer('location_id').references(() => locations.id),
     calibrationDate: date('calibration_date'),
     calibrationDue: date('calibration_due'),
     accuracy: decimal('accuracy'),
-    range: json('range'),
-    metadata: json('metadata'),
+    range: json('range').$type<{ min: number; max: number; unit: string }>(),
+    metadata: json('metadata').$type<{
+      ipAddress?: string
+      protocol?: string
+      firmware?: string
+      lastCalibration?: Date
+    }>(),
     createdById: varchar('created_by', { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -367,17 +541,23 @@ export const sensorReadings = createTable(
 export type TaskTemplate = typeof taskTemplates.$inferSelect
 export type Task = typeof tasks.$inferSelect
 
+/**
+ * Task templates for common cultivation tasks
+ * Category options: maintenance, feeding, environmental, harvest
+ * Instructions: Step by step process
+ * Required skills: Array of required capabilities
+ */
 export const taskTemplates = createTable(
   'task_template',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
-    category: varchar('category', { length: 50 }).notNull(),
+    category: taskCategoryEnum('category').notNull(),
     description: text('description'),
-    instructions: json('instructions'),
+    instructions: json('instructions').$type<string[]>(),
     estimatedDuration: integer('estimated_duration'),
-    requiredSkills: json('required_skills'),
-    checklist: json('checklist'),
+    requiredSkills: json('required_skills').$type<string[]>(),
+    checklist: json('checklist').$type<{ item: string; required: boolean }[]>(),
     createdById: varchar('created_by', { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -394,6 +574,11 @@ export const taskTemplates = createTable(
   })
 )
 
+/**
+ * Tasks for plant maintenance and workflow
+ * Status options: pending, in_progress, completed, cancelled
+ * Priority options: low, medium, high, urgent
+ */
 export const tasks = createTable(
   'task',
   {
@@ -402,8 +587,8 @@ export const tasks = createTable(
     assignedToId: varchar('assigned_to', { length: 255 }).references(
       () => users.id
     ),
-    status: varchar('status', { length: 50 }).notNull(),
-    priority: varchar('priority', { length: 50 }).notNull(),
+    status: taskStatusEnum('status').notNull(),
+    priority: taskPriorityEnum('priority').notNull(),
     dueDate: timestamp('due_date', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     notes: text('notes'),
@@ -463,9 +648,9 @@ export const inputs = createTable(
   'input',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    supplierId: integer('supplier_id').references(() => suppliers.id),
     name: varchar('name', { length: 255 }).notNull(),
     type: varchar('type', { length: 50 }).notNull(),
-    supplierId: integer('supplier_id').references(() => suppliers.id),
     manufacturer: varchar('manufacturer', { length: 255 }),
     composition: json('composition'),
     applicationMethods: json('application_methods'),
@@ -493,6 +678,10 @@ export const inputs = createTable(
 export type Harvest = typeof harvests.$inferSelect
 export type Processing = typeof processing.$inferSelect
 
+/**
+ * Harvests tracking
+ * Quality options: A, B, C, D
+ */
 export const harvests = createTable(
   'harvest',
   {
@@ -505,7 +694,7 @@ export const harvests = createTable(
     trimWeight: decimal('trim_weight'),
     wasteWeight: decimal('waste_weight'),
     location: varchar('location', { length: 255 }),
-    quality: varchar('quality', { length: 50 }),
+    quality: harvestQualityEnum('quality'),
     notes: text('notes'),
     labResults: json('lab_results'),
     createdById: varchar('created_by', { length: 255 })
@@ -605,6 +794,10 @@ export const plantsRelations = relations(plants, ({ one }) => ({
     fields: [plants.createdById],
     references: [users.id],
   }),
+  batch: one(batches, {
+    fields: [plants.batchId],
+    references: [batches.id],
+  }),
 }))
 
 export const areasRelations = relations(areas, ({ one, many }) => ({
@@ -683,23 +876,15 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   }),
 }))
 
-export const suppliersRelations = relations(suppliers, ({ one, many }) => ({
-  inputs: many(inputs),
-  createdBy: one(users, {
-    fields: [suppliers.createdById],
-    references: [users.id],
-  }),
-}))
-
 export const inputsRelations = relations(inputs, ({ one }) => ({
   supplier: one(suppliers, {
     fields: [inputs.supplierId],
     references: [suppliers.id],
   }),
-  createdBy: one(users, {
-    fields: [inputs.createdById],
-    references: [users.id],
-  }),
+}))
+
+export const suppliersRelations = relations(suppliers, ({ many }) => ({
+  inputs: many(inputs),
 }))
 
 export const harvestsRelations = relations(harvests, ({ one, many }) => ({
@@ -748,6 +933,14 @@ export const facilitiesRelations = relations(facilities, ({ one, many }) => ({
   areas: many(areas),
   createdBy: one(users, {
     fields: [facilities.createdById],
+    references: [users.id],
+  }),
+}))
+
+export const batchesRelations = relations(batches, ({ many, one }) => ({
+  plants: many(plants),
+  createdBy: one(users, {
+    fields: [batches.userId],
     references: [users.id],
   }),
 }))

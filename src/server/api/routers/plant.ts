@@ -9,18 +9,18 @@ export const plantRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        batchId: z.string().optional(),
-        source: z.enum(['SEED', 'CLONE', 'MOTHER']),
-        stage: z.enum(['SEEDLING', 'VEGETATIVE', 'FLOWERING']),
+        batchId: z.number().optional(),
+        source: z.enum(['seed', 'clone', 'mother']),
+        stage: z.enum(['seedling', 'vegetative', 'flowering']),
         plantDate: z.date(),
         healthStatus: z
-          .enum(['HEALTHY', 'SICK', 'PEST', 'NUTRIENT'])
-          .default('HEALTHY'),
+          .enum(['healthy', 'sick', 'pest', 'nutrient'])
+          .default('healthy'),
         quarantine: z.boolean().default(false),
         geneticId: z.number().optional(),
         motherId: z.number().optional(),
         generation: z.number().optional(),
-        sex: z.enum(['MALE', 'FEMALE', 'HERMAPHRODITE', 'UNKNOWN']).optional(),
+        sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
         phenotype: z.string().optional(),
         locationId: z.number().optional(),
         destroyReason: z.string().optional(),

@@ -18,6 +18,9 @@ export default async function Home() {
             <div className="flex items-center gap-4">
               {session ? (
                 <>
+                  <Link href="/batches">
+                    <Button variant="ghost">Batches</Button>
+                  </Link>
                   <Link href="/plants">
                     <Button variant="ghost">Plants</Button>
                   </Link>

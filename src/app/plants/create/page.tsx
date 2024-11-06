@@ -28,18 +28,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { z } from 'zod'
 
 const createPlantSchema = z.object({
-  batchId: z.string().optional(),
-  source: z.enum(['SEED', 'CLONE', 'MOTHER']),
-  stage: z.enum(['SEEDLING', 'VEGETATIVE', 'FLOWERING']),
+  batchId: z
+    .string()
+    .optional()
+    .transform((val) => (val ? Number(val) : undefined)),
+  source: z.enum(['seed', 'clone', 'mother']),
+  stage: z.enum(['seedling', 'vegetative', 'flowering']),
   plantDate: z.date(),
   healthStatus: z
-    .enum(['HEALTHY', 'SICK', 'PEST', 'NUTRIENT'])
-    .default('HEALTHY'),
+    .enum(['healthy', 'sick', 'pest', 'nutrient'])
+    .default('healthy'),
   quarantine: z.boolean().default(false),
   geneticId: z.number().optional(),
   motherId: z.number().optional(),
   generation: z.number().optional(),
-  sex: z.enum(['MALE', 'FEMALE', 'HERMAPHRODITE', 'UNKNOWN']).optional(),
+  sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
   phenotype: z.string().optional(),
   locationId: z.number().optional(),
   destroyReason: z.string().optional(),
@@ -54,11 +57,10 @@ export default function CreatePlant() {
   const form = useForm<CreatePlantInput>({
     resolver: zodResolver(createPlantSchema),
     defaultValues: {
-      batchId: '',
-      source: 'SEED',
-      stage: 'SEEDLING',
+      source: 'seed',
+      stage: 'seedling',
       plantDate: new Date(),
-      healthStatus: 'HEALTHY',
+      healthStatus: 'healthy',
       quarantine: false,
     },
   })
@@ -129,9 +131,9 @@ export default function CreatePlant() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="SEED">Seed</SelectItem>
-                        <SelectItem value="CLONE">Clone</SelectItem>
-                        <SelectItem value="MOTHER">Mother</SelectItem>
+                        <SelectItem value="seed">Seed</SelectItem>
+                        <SelectItem value="clone">Clone</SelectItem>
+                        <SelectItem value="mother">Mother</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -156,9 +158,9 @@ export default function CreatePlant() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="SEEDLING">Seedling</SelectItem>
-                        <SelectItem value="VEGETATIVE">Vegetative</SelectItem>
-                        <SelectItem value="FLOWERING">Flowering</SelectItem>
+                        <SelectItem value="seedling">Seedling</SelectItem>
+                        <SelectItem value="vegetative">Vegetative</SelectItem>
+                        <SelectItem value="flowering">Flowering</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -206,10 +208,10 @@ export default function CreatePlant() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="HEALTHY">Healthy</SelectItem>
-                        <SelectItem value="SICK">Sick</SelectItem>
-                        <SelectItem value="PEST">Pest Issue</SelectItem>
-                        <SelectItem value="NUTRIENT">Nutrient Issue</SelectItem>
+                        <SelectItem value="healthy">Healthy</SelectItem>
+                        <SelectItem value="sick">Sick</SelectItem>
+                        <SelectItem value="pest">Pest Issue</SelectItem>
+                        <SelectItem value="nutrient">Nutrient Issue</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

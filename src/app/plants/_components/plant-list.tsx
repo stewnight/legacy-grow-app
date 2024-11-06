@@ -52,9 +52,9 @@ export function PlantList() {
             <TableCell>
               <Badge
                 variant={
-                  plant.stage === 'FLOWERING'
+                  plant.stage === 'flowering'
                     ? 'default'
-                    : plant.stage === 'VEGETATIVE'
+                    : plant.stage === 'vegetative'
                       ? 'secondary'
                       : 'outline'
                 }
@@ -71,9 +71,9 @@ export function PlantList() {
             <TableCell>
               <Badge
                 variant={
-                  plant.healthStatus === 'HEALTHY'
+                  plant.healthStatus === 'healthy'
                     ? 'default'
-                    : plant.healthStatus === 'SICK'
+                    : plant.healthStatus === 'sick'
                       ? 'destructive'
                       : 'secondary'
                 }
