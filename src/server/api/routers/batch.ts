@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches, plants, type Batch, type Plant } from '~/server/db/schema'
+import { batches, plants, type Batch, type NewPlant } from '~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { format } from 'date-fns'
 
@@ -45,13 +45,23 @@ export const batchRouter = createTRPCRouter({
       }
 
       // Create plants with proper type checking
-      const plantsToCreate: Omit<Plant, 'id' | 'updatedAt' | 'createdAt'>[] =
-        Array(plantCount).fill({
+      const plantsToCreate: NewPlant[] = Array(plantCount)
+        .fill(null)
+        .map(() => ({
           ...plantData,
           plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
           batchId: batch.id,
+          geneticId: plantData.geneticId ?? null,
+          motherId: plantData.motherId ?? null,
+          generation: plantData.generation ?? null,
           createdById: ctx.session.user.id,
-        })
+          harvestDate: null,
+          quarantine: false,
+          destroyReason: null,
+          sex: plantData.sex ?? 'female',
+          phenotype: plantData.phenotype ?? null,
+          locationId: plantData.locationId ?? null,
+        }))
 
       await ctx.db.insert(plants).values(plantsToCreate)
 
