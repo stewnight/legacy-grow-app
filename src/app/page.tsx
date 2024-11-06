@@ -1,10 +1,10 @@
-import Link from 'next/link'
+import Link from "next/link";
 
-import { auth } from '~/server/auth'
-import { HydrateClient } from '~/trpc/server'
+import { auth } from "~/server/auth";
+import { HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
-  const session = await auth()
+  const session = await auth();
 
   if (session?.user) {
     // void api.post.getLatest.prefetch()
@@ -47,15 +47,15 @@ export default async function Home() {
                 {session && <span>Logged in as {session.user?.name}</span>}
               </p>
               <Link
-                href={session ? '/api/auth/signout' : '/api/auth/signin'}
+                href={session ? "/api/auth/signout" : "/api/auth/signin"}
                 className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
               >
-                {session ? 'Sign out' : 'Sign in'}
+                {session ? "Sign out" : "Sign in"}
               </Link>
             </div>
           </div>
         </div>
       </main>
     </HydrateClient>
-  )
+  );
 }
