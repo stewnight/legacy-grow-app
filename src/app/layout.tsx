@@ -26,7 +26,9 @@ export default async function RootLayout({
           <nav className="border-b">
             <div className="container mx-auto flex h-16 items-center px-4">
               <div className="flex-1">
-                <h1 className="text-2xl font-bold">LegacyAG</h1>
+                <Link href="/">
+                  <h1 className="text-2xl font-bold">LegacyAG</h1>
+                </Link>
               </div>
               <div className="flex items-center gap-4">
                 {session ? (

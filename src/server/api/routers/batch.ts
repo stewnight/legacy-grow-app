@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches } from '~/server/db/schema'
+import { batches, plants } from '~/server/db/schema'
 import { eq } from 'drizzle-orm'
-// import { api } from '~/trpc/server'
+import { format } from 'date-fns'
 
 export const batchRouter = createTRPCRouter({
   create: protectedProcedure
@@ -12,21 +12,45 @@ export const batchRouter = createTRPCRouter({
         strain: z.string(),
         plantCount: z.number().min(1),
         notes: z.string().optional(),
+        // Plant details
+        source: z.enum(['seed', 'clone', 'mother']),
+        stage: z.enum(['seedling', 'vegetative', 'flowering']),
+        plantDate: z.date(),
+        healthStatus: z.enum(['healthy', 'sick', 'pest', 'nutrient']),
+        geneticId: z.number().optional(),
+        motherId: z.number().optional(),
+        generation: z.number().optional(),
+        sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
+        phenotype: z.string().optional(),
+        locationId: z.number().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const batch = await ctx.db
+      const { name, strain, plantCount, notes, ...plantData } = input
+
+      // Create the batch first
+      const [batch] = await ctx.db
         .insert(batches)
         .values({
-          ...input,
+          name,
+          strain,
+          plantCount,
+          notes,
           userId: ctx.session.user.id,
         })
         .returning()
 
-      // Create plants for the batch
-      // Code to be implemented here
+      // Create the specified number of plants with formatted date
+      const plantsToCreate = Array(plantCount).fill({
+        ...plantData,
+        plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
+        batchId: batch?.id,
+        createdById: ctx.session.user.id,
+      })
 
-      return batch[0]
+      await ctx.db.insert(plants).values(plantsToCreate)
+
+      return batch
     }),
 
   list: protectedProcedure.query(({ ctx }) => {
