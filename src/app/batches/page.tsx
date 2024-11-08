@@ -1,6 +1,6 @@
 import { api } from '~/trpc/server'
 import { CreateBatchForm } from './_components/create-batch-form'
-import { BatchList } from './batch-list'
+import { BatchList } from './_components/batch-list'
 
 export default async function BatchesPage() {
   const batches = await api.batch.list()

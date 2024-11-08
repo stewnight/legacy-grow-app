@@ -1,5 +1,5 @@
 'use client'
-
+import { QRCodeSVG } from 'qrcode.react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '~/components/ui/badge'
 import { format } from 'date-fns'
@@ -23,6 +23,11 @@ import {
 } from '~/components/ui/dropdown-menu'
 
 import type { Plant } from '~/server/db/schemas'
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '../../../components/ui/hover-card'
 
 export const columns: ColumnDef<Plant>[] = [
   {
@@ -46,6 +51,29 @@ export const columns: ColumnDef<Plant>[] = [
     ),
     enableSorting: true,
     enableHiding: true,
+  },
+  {
+    accessorKey: 'code',
+    header: () => {
+      return <>Code</>
+    },
+    cell: ({ row }) => {
+      const code: Plant['code'] = row.getValue('code')
+      return (
+        <HoverCard>
+          <HoverCardTrigger>
+            <QRCodeSVG value={code} size={32} />
+          </HoverCardTrigger>
+          <HoverCardContent className="flex flex-col items-center space-y-2">
+            <QRCodeSVG value={code} size={128} />
+            <span className="font-mono text-sm text-muted-foreground">
+              This is a unique code for this plant. This code:{' '}
+              <strong>{code}</strong>
+            </span>
+          </HoverCardContent>
+        </HoverCard>
+      )
+    },
   },
   {
     accessorKey: 'id',
@@ -159,8 +187,8 @@ export const columns: ColumnDef<Plant>[] = [
     accessorKey: 'location',
     header: 'Location',
     cell: ({ row }) => {
-      const locationId: Plant['locationId'] = row.getValue('locationId')
-      return locationId ? `Location ${locationId}` : 'N/A'
+      const location: Plant['locationId'] = row.getValue('location')
+      return location ? location : 'N/A'
     },
   },
   {

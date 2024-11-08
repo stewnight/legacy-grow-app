@@ -31,6 +31,11 @@ export const batches = createTable(
   'batches',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    code: varchar('code', { length: 255 })
+      .notNull()
+      .$defaultFn(
+        () => `BAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      ),
     name: varchar('name', { length: 255 }).notNull(),
     strain: varchar('strain', { length: 255 }).notNull(),
     startDate: timestamp('start_date', { withTimezone: true }).defaultNow(),
@@ -43,6 +48,7 @@ export const batches = createTable(
     userId: varchar('user_id', { length: 255 }).notNull(),
   },
   (batch) => ({
+    codeIdx: index('batch_code_idx').on(batch.code),
     nameIdx: index('batch_name_idx').on(batch.name),
     statusIdx: index('batch_status_idx').on(batch.status),
     userIdIdx: index('batch_user_id_idx').on(batch.userId),
@@ -101,6 +107,11 @@ export const plants = createTable(
   'plant',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    code: varchar('code', { length: 255 })
+      .notNull()
+      .$defaultFn(
+        () => `PLT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      ),
     geneticId: integer('genetic_id').references(() => genetics.id),
     batchId: integer('batch_id').references(() => batches.id),
     source: plantSourceEnum('source').notNull(),
@@ -128,6 +139,7 @@ export const plants = createTable(
     ),
   },
   (plant) => ({
+    codeIdx: index('plant_code_idx').on(plant.code),
     batchIdIdx: index('plant_batch_id_idx').on(plant.batchId),
     stageIdx: index('plant_stage_idx').on(plant.stage),
     createdByIdx: index('plant_created_by_idx').on(plant.createdById),

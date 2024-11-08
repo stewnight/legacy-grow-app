@@ -43,13 +43,13 @@ export const batchRouter = createTRPCRouter({
       if (!batch) {
         throw new Error('Failed to create batch')
       }
-
       // Create plants with proper type checking
       const plantsToCreate: NewPlant[] = Array(plantCount)
         .fill(null)
         .map(() => ({
           ...plantData,
           plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
+          code: `${batch.id}-${Math.random().toString(36).substring(2, 7)}`,
           batchId: batch.id,
           geneticId: plantData.geneticId ?? null,
           motherId: plantData.motherId ?? null,

@@ -50,6 +50,13 @@
       "when": 1731036998140,
       "tag": "0006_fantastic_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1731046280321,
+      "tag": "0007_lumpy_quasar",
+      "breakpoints": true
     }
   ]
 }

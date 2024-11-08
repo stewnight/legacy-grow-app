@@ -13,6 +13,7 @@ export const plantRouter = createTRPCRouter({
         source: z.enum(['seed', 'clone', 'mother']),
         stage: z.enum(['seedling', 'vegetative', 'flowering']),
         plantDate: z.date(),
+        notes: z.string().optional(),
         healthStatus: z
           .enum(['healthy', 'sick', 'pest', 'nutrient'])
           .default('healthy'),
