@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
-import { plants } from '~/server/db/schema'
+import { plants } from '~/server/db/schemas'
 import { desc, eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { format } from 'date-fns'

@@ -9,8 +9,6 @@ import { Button } from '../components/ui/button'
 import { auth } from '../server/auth'
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { createQueryClient } from '~/trpc/query-client'
 
 export const metadata: Metadata = {
   title: 'LegacyAG - Growing app',

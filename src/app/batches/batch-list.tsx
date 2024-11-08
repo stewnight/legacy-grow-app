@@ -1,6 +1,6 @@
 'use client'
 
-import { type Batch } from '~/server/db/schema'
+import { type Batch } from '~/server/db/schemas'
 import {
   Card,
   CardContent,

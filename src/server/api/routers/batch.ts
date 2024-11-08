@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches, plants, type Batch, type NewPlant } from '~/server/db/schema'
+import { batches, plants, type Batch, type NewPlant } from '~/server/db/schemas'
 import { eq } from 'drizzle-orm'
 import { format } from 'date-fns'
 
