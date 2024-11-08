@@ -5,8 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { generateStorageKey } from '~/lib/storage'
 import { api } from '~/trpc/react'
 import { Progress } from '~/components/ui/progress'
-import { toast } from '~/hooks/use-toast'
-import { Loader2, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
 interface MediaUploaderProps {

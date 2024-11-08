@@ -9,6 +9,7 @@ import { type Note } from '~/server/db/schemas/notes'
 import { cn } from '~/lib/utils'
 import { MediaUploader } from './MediaUploader'
 import { toast } from '~/hooks/use-toast'
+import Image from 'next/image'
 
 interface NoteInputProps {
   entityType: string
@@ -81,10 +82,12 @@ export function NoteInput({
 
       {mediaUrl ? (
         <div className="relative rounded-lg border overflow-hidden">
-          <img
+          <Image
             src={mediaUrl}
             alt="Upload preview"
             className="max-h-[300px] w-full object-contain"
+            width={300}
+            height={300}
           />
           <Button
             variant="ghost"

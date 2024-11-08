@@ -2,14 +2,7 @@ import { relations } from 'drizzle-orm'
 import { users, accounts, sessions } from './core'
 import { notes } from './notes'
 import { plants, genetics, batches } from './cultivation'
-import {
-  tasks,
-  sensors,
-  sensorReadings,
-  taskTemplates,
-  suppliers,
-  inputs,
-} from './operations'
+import { tasks, sensors, sensorReadings, taskTemplates } from './operations'
 import { areas, locations, facilities } from './facility'
 import { harvests, processing, complianceLogs } from './processing'
 
@@ -38,7 +31,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 }))
 
 // Notes relations
-export const notesRelations = relations(notes, ({ one, many }) => ({
+export const notesRelations = relations(notes, ({ one }) => ({
   createdBy: one(users, {
     fields: [notes.createdById],
     references: [users.id],
