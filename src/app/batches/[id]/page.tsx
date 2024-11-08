@@ -9,8 +9,8 @@ import {
 import { format } from 'date-fns'
 import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Textarea } from '~/components/ui/textarea'
-import { Button } from '~/components/ui/button'
+import { Timeline } from '~/components/notes/Timeline'
+import { NoteInput } from '~/components/notes/NoteInput'
 
 export default async function BatchPage({
   params,
@@ -91,78 +91,24 @@ export default async function BatchPage({
           </CardContent>
         </Card>
 
-        {/* Timeline and Comments Section */}
-        <div>
-          <h2 className="text-2xl font-semibold">
-            Logging features to be done, the below is just a placeholder
-          </h2>
-        </div>
-        <div className="grid gap-8 md:grid-cols-2">
-          {/* Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Timeline</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Example timeline items */}
-              <div className="border-l-2 border-muted pl-4 space-y-4">
-                <div className="relative">
-                  <div className="absolute -left-[41px] h-6 w-6 rounded-full bg-muted-foreground flex items-center justify-center">
-                    <div className="h-2 w-2 rounded-full bg-background" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Today</p>
-                    <p>Changed stage to Flowering</p>
-                  </div>
-                </div>
-                <div className="relative">
-                  <div className="absolute -left-[41px] h-6 w-6 rounded-full bg-muted-foreground flex items-center justify-center">
-                    <div className="h-2 w-2 rounded-full bg-background" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">3 days ago</p>
-                    <p>Added nutrients</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" size="sm" className="w-full">
-                Add Timeline Event
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Comments */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Comments</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Example comments */}
-              <div className="space-y-4">
-                <div className="rounded-lg bg-muted p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium">User</p>
-                    <p className="text-sm text-muted-foreground">2 days ago</p>
-                  </div>
-                  <p>Plants are looking healthy, good leaf development.</p>
-                </div>
-                <div className="rounded-lg bg-muted p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium">User</p>
-                    <p className="text-sm text-muted-foreground">5 days ago</p>
-                  </div>
-                  <p>Started LST on the larger plants.</p>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <Textarea placeholder="Add a comment..." className="w-full" />
-              <Button className="w-full">Add Comment</Button>
-            </CardFooter>
-          </Card>
-        </div>
+        {/* Notes Timeline */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Notes & Timeline</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Timeline
+              entityType="batch"
+              entityId={parseInt(resolvedParams.id)}
+            />
+          </CardContent>
+          <CardFooter>
+            <NoteInput
+              entityType="batch"
+              entityId={parseInt(resolvedParams.id)}
+            />
+          </CardFooter>
+        </Card>
       </div>
     )
   } catch (error) {

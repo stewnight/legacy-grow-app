@@ -33,6 +33,27 @@ The app provides comprehensive tracking and management for cannabis cultivation:
 - [ ] Basic location tracking
 - [ ] Mobile-friendly image upload
 - [ ] Simple task creation and completion
+- [ ] Data and note logging
+
+### Data and note logging phases
+
+#### Phase 1: Core Note Infrastructure
+
+- [x] Database schema for notes
+- [x] Basic text note creation/display
+- [x] Timeline component
+
+#### Phase 2: Media Handling
+
+- [ ] Image upload/display
+- [ ] Voice recording/playback
+- [ ] File attachments
+
+#### Phase 3: Social Features
+
+- [ ] Threading/replies
+- [ ] Mentions/tags
+- [ ] Real-time updates
 
 ### Phase 2: Enhanced Tracking
 

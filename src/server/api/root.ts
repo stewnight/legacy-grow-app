@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc'
 import { plantRouter } from './routers/plant'
 import { batchRouter } from './routers/batch'
+import { notesRouter } from './routers/notes'
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { batchRouter } from './routers/batch'
 export const appRouter = createTRPCRouter({
   plant: plantRouter,
   batch: batchRouter,
+  notes: notesRouter,
 })
 
 // export type definition of API

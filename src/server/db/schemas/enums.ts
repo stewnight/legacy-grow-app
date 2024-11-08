@@ -107,3 +107,10 @@ export const harvestQualityEnum = pgEnum('harvest_quality', [
   'C',
   'D',
 ])
+
+export const noteTypeEnum = pgEnum('note_type', [
+  'text',
+  'voice',
+  'image',
+  'file',
+])

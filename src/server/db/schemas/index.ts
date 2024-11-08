@@ -5,8 +5,8 @@ export * from './cultivation'
 export * from './facility'
 export * from './operations'
 export * from './processing'
+export * from './notes'
 
-// Update the user relations to include all relationships
 import { relations } from 'drizzle-orm'
 import { accounts, users } from './core'
 import { plants } from './cultivation'
@@ -14,6 +14,7 @@ import { tasks, sensors } from './operations'
 import { areas, locations } from './facility'
 import { genetics } from './cultivation'
 import { harvests, processing } from './processing'
+import { notes } from './notes'
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -26,4 +27,5 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdSensors: many(sensors),
   createdHarvests: many(harvests),
   createdProcessing: many(processing),
+  createdNotes: many(notes),
 }))
