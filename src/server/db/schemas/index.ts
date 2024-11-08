@@ -7,25 +7,23 @@ export * from './operations'
 export * from './processing'
 export * from './notes'
 
-import { relations } from 'drizzle-orm'
-import { accounts, users } from './core'
-import { plants } from './cultivation'
-import { tasks, sensors } from './operations'
-import { areas, locations } from './facility'
-import { genetics } from './cultivation'
-import { harvests, processing } from './processing'
-import { notes } from './notes'
-
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  plants: many(plants),
-  assignedTasks: many(tasks, { relationName: 'assignedTasks' }),
-  createdTasks: many(tasks, { relationName: 'createdTasks' }),
-  createdGenetics: many(genetics),
-  createdAreas: many(areas),
-  createdLocations: many(locations),
-  createdSensors: many(sensors),
-  createdHarvests: many(harvests),
-  createdProcessing: many(processing),
-  createdNotes: many(notes),
-}))
+// Export relations separately to avoid naming conflicts
+export {
+  usersRelations,
+  accountsRelations,
+  sessionsRelations,
+  notesRelations,
+  facilitiesRelations,
+  areasRelations,
+  locationsRelations,
+  plantsRelations,
+  geneticsRelations,
+  batchesRelations,
+  sensorsRelations,
+  sensorReadingsRelations,
+  taskTemplatesRelations,
+  tasksRelations,
+  harvestsRelations,
+  processingRelations,
+  complianceLogsRelations,
+} from './relations'

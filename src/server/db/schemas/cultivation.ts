@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -28,7 +28,7 @@ export type Batch = typeof batches.$inferSelect
 export type NewBatch = Omit<Batch, 'id' | 'createdAt' | 'updatedAt'>
 
 export const batches = createTable(
-  'batches',
+  'batch',
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     code: varchar('code', { length: 255 })
@@ -147,39 +147,3 @@ export const plants = createTable(
     locationIdIdx: index('plant_location_id_idx').on(plant.locationId),
   })
 )
-
-// Relations
-export const plantsRelations = relations(plants, ({ one }) => ({
-  genetic: one(genetics, {
-    fields: [plants.geneticId],
-    references: [genetics.id],
-  }),
-  location: one(locations, {
-    fields: [plants.locationId],
-    references: [locations.id],
-  }),
-  createdBy: one(users, {
-    fields: [plants.createdById],
-    references: [users.id],
-  }),
-  batch: one(batches, {
-    fields: [plants.batchId],
-    references: [batches.id],
-  }),
-}))
-
-export const geneticsRelations = relations(genetics, ({ one, many }) => ({
-  plants: many(plants),
-  createdBy: one(users, {
-    fields: [genetics.createdById],
-    references: [users.id],
-  }),
-}))
-
-export const batchesRelations = relations(batches, ({ many, one }) => ({
-  plants: many(plants),
-  createdBy: one(users, {
-    fields: [batches.userId],
-    references: [users.id],
-  }),
-}))

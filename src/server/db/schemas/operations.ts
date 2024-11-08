@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -211,62 +211,3 @@ export const inputs = createTable(
     supplierIdIdx: index('input_supplier_id_idx').on(table.supplierId),
   })
 )
-
-// Relations
-export const sensorsRelations = relations(sensors, ({ one, many }) => ({
-  location: one(locations, {
-    fields: [sensors.locationId],
-    references: [locations.id],
-  }),
-  readings: many(sensorReadings),
-  createdBy: one(users, {
-    fields: [sensors.createdById],
-    references: [users.id],
-  }),
-}))
-
-export const sensorReadingsRelations = relations(sensorReadings, ({ one }) => ({
-  sensor: one(sensors, {
-    fields: [sensorReadings.sensorId],
-    references: [sensors.id],
-  }),
-}))
-
-export const taskTemplatesRelations = relations(
-  taskTemplates,
-  ({ one, many }) => ({
-    tasks: many(tasks),
-    createdBy: one(users, {
-      fields: [taskTemplates.createdById],
-      references: [users.id],
-    }),
-  })
-)
-
-export const tasksRelations = relations(tasks, ({ one }) => ({
-  template: one(taskTemplates, {
-    fields: [tasks.templateId],
-    references: [taskTemplates.id],
-  }),
-  assignedTo: one(users, {
-    fields: [tasks.assignedToId],
-    references: [users.id],
-    relationName: 'assignedTasks',
-  }),
-  createdBy: one(users, {
-    fields: [tasks.createdById],
-    references: [users.id],
-    relationName: 'createdTasks',
-  }),
-}))
-
-export const suppliersRelations = relations(suppliers, ({ many }) => ({
-  inputs: many(inputs),
-}))
-
-export const inputsRelations = relations(inputs, ({ one }) => ({
-  supplier: one(suppliers, {
-    fields: [inputs.supplierId],
-    references: [suppliers.id],
-  }),
-}))

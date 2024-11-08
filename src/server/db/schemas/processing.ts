@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -120,38 +120,3 @@ export const complianceLogs = createTable(
     statusIdx: index('compliance_log_status_idx').on(table.status),
   })
 )
-
-// Relations
-export const harvestsRelations = relations(harvests, ({ one, many }) => ({
-  plant: one(plants, {
-    fields: [harvests.plantId],
-    references: [plants.id],
-  }),
-  processing: many(processing),
-  createdBy: one(users, {
-    fields: [harvests.createdById],
-    references: [users.id],
-  }),
-}))
-
-export const processingRelations = relations(processing, ({ one }) => ({
-  harvest: one(harvests, {
-    fields: [processing.harvestId],
-    references: [harvests.id],
-  }),
-  createdBy: one(users, {
-    fields: [processing.createdById],
-    references: [users.id],
-  }),
-}))
-
-export const complianceLogsRelations = relations(complianceLogs, ({ one }) => ({
-  verifiedBy: one(users, {
-    fields: [complianceLogs.verifiedById],
-    references: [users.id],
-  }),
-  createdBy: one(users, {
-    fields: [complianceLogs.createdById],
-    references: [users.id],
-  }),
-}))

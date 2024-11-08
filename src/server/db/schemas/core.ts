@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -42,31 +42,39 @@ export type Account = typeof accounts.$inferSelect
 export type Session = typeof sessions.$inferSelect
 export type VerificationToken = typeof verificationTokens.$inferSelect
 
-export const users = createTable('user', {
-  id: varchar('id', { length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: varchar('name', { length: 255 }),
-  email: varchar('email', { length: 255 }).notNull(),
-  emailVerified: timestamp('email_verified', {
-    mode: 'date',
-    withTimezone: true,
-  }).default(sql`CURRENT_TIMESTAMP`),
-  image: varchar('image', { length: 255 }),
-  role: userRoleEnum('role').notNull().default('user'),
-  active: boolean('active').default(true),
-  permissions: json('permissions').$type<string[]>(),
-  preferences: json('preferences').$type<{
-    theme?: 'light' | 'dark'
-    notifications?: boolean
-    units?: 'metric' | 'imperial'
-  }>(),
-  lastLogin: timestamp('last_login', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-})
+export const users = createTable(
+  'user',
+  {
+    id: varchar('id', { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar('name', { length: 255 }),
+    email: varchar('email', { length: 255 }).notNull(),
+    emailVerified: timestamp('email_verified', {
+      mode: 'date',
+      withTimezone: true,
+    }).default(sql`CURRENT_TIMESTAMP`),
+    image: varchar('image', { length: 255 }),
+    role: userRoleEnum('role').notNull().default('user'),
+    active: boolean('active').default(true),
+    permissions: json('permissions').$type<string[]>(),
+    preferences: json('preferences').$type<{
+      theme?: 'light' | 'dark'
+      notifications?: boolean
+      units?: 'metric' | 'imperial'
+    }>(),
+    lastLogin: timestamp('last_login', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (self) => ({
+    emailIdx: index('user_email_idx').on(self.email),
+    roleIdx: index('user_role_idx').on(self.role),
+    activeIdx: index('user_active_idx').on(self.active),
+  })
+)
 
 export const accounts = createTable(
   'account',
@@ -130,16 +138,3 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [self.identifier, self.token] }),
   })
 )
-
-// Auth Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-}))
-
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
-}))
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}))

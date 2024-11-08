@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -22,10 +22,10 @@ export const notes = createTable(
     entityId: integer('entity_id').notNull(),
     parentId: integer('parent_id'),
     metadata: json('metadata').$type<{
-      duration?: number // for voice notes
-      dimensions?: { width: number; height: number } // for images
-      fileSize?: number // for files
-      mimeType?: string // for files and images
+      duration?: number
+      dimensions?: { width: number; height: number }
+      fileSize?: number
+      mimeType?: string
     }>(),
     createdById: varchar('created_by', { length: 255 })
       .notNull()
@@ -48,20 +48,3 @@ export const notes = createTable(
 
 export type Note = typeof notes.$inferSelect
 export type NewNote = Omit<Note, 'id' | 'createdAt' | 'updatedAt'>
-
-// Relations
-export const notesRelations = relations(notes, ({ one }) => ({
-  createdBy: one(users, {
-    fields: [notes.createdById],
-    references: [users.id],
-  }),
-  parent: one(notes, {
-    fields: [notes.parentId],
-    references: [notes.id],
-  }),
-}))
-
-// Add the user-notes relation to extend usersRelations from core.ts
-export const userNotesRelations = relations(users, ({ many }) => ({
-  createdNotes: many(notes, { relationName: 'createdNotes' }),
-}))

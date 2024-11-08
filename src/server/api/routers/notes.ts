@@ -3,17 +3,20 @@ import { desc, eq, and } from 'drizzle-orm'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { notes } from '~/server/db/schemas'
 
-const noteMetadataSchema = z.object({
-  duration: z.number().optional(),
-  dimensions: z
-    .object({
-      width: z.number(),
-      height: z.number(),
-    })
-    .optional(),
-  fileSize: z.number().optional(),
-  mimeType: z.string().optional(),
-})
+const noteMetadataSchema = z
+  .object({
+    duration: z.number().optional(),
+    dimensions: z
+      .object({
+        width: z.number(),
+        height: z.number(),
+      })
+      .optional(),
+    fileSize: z.number().optional(),
+    mimeType: z.string().optional(),
+  })
+  .nullable()
+  .optional()
 
 export const notesRouter = createTRPCRouter({
   create: protectedProcedure
@@ -24,14 +27,19 @@ export const notesRouter = createTRPCRouter({
         entityType: z.string(),
         entityId: z.number(),
         parentId: z.number().optional(),
-        metadata: noteMetadataSchema.optional(),
+        metadata: noteMetadataSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
       const [note] = await ctx.db
         .insert(notes)
         .values({
-          ...input,
+          content: input.content,
+          type: input.type,
+          entityType: input.entityType,
+          entityId: input.entityId,
+          parentId: input.parentId,
+          metadata: input.metadata ?? null,
           createdById: ctx.session.user.id,
         })
         .returning()

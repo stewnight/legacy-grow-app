@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -114,39 +114,3 @@ export const locations = createTable(
     areaIdIdx: index('location_area_id_idx').on(location.areaId),
   })
 )
-
-// Relations
-export const facilitiesRelations = relations(facilities, ({ one, many }) => ({
-  areas: many(areas),
-  createdBy: one(users, {
-    fields: [facilities.createdById],
-    references: [users.id],
-  }),
-}))
-
-export const areasRelations = relations(areas, ({ one, many }) => ({
-  facility: one(facilities, {
-    fields: [areas.facilityId],
-    references: [facilities.id],
-  }),
-  parent: one(areas, {
-    fields: [areas.parentId],
-    references: [areas.id],
-  }),
-  locations: many(locations),
-  createdBy: one(users, {
-    fields: [areas.createdById],
-    references: [users.id],
-  }),
-}))
-
-export const locationsRelations = relations(locations, ({ one }) => ({
-  area: one(areas, {
-    fields: [locations.areaId],
-    references: [areas.id],
-  }),
-  createdBy: one(users, {
-    fields: [locations.createdById],
-    references: [users.id],
-  }),
-}))
