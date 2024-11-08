@@ -1,5 +1,5 @@
 import { api } from '~/trpc/server'
-import { CreateBatchForm } from './create-batch-form'
+import { CreateBatchForm } from './_components/create-batch-form'
 import { BatchList } from './batch-list'
 
 export default async function BatchesPage() {
