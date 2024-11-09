@@ -49,6 +49,7 @@ type BatchInput = z.infer<typeof batchSchema>
 
 export function CreateBatchForm() {
   const router = useRouter()
+  const { data: strains } = api.strain.list.useQuery()
 
   const form = useForm<BatchInput>({
     resolver: zodResolver(batchSchema),
@@ -101,9 +102,23 @@ export function CreateBatchForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Strain</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Enter strain name" />
-                      </FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select strain" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {strains?.map((strain) => (
+                            <SelectItem key={strain.id} value={strain.name}>
+                              {strain.name} ({strain.type})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -147,3 +147,34 @@ export const plants = createTable(
     locationIdIdx: index('plant_location_id_idx').on(plant.locationId),
   })
 )
+
+// ================== STRAINS ==================
+export type Strain = typeof strains.$inferSelect
+export type NewStrain = Omit<Strain, 'id' | 'createdAt' | 'updatedAt'>
+
+export const strains = createTable(
+  'strain',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    name: varchar('name', { length: 255 }).notNull(),
+    type: geneticTypeEnum('type').notNull(),
+    description: text('description'),
+    floweringTime: integer('flowering_time'),
+    thcPotential: decimal('thc_potential', { precision: 4, scale: 1 }),
+    cbdPotential: decimal('cbd_potential', { precision: 4, scale: 1 }),
+    createdById: varchar('created_by', { length: 255 })
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
+      () => new Date()
+    ),
+  },
+  (strain) => ({
+    nameIdx: index('strain_name_idx').on(strain.name),
+    typeIdx: index('strain_type_idx').on(strain.type),
+    createdByIdx: index('strain_created_by_idx').on(strain.createdById),
+  })
+)

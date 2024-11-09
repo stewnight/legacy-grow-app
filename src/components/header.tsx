@@ -21,6 +21,9 @@ export default async function Header() {
               <Link href="/plants">
                 <Button variant="ghost">Plants</Button>
               </Link>
+              <Link href="/strains">
+                <Button variant="ghost">Strains</Button>
+              </Link>
               <Link href="/api/auth/signout">
                 <Button variant="outline">Sign out</Button>
               </Link>

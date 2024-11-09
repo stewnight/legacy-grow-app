@@ -15,6 +15,13 @@
       "when": 1731109471565,
       "tag": "0001_massive_lorna_dane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1731190669248,
+      "tag": "0002_slim_killmonger",
+      "breakpoints": true
     }
   ]
 }

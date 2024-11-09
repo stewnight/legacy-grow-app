@@ -3,6 +3,7 @@ import { plantRouter } from './routers/plant'
 import { batchRouter } from './routers/batch'
 import { notesRouter } from './routers/notes'
 import { mediaRouter } from './routers/media'
+import { strainRouter } from './routers/strain'
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   batch: batchRouter,
   notes: notesRouter,
   media: mediaRouter,
+  strain: strainRouter,
 })
 
 // export type definition of API
