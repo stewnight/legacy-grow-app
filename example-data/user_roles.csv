@@ -1,0 +1,6 @@
+role_name,permissions,description
+Manager,"full_access","Complete system access"
+Grower,"read_write_plants,read_environment","Plant management access"
+Maintenance,"read_write_equipment","Equipment maintenance access"
+Harvest,"read_write_harvest","Harvest and processing access"
+Observer,"read_only","View-only access"

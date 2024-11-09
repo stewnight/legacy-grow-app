@@ -1,0 +1,17 @@
+name,machine_name,description,fixed_assets
+Mother Plant,mother_plant,"Source plants for propagation",false
+Clone,clone,"Rooting cuttings in humidity dome",false
+Veg Plant,veg_plant,"Vegetative growth phase",false
+Flower Plant,flower_plant,"Flowering phase plants",false
+HVAC-Mini Split,hvac_split,"Climate control unit",true
+Light-1000W,light_1000w,"Flowering light fixture",true
+Light-680W,light_680w,"Vegetative light fixture",true
+Dehumidifier,dehumidifier,"Humidity control unit",true
+Sensor-VPD,sensor_vpd,"Temperature/Humidity sensor",true
+Sensor-EC,sensor_ec,"Substrate EC probe",true
+Sensor-pH,sensor_ph,"pH monitoring probe",true
+Sensor-CO2,sensor_co2,"CO2 monitoring device",true
+Irrigation-Pump,irr_pump,"Main irrigation pump",true
+Irrigation-Filter,irr_filter,"Water filtration system",true
+RO-System,ro_system,"Reverse osmosis unit",true
+CO2-System,co2_system,"CO2 enrichment system",true

@@ -1,0 +1,6 @@
+sensor,condition,alert_type,message
+VPD-*,above_max,notification,"VPD too high in {location}"
+VPD-*,below_min,notification,"VPD too low in {location}"
+EC-*,above_max,urgent,"EC spike detected in {location}"
+pH-*,outside_range,urgent,"pH out of range in {location}"
+CO2-*,below_min,notification,"CO2 level low in {location}"

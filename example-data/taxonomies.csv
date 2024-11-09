@@ -1,0 +1,6 @@
+name,description,terms
+Plant_Stage,"Growth stages","Mother,Clone,Veg,Early_Flower,Mid_Flower,Late_Flower,Flush,Harvest"
+Strain_Types,"Genetics catalog","[Your strain list here]"
+Task_Priority,"Task importance","Critical,High,Medium,Low"
+Health_Status,"Plant health","Healthy,Watch,Concern,Critical"
+Input_Type,"Material inputs","Nutrient,Pesticide,Growth_Promoter,Cleaning"

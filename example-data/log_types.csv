@@ -1,0 +1,11 @@
+name,machine_name,description,allowed_assets
+Environmental,environmental,"Environmental measurements","sensor_vpd,sensor_ec,sensor_ph,sensor_co2"
+Plant Care,plant_care,"Plant maintenance activities","mother_plant,clone,veg_plant,flower_plant"
+Feeding,feeding,"Nutrient applications","mother_plant,clone,veg_plant,flower_plant"
+Maintenance,maintenance,"Equipment maintenance","hvac_split,light_1000w,light_680w,dehumidifier"
+Harvest,harvest,"Harvest data","flower_plant"
+Compliance,compliance,"Compliance checks","all"
+IPM,ipm,"Pest management activities","mother_plant,clone,veg_plant,flower_plant"
+Clone_Data,clone_data,"Propagation tracking","clone"
+Training,training,"Plant training records","veg_plant,flower_plant"
+Quality,quality,"Quality control checks","flower_plant"
