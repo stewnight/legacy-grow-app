@@ -1,27 +1,19 @@
-import { api } from '~/trpc/server'
-import { CreateBatchForm } from './_components/create-batch-form'
+import { Suspense } from 'react'
+import { CreateBatchSheet } from './_components/create-batch-sheet'
 import { BatchList } from './_components/batch-list'
+import { Skeleton } from '~/components/ui/skeleton'
 
-export default async function BatchesPage() {
-  const batches = await api.batch.list()
-
+export default function BatchesPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Batches</h1>
-        <p className="text-gray-500">Manage your plant batches</p>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Batches</h2>
+        <CreateBatchSheet />
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-lg border p-4">
-          <h2 className="mb-4 text-lg font-semibold">Create New Batch</h2>
-          <CreateBatchForm />
-        </div>
-
-        <div className="rounded-lg border p-4">
-          <h2 className="mb-4 text-lg font-semibold">Active Batches</h2>
-          <BatchList batches={batches} />
-        </div>
+      <div className="h-full">
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <BatchList />
+        </Suspense>
       </div>
     </div>
   )

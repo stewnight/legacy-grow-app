@@ -14,6 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
+import { api } from '~/trpc/react'
+import { useRouter } from 'next/navigation'
+import { SheetClose } from '~/components/ui/sheet'
 import {
   Select,
   SelectContent,
@@ -21,67 +24,105 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { api } from '~/trpc/react'
-import { CardContent } from '~/components/ui/card'
-import { useToast } from '~/hooks/use-toast'
 
-const strainSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  type: z.enum(['sativa', 'indica', 'hybrid']),
+const createStrainSchema = z.object({
+  name: z.string().min(1, 'Strain name is required'),
+  type: z.enum(['sativa', 'indica', 'hybrid'], {
+    required_error: 'Type is required',
+  }),
   description: z.string().optional(),
-  floweringTime: z.number().min(1).max(52).optional(),
-  thcPotential: z.number().min(0).max(100).optional(),
-  cbdPotential: z.number().min(0).max(100).optional(),
+  floweringTime: z.number().min(1).max(20).optional(),
+  thcPotential: z.number().min(0).max(35).optional(),
+  cbdPotential: z.number().min(0).max(35).optional(),
+  terpeneProfile: z.string().optional(),
 })
 
-type StrainInput = z.infer<typeof strainSchema>
-
 export function CreateStrainForm() {
-  const { toast } = useToast()
-  const utils = api.useUtils()
-
-  const form = useForm<StrainInput>({
-    resolver: zodResolver(strainSchema),
-    defaultValues: {
-      name: '',
-      type: 'hybrid',
-    },
+  const router = useRouter()
+  const form = useForm<z.infer<typeof createStrainSchema>>({
+    resolver: zodResolver(createStrainSchema),
   })
 
   const createStrain = api.strain.create.useMutation({
     onSuccess: () => {
-      form.reset()
-      void utils.strain.list.invalidate()
-      toast({
-        title: 'Success',
-        description: 'Strain created successfully',
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      })
+      router.refresh()
     },
   })
 
-  function onSubmit(data: StrainInput) {
-    createStrain.mutate(data)
+  function onSubmit(values: z.infer<typeof createStrainSchema>) {
+    createStrain.mutate(values)
   }
 
   return (
-    <CardContent>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Strain name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="sativa">Sativa</SelectItem>
+                  <SelectItem value="indica">Indica</SelectItem>
+                  <SelectItem value="hybrid">Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe the strain characteristics"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid gap-4 md:grid-cols-3">
           <FormField
             control={form.control}
-            name="name"
+            name="floweringTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Flowering Time (weeks)</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Enter strain name" />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,25 +131,18 @@ export function CreateStrainForm() {
 
           <FormField
             control={form.control}
-            name="type"
+            name="thcPotential"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="sativa">Sativa</SelectItem>
-                    <SelectItem value="indica">Indica</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>THC %</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -116,85 +150,33 @@ export function CreateStrainForm() {
 
           <FormField
             control={form.control}
-            name="description"
+            name="cbdPotential"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>CBD %</FormLabel>
                 <FormControl>
-                  <Textarea {...field} placeholder="Enter strain description" />
+                  <Input
+                    type="number"
+                    step="0.1"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="floweringTime"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Flowering Time (weeks)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="thcPotential"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>THC %</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cbdPotential"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CBD %</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={createStrain.isPending}
-          >
-            {createStrain.isPending ? 'Creating...' : 'Create Strain'}
-          </Button>
-        </form>
-      </Form>
-    </CardContent>
+        <div className="flex justify-end gap-4">
+          <SheetClose asChild>
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+          </SheetClose>
+          <Button type="submit">Create Strain</Button>
+        </div>
+      </form>
+    </Form>
   )
 }

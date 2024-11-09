@@ -24,6 +24,7 @@ import {
 import { api } from '~/trpc/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '~/components/ui/card'
+import { SheetClose } from '~/components/ui/sheet'
 
 const batchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
@@ -255,13 +256,14 @@ export function CreateBatchForm() {
           </CardContent>
         </Card>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={createBatch.isPending}
-        >
-          {createBatch.isPending ? 'Creating...' : 'Create Batch'}
-        </Button>
+        <div className="flex justify-end gap-4">
+          <SheetClose asChild>
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+          </SheetClose>
+          <Button type="submit">Create Batch</Button>
+        </div>
       </form>
     </Form>
   )

@@ -27,10 +27,14 @@ export function NoteInput({
   const [content, setContent] = useState('')
   const [isRecording, setIsRecording] = useState(false)
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
-  const [mediaMetadata, setMediaMetadata] = useState<Record<
-    string,
-    any
-  > | null>(null)
+  type MediaMetadata = {
+    width?: number
+    height?: number
+    size?: number
+    type?: string
+    [key: string]: unknown
+  }
+  const [mediaMetadata, setMediaMetadata] = useState<MediaMetadata | null>(null)
 
   const createNote = api.notes.create.useMutation({
     onSuccess: (note) => {
@@ -52,11 +56,23 @@ export function NoteInput({
       entityType,
       entityId,
       parentId,
-      metadata: mediaMetadata ?? undefined,
+      metadata: mediaMetadata
+        ? {
+            dimensions:
+              mediaMetadata.width && mediaMetadata.height
+                ? {
+                    width: mediaMetadata.width,
+                    height: mediaMetadata.height,
+                  }
+                : undefined,
+            fileSize: mediaMetadata.size,
+            mimeType: mediaMetadata.type,
+          }
+        : undefined,
     })
   }
 
-  const handleUploadComplete = (url: string, metadata: any) => {
+  const handleUploadComplete = (url: string, metadata: MediaMetadata) => {
     setMediaUrl(url)
     setMediaMetadata(metadata)
   }

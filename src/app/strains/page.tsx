@@ -1,32 +1,20 @@
 import { Suspense } from 'react'
+import { CreateStrainSheet } from './_components/create-strain-sheet'
 import { StrainList } from './_components/strain-list'
-import { CreateStrainForm } from './_components/create-strain-form'
-import { Card, CardHeader, CardTitle } from '~/components/ui/card'
+import { Skeleton } from '~/components/ui/skeleton'
 
 export default function StrainsPage() {
   return (
-    <main className="container mx-auto p-4">
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Create New Strain</CardTitle>
-            </CardHeader>
-            <CreateStrainForm />
-          </Card>
-        </div>
-
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Strain Library</CardTitle>
-            </CardHeader>
-            <Suspense fallback={<div>Loading strains...</div>}>
-              <StrainList />
-            </Suspense>
-          </Card>
-        </div>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Strains</h2>
+        <CreateStrainSheet />
       </div>
-    </main>
+      <div className="h-full">
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <StrainList />
+        </Suspense>
+      </div>
+    </div>
   )
 }
