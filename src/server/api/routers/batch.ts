@@ -81,7 +81,6 @@ export const batchRouter = createTRPCRouter({
 
   list: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.batches.findMany({
-      where: eq(batches.userId, ctx.session.user.id),
       orderBy: (batches) => [batches.createdAt],
     })
   }),
