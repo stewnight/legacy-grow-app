@@ -13,18 +13,20 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import Link from 'next/link'
+import { slugify } from '~/lib/utils'
 
 export const columns: ColumnDef<Genetic>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => {
+      const genetic = row.original
       return (
         <Link
-          href={`/genetics/${row.original.name}`}
+          href={`/genetics/${slugify(genetic.name)}`}
           className="font-medium hover:underline"
         >
-          {row.getValue('name')}
+          {genetic.name}
         </Link>
       )
     },
@@ -66,7 +68,9 @@ export const columns: ColumnDef<Genetic>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/genetics/${genetic.name}`}>View Details</Link>
+              <Link href={`/genetics/${slugify(genetic.name)}`}>
+                View Details
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

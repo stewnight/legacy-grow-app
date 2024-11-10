@@ -70,7 +70,7 @@ export const plantRouter = createTRPCRouter({
   getByCode: protectedProcedure
     .input(z.object({ code: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.plants.findFirst({
+      const plant = await ctx.db.query.plants.findFirst({
         where: eq(plants.code, input.code),
         with: {
           genetic: true,
@@ -78,6 +78,15 @@ export const plantRouter = createTRPCRouter({
           batch: true,
         },
       })
+
+      if (!plant) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Plant not found',
+        })
+      }
+
+      return plant
     }),
 
   update: protectedProcedure

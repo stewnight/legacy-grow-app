@@ -48,7 +48,9 @@ export default async function RootLayout({
                 {children}
               </div>
             )}
-            <ReactQueryDevtools initialIsOpen={false} />
+            {process.env.NODE_ENV === 'development' && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
           </TRPCReactProvider>
         </ThemeProvider>
       </body>

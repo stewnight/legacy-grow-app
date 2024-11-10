@@ -7,7 +7,10 @@ import { Card } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
 
 export function GeneticList() {
-  const { data: genetics, isLoading } = api.genetic.list.useQuery()
+  const { data: genetics, isLoading } = api.genetic.list.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    networkMode: 'offlineFirst',
+  })
 
   if (isLoading) {
     return (

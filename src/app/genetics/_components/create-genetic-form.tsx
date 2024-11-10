@@ -55,6 +55,7 @@ const createGeneticSchema = z.object({
 
 export function CreateGeneticForm() {
   const router = useRouter()
+  const utils = api.useUtils()
   const form = useForm<z.infer<typeof createGeneticSchema>>({
     resolver: zodResolver(createGeneticSchema),
     defaultValues: {
@@ -68,9 +69,28 @@ export function CreateGeneticForm() {
   })
 
   const createGenetic = api.genetic.create.useMutation({
-    onSuccess: () => {
-      form.reset()
-      router.refresh()
+    onMutate: async (newGenetic) => {
+      // Cancel outgoing refetches
+      await utils.genetic.list.cancel()
+
+      // Snapshot the previous value
+      const previousGenetics = utils.genetic.list.getData()
+
+      // Optimistically update the list
+      utils.genetic.list.setData(undefined, (old) => {
+        if (!old) return [newGenetic]
+        return [...old, newGenetic]
+      })
+
+      return { previousGenetics }
+    },
+    onError: (err, newGenetic, context) => {
+      // Roll back on error
+      utils.genetic.list.setData(undefined, context?.previousGenetics)
+    },
+    onSettled: () => {
+      // Sync with server after error or success
+      void utils.genetic.list.invalidate()
     },
   })
 
