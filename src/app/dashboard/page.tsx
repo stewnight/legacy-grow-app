@@ -1,17 +1,9 @@
-import { AppSidebar } from '~/components/app-sidebar'
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
 } from '~/components/ui/breadcrumb'
-import { Separator } from '~/components/ui/separator'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '~/components/ui/sidebar'
-import { auth } from '~/server/auth'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Overview } from './_components/overview'
 import { RecentPlants } from './_components/recent-plants'
@@ -19,8 +11,6 @@ import { QuickActions } from './_components/quick-actions'
 import { StrainDistribution } from './_components/strain-distribution'
 
 export default async function Page() {
-  const session = await auth()
-
   return (
     <div>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b">

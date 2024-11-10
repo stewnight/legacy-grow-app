@@ -1,6 +1,6 @@
 'use client'
 
-import { LifeBuoy, type LucideIcon } from 'lucide-react'
+import { type LucideIcon } from 'lucide-react'
 import {
   SidebarGroup,
   SidebarGroupLabel,

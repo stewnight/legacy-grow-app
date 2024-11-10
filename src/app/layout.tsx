@@ -6,13 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Header from '~/components/layout/header'
 import { AppSidebar } from '~/components/app-sidebar'
 import { auth } from '~/server/auth'
-import Link from 'next/link'
-import { Button } from '~/components/ui/button'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '~/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar'
 export const metadata: Metadata = {
   title: 'Legacy Grow App',
   description: 'An all-in-one cannabis growing app',
@@ -31,27 +25,15 @@ export default async function RootLayout({
           {session ? (
             <SidebarProvider>
               <AppSidebar user={session.user} />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center border-b">
-                  <div className="flex items-center gap-2 px-4">
-                    <SidebarTrigger className="-ml-1" />
-                    <h1 className="text-xl font-bold">Legacy Grow App</h1>
-                  </div>
-                  <div className="ml-auto flex items-center gap-2 px-4">
-                    <Link href="/api/auth/signout">
-                      <Button variant="outline" size="sm">
-                        Sign out
-                      </Button>
-                    </Link>
-                  </div>
-                </header>
+              <SidebarInset className="max-w-full mx-auto">
+                <Header />
                 {children}
               </SidebarInset>
             </SidebarProvider>
           ) : (
             <div className="relative">
               <Header />
-              <main className="pt-16">{children}</main>
+              {children}
             </div>
           )}
           <ReactQueryDevtools initialIsOpen={false} />

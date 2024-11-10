@@ -1,21 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
-  Settings2,
-  SquareTerminal,
-  Sprout,
-  Package,
-  Dna,
-} from 'lucide-react'
+import { Command, LifeBuoy, Sprout, Package, Dna, PieChart } from 'lucide-react'
 
 import { NavMain } from '~/components/nav-main'
 import { NavSecondary } from '~/components/nav-secondary'

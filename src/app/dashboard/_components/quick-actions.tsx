@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '~/components/ui/button'
-import { Plus, Leaf, Package, Dna } from 'lucide-react'
+import { Plus, Package, Dna } from 'lucide-react'
 import Link from 'next/link'
 
 export function QuickActions() {
