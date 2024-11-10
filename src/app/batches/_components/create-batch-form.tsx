@@ -77,184 +77,164 @@ export function CreateBatchForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              {/* Batch Details */}
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Batch Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Enter batch name" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Batch Name</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Enter batch name" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="strain"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Strain</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select strain" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {strains?.map((strain) => (
+                    <SelectItem key={strain.id} value={strain.name}>
+                      {strain.name} ({strain.type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="plantCount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Plants</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  min={1}
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                <FormField
-                  control={form.control}
-                  name="strain"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Strain</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select strain" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {strains?.map((strain) => (
-                            <SelectItem key={strain.id} value={strain.name}>
-                              {strain.name} ({strain.type})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <div className="border-t pt-4">
+          <h3 className="mb-4 font-medium">Plant Details</h3>
+          <div className="space-y-4">
+            {/* Source */}
+            <FormField
+              control={form.control}
+              name="source"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Source</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select source" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="seed">Seed</SelectItem>
+                      <SelectItem value="clone">Clone</SelectItem>
+                      <SelectItem value="mother">Mother</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="plantCount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Plants</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseInt(e.target.value))
-                          }
-                          min={1}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            {/* Stage */}
+            <FormField
+              control={form.control}
+              name="stage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stage</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select stage" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="seedling">Seedling</SelectItem>
+                      <SelectItem value="vegetative">Vegetative</SelectItem>
+                      <SelectItem value="flowering">Flowering</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="border-t pt-4">
-                <h3 className="mb-4 font-medium">Plant Details</h3>
-                <div className="space-y-4">
-                  {/* Source */}
-                  <FormField
-                    control={form.control}
-                    name="source"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Source</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select source" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="seed">Seed</SelectItem>
-                            <SelectItem value="clone">Clone</SelectItem>
-                            <SelectItem value="mother">Mother</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            {/* Plant Date */}
+            <FormField
+              control={form.control}
+              name="plantDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plant Date</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      value={
+                        field.value
+                          ? new Date(field.value).toISOString().split('T')[0]
+                          : ''
+                      }
+                      onChange={(e) => field.onChange(new Date(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                  {/* Stage */}
-                  <FormField
-                    control={form.control}
-                    name="stage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Stage</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select stage" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="seedling">Seedling</SelectItem>
-                            <SelectItem value="vegetative">
-                              Vegetative
-                            </SelectItem>
-                            <SelectItem value="flowering">Flowering</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Plant Date */}
-                  <FormField
-                    control={form.control}
-                    name="plantDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Plant Date</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            value={
-                              field.value
-                                ? new Date(field.value)
-                                    .toISOString()
-                                    .split('T')[0]
-                                : ''
-                            }
-                            onChange={(e) =>
-                              field.onChange(new Date(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Notes */}
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Optional notes about the batch"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Notes */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Optional notes about the batch"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <div className="flex justify-end gap-4">
           <SheetClose asChild>

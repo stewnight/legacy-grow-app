@@ -22,7 +22,7 @@ export function CreatePlantSheet() {
           Create Plant
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="sm:max-w-[540px] p-0">
+      <SheetContent side="right" className="w-full p-0">
         <ScrollArea className="h-full w-full">
           <div className="p-6">
             <SheetHeader>
