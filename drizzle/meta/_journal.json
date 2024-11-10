@@ -29,6 +29,20 @@
       "when": 1731213846966,
       "tag": "0003_short_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1731220603319,
+      "tag": "0004_special_shinko_yamashiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1731221990065,
+      "tag": "0005_modern_ulik",
+      "breakpoints": true
     }
   ]
 }

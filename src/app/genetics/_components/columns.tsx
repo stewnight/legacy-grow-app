@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type Strain } from '~/server/db/schemas/cultivation'
+import { type Genetic } from '~/server/db/schemas/cultivation'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
@@ -14,15 +14,18 @@ import {
 } from '~/components/ui/dropdown-menu'
 import Link from 'next/link'
 
-export const columns: ColumnDef<Strain>[] = [
+export const columns: ColumnDef<Genetic>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => {
       return (
-        <div className="flex items-center">
-          <span className="font-medium">{row.getValue('name')}</span>
-        </div>
+        <Link
+          href={`/genetics/${row.original.name}`}
+          className="font-medium hover:underline"
+        >
+          {row.getValue('name')}
+        </Link>
       )
     },
   },
@@ -49,7 +52,7 @@ export const columns: ColumnDef<Strain>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const strain = row.original
+      const genetic = row.original
 
       return (
         <DropdownMenu>
@@ -63,7 +66,7 @@ export const columns: ColumnDef<Strain>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/strains/${strain.id}`}>View Details</Link>
+              <Link href={`/genetics/${genetic.name}`}>View Details</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -32,8 +32,18 @@ export const columns: ColumnDef<Batch>[] = [
     },
   },
   {
-    accessorKey: 'strain',
-    header: 'Strain',
+    accessorKey: 'genetic',
+    header: 'Genetic',
+    cell: ({ row }) => {
+      const genetic = row.original.geneticId
+      return genetic ? (
+        <Link href={`/genetics/${genetic}`} className="hover:underline">
+          {genetic}
+        </Link>
+      ) : (
+        'N/A'
+      )
+    },
   },
   {
     accessorKey: 'plantCount',

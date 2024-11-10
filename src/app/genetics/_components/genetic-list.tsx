@@ -6,8 +6,8 @@ import { DataTable } from '~/components/ui/data-table'
 import { Card } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
 
-export function StrainList() {
-  const { data: strains, isLoading } = api.strain.list.useQuery()
+export function GeneticList() {
+  const { data: genetics, isLoading } = api.genetic.list.useQuery()
 
   if (isLoading) {
     return (
@@ -26,15 +26,15 @@ export function StrainList() {
     )
   }
 
-  if (!strains?.length) {
+  if (!genetics?.length) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <p className="text-muted-foreground">
-          No strains found. Create your first strain to get started.
+          No genetics found. Create your first genetic to get started.
         </p>
       </div>
     )
   }
 
-  return <DataTable columns={columns} data={strains} filterColumn="name" />
+  return <DataTable columns={columns} data={genetics} filterColumn="name" />
 }

@@ -27,7 +27,7 @@ import { SheetClose } from '~/components/ui/sheet'
 
 const batchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
-  strain: z.string().min(1, 'Strain name is required'),
+  geneticId: z.number().min(1, 'Genetic selection is required'),
   plantCount: z.number().min(1, 'Must have at least 1 plant'),
   notes: z.string().optional(),
   // Plant details
@@ -37,7 +37,6 @@ const batchSchema = z.object({
   healthStatus: z
     .enum(['healthy', 'sick', 'pest', 'nutrient'])
     .default('healthy'),
-  geneticId: z.number().optional(),
   motherId: z.number().optional(),
   generation: z.number().optional(),
   sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
@@ -49,7 +48,7 @@ type BatchInput = z.infer<typeof batchSchema>
 
 export function CreateBatchForm() {
   const router = useRouter()
-  const { data: strains } = api.strain.list.useQuery()
+  const { data: genetics } = api.genetic.list.useQuery()
 
   const form = useForm<BatchInput>({
     resolver: zodResolver(batchSchema),
@@ -60,6 +59,7 @@ export function CreateBatchForm() {
       plantDate: new Date(),
       healthStatus: 'healthy',
       plantCount: 1,
+      geneticId: undefined,
     },
   })
 
@@ -70,8 +70,17 @@ export function CreateBatchForm() {
     },
   })
 
-  function onSubmit(data: BatchInput) {
-    createBatch.mutate(data)
+  async function onSubmit(data: BatchInput) {
+    try {
+      await createBatch.mutateAsync(data)
+      // Close the sheet after successful creation
+      const sheetClose = document.querySelector(
+        '[data-sheet-close]'
+      ) as HTMLButtonElement
+      sheetClose?.click()
+    } catch (error) {
+      console.error('Failed to create batch:', error)
+    }
   }
 
   return (
@@ -93,20 +102,23 @@ export function CreateBatchForm() {
 
         <FormField
           control={form.control}
-          name="strain"
+          name="geneticId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Strain</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Genetic</FormLabel>
+              <Select
+                onValueChange={(value) => field.onChange(Number(value))}
+                value={field.value?.toString()}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select strain" />
+                    <SelectValue placeholder="Select genetic" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {strains?.map((strain) => (
-                    <SelectItem key={strain.id} value={strain.name}>
-                      {strain.name} ({strain.type})
+                  {genetics?.map((genetic) => (
+                    <SelectItem key={genetic.id} value={genetic.id.toString()}>
+                      {genetic.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -236,12 +248,14 @@ export function CreateBatchForm() {
         </div>
 
         <div className="flex justify-end gap-4">
-          <SheetClose asChild>
+          <SheetClose asChild data-sheet-close>
             <Button type="button" variant="outline">
               Cancel
             </Button>
           </SheetClose>
-          <Button type="submit">Create Batch</Button>
+          <Button type="submit" disabled={createBatch.isPending}>
+            {createBatch.isPending ? 'Creating...' : 'Create Batch'}
+          </Button>
         </div>
       </form>
     </Form>

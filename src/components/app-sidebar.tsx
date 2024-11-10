@@ -35,8 +35,8 @@ const data = {
       icon: Package,
     },
     {
-      title: 'Strains',
-      url: '/strains',
+      title: 'Genetics',
+      url: '/genetics',
       icon: Dna,
     },
   ],

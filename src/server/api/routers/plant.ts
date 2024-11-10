@@ -75,11 +75,7 @@ export const plantRouter = createTRPCRouter({
         with: {
           genetic: true,
           createdBy: true,
-          batch: {
-            with: {
-              strain: true,
-            },
-          },
+          batch: true,
         },
       })
     }),

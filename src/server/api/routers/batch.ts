@@ -9,7 +9,7 @@ export const batchRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        strain: z.string(),
+        geneticId: z.number(),
         plantCount: z.number().min(1),
         notes: z.string().optional(),
         // Plant details
@@ -17,7 +17,6 @@ export const batchRouter = createTRPCRouter({
         stage: z.enum(['seedling', 'vegetative', 'flowering']),
         plantDate: z.date(),
         healthStatus: z.enum(['healthy', 'sick', 'pest', 'nutrient']),
-        geneticId: z.number().optional(),
         motherId: z.number().optional(),
         generation: z.number().optional(),
         sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
@@ -26,16 +25,16 @@ export const batchRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }): Promise<Batch> => {
-      const { name, strain, plantCount, notes, ...plantData } = input
+      const { name, geneticId, plantCount, notes, ...plantData } = input
 
       // Create the batch first
       const [batch] = await ctx.db
         .insert(batches)
         .values({
           name,
-          strain,
           plantCount,
           notes,
+          geneticId,
           userId: ctx.session.user.id,
         } satisfies Partial<Batch>)
         .returning()
@@ -43,6 +42,7 @@ export const batchRouter = createTRPCRouter({
       if (!batch) {
         throw new Error('Failed to create batch')
       }
+
       // Create plants with proper type checking
       const plantsToCreate: NewPlant[] = Array(plantCount)
         .fill(null)
@@ -51,7 +51,7 @@ export const batchRouter = createTRPCRouter({
           plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
           code: `${batch.id}-${Math.random().toString(36).substring(2, 7)}`,
           batchId: batch.id,
-          geneticId: plantData.geneticId ?? null,
+          geneticId: batch.geneticId ?? null,
           motherId: plantData.motherId ?? null,
           generation: plantData.generation ?? null,
           createdById: ctx.session.user.id,
@@ -75,6 +75,8 @@ export const batchRouter = createTRPCRouter({
         where: eq(batches.id, input.id),
         with: {
           plants: true,
+          genetic: true,
+          createdBy: true,
         },
       })
     }),
@@ -82,6 +84,10 @@ export const batchRouter = createTRPCRouter({
   list: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.batches.findMany({
       orderBy: (batches) => [batches.createdAt],
+      with: {
+        genetic: true,
+        createdBy: true,
+      },
     })
   }),
 })

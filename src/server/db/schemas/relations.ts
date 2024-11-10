@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm'
 import { users, accounts, sessions } from './core'
 import { notes } from './notes'
-import { plants, genetics, batches, strains } from './cultivation'
+import { plants, genetics, batches } from './cultivation'
 import { tasks, sensors, sensorReadings, taskTemplates } from './operations'
 import { areas, locations, facilities } from './facility'
 import { harvests, processing, complianceLogs } from './processing'
@@ -114,9 +114,9 @@ export const batchesRelations = relations(batches, ({ many, one }) => ({
     fields: [batches.userId],
     references: [users.id],
   }),
-  strain: one(strains, {
-    fields: [batches.strain],
-    references: [strains.name],
+  genetic: one(genetics, {
+    fields: [batches.geneticId],
+    references: [genetics.id],
   }),
 }))
 
@@ -199,15 +199,6 @@ export const complianceLogsRelations = relations(complianceLogs, ({ one }) => ({
   }),
   createdBy: one(users, {
     fields: [complianceLogs.createdById],
-    references: [users.id],
-  }),
-}))
-
-// Strains relations
-export const strainsRelations = relations(strains, ({ many, one }) => ({
-  batches: many(batches),
-  createdBy: one(users, {
-    fields: [strains.createdById],
     references: [users.id],
   }),
 }))

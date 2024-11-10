@@ -11,6 +11,7 @@ import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Timeline } from '~/components/notes/Timeline'
 import { NoteInput } from '~/components/notes/NoteInput'
+import Link from 'next/link'
 
 export default async function BatchPage({
   params,
@@ -40,8 +41,17 @@ export default async function BatchPage({
               <div className="space-y-2">
                 <h3 className="font-semibold">Batch Details</h3>
                 <div>
-                  <span className="text-muted-foreground">Strain:</span>{' '}
-                  {batch.strain}
+                  <span className="text-muted-foreground">Genetic:</span>{' '}
+                  {batch.genetic ? (
+                    <Link
+                      href={`/genetics/${batch.genetic.name}`}
+                      className="hover:underline"
+                    >
+                      {batch.genetic.name}
+                    </Link>
+                  ) : (
+                    'N/A'
+                  )}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Plant Count:</span>{' '}

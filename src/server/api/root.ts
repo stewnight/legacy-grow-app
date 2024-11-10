@@ -1,31 +1,18 @@
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc'
-import { plantRouter } from './routers/plant'
+import { geneticRouter } from './routers/genetic'
 import { batchRouter } from './routers/batch'
+import { plantRouter } from './routers/plant'
 import { notesRouter } from './routers/notes'
 import { mediaRouter } from './routers/media'
-import { strainRouter } from './routers/strain'
 
-/**
- * This is the primary router for your server.
- *
- * All routers added in /api/routers should be manually added here.
- */
 export const appRouter = createTRPCRouter({
-  plant: plantRouter,
+  genetic: geneticRouter,
   batch: batchRouter,
+  plant: plantRouter,
   notes: notesRouter,
   media: mediaRouter,
-  strain: strainRouter,
 })
 
-// export type definition of API
 export type AppRouter = typeof appRouter
 
-/**
- * Create a server-side caller for the tRPC API.
- * @example
- * const trpc = createCaller(createContext);
- * const res = await trpc.post.all();
- *       ^? Post[]
- */
 export const createCaller = createCallerFactory(appRouter)

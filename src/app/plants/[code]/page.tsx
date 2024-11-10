@@ -223,8 +223,8 @@ export default async function PlantPage({
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Strain</p>
-                      <p className="font-medium">{plant.batch.strain.name}</p>
+                      <p className="text-sm text-muted-foreground">Genetic</p>
+                      <p className="font-medium">{plant.genetic?.name}</p>
                     </div>
                   </div>
                 </CardContent>
