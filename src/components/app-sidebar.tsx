@@ -1,8 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Command, LifeBuoy, Sprout, Package, Dna, PieChart } from 'lucide-react'
-
+import { Github, Command, Sprout, Package, Dna, PieChart } from 'lucide-react'
 import { NavMain } from '~/components/nav-main'
 import { NavSecondary } from '~/components/nav-secondary'
 import { NavUser } from '~/components/nav-user'
@@ -43,9 +42,9 @@ const data = {
   ],
   navSecondary: [
     {
-      title: 'Support',
-      url: '#',
-      icon: LifeBuoy,
+      title: 'Github',
+      url: 'https://github.com/stewnight/legacy-grow-app',
+      icon: Github,
     },
   ],
 }
