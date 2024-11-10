@@ -48,8 +48,8 @@ export const plantRouter = createTRPCRouter({
       orderBy: [desc(plants.createdAt)],
       with: {
         genetic: true,
-        location: true,
         createdBy: true,
+        batch: true,
       },
     })
   }),
@@ -61,8 +61,8 @@ export const plantRouter = createTRPCRouter({
         where: eq(plants.id, input),
         with: {
           genetic: true,
-          location: true,
           createdBy: true,
+          batch: true,
         },
       })
     }),
@@ -74,9 +74,12 @@ export const plantRouter = createTRPCRouter({
         where: eq(plants.code, input.code),
         with: {
           genetic: true,
-          location: true,
           createdBy: true,
-          batch: true,
+          batch: {
+            with: {
+              strain: true,
+            },
+          },
         },
       })
     }),

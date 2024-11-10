@@ -21,11 +21,12 @@ import {
   QuarantineIcon,
 } from '~/components/icons'
 
-export default async function PlantPage({
-  params,
-}: {
+interface PageProps {
   params: { code: string }
-}) {
+}
+
+export default async function PlantPage({ params }: PageProps) {
+  // Fetch plant data
   const plant = await api.plant.getByCode({ code: params.code })
 
   if (!plant) {
@@ -54,7 +55,6 @@ export default async function PlantPage({
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Plant Details Card */}
         <Card>
           <CardHeader>
             <CardTitle>Plant Details</CardTitle>
@@ -64,6 +64,7 @@ export default async function PlantPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              {/* Plant Details */}
               <div>
                 <p className="text-sm text-muted-foreground">Plant ID</p>
                 <p className="font-medium">{plant.code}</p>
@@ -92,22 +93,10 @@ export default async function PlantPage({
                   </p>
                 </div>
               )}
-              {plant.geneticId && (
+              {plant.genetic && (
                 <div>
                   <p className="text-sm text-muted-foreground">Genetic</p>
-                  <p className="font-medium">{plant.genetic?.name}</p>
-                </div>
-              )}
-              {plant.motherId && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Mother ID</p>
-                  <p className="font-medium">{plant.motherId}</p>
-                </div>
-              )}
-              {plant.generation !== null && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Generation</p>
-                  <p className="font-medium">{plant.generation}</p>
+                  <p className="font-medium">{plant.genetic.name}</p>
                 </div>
               )}
               {plant.sex && (
@@ -140,51 +129,10 @@ export default async function PlantPage({
                   <p className="font-medium">{plant.destroyReason}</p>
                 </div>
               )}
-              {plant.location && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-medium">{plant.location.name}</p>
-                </div>
-              )}
-              <div>
-                <p className="text-sm text-muted-foreground">Created By</p>
-                <p className="font-medium">{plant.createdBy.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Created At</p>
-                <p className="font-medium">
-                  {format(new Date(plant.createdAt), 'PPP')}
-                </p>
-              </div>
-              {plant.batch && (
-                <>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Batch</p>
-                    <p className="font-medium">{plant.batch.code}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Batch Name</p>
-                    <p className="font-medium">{plant.batch.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Strain</p>
-                    <p className="font-medium">{plant.batch.strain}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Batch Status
-                    </p>
-                    <p className="font-medium capitalize">
-                      {plant.batch.status}
-                    </p>
-                  </div>
-                </>
-              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* QR Code Card */}
         <Card>
           <CardHeader>
             <CardTitle>Plant QR Code</CardTitle>
@@ -206,7 +154,9 @@ export default async function PlantPage({
         <TabsList>
           <TabsTrigger value="notes">Notes & Timeline</TabsTrigger>
           <TabsTrigger value="health">Health & Status</TabsTrigger>
-          <TabsTrigger value="batch">Batch Information</TabsTrigger>
+          {plant.batch && (
+            <TabsTrigger value="batch">Batch Information</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="notes" className="mt-6">
@@ -225,8 +175,8 @@ export default async function PlantPage({
           <PlantHealthStatus plant={plant} />
         </TabsContent>
 
-        <TabsContent value="batch" className="mt-6">
-          {plant.batch ? (
+        {plant.batch && (
+          <TabsContent value="batch" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Batch Information</CardTitle>
@@ -255,26 +205,20 @@ export default async function PlantPage({
                     </Link>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Strain</p>
-                    <Link
-                      href={`/strains/${plant.batch.strain}`}
-                      className="font-medium hover:underline"
-                    >
-                      {plant.batch.strain}
-                    </Link>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    <p className="font-medium capitalize">
+                      {plant.batch.status}
+                    </p>
                   </div>
-                  {/* ... rest of batch information ... */}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Strain</p>
+                    <p className="font-medium">{plant.batch.strain.name}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          ) : (
-            <Card>
-              <CardContent className="py-4 text-center text-muted-foreground">
-                This plant is not part of any batch
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )
