@@ -30,7 +30,7 @@ export default async function RootLayout({
         <TRPCReactProvider>
           {session ? (
             <SidebarProvider>
-              <AppSidebar />
+              <AppSidebar user={session.user} />
               <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center border-b">
                   <div className="flex items-center gap-2 px-4">

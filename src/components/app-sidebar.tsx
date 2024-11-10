@@ -18,7 +18,6 @@ import {
 } from 'lucide-react'
 
 import { NavMain } from '~/components/nav-main'
-import { NavProjects } from '~/components/nav-projects'
 import { NavSecondary } from '~/components/nav-secondary'
 import { NavUser } from '~/components/nav-user'
 import {
@@ -30,13 +29,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '~/components/ui/sidebar'
+import type { User } from 'next-auth'
 
 const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
   navMain: [
     {
       title: 'Dashboard',
@@ -66,32 +61,15 @@ const data = {
       url: '#',
       icon: LifeBuoy,
     },
-    {
-      title: 'Feedback',
-      url: '#',
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChart,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: Map,
-    },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  user,
+  ...props
+}: { user: User | null | undefined } & React.ComponentProps<typeof Sidebar>) {
+  if (!user) return null
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -103,8 +81,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">Legacy Grow</span>
+                  <span className="truncate text-xs">Cannabis Management</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -113,11 +91,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

@@ -1,6 +1,6 @@
 {
   "name": "legacy-grow-app",
-  "version": "0.1110.1",
+  "version": "0.1110.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -63,6 +63,7 @@
     "react-dropzone": "^14.3.5",
     "react-hook-form": "^7.53.1",
     "react-intersection-observer": "^9.13.1",
+    "recharts": "^2.13.3",
     "server-only": "^0.0.1",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.5.4",
