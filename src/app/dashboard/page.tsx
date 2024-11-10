@@ -9,8 +9,16 @@ import { Overview } from './_components/overview'
 import { RecentPlants } from './_components/recent-plants'
 import { QuickActions } from './_components/quick-actions'
 import { StrainDistribution } from './_components/strain-distribution'
+import { auth } from '~/server/auth'
+import { redirect } from 'next/navigation'
 
-export default async function Page() {
+export default async function DashboardPage() {
+  const session = await auth()
+
+  if (!session) {
+    redirect('/')
+  }
+
   return (
     <div>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b">
