@@ -8,7 +8,11 @@ const data = [
   { name: 'Hybrid', value: 40 },
 ]
 
-const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)']
+const COLORS = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+]
 
 export function StrainDistribution() {
   return (
@@ -20,7 +24,7 @@ export function StrainDistribution() {
           cy="50%"
           labelLine={false}
           outerRadius={80}
-          fill="#8884d8"
+          fill="hsl(var(--chart-1))"
           dataKey="value"
         >
           {data.map((entry, index) => (

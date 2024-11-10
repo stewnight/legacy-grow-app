@@ -41,20 +41,28 @@ export function Overview() {
       <BarChart data={data}>
         <XAxis
           dataKey="name"
-          stroke="#888888"
+          stroke="hsl(var(--muted-foreground))"
           fontSize={12}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke="#888888"
+          stroke="hsl(var(--muted-foreground))"
           fontSize={12}
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `${value}`}
         />
-        <Bar dataKey="plants" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="harvests" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="plants"
+          fill="hsl(var(--chart-1))"
+          radius={[4, 4, 0, 0]}
+        />
+        <Bar
+          dataKey="harvests"
+          fill="hsl(var(--chart-2))"
+          radius={[4, 4, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   )

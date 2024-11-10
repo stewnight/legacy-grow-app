@@ -18,6 +18,7 @@ import {
   useSidebar,
 } from '~/components/ui/sidebar'
 import Link from 'next/link'
+import { ThemeToggle } from '~/components/theme-toggle'
 
 type UserData =
   | {
@@ -52,8 +53,21 @@ export function NavUser({ user }: { user: UserData }) {
             className="w-56"
             align={isMobile ? 'end' : 'start'}
             side={isMobile ? 'top' : 'right'}
+            forceMount
           >
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-row gap-2 items-center justify-between">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {user.name}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user.email}
+                  </p>
+                </div>
+                <ThemeToggle />
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>

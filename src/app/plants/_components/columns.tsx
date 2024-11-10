@@ -3,7 +3,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { type Plant } from '~/server/db/schemas/cultivation'
 import { Badge } from '~/components/ui/badge'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
@@ -90,7 +90,9 @@ export const columns: ColumnDef<Plant>[] = [
           className="whitespace-nowrap"
           title={date ? format(new Date(date as string), 'PPP') : undefined}
         >
-          {date ? format(new Date(date as string), 'MMM d, yyyy') : 'N/A'}
+          {date
+            ? formatDistanceToNow(new Date(date as string), { addSuffix: true })
+            : 'N/A'}
         </span>
       )
     },
