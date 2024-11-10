@@ -22,9 +22,12 @@ export const columns: ColumnDef<Batch>[] = [
     header: 'Name',
     cell: ({ row }) => {
       return (
-        <div className="flex items-center">
-          <span className="font-medium">{row.getValue('name')}</span>
-        </div>
+        <Link
+          href={`/batches/${row.original.id}`}
+          className="font-medium hover:underline whitespace-nowrap"
+        >
+          {row.getValue('name')}
+        </Link>
       )
     },
   },

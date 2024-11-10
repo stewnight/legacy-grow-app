@@ -66,4 +66,66 @@ export const plantRouter = createTRPCRouter({
         },
       })
     }),
+
+  getByCode: protectedProcedure
+    .input(z.object({ code: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.plants.findFirst({
+        where: eq(plants.code, input.code),
+        with: {
+          genetic: true,
+          location: true,
+          createdBy: true,
+          batch: true,
+        },
+      })
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        batchId: z.number().optional(),
+        source: z.enum(['seed', 'clone', 'mother']).optional(),
+        stage: z
+          .enum(['seedling', 'vegetative', 'flowering', 'harvested'])
+          .optional(),
+        plantDate: z.date().optional(),
+        harvestDate: z.date().optional(),
+        notes: z.string().optional(),
+        healthStatus: z
+          .enum(['healthy', 'sick', 'pest', 'nutrient'])
+          .optional(),
+        quarantine: z.boolean().optional(),
+        geneticId: z.number().optional(),
+        motherId: z.number().optional(),
+        generation: z.number().optional(),
+        sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
+        phenotype: z.string().optional(),
+        locationId: z.number().optional(),
+        destroyReason: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, plantDate, harvestDate, ...updateData } = input
+      try {
+        await ctx.db
+          .update(plants)
+          .set({
+            ...updateData,
+            ...(plantDate && { plantDate: format(plantDate, 'yyyy-MM-dd') }),
+            ...(harvestDate && {
+              harvestDate: format(harvestDate, 'yyyy-MM-dd'),
+            }),
+            updatedAt: new Date(),
+          })
+          .where(eq(plants.id, id))
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update plant',
+          cause: error,
+        })
+      }
+    }),
 })

@@ -73,8 +73,13 @@ export function Timeline({
   }
 
   return (
-    <ScrollArea className="h-[600px] pr-4">
+    <ScrollArea className="max-h-[600px] pr-4">
       <div className="space-y-4">
+        {data?.pages.length === 0 && (
+          <div className="text-center text-sm text-muted-foreground">
+            No notes found
+          </div>
+        )}
         {data?.pages.map((page, i) => (
           <div key={i} className="space-y-4">
             {page.items.map((note) => (

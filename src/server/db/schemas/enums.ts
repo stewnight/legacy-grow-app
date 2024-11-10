@@ -114,3 +114,51 @@ export const noteTypeEnum = pgEnum('note_type', [
   'image',
   'file',
 ])
+
+export const destroyReasonEnum = pgEnum('destroy_reason', [
+  'died',
+  'destroyed',
+  'other',
+])
+
+export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
+export type DestroyReasonEnum = typeof destroyReasonEnum
+
+export type NoteType = (typeof noteTypeEnum.enumValues)[number]
+export type NoteTypeEnum = typeof noteTypeEnum
+
+export type HarvestQuality = (typeof harvestQualityEnum.enumValues)[number]
+export type HarvestQualityEnum = typeof harvestQualityEnum
+
+export type GeneticType = (typeof geneticTypeEnum.enumValues)[number]
+export type GeneticTypeEnum = typeof geneticTypeEnum
+
+export type LocationType = (typeof locationTypeEnum.enumValues)[number]
+export type LocationTypeEnum = typeof locationTypeEnum
+
+export type SensorType = (typeof sensorTypeEnum.enumValues)[number]
+export type SensorTypeEnum = typeof sensorTypeEnum
+
+export type TaskStatus = (typeof taskStatusEnum.enumValues)[number]
+export type TaskStatusEnum = typeof taskStatusEnum
+
+export type TaskPriority = (typeof taskPriorityEnum.enumValues)[number]
+export type TaskPriorityEnum = typeof taskPriorityEnum
+
+export type TaskCategory = (typeof taskCategoryEnum.enumValues)[number]
+export type TaskCategoryEnum = typeof taskCategoryEnum
+
+export type PlantSource = (typeof plantSourceEnum.enumValues)[number]
+export type PlantSourceEnum = typeof plantSourceEnum
+
+export type PlantStage = (typeof plantStageEnum.enumValues)[number]
+export type PlantStageEnum = typeof plantStageEnum
+
+export type PlantSex = (typeof plantSexEnum.enumValues)[number]
+export type PlantSexEnum = typeof plantSexEnum
+
+export type HealthStatus = (typeof healthStatusEnum.enumValues)[number]
+export type HealthStatusEnum = typeof healthStatusEnum
+
+export type BatchStatus = (typeof batchStatusEnum.enumValues)[number]
+export type BatchStatusEnum = typeof batchStatusEnum

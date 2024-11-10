@@ -30,7 +30,7 @@ export default async function BatchPage({
     const firstPlant = batch.plants[0]
 
     return (
-      <div className="container mx-auto py-8 space-y-8">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">{batch.name}</CardTitle>

@@ -20,7 +20,32 @@ export const columns: ColumnDef<Plant>[] = [
   {
     accessorKey: 'code',
     header: 'Code',
+    cell: ({ row }) => {
+      return (
+        <Link
+          className="hover:underline whitespace-nowrap"
+          href={`/plants/${row.original.code}`}
+        >
+          {row.original.code}
+        </Link>
+      )
+    },
   },
+  {
+    accessorKey: 'batchId',
+    header: 'Batch',
+    cell: ({ row }) => {
+      return (
+        <Link
+          className="hover:underline whitespace-nowrap"
+          href={`/batches/${row.original.batchId}`}
+        >
+          {row.original.batchId}
+        </Link>
+      )
+    },
+  },
+
   {
     accessorKey: 'source',
     header: 'Source',
@@ -60,7 +85,14 @@ export const columns: ColumnDef<Plant>[] = [
     header: 'Plant Date',
     cell: ({ row }) => {
       const date = row.getValue('plantDate')
-      return date ? format(new Date(date as string), 'PPP') : 'N/A'
+      return (
+        <span
+          className="whitespace-nowrap"
+          title={date ? format(new Date(date as string), 'PPP') : undefined}
+        >
+          {date ? format(new Date(date as string), 'MMM d, yyyy') : 'N/A'}
+        </span>
+      )
     },
   },
   {
