@@ -9,13 +9,11 @@ export const geneticRouter = createTRPCRouter({
   getByName: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      console.log('Searching for genetic:', {
-        slug: input,
-        deslugified: deslugify(input),
-      })
+      const deslugifiedName = deslugify(input)
 
+      // Try case-sensitive match first
       const genetic = await ctx.db.query.genetics.findFirst({
-        where: eq(genetics.name, deslugify(input)),
+        where: eq(genetics.name, deslugifiedName),
         with: {
           createdBy: true,
           plants: {
@@ -26,32 +24,29 @@ export const geneticRouter = createTRPCRouter({
         },
       })
 
-      console.log('Found genetic:', genetic)
+      if (genetic) return genetic
 
-      if (!genetic) {
-        const caseInsensitiveMatch = await ctx.db.query.genetics.findFirst({
-          where: ilike(genetics.name, deslugify(input)),
-          with: {
-            createdBy: true,
-            plants: {
-              with: {
-                batch: true,
-              },
+      // Try case-insensitive match if no exact match found
+      const caseInsensitiveMatch = await ctx.db.query.genetics.findFirst({
+        where: ilike(genetics.name, deslugifiedName),
+        with: {
+          createdBy: true,
+          plants: {
+            with: {
+              batch: true,
             },
           },
+        },
+      })
+
+      if (!caseInsensitiveMatch) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Genetic "${deslugifiedName}" not found`,
         })
-
-        if (!caseInsensitiveMatch) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Genetic not found',
-          })
-        }
-
-        return caseInsensitiveMatch
       }
 
-      return genetic
+      return caseInsensitiveMatch
     }),
 
   create: protectedProcedure
@@ -83,25 +78,28 @@ export const geneticRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        const [genetic] = await ctx.db
-          .insert(genetics)
-          .values({
-            ...input,
-            thcPotential: input.thcPotential?.toString(),
-            cbdPotential: input.cbdPotential?.toString(),
-            createdById: ctx.session.user.id,
-          })
-          .returning()
-
-        return genetic
-      } catch (error) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create genetic',
-          cause: error,
+      const [genetic] = await ctx.db
+        .insert(genetics)
+        .values({
+          name: input.name,
+          type: input.type,
+          breeder: input.breeder ?? null,
+          description: input.description ?? null,
+          floweringTime: input.floweringTime ?? null,
+          thcPotential: input.thcPotential?.toString() ?? null,
+          cbdPotential: input.cbdPotential?.toString() ?? null,
+          createdById: ctx.session.user.id,
+          updatedAt: new Date(),
+          growthCharacteristics: input.growthCharacteristics ?? null,
+          lineage: input.lineage ?? null,
         })
+        .returning()
+
+      if (!genetic) {
+        throw new Error('Failed to create genetic')
       }
+
+      return genetic
     }),
 
   list: protectedProcedure.query(({ ctx }) => {

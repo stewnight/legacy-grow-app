@@ -9,12 +9,16 @@ import {
   CardTitle,
 } from '~/components/ui/card'
 import { notFound, useRouter } from 'next/navigation'
-import { Timeline } from '~/components/notes/Timeline'
-import { NoteInput } from '~/components/notes/NoteInput'
+import { Timeline } from '~/components/notes/timeline'
+import { NoteInput } from '~/components/notes/note-input'
 import Link from 'next/link'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import { use } from 'react'
+import { type TRPCClientErrorLike } from '@trpc/client'
+import { type RouterOutputs } from '~/trpc/shared'
+
+type Genetic = RouterOutputs['genetic']['getByName']
 
 export default function GeneticPage({
   params,
@@ -33,11 +37,6 @@ export default function GeneticPage({
     staleTime: 5 * 60 * 1000,
     networkMode: 'offlineFirst',
     retry: 1,
-    onError: (err) => {
-      if (err.data?.code === 'NOT_FOUND') {
-        router.push('/genetics/not-found')
-      }
-    },
   })
 
   const updateGenetic = api.genetic.update.useMutation({
@@ -52,6 +51,8 @@ export default function GeneticPage({
         return {
           ...old,
           ...newGenetic,
+          thcPotential: newGenetic.thcPotential?.toString() ?? old.thcPotential,
+          cbdPotential: newGenetic.cbdPotential?.toString() ?? old.cbdPotential,
         }
       })
 

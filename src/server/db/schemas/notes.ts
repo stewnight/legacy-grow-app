@@ -26,6 +26,7 @@ export const notes = createTable(
       dimensions?: { width: number; height: number }
       fileSize?: number
       mimeType?: string
+      url?: string
     }>(),
     createdById: varchar('created_by', { length: 255 })
       .notNull()

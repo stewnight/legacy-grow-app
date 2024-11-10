@@ -8,6 +8,9 @@ import { AppSidebar } from '~/components/app-sidebar'
 import { auth } from '~/server/auth'
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar'
 import { ThemeProvider } from '~/components/theme-provider'
+import { NetworkStatus } from '~/components/network-status'
+import { SessionProvider } from '~/components/session-provider'
+import { Toaster } from '../components/ui/toaster'
 
 export const metadata: Metadata = {
   title: 'Legacy Grow App',
@@ -34,20 +37,24 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            {session ? (
-              <SidebarProvider>
-                <AppSidebar user={session.user} />
-                <SidebarInset className="max-w-full mx-auto">
+            <SessionProvider>
+              {session ? (
+                <SidebarProvider>
+                  <AppSidebar user={session.user} />
+                  <SidebarInset className="max-w-full mx-auto">
+                    <Header />
+                    {children}
+                  </SidebarInset>
+                </SidebarProvider>
+              ) : (
+                <div className="relative">
                   <Header />
                   {children}
-                </SidebarInset>
-              </SidebarProvider>
-            ) : (
-              <div className="relative">
-                <Header />
-                {children}
-              </div>
-            )}
+                </div>
+              )}
+              <NetworkStatus />
+              <Toaster />
+            </SessionProvider>
             {process.env.NODE_ENV === 'development' && (
               <ReactQueryDevtools initialIsOpen={false} />
             )}

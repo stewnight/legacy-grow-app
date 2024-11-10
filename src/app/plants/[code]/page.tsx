@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card'
-import { Timeline } from '~/components/notes/Timeline'
-import { NoteInput } from '~/components/notes/NoteInput'
+import { Timeline } from '~/components/notes/timeline'
+import { NoteInput } from '~/components/notes/note-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { PlantActions } from './_components/plant-actions'
 import { PlantHealthStatus } from './_components/plant-health-status'
@@ -23,6 +23,9 @@ import {
 } from '~/components/icons'
 import { use } from 'react'
 import { slugify } from '~/lib/utils'
+import { type RouterOutputs } from '~/trpc/shared'
+
+type Plant = RouterOutputs['plant']['getByCode']
 
 export default function PlantPage({
   params,
@@ -46,13 +49,21 @@ export default function PlantPage({
       const previousPlant = utils.plant.getByCode.getData({
         code: resolvedParams.code,
       })
+
       utils.plant.getByCode.setData({ code: resolvedParams.code }, (old) => {
         if (!old) return old
         return {
           ...old,
           ...newData,
+          plantDate: newData.plantDate
+            ? format(newData.plantDate, 'yyyy-MM-dd')
+            : null,
+          harvestDate: newData.harvestDate
+            ? format(newData.harvestDate, 'yyyy-MM-dd')
+            : null,
         }
       })
+
       return { previousPlant }
     },
     onError: (err, newData, context) => {

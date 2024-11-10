@@ -10,7 +10,16 @@ import SuperJSON from 'superjson'
 import { type AppRouter } from '~/server/api/root'
 import { createQueryClient } from './query-client'
 
-export const api = createTRPCReact<AppRouter>()
+export const api = createTRPCReact<AppRouter>({
+  unstable_overrides: {
+    useMutation: {
+      async onSuccess(opts) {
+        await opts.originalFn()
+        await opts.queryClient.invalidateQueries()
+      },
+    },
+  },
+})
 
 /**
  * Inference helper for inputs.

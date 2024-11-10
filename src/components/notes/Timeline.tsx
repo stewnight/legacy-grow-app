@@ -1,7 +1,7 @@
 'use client'
 
 import { api } from '~/trpc/react'
-import { NoteCard } from './NoteCard'
+import { NoteCard } from './note-card'
 import { Button } from '~/components/ui/button'
 import { useInView } from 'react-intersection-observer'
 import { useEffect } from 'react'
@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react'
 import { type Note } from '~/server/db/schemas/notes'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { Alert, AlertDescription } from '~/components/ui/alert'
+import { CreateNoteForm } from './create-note-form'
 
 interface TimelineProps {
   entityType: string
@@ -75,6 +76,8 @@ export function Timeline({
   return (
     <ScrollArea className="max-h-[600px] pr-4">
       <div className="space-y-4">
+        <CreateNoteForm entityType={entityType} entityId={entityId} />
+
         {data?.pages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
             No notes found

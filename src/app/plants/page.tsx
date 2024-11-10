@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { CreatePlantSheet } from './_components/create-plant-sheet'
-import { PlantList } from './_components/plant-list'
-import { Skeleton } from '~/components/ui/skeleton'
+import { PlantList, PlantListLoading } from './_components/plant-list'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 
@@ -19,7 +18,7 @@ export default async function PlantsPage() {
         <CreatePlantSheet />
       </div>
       <div className="h-full">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+        <Suspense fallback={<PlantListLoading />}>
           <PlantList />
         </Suspense>
       </div>

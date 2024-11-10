@@ -24,6 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { type RouterOutputs } from '~/trpc/shared'
+import { createOptimisticGenetic } from '~/lib/optimistic-update'
+import { useSession } from 'next-auth/react'
+import { CreateFormWrapper } from '~/components/create-form-wrapper'
 
 const createGeneticSchema = z.object({
   name: z.string().min(1, 'Genetic name is required'),
@@ -53,7 +57,18 @@ const createGeneticSchema = z.object({
     .optional(),
 })
 
+type Genetic = RouterOutputs['genetic']['list'][number]
+
 export function CreateGeneticForm() {
+  return (
+    <CreateFormWrapper>
+      <CreateGeneticFormContent />
+    </CreateFormWrapper>
+  )
+}
+
+function CreateGeneticFormContent() {
+  const { data: session } = useSession()
   const router = useRouter()
   const utils = api.useUtils()
   const form = useForm<z.infer<typeof createGeneticSchema>>({
@@ -70,26 +85,30 @@ export function CreateGeneticForm() {
 
   const createGenetic = api.genetic.create.useMutation({
     onMutate: async (newGenetic) => {
-      // Cancel outgoing refetches
-      await utils.genetic.list.cancel()
+      if (!session?.user) {
+        throw new Error('Must be logged in to create genetics')
+      }
 
-      // Snapshot the previous value
+      await utils.genetic.list.cancel()
       const previousGenetics = utils.genetic.list.getData()
 
-      // Optimistically update the list
       utils.genetic.list.setData(undefined, (old) => {
-        if (!old) return [newGenetic]
-        return [...old, newGenetic]
+        const optimisticGenetic = createOptimisticGenetic(newGenetic, {
+          id: session.user.id,
+          name: session.user.name ?? null,
+          email: session.user.email ?? null,
+        })
+
+        if (!old) return [optimisticGenetic]
+        return [...old, optimisticGenetic]
       })
 
       return { previousGenetics }
     },
     onError: (err, newGenetic, context) => {
-      // Roll back on error
       utils.genetic.list.setData(undefined, context?.previousGenetics)
     },
     onSettled: () => {
-      // Sync with server after error or success
       void utils.genetic.list.invalidate()
     },
   })

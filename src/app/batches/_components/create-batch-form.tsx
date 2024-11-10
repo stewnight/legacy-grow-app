@@ -24,19 +24,23 @@ import {
 import { api } from '~/trpc/react'
 import { useRouter } from 'next/navigation'
 import { SheetClose } from '~/components/ui/sheet'
+import { useSession } from 'next-auth/react'
+import { createOptimisticBatch } from '~/lib/optimistic-update'
+import { useToast } from '~/hooks/use-toast'
+import { format } from 'date-fns'
+import { DatePicker } from '~/components/ui/date-picker'
+import { CreateFormWrapper } from '~/components/create-form-wrapper'
 
-const batchSchema = z.object({
+const createBatchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
-  geneticId: z.number().min(1, 'Genetic selection is required'),
-  plantCount: z.number().min(1, 'Must have at least 1 plant'),
+  geneticId: z.number(),
+  plantCount: z.number().min(1),
   notes: z.string().optional(),
   // Plant details
   source: z.enum(['seed', 'clone', 'mother']),
   stage: z.enum(['seedling', 'vegetative', 'flowering']),
   plantDate: z.date(),
-  healthStatus: z
-    .enum(['healthy', 'sick', 'pest', 'nutrient'])
-    .default('healthy'),
+  healthStatus: z.enum(['healthy', 'sick', 'pest', 'nutrient']),
   motherId: z.number().optional(),
   generation: z.number().optional(),
   sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
@@ -44,36 +48,77 @@ const batchSchema = z.object({
   locationId: z.number().optional(),
 })
 
-type BatchInput = z.infer<typeof batchSchema>
-
 export function CreateBatchForm() {
+  return (
+    <CreateFormWrapper>
+      <CreateBatchFormContent />
+    </CreateFormWrapper>
+  )
+}
+
+function CreateBatchFormContent() {
+  const { data: session } = useSession()
   const router = useRouter()
+  const utils = api.useUtils()
+  const { toast } = useToast()
   const { data: genetics } = api.genetic.list.useQuery()
 
-  const form = useForm<BatchInput>({
-    resolver: zodResolver(batchSchema),
+  const form = useForm<z.infer<typeof createBatchSchema>>({
+    resolver: zodResolver(createBatchSchema),
     defaultValues: {
-      name: '',
       source: 'clone',
       stage: 'seedling',
       plantDate: new Date(),
       healthStatus: 'healthy',
       plantCount: 1,
-      geneticId: undefined,
     },
   })
 
   const createBatch = api.batch.create.useMutation({
+    onMutate: async (newBatch) => {
+      if (!session?.user) {
+        throw new Error('Must be logged in to create batches')
+      }
+
+      await utils.batch.list.cancel()
+      const previousBatches = utils.batch.list.getData()
+
+      utils.batch.list.setData(undefined, (old) => {
+        const optimisticBatch = createOptimisticBatch(newBatch, {
+          id: session.user.id,
+          name: session.user.name ?? null,
+          email: session.user.email ?? null,
+        })
+
+        if (!old) return [optimisticBatch]
+        return [...old, optimisticBatch]
+      })
+
+      return { previousBatches }
+    },
+    onError: (err, newBatch, context) => {
+      utils.batch.list.setData(undefined, context?.previousBatches)
+      toast({
+        title: 'Failed to create batch',
+        description: 'Please try again',
+        variant: 'destructive',
+      })
+    },
     onSuccess: () => {
       form.reset()
-      router.refresh()
+      toast({
+        title: 'Batch created',
+        description: 'Your batch has been created successfully',
+      })
+    },
+    onSettled: () => {
+      void utils.batch.list.invalidate()
     },
   })
 
-  async function onSubmit(data: BatchInput) {
+  async function onSubmit(values: z.infer<typeof createBatchSchema>) {
     try {
-      await createBatch.mutateAsync(data)
-      // Close the sheet after successful creation
+      await createBatch.mutateAsync(values)
       const sheetClose = document.querySelector(
         '[data-sheet-close]'
       ) as HTMLButtonElement
@@ -108,7 +153,7 @@ export function CreateBatchForm() {
               <FormLabel>Genetic</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(Number(value))}
-                value={field.value?.toString()}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -133,12 +178,12 @@ export function CreateBatchForm() {
           name="plantCount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Number of Plants</FormLabel>
+              <FormLabel>Plant Count</FormLabel>
               <FormControl>
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                   min={1}
                 />
               </FormControl>
@@ -147,108 +192,109 @@ export function CreateBatchForm() {
           )}
         />
 
-        <div className="border-t pt-4">
-          <h3 className="mb-4 font-medium">Plant Details</h3>
-          <div className="space-y-4">
-            {/* Source */}
-            <FormField
-              control={form.control}
-              name="source"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Source</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select source" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="seed">Seed</SelectItem>
-                      <SelectItem value="clone">Clone</SelectItem>
-                      <SelectItem value="mother">Mother</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="source"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Source</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="seed">Seed</SelectItem>
+                  <SelectItem value="clone">Clone</SelectItem>
+                  <SelectItem value="mother">Mother</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {/* Stage */}
-            <FormField
-              control={form.control}
-              name="stage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Stage</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select stage" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="seedling">Seedling</SelectItem>
-                      <SelectItem value="vegetative">Vegetative</SelectItem>
-                      <SelectItem value="flowering">Flowering</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="stage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Stage</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select stage" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="seedling">Seedling</SelectItem>
+                  <SelectItem value="vegetative">Vegetative</SelectItem>
+                  <SelectItem value="flowering">Flowering</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {/* Plant Date */}
-            <FormField
-              control={form.control}
-              name="plantDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Plant Date</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      value={
-                        field.value
-                          ? new Date(field.value).toISOString().split('T')[0]
-                          : ''
-                      }
-                      onChange={(e) => field.onChange(new Date(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="plantDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Plant Date</FormLabel>
+              <FormControl>
+                <DatePicker date={field.value} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {/* Notes */}
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Optional notes about the batch"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+        <FormField
+          control={form.control}
+          name="healthStatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Health Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select health status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="healthy">Healthy</SelectItem>
+                  <SelectItem value="sick">Sick</SelectItem>
+                  <SelectItem value="pest">Pest Issues</SelectItem>
+                  <SelectItem value="nutrient">Nutrient Issues</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="Add any notes about this batch"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="flex justify-end gap-4">
-          <SheetClose asChild data-sheet-close>
+          <SheetClose asChild>
             <Button type="button" variant="outline">
               Cancel
             </Button>

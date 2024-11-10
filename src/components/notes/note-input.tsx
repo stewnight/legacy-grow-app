@@ -7,7 +7,7 @@ import { Mic, Send, X } from 'lucide-react'
 import { api } from '~/trpc/react'
 import { type Note } from '~/server/db/schemas/notes'
 import { cn } from '~/lib/utils'
-import { MediaUploader } from './MediaUploader'
+import { MediaUploader } from './media-uploader'
 import { toast } from '~/hooks/use-toast'
 import Image from 'next/image'
 

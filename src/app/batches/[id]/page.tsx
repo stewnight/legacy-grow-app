@@ -9,8 +9,8 @@ import {
 import { format } from 'date-fns'
 import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Timeline } from '~/components/notes/Timeline'
-import { NoteInput } from '~/components/notes/NoteInput'
+import { Timeline } from '~/components/notes/timeline'
+import { NoteInput } from '~/components/notes/note-input'
 import Link from 'next/link'
 
 export default async function BatchPage({

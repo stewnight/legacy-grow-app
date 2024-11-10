@@ -12,6 +12,12 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
+import { api } from '~/trpc/react'
+import { useRouter } from 'next/navigation'
+import { SheetClose } from '~/components/ui/sheet'
+import { useSession } from 'next-auth/react'
+import { createOptimisticPlant } from '~/lib/optimistic-update'
+import { useToast } from '~/hooks/use-toast'
 import {
   Select,
   SelectContent,
@@ -19,15 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { api } from '~/trpc/react'
-import { useRouter } from 'next/navigation'
-import { SheetClose } from '~/components/ui/sheet'
+import { CreateFormWrapper } from '~/components/create-form-wrapper'
 
 const createPlantSchema = z.object({
-  batchId: z
-    .string()
-    .optional()
-    .transform((val) => (val ? Number(val) : undefined)),
+  batchId: z.number().optional(),
   source: z.enum(['seed', 'clone', 'mother']),
   stage: z.enum(['seedling', 'vegetative', 'flowering']),
   plantDate: z.date(),
@@ -45,26 +46,88 @@ const createPlantSchema = z.object({
 })
 
 export function CreatePlantForm() {
+  return (
+    <CreateFormWrapper>
+      <CreatePlantFormContent />
+    </CreateFormWrapper>
+  )
+}
+
+function CreatePlantFormContent() {
+  const { data: session } = useSession()
   const router = useRouter()
+  const utils = api.useUtils()
+  const { toast } = useToast()
+
   const form = useForm<z.infer<typeof createPlantSchema>>({
     resolver: zodResolver(createPlantSchema),
     defaultValues: {
       source: 'seed',
       stage: 'seedling',
-      healthStatus: 'healthy',
       plantDate: new Date(),
+      healthStatus: 'healthy',
       quarantine: false,
     },
   })
 
   const createPlant = api.plant.create.useMutation({
+    onMutate: async (newPlant) => {
+      if (!session?.user) {
+        throw new Error('Must be logged in to create plants')
+      }
+
+      // Cancel any outgoing refetches
+      await utils.plant.list.cancel()
+
+      // Snapshot the previous value
+      const previousPlants = utils.plant.list.getData()
+
+      // Optimistically update to the new value
+      utils.plant.list.setData(undefined, (old) => {
+        const optimisticPlant = createOptimisticPlant(newPlant, {
+          id: session.user.id,
+          name: session.user.name ?? null,
+          email: session.user.email ?? null,
+        })
+
+        if (!old) return [optimisticPlant]
+        return [...old, optimisticPlant]
+      })
+
+      return { previousPlants }
+    },
+    onError: (err, newPlant, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      utils.plant.list.setData(undefined, context?.previousPlants)
+      toast({
+        title: 'Failed to create plant',
+        description: 'Please try again',
+        variant: 'destructive',
+      })
+    },
     onSuccess: () => {
-      router.refresh()
+      form.reset()
+      toast({
+        title: 'Plant created',
+        description: 'Your plant has been created successfully',
+      })
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      void utils.plant.list.invalidate()
     },
   })
 
-  function onSubmit(values: z.infer<typeof createPlantSchema>) {
-    createPlant.mutate(values)
+  async function onSubmit(values: z.infer<typeof createPlantSchema>) {
+    try {
+      await createPlant.mutateAsync(values)
+      const sheetClose = document.querySelector(
+        '[data-sheet-close]'
+      ) as HTMLButtonElement
+      sheetClose?.click()
+    } catch (error) {
+      console.error('Failed to create plant:', error)
+    }
   }
 
   return (
