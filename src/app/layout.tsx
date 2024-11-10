@@ -4,9 +4,15 @@ import { type Metadata } from 'next'
 import { TRPCReactProvider } from '~/trpc/react'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Header from '~/components/layout/header'
-import { Sidebar } from '~/components/layout/sidebar'
+import { AppSidebar } from '~/components/app-sidebar'
 import { auth } from '~/server/auth'
-
+import Link from 'next/link'
+import { Button } from '~/components/ui/button'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '~/components/ui/sidebar'
 export const metadata: Metadata = {
   title: 'Legacy Grow App',
   description: 'An all-in-one cannabis growing app',
@@ -23,15 +29,25 @@ export default async function RootLayout({
       <body className="min-h-screen">
         <TRPCReactProvider>
           {session ? (
-            <div className="relative">
-              <Header />
-              <div className="flex h-full">
-                <div className="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 pt-16">
-                  <Sidebar />
-                </div>
-                <main className="md:pl-72 pt-16 w-full">{children}</main>
-              </div>
-            </div>
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+                <header className="flex h-16 shrink-0 items-center border-b">
+                  <div className="flex items-center gap-2 px-4">
+                    <SidebarTrigger className="-ml-1" />
+                    <h1 className="text-xl font-bold">Legacy Grow App</h1>
+                  </div>
+                  <div className="ml-auto flex items-center gap-2 px-4">
+                    <Link href="/api/auth/signout">
+                      <Button variant="outline" size="sm">
+                        Sign out
+                      </Button>
+                    </Link>
+                  </div>
+                </header>
+                {children}
+              </SidebarInset>
+            </SidebarProvider>
           ) : (
             <div className="relative">
               <Header />
