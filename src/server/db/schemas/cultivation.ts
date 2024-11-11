@@ -73,7 +73,10 @@ export const genetics = createTable(
     floweringTime: integer('flowering_time'),
     thcPotential: decimal('thc_potential'),
     cbdPotential: decimal('cbd_potential'),
-    terpeneProfile: json('terpene_profile').$type<Record<string, number>>(),
+    terpeneProfile: json('terpene_profile').$type<Record<
+      string,
+      number
+    > | null>(),
     growthCharacteristics: json('growth_characteristics').$type<{
       height?: number
       spread?: number

@@ -13,7 +13,7 @@ import {
 import { notFound } from 'next/navigation'
 import { Timeline } from '~/components/notes/timeline'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { GeneticActions } from './_components/genetic-actions'
+import { GeneticActions } from '../_components/genetic-actions'
 import { Skeleton } from '~/components/ui/skeleton'
 import { type RouterOutputs } from '~/trpc/shared'
 import Link from 'next/link'
@@ -54,6 +54,14 @@ export default function GeneticPage({
             newData.data.thcPotential?.toString() ?? old.thcPotential,
           cbdPotential:
             newData.data.cbdPotential?.toString() ?? old.cbdPotential,
+          terpeneProfile: newData.data.terpeneProfile
+            ? Object.fromEntries(
+                Object.entries(newData.data.terpeneProfile).map(([k, v]) => [
+                  k,
+                  Number(v),
+                ])
+              )
+            : old.terpeneProfile,
           updatedAt: new Date(),
         }
       })

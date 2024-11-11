@@ -70,35 +70,44 @@ function CreatePlantFormContent() {
     },
   })
 
-  const createPlant = api.plant.create.useMutation({
+  const createMutation = api.plant.create.useMutation({
     onMutate: async (newPlant) => {
-      if (!session?.user) {
-        throw new Error('Must be logged in to create plants')
+      if (!session?.user) throw new Error('Not authenticated')
+
+      await utils.plant.list.cancel()
+      const previousData = utils.plant.list.getData()
+
+      const createdBy = {
+        id: session.user.id,
+        name: session.user.name ?? null,
+        email: session.user.email ?? '',
+        emailVerified: null,
+        image: null,
+        role: 'user' as const,
+        active: true,
+        permissions: null,
+        preferences: null,
+        lastLogin: null,
+        createdAt: new Date(),
       }
 
-      // Cancel any outgoing refetches
-      await utils.plant.list.cancel()
+      const optimisticPlant = {
+        ...createOptimisticPlant(newPlant, createdBy),
+        batch: null,
+        genetic: null,
+        createdBy,
+      }
 
-      // Snapshot the previous value
-      const previousPlants = utils.plant.list.getData()
-
-      // Optimistically update to the new value
       utils.plant.list.setData(undefined, (old) => {
-        const optimisticPlant = createOptimisticPlant(newPlant, {
-          id: session.user.id,
-          name: session.user.name ?? null,
-          email: session.user.email ?? null,
-        })
-
         if (!old) return [optimisticPlant]
         return [...old, optimisticPlant]
       })
 
-      return { previousPlants }
+      return { previousData }
     },
     onError: (err, newPlant, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      utils.plant.list.setData(undefined, context?.previousPlants)
+      utils.plant.list.setData(undefined, context?.previousData)
       toast({
         title: 'Failed to create plant',
         description: 'Please try again',
@@ -120,7 +129,7 @@ function CreatePlantFormContent() {
 
   async function onSubmit(values: z.infer<typeof createPlantSchema>) {
     try {
-      await createPlant.mutateAsync(values)
+      await createMutation.mutateAsync(values)
       const sheetClose = document.querySelector(
         '[data-sheet-close]'
       ) as HTMLButtonElement

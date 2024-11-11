@@ -26,4 +26,13 @@ export type GeneticFormData = z.infer<typeof geneticFormSchema>
 export interface GeneticWithRelations extends Genetic {
   plants: Plant[]
   batches: Batch[]
+  _count?: {
+    plants: number
+    batches: number
+  }
+  createdBy?: {
+    id: string
+    name: string | null
+    email: string | null
+  }
 }

@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server'
 import { eq, sql, and, ne } from 'drizzle-orm'
 import { genetics, plants, batches } from '~/server/db/schemas'
 import { slugify } from '~/lib/utils'
+import { type NewGenetic } from '~/server/db/schemas/cultivation'
 
 // Use the same validation schema for both create and update
 const geneticInput = z.object({
@@ -14,7 +15,7 @@ const geneticInput = z.object({
   floweringTime: z.number().nullish(),
   thcPotential: z.number().min(0).max(100).nullish(),
   cbdPotential: z.number().min(0).max(100).nullish(),
-  terpeneProfile: z.record(z.unknown()).nullish(),
+  terpeneProfile: z.record(z.number()).nullish(),
   growthCharacteristics: z.record(z.unknown()).nullish(),
   lineage: z.record(z.unknown()).nullish(),
 })
@@ -27,12 +28,16 @@ export const geneticRouter = createTRPCRouter({
         .select({
           id: genetics.id,
           name: genetics.name,
+          slug: genetics.slug,
           type: genetics.type,
           breeder: genetics.breeder,
           description: genetics.description,
           floweringTime: genetics.floweringTime,
           thcPotential: genetics.thcPotential,
           cbdPotential: genetics.cbdPotential,
+          terpeneProfile: genetics.terpeneProfile,
+          lineage: genetics.lineage,
+          createdById: genetics.createdById,
           growthCharacteristics: genetics.growthCharacteristics,
           createdAt: genetics.createdAt,
           updatedAt: genetics.updatedAt,
@@ -97,14 +102,27 @@ export const geneticRouter = createTRPCRouter({
           ? `${slug}-${Date.now().toString().slice(-4)}`
           : slug
 
-        // Convert number values to strings for decimal fields
-        const insertData: Partial<NewGenetic> = {
-          ...input,
+        // Replace the insertData section with this:
+        const insertData = {
+          name: input.name,
           slug: finalSlug,
+          type: input.type,
+          breeder: input.breeder ?? null,
+          description: input.description ?? null,
+          floweringTime: input.floweringTime ?? null,
+          thcPotential: input.thcPotential
+            ? input.thcPotential.toString()
+            : null,
+          cbdPotential: input.cbdPotential
+            ? input.cbdPotential.toString()
+            : null,
+          terpeneProfile: input.terpeneProfile ?? null,
+          growthCharacteristics: input.growthCharacteristics ?? null,
+          lineage: input.lineage ?? null,
           createdById: ctx.session.user.id,
-        }
+        } satisfies Omit<NewGenetic, 'id' | 'createdAt' | 'updatedAt'>
 
-        await ctx.db.insert(genetics).values(insertData as Partial<NewGenetic>)
+        await ctx.db.insert(genetics).values(insertData as NewGenetic)
       } catch (error) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -193,7 +211,6 @@ export const geneticRouter = createTRPCRouter({
             : slug
         }
 
-        // Copy over fields, handling nullish values correctly
         if (data.type !== undefined) updateData.type = data.type
         if (data.description !== undefined)
           updateData.description = data.description
@@ -202,8 +219,16 @@ export const geneticRouter = createTRPCRouter({
           updateData.floweringTime = data.floweringTime
         if (data.growthCharacteristics !== undefined)
           updateData.growthCharacteristics = data.growthCharacteristics
-        if (data.terpeneProfile !== undefined)
-          updateData.terpeneProfile = data.terpeneProfile
+        if (data.terpeneProfile !== undefined) {
+          // Ensure all values are numbers
+          const validatedProfile = Object.fromEntries(
+            Object.entries(data.terpeneProfile || {}).map(([k, v]) => [
+              k,
+              Number(v),
+            ])
+          )
+          updateData.terpeneProfile = validatedProfile
+        }
         if (data.lineage !== undefined) updateData.lineage = data.lineage
 
         // Handle decimal fields

@@ -33,7 +33,7 @@ import {
   createOptimisticGenetic,
   updateOptimisticEntity,
 } from '~/lib/optimistic-update'
-import { type Genetic } from '~/server/db/schemas'
+import { Batch, Plant, type Genetic } from '~/server/db/schemas'
 
 interface GeneticFormProps {
   mode: 'create' | 'edit'
@@ -54,11 +54,39 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
       await utils.genetic.list.cancel()
       const previousData = utils.genetic.list.getData()
 
-      const optimisticGenetic = createOptimisticGenetic(newGenetic, {
+      const terpeneProfile = newGenetic.terpeneProfile
+        ? Object.fromEntries(
+            Object.entries(newGenetic.terpeneProfile).map(([k, v]) => [
+              k,
+              Number(v),
+            ])
+          )
+        : null
+
+      const createdBy = {
         id: session.user.id,
-        name: session.user.name ?? '',
+        name: session.user.name ?? null,
         email: session.user.email ?? '',
-      })
+        emailVerified: null,
+        image: null,
+        role: 'user' as const,
+        active: true,
+        permissions: null,
+        preferences: null,
+        lastLogin: null,
+        createdAt: new Date(),
+      }
+
+      const optimisticGenetic = {
+        ...createOptimisticGenetic(
+          { ...newGenetic, terpeneProfile },
+          createdBy
+        ),
+        plants: [] as Plant[],
+        batches: [] as Batch[],
+        _count: { plants: 0, batches: 0 },
+        createdBy,
+      } satisfies GeneticWithRelations
 
       utils.genetic.list.setData(undefined, (old) => {
         if (!old) return [optimisticGenetic]
@@ -98,15 +126,31 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
 
       if (genetic) {
         utils.genetic.getBySlug.setData(genetic.slug, (old) => {
-          if (!old) return old
-          return updateOptimisticEntity(old, data as Partial<Genetic>)
+          if (!old) return undefined
+          return {
+            ...old,
+            ...data,
+            thcPotential: data.thcPotential?.toString() ?? old.thcPotential,
+            cbdPotential: data.cbdPotential?.toString() ?? old.cbdPotential,
+            plants: old.plants || [],
+            batches: old.batches || [],
+            _count: old._count || { plants: 0, batches: 0 },
+          }
         })
 
         utils.genetic.list.setData(undefined, (old) => {
-          if (!old) return old
+          if (!old) return undefined
           return old.map((g) =>
             g.id === id
-              ? updateOptimisticEntity(g, data as Partial<Genetic>)
+              ? {
+                  ...g,
+                  ...data,
+                  thcPotential: data.thcPotential?.toString() ?? g.thcPotential,
+                  cbdPotential: data.cbdPotential?.toString() ?? g.cbdPotential,
+                  plants: [],
+                  batches: [],
+                  _count: { plants: 0, batches: 0 },
+                }
               : g
           )
         })
@@ -154,7 +198,14 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
             thcPotential: Number(genetic.thcPotential),
             cbdPotential: Number(genetic.cbdPotential),
             growthCharacteristics: genetic.growthCharacteristics,
-            terpeneProfile: genetic.terpeneProfile,
+            terpeneProfile: genetic.terpeneProfile
+              ? Object.fromEntries(
+                  Object.entries(genetic.terpeneProfile).map(([k, v]) => [
+                    k,
+                    Number(v),
+                  ])
+                )
+              : null,
             lineage: genetic.lineage,
           }
         : {
@@ -166,24 +217,25 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
   const onSubmit = async (data: GeneticFormData) => {
     if (!session?.user) return
 
+    const terpeneProfile = data.terpeneProfile
+      ? Object.fromEntries(
+          Object.entries(data.terpeneProfile).map(([k, v]) => [k, Number(v)])
+        )
+      : null
+
     if (mode === 'edit' && genetic) {
       await updateGenetic.mutate({
         id: genetic.id,
         data: {
-          name: data.name,
-          type: data.type,
-          breeder: data.breeder,
-          description: data.description,
-          floweringTime: data.floweringTime,
-          thcPotential: data.thcPotential,
-          cbdPotential: data.cbdPotential,
-          growthCharacteristics: data.growthCharacteristics,
-          lineage: data.lineage,
-          terpeneProfile: data.terpeneProfile,
+          ...data,
+          terpeneProfile,
         },
       })
     } else {
-      await createMutation.mutate(data)
+      await createMutation.mutate({
+        ...data,
+        terpeneProfile,
+      })
     }
   }
 

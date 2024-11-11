@@ -74,30 +74,69 @@ function CreateBatchFormContent() {
     },
   })
 
-  const createBatch = api.batch.create.useMutation({
+  const createMutation = api.batch.create.useMutation({
     onMutate: async (newBatch) => {
-      if (!session?.user) {
-        throw new Error('Must be logged in to create batches')
-      }
+      if (!session?.user) throw new Error('Not authenticated')
 
       await utils.batch.list.cancel()
-      const previousBatches = utils.batch.list.getData()
+      const previousData = utils.batch.list.getData()
+
+      const createdBy = {
+        id: session.user.id,
+        name: session.user.name ?? null,
+        email: session.user.email ?? '',
+        emailVerified: null,
+        image: null,
+        role: 'user' as const,
+        active: true,
+        permissions: null,
+        preferences: null,
+        lastLogin: null,
+        createdAt: new Date(),
+      }
+
+      const optimisticBatch = {
+        id: Math.floor(Math.random() * -1000000),
+        name: newBatch.name,
+        code: `BCH-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        geneticId: newBatch.geneticId,
+        plantCount: newBatch.plantCount,
+        notes: newBatch.notes ?? null,
+        status: 'active' as const,
+        startDate: new Date(),
+        endDate: null,
+        userId: session.user.id,
+        createdAt: new Date(),
+        updatedAt: null,
+        genetic: {
+          id: newBatch.geneticId,
+          name: '', // This will be updated when the real data comes in
+          type: 'hybrid' as const,
+          description: null,
+          slug: '',
+          breeder: null,
+          floweringTime: null,
+          thcPotential: null,
+          cbdPotential: null,
+          terpeneProfile: null,
+          growthCharacteristics: null,
+          lineage: null,
+          createdById: session.user.id,
+          createdAt: new Date(),
+          updatedAt: null,
+        },
+        createdBy,
+      }
 
       utils.batch.list.setData(undefined, (old) => {
-        const optimisticBatch = createOptimisticBatch(newBatch, {
-          id: session.user.id,
-          name: session.user.name ?? null,
-          email: session.user.email ?? null,
-        })
-
         if (!old) return [optimisticBatch]
         return [...old, optimisticBatch]
       })
 
-      return { previousBatches }
+      return { previousData }
     },
     onError: (err, newBatch, context) => {
-      utils.batch.list.setData(undefined, context?.previousBatches)
+      utils.batch.list.setData(undefined, context?.previousData)
       toast({
         title: 'Failed to create batch',
         description: 'Please try again',
@@ -118,7 +157,7 @@ function CreateBatchFormContent() {
 
   async function onSubmit(values: z.infer<typeof createBatchSchema>) {
     try {
-      await createBatch.mutateAsync(values)
+      await createMutation.mutateAsync(values)
       const sheetClose = document.querySelector(
         '[data-sheet-close]'
       ) as HTMLButtonElement
@@ -299,8 +338,8 @@ function CreateBatchFormContent() {
               Cancel
             </Button>
           </SheetClose>
-          <Button type="submit" disabled={createBatch.isPending}>
-            {createBatch.isPending ? 'Creating...' : 'Create Batch'}
+          <Button type="submit" disabled={createMutation.isPending}>
+            {createMutation.isPending ? 'Creating...' : 'Create Batch'}
           </Button>
         </div>
       </form>

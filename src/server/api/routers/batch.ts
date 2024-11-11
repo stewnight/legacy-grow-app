@@ -47,20 +47,23 @@ export const batchRouter = createTRPCRouter({
       const plantsToCreate: NewPlant[] = Array(plantCount)
         .fill(null)
         .map(() => ({
-          ...plantData,
-          plantDate: format(plantData.plantDate, 'yyyy-MM-dd'),
-          code: `${batch.id}-${Math.random().toString(36).substring(2, 7)}`,
+          plantDate: format(input.plantDate, 'yyyy-MM-dd'),
+          code: `PLT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           batchId: batch.id,
-          geneticId: batch.geneticId ?? null,
-          motherId: plantData.motherId ?? null,
-          generation: plantData.generation ?? null,
+          geneticId: input.geneticId,
+          motherId: null,
+          generation: null,
           createdById: ctx.session.user.id,
           harvestDate: null,
           quarantine: false,
           destroyReason: null,
-          sex: plantData.sex ?? 'female',
-          phenotype: plantData.phenotype ?? null,
-          locationId: plantData.locationId ?? null,
+          locationId: null,
+          phenotype: null,
+          sex: 'unknown' as const,
+          source: input.source,
+          stage: 'seedling' as const,
+          healthStatus: 'healthy' as const,
+          status: 'active' as const,
         }))
 
       await ctx.db.insert(plants).values(plantsToCreate)

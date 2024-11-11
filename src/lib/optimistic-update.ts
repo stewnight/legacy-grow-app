@@ -47,7 +47,7 @@ export function createOptimisticGenetic(
       floweringTime: input.floweringTime ?? null,
       thcPotential: input.thcPotential?.toString() ?? null,
       cbdPotential: input.cbdPotential?.toString() ?? null,
-      terpeneProfile: input.terpeneProfile ?? null,
+      terpeneProfile: (input.terpeneProfile as Record<string, number>) ?? null,
       growthCharacteristics: input.growthCharacteristics ?? null,
       lineage: input.lineage ?? null,
       createdById: currentUser.id,

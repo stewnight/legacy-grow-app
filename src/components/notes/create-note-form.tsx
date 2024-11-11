@@ -83,37 +83,54 @@ export function CreateNoteForm({
     },
   })
 
-  const createNote = api.notes.create.useMutation({
+  const createMutation = api.notes.create.useMutation({
     onMutate: async (newNote) => {
-      if (!session?.user) return
+      if (!session?.user) throw new Error('Not authenticated')
 
-      await utils.notes.list.cancel({ entityType, entityId })
-      const previousNotes = utils.notes.list.getData({
+      await utils.notes.list.cancel({ entityType, entityId, limit: 50 })
+      const previousData = utils.notes.list.getData({
         entityType,
         entityId,
         limit: 50,
       })
 
-      utils.notes.list.setData({ entityType, entityId, limit: 50 }, (old) => {
-        const optimisticNote = createOptimisticNote(newNote, {
-          id: session.user.id,
-          name: session.user.name ?? null,
-          email: session.user.email ?? null,
-        })
+      const createdBy = {
+        id: session.user.id,
+        name: session.user.name ?? null,
+        email: session.user.email ?? '',
+        emailVerified: null,
+        image: null,
+        role: 'user' as const,
+        active: true,
+        permissions: null,
+        preferences: null,
+        lastLogin: null,
+        createdAt: new Date(),
+      }
 
-        if (!old) return { items: [optimisticNote], nextCursor: undefined }
+      const optimisticNote = {
+        ...createOptimisticNote(newNote, createdBy),
+        createdBy,
+      }
+
+      utils.notes.list.setData({ entityType, entityId, limit: 50 }, (old) => {
+        if (!old)
+          return {
+            items: [optimisticNote],
+            nextCursor: null,
+          }
         return {
-          ...old,
           items: [optimisticNote, ...old.items],
+          nextCursor: old.nextCursor,
         }
       })
 
-      return { previousNotes }
+      return { previousData }
     },
     onError: (err, newNote, context) => {
       utils.notes.list.setData(
         { entityType, entityId, limit: 50 },
-        context?.previousNotes
+        context?.previousData
       )
       toast({
         title: 'Failed to create note',
@@ -150,7 +167,7 @@ export function CreateNoteForm({
     if (!noteContent.trim()) return
 
     try {
-      await createNote.mutateAsync({
+      await createMutation.mutateAsync({
         ...values,
         content: noteContent,
         type: mediaUrl ? 'image' : 'text',
@@ -265,7 +282,7 @@ export function CreateNoteForm({
               type="submit"
               disabled={
                 (!form.getValues('content') && !mediaUrl) ||
-                createNote.isPending
+                createMutation.isPending
               }
             >
               <Send className="h-4 w-4 mr-2" />

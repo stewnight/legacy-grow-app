@@ -12,9 +12,9 @@ import {
 import { Button } from '~/components/ui/button'
 import { Plus } from 'lucide-react'
 import { ScrollArea } from '~/components/ui/scroll-area'
-import { type Genetic } from '~/server/db/schemas'
-import { type GeneticWithRelations } from '~/lib/validations/genetic'
+import { type Genetic, type Plant, type Batch } from '~/server/db/schemas'
 import { GeneticForm } from './genetic-form'
+import { GeneticWithRelations } from '../../../lib/validations/genetic'
 
 interface GeneticSheetProps {
   mode: 'create' | 'edit'
@@ -72,7 +72,16 @@ export function GeneticSheet({
             <div className="flex-1">
               <GeneticForm
                 mode={mode}
-                genetic={genetic}
+                genetic={
+                  genetic
+                    ? {
+                        ...genetic,
+                        plants: genetic.plants || [],
+                        batches: genetic.batches || [],
+                        _count: genetic._count || { plants: 0, batches: 0 },
+                      }
+                    : undefined
+                }
                 onSuccess={() => handleOpenChange(false)}
               />
             </div>

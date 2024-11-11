@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { api } from '~/trpc/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '~/hooks/use-toast'
-import { type GeneticWithRelations } from '~/lib/validations/genetic'
 import { updateOptimisticEntity } from '~/lib/optimistic-update'
 import { MoreHorizontal, Trash2, Pencil } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -22,10 +21,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { GeneticSheet } from '../../_components/genetic-sheet'
+import { GeneticSheet } from './genetic-sheet'
+import { type Genetic, type Plant, type Batch } from '~/server/db/schemas'
 
 interface GeneticActionsProps {
-  genetic: GeneticWithRelations
+  genetic: Genetic & {
+    plants: Plant[]
+    batches: Batch[]
+    _count?: {
+      plants: number
+      batches: number
+    }
+  }
 }
 
 export function GeneticActions({ genetic }: GeneticActionsProps) {
@@ -121,7 +128,12 @@ export function GeneticActions({ genetic }: GeneticActionsProps) {
 
       <GeneticSheet
         mode="edit"
-        genetic={genetic}
+        genetic={{
+          ...genetic,
+          plants: genetic.plants || [],
+          batches: genetic.batches || [],
+          _count: genetic._count || { plants: 0, batches: 0 },
+        }}
         open={isEditSheetOpen}
         onOpenChange={setIsEditSheetOpen}
       />
