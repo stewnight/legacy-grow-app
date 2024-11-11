@@ -33,7 +33,7 @@ import {
   createOptimisticGenetic,
   updateOptimisticEntity,
 } from '~/lib/optimistic-update'
-import { Batch, Plant, type Genetic } from '~/server/db/schemas'
+import { type Batch, type Plant, type Genetic } from '~/server/db/schemas'
 
 interface GeneticFormProps {
   mode: 'create' | 'edit'

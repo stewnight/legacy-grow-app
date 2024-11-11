@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { api } from '~/trpc/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '~/hooks/use-toast'
+import { updateOptimisticEntity } from '~/lib/optimistic-update'
 import { MoreHorizontal, Trash2, Pencil } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
@@ -20,56 +21,51 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { PlantSheet } from './plant-sheet'
-import { type PlantWithRelations } from '~/lib/validations/plant'
+import { BatchSheet } from './batch-sheet'
+import { type BatchWithRelations } from '~/lib/validations/batch'
 
-interface PlantActionsProps {
-  plant: PlantWithRelations
+interface BatchActionsProps {
+  batch: BatchWithRelations
 }
 
-export function PlantActions({ plant }: PlantActionsProps) {
+export function BatchActions({ batch }: BatchActionsProps) {
   const [showEditSheet, setShowEditSheet] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
   const utils = api.useUtils()
 
-  const deleteMutation = api.plant.delete.useMutation({
+  const deleteMutation = api.batch.delete.useMutation({
     onMutate: async () => {
-      await utils.plant.list.cancel()
-      const previousData = utils.plant.list.getData({
-        filters: plant.batchId ? { batchId: plant.batchId } : undefined,
-      })
+      await utils.batch.list.cancel()
+      const previousData = utils.batch.list.getData()
 
-      utils.plant.list.setData(
-        { filters: plant.batchId ? { batchId: plant.batchId } : undefined },
-        (old) => {
-          if (!old) return []
-          return old.filter((item) => item.code !== plant.code)
-        }
-      )
+      utils.batch.list.setData(undefined, (old) => {
+        if (!old) return []
+        return old.filter((item) => item.code !== batch.code)
+      })
 
       return { previousData }
     },
     onSuccess: () => {
       toast({
         title: 'Success',
-        description: 'Plant deleted successfully',
+        description: 'Batch deleted successfully',
       })
-      router.refresh()
+      router.push('/batches')
     },
     onError: (err, _, context) => {
       if (context?.previousData) {
-        utils.plant.list.setData(
-          { filters: plant.batchId ? { batchId: plant.batchId } : undefined },
-          context.previousData
-        )
+        utils.batch.list.setData(undefined, context.previousData)
       }
       toast({
         title: 'Error',
         description: err.message,
         variant: 'destructive',
       })
+    },
+    onSettled: () => {
+      void utils.batch.list.invalidate()
     },
   })
 
@@ -97,9 +93,9 @@ export function PlantActions({ plant }: PlantActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <PlantSheet
+      <BatchSheet
         mode="edit"
-        plant={plant}
+        batch={batch}
         open={showEditSheet}
         onOpenChange={setShowEditSheet}
       />
@@ -107,10 +103,16 @@ export function PlantActions({ plant }: PlantActionsProps) {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Plant</DialogTitle>
+            <DialogTitle>Delete Batch</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this plant? This action cannot be
+              Are you sure you want to delete this batch? This action cannot be
               undone.
+              {batch.plants.length > 0 && (
+                <p className="mt-2 text-red-500">
+                  Warning: This batch has {batch.plants.length} active plants.
+                  Please remove or transfer them before deleting.
+                </p>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -123,9 +125,10 @@ export function PlantActions({ plant }: PlantActionsProps) {
             <Button
               variant="destructive"
               onClick={() => {
-                deleteMutation.mutate({ code: plant.code })
+                deleteMutation.mutate({ code: batch.code! })
                 setShowDeleteDialog(false)
               }}
+              disabled={batch.plants.length > 0}
             >
               Delete
             </Button>

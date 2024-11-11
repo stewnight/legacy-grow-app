@@ -114,11 +114,7 @@ export function CreateNoteForm({
       }
 
       utils.notes.list.setData({ entityType, entityId, limit: 50 }, (old) => {
-        if (!old)
-          return {
-            items: [optimisticNote],
-            nextCursor: null,
-          }
+        if (!old) return { items: [], nextCursor: null }
         return {
           items: [optimisticNote, ...old.items],
           nextCursor: old.nextCursor,
@@ -264,6 +260,9 @@ export function CreateNoteForm({
 
           <div className="absolute bottom-3 right-3 flex items-center gap-2">
             <MediaUploader
+              onUpload={(file) => {
+                console.log('uploading file', file)
+              }}
               onUploadComplete={(url, metadata) => {
                 setMediaUrl(url)
                 setMediaMetadata(metadata)

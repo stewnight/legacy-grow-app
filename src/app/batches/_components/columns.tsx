@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type Batch } from '~/server/db/schemas/cultivation'
+import { type BatchWithRelations } from '~/lib/validations/batch'
 import { Badge } from '~/components/ui/badge'
 import { format } from 'date-fns'
 import { MoreHorizontal } from 'lucide-react'
@@ -16,17 +16,18 @@ import {
 } from '~/components/ui/dropdown-menu'
 import Link from 'next/link'
 
-export const columns: ColumnDef<Batch>[] = [
+export const columns: ColumnDef<BatchWithRelations>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => {
+      const batch = row.original
       return (
         <Link
-          href={`/batches/${row.original.id}`}
-          className="font-medium hover:underline whitespace-nowrap"
+          href={`/batches/${batch.code}`}
+          className="font-medium hover:underline"
         >
-          {row.getValue('name')}
+          {batch.name}
         </Link>
       )
     },
@@ -35,10 +36,10 @@ export const columns: ColumnDef<Batch>[] = [
     accessorKey: 'genetic',
     header: 'Genetic',
     cell: ({ row }) => {
-      const genetic = row.original.geneticId
+      const genetic = row.original.genetic
       return genetic ? (
-        <Link href={`/genetics/${genetic}`} className="hover:underline">
-          {genetic}
+        <Link href={`/genetics/${genetic.slug}`} className="hover:underline">
+          {genetic.name}
         </Link>
       ) : (
         'N/A'
@@ -81,10 +82,10 @@ export const columns: ColumnDef<Batch>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/batches/${batch.id}`}>View Details</Link>
+              <Link href={`/batches/${batch.code}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`/batches/${batch.id}/plants`}>View Plants</Link>
+              <Link href={`/batches/${batch.code}/plants`}>View Plants</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

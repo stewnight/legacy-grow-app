@@ -1,13 +1,16 @@
 'use client'
 
-import { DataTable } from '~/components/ui/data-table'
-import { columns } from './columns'
 import { api } from '~/trpc/react'
+import { columns } from './columns'
+import { DataTable } from '~/components/ui/data-table'
 import { Card } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
 
 export function BatchList() {
-  const { data: batches, isLoading } = api.batch.list.useQuery()
+  const { data: batches, isLoading } = api.batch.list.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    networkMode: 'offlineFirst',
+  })
 
   if (isLoading) {
     return (

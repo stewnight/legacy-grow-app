@@ -64,7 +64,7 @@ export const columns: ColumnDef<Plant>[] = [
     accessorKey: 'healthStatus',
     header: 'Health',
     cell: ({ row }) => {
-      const status = row.getValue('healthStatus') as string
+      const status = row.getValue('healthStatus')
       return (
         <Badge
           variant={

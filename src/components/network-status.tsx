@@ -51,7 +51,7 @@ export function NetworkStatus() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
-  }, [])
+  }, [handleSync])
 
   if (isOnline && !isSyncing && !hasError) return null
 

@@ -23,7 +23,7 @@ export function MediaPreview({ note, className }: MediaPreviewProps) {
   if (!note.metadata?.url) return null
 
   // Safely access the URL
-  const mediaUrl = note.metadata.url as string
+  const mediaUrl = note.metadata.url
 
   const renderPreview = () => {
     switch (note.type) {

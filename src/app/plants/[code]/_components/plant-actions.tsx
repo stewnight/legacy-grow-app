@@ -1,13 +1,15 @@
 'use client'
 
-import { MoreHorizontal, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { api } from '~/trpc/react'
+import { useRouter } from 'next/navigation'
+import { useToast } from '~/hooks/use-toast'
+import { MoreHorizontal, Trash2, Pencil } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import {
@@ -18,38 +20,54 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import { type Plant } from '~/server/db/schemas/cultivation'
-import { api } from '~/trpc/react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useToast } from '~/hooks/use-toast'
+import { PlantSheet } from '../../_components/plant-sheet'
+import { type PlantWithRelations } from '~/lib/validations/plant'
 
-export function PlantActions({ plant }: { plant: Plant }) {
+interface PlantActionsProps {
+  plant: PlantWithRelations
+}
+
+export function PlantActions({ plant }: PlantActionsProps) {
+  const [showEditSheet, setShowEditSheet] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [destroyReason, setDestroyReason] = useState('')
+  const utils = api.useUtils()
 
-  const updatePlant = api.plant.update.useMutation({
-    onSuccess: () => {
-      router.refresh()
+  const deleteMutation = api.plant.delete.useMutation({
+    onMutate: async () => {
+      await utils.plant.list.cancel()
+      const previousData = utils.plant.list.getData({
+        filters: plant.batchId ? { batchId: plant.batchId } : undefined,
+      })
+
+      utils.plant.list.setData(
+        { filters: plant.batchId ? { batchId: plant.batchId } : undefined },
+        (old) => {
+          if (!old) return []
+          return old.filter((item) => item.code !== plant.code)
+        }
+      )
+
+      return { previousData }
     },
-  })
-
-  const deletePlant = api.plant.delete.useMutation({
     onSuccess: () => {
       toast({
-        title: 'Plant deleted',
-        description: 'The plant has been successfully deleted.',
+        title: 'Success',
+        description: 'Plant deleted successfully',
       })
       router.push('/plants')
     },
-    onError: (error) => {
+    onError: (err, _, context) => {
+      if (context?.previousData) {
+        utils.plant.list.setData(
+          { filters: plant.batchId ? { batchId: plant.batchId } : undefined },
+          context.previousData
+        )
+      }
       toast({
         title: 'Error',
-        description: error.message,
+        description: err.message,
         variant: 'destructive',
       })
     },
@@ -59,87 +77,57 @@ export function PlantActions({ plant }: { plant: Plant }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() =>
-              updatePlant.mutate({
-                id: plant.id,
-                quarantine: !plant.quarantine,
-              })
-            }
-          >
-            {plant.quarantine ? 'Remove from Quarantine' : 'Mark as Quarantined'}
+          <DropdownMenuItem onClick={() => setShowEditSheet(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              updatePlant.mutate({
-                id: plant.id,
-                stage:
-                  plant.stage === 'seedling'
-                    ? 'vegetative'
-                    : plant.stage === 'vegetative'
-                      ? 'flowering'
-                      : 'harvested',
-              })
-            }
-          >
-            Advance Growth Stage
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="text-destructive"
-            onClick={() => setIsDeleteDialogOpen(true)}
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-red-600"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete Plant
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <PlantSheet
+        mode="edit"
+        plant={plant}
+        open={showEditSheet}
+        onOpenChange={setShowEditSheet}
+      />
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Plant</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this plant? This action cannot be undone.
+              Are you sure you want to delete this plant? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="reason">Reason for deletion (optional)</Label>
-              <Input
-                id="reason"
-                value={destroyReason}
-                onChange={(e) => setDestroyReason(e.target.value)}
-                placeholder="Enter reason..."
-              />
-            </div>
-          </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
+              onClick={() => setShowDeleteDialog(false)}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={() => {
-                deletePlant.mutate({
-                  id: plant.id,
-                  destroyReason: destroyReason || undefined,
-                })
-                setIsDeleteDialogOpen(false)
+                deleteMutation.mutate({ code: plant.code })
+                setShowDeleteDialog(false)
               }}
             >
-              Delete Plant
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

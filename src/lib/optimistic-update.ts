@@ -47,7 +47,7 @@ export function createOptimisticGenetic(
       floweringTime: input.floweringTime ?? null,
       thcPotential: input.thcPotential?.toString() ?? null,
       cbdPotential: input.cbdPotential?.toString() ?? null,
-      terpeneProfile: (input.terpeneProfile as Record<string, number>) ?? null,
+      terpeneProfile: input.terpeneProfile! ?? null,
       growthCharacteristics: input.growthCharacteristics ?? null,
       lineage: input.lineage ?? null,
       createdById: currentUser.id,
@@ -97,16 +97,14 @@ export function createOptimisticBatch(
   return createOptimisticEntity<Batch>(
     {
       name: input.name,
-      code: `BAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      code: `b${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
+      geneticId: input.geneticId,
       plantCount: input.plantCount,
       notes: input.notes ?? null,
-      geneticId: input.geneticId,
+      status: 'active',
       userId: currentUser.id,
       createdAt: new Date(),
-      updatedAt: null,
-      startDate: new Date(),
-      endDate: null,
-      status: 'active',
+      updatedAt: new Date(),
     },
     {}
   )
@@ -163,19 +161,17 @@ export function mergeOptimisticData<T extends { id: number }>(
   )
 }
 
-export function handleOptimisticError(
+export function handleOptimisticError<T extends { id: number }>(
   error: Error,
   queryClient: QueryClient,
   entityType: string,
   entityId: number
 ): void {
-  // Remove failed optimistic update from cache
-  queryClient.setQueryData<any[]>(
+  queryClient.setQueryData<T[]>(
     [entityType, 'list'],
     (old) => old?.filter((item) => item.id !== entityId) ?? []
   )
 
-  // Add error state
   queryClient.setQueryData(
     [entityType, 'errors'],
     (old: Record<string, Error> = {}) => ({

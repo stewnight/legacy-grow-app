@@ -228,7 +228,7 @@ export const geneticRouter = createTRPCRouter({
               Number(v),
             ])
           )
-          updateData.terpeneProfile = validatedProfile
+          updateData.terpeneProfile = validatedProfile ?? null
         }
         if (data.lineage !== undefined) updateData.lineage = data.lineage
 

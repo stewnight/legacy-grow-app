@@ -9,11 +9,13 @@ import { X } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
 interface MediaUploaderProps {
+  onUpload: (file: File) => Promise<void> | void
   onUploadComplete: (url: string, metadata: any) => void
   onUploadError: (error: Error) => void
 }
 
 export function MediaUploader({
+  onUpload,
   onUploadComplete,
   onUploadError,
 }: MediaUploaderProps) {

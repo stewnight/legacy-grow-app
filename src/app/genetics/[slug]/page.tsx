@@ -351,7 +351,7 @@ export default function GeneticPage({
                     >
                       <div className="space-y-1">
                         <Link
-                          href={`/batches/${batch.id}`}
+                          href={`/batches/${batch.code}`}
                           className="font-medium hover:underline"
                         >
                           {batch.name}

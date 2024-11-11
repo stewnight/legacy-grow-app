@@ -1,81 +1,46 @@
 import { z } from 'zod'
-import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
+import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { plants } from '~/server/db/schemas'
-import { desc, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import { format } from 'date-fns'
+import { plantFormSchema } from '~/lib/validations/plant'
+
+const plantInput = z.object({
+  name: z.string().min(1, 'Name is required'),
+  geneticId: z.number().min(1, 'Genetic is required'),
+  batchId: z.number().min(1, 'Batch is required'),
+  plantDate: z.string().min(1, 'Plant date is required'),
+  harvestDate: z.string().min(1, 'Harvest date is required'),
+})
 
 export const plantRouter = createTRPCRouter({
-  create: protectedProcedure
-    .input(
-      z.object({
-        batchId: z.number().optional(),
-        source: z.enum(['seed', 'clone', 'mother']),
-        stage: z.enum(['seedling', 'vegetative', 'flowering']),
-        plantDate: z.date(),
-        notes: z.string().optional(),
-        healthStatus: z
-          .enum(['healthy', 'sick', 'pest', 'nutrient'])
-          .default('healthy'),
-        quarantine: z.boolean().default(false),
-        geneticId: z.number().optional(),
-        motherId: z.number().optional(),
-        generation: z.number().optional(),
-        sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
-        phenotype: z.string().optional(),
-        locationId: z.number().optional(),
-        destroyReason: z.string().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.insert(plants).values({
-          ...input,
-          plantDate: format(input.plantDate, 'yyyy-MM-dd'),
-          createdById: ctx.session.user.id,
-        })
-      } catch (error) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create plant',
-          cause: error,
-        })
-      }
-    }),
-
-  list: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.plants.findMany({
-      orderBy: [desc(plants.createdAt)],
-      with: {
-        genetic: true,
-        createdBy: true,
-        batch: true,
-      },
-    })
-  }),
-
-  getById: protectedProcedure
-    .input(z.number())
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.query.plants.findFirst({
-        where: eq(plants.id, input),
-        with: {
-          genetic: true,
-          createdBy: true,
-          batch: true,
-        },
-      })
-    }),
-
   getByCode: protectedProcedure
-    .input(z.object({ code: z.string() }))
+    .input(z.string())
     .query(async ({ ctx, input }) => {
       const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.code, input.code),
+        where: eq(plants.code, input),
         with: {
-          genetic: true,
-          createdBy: true,
-          batch: true,
+          genetic: {
+            columns: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          batch: {
+            columns: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       })
 
@@ -88,81 +53,126 @@ export const plantRouter = createTRPCRouter({
 
       return plant
     }),
+  list: protectedProcedure
+    .input(
+      z.object({
+        filters: z
+          .object({
+            batchId: z.number(),
+          })
+          .optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where = input.filters?.batchId
+        ? eq(plants.batchId, input.filters.batchId)
+        : undefined
+
+      return ctx.db.query.plants.findMany({
+        where,
+        with: {
+          genetic: {
+            columns: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          batch: {
+            columns: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: (plants, { desc }) => [desc(plants.createdAt)],
+      })
+    }),
+
+  create: protectedProcedure
+    .input(plantFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const code = `p${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+
+      const [plant] = await ctx.db
+        .insert(plants)
+        .values({
+          ...input,
+          code,
+          status: 'active',
+          createdById: ctx.session.user.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          plantDate: input.plantDate.toISOString(),
+          harvestDate: input.harvestDate?.toISOString() ?? null,
+        })
+        .returning()
+
+      return plant
+    }),
 
   update: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
-        batchId: z.number().optional(),
-        source: z.enum(['seed', 'clone', 'mother']).optional(),
-        stage: z
-          .enum(['seedling', 'vegetative', 'flowering', 'harvested'])
-          .optional(),
-        plantDate: z.date().optional(),
-        harvestDate: z.date().optional(),
-        notes: z.string().optional(),
-        healthStatus: z
-          .enum(['healthy', 'sick', 'pest', 'nutrient'])
-          .optional(),
-        quarantine: z.boolean().optional(),
-        geneticId: z.number().optional(),
-        motherId: z.number().optional(),
-        generation: z.number().optional(),
-        sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']).optional(),
-        phenotype: z.string().optional(),
-        locationId: z.number().optional(),
-        destroyReason: z.string().optional(),
+        code: z.string(),
+        data: plantFormSchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, plantDate, harvestDate, ...updateData } = input
-      try {
-        await ctx.db
-          .update(plants)
-          .set({
-            ...updateData,
-            ...(plantDate && { plantDate: format(plantDate, 'yyyy-MM-dd') }),
-            ...(harvestDate && {
-              harvestDate: format(harvestDate, 'yyyy-MM-dd'),
-            }),
-            updatedAt: new Date(),
-          })
-          .where(eq(plants.id, id))
-      } catch (error) {
+      const plant = await ctx.db.query.plants.findFirst({
+        where: eq(plants.code, input.code),
+      })
+
+      if (!plant) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update plant',
-          cause: error,
+          code: 'NOT_FOUND',
+          message: 'Plant not found',
         })
       }
+
+      const [updated] = await ctx.db
+        .update(plants)
+        .set({
+          ...(input.data as Partial<typeof plants.$inferSelect>),
+          updatedAt: new Date(),
+        })
+        .where(eq(plants.code, input.code))
+        .returning()
+
+      return updated
     }),
 
   delete: protectedProcedure
-    .input(z.object({ 
-      id: z.number(),
-      destroyReason: z.string().optional()
-    }))
+    .input(z.object({ code: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        // First update the plant with destroy reason if provided
-        if (input.destroyReason) {
-          await ctx.db
-            .update(plants)
-            .set({
-              destroyReason: input.destroyReason,
-              updatedAt: new Date(),
-            })
-            .where(eq(plants.id, input.id))
-        }
+      const plant = await ctx.db.query.plants.findFirst({
+        where: eq(plants.code, input.code),
+      })
 
-        // Then delete the plant
-        await ctx.db.delete(plants).where(eq(plants.id, input.id))
-      } catch (error) {
+      if (!plant) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to delete plant',
-          cause: error,
+          code: 'NOT_FOUND',
+          message: 'Plant not found',
         })
       }
+
+      if (plant.createdById !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Not authorized to delete this plant',
+        })
+      }
+
+      await ctx.db.delete(plants).where(eq(plants.code, input.code))
+
+      return plant
     }),
 })

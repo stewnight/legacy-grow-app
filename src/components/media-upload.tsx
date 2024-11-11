@@ -15,9 +15,7 @@ interface MediaUploadProps {
   className?: string
 }
 
-interface PresignedPostFields {
-  [key: string]: string
-}
+type PresignedPostFields = Record<string, string>;
 
 export function MediaUpload({
   onUploadComplete,

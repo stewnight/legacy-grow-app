@@ -34,20 +34,25 @@ export const batches = createTable(
     code: varchar('code', { length: 255 })
       .notNull()
       .$defaultFn(
-        () => `BAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        () => `b${Date.now()}${Math.random().toString(24).substr(2, 9)}`
       ),
     name: varchar('name', { length: 255 }).notNull(),
-    geneticId: integer('genetic_id')
-      .notNull()
-      .references(() => genetics.id),
-    startDate: timestamp('start_date', { withTimezone: true }).defaultNow(),
-    endDate: timestamp('end_date', { withTimezone: true }),
-    status: batchStatusEnum('status').notNull().default('active'),
+    geneticId: integer('genetic_id').references(() => genetics.id),
     plantCount: integer('plant_count').notNull(),
     notes: text('notes'),
+    status: varchar('status', { length: 255 }).notNull().default('active'),
+    userId: varchar('user_id', { length: 255 }).notNull(),
+    source: varchar('source', { length: 255 }),
+    stage: varchar('stage', { length: 255 }),
+    plantDate: timestamp('plant_date', { withTimezone: true }),
+    healthStatus: varchar('health_status', { length: 255 }),
+    motherId: integer('mother_id'),
+    generation: integer('generation'),
+    sex: varchar('sex', { length: 255 }),
+    phenotype: varchar('phenotype', { length: 255 }),
+    locationId: integer('location_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    userId: varchar('user_id', { length: 255 }).notNull(),
   },
   (batch) => ({
     codeIdx: index('batch_code_idx').on(batch.code),
@@ -117,7 +122,7 @@ export const plants = createTable(
     code: varchar('code', { length: 255 })
       .notNull()
       .$defaultFn(
-        () => `PLT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        () => `p${Date.now()}${Math.random().toString(36).substr(2, 9)}`
       ),
     geneticId: integer('genetic_id').references(() => genetics.id),
     batchId: integer('batch_id').references(() => batches.id),

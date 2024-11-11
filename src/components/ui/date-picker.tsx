@@ -15,10 +15,10 @@ import {
 
 interface DatePickerProps {
   date?: Date
-  onChange?: (date: Date | undefined) => void
+  onSelect: (date: Date | undefined) => void
 }
 
-export function DatePicker({ date, onChange }: DatePickerProps) {
+export function DatePicker({ date, onSelect }: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -37,7 +37,7 @@ export function DatePicker({ date, onChange }: DatePickerProps) {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={onChange}
+          onSelect={onSelect}
           initialFocus
         />
       </PopoverContent>
