@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { CreateGeneticSheet } from './_components/create-genetic-sheet'
+import { GeneticSheet } from './_components/genetic-sheet'
 import { GeneticList } from './_components/genetic-list'
 import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
@@ -16,7 +16,7 @@ export default async function GeneticsPage() {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Genetics</h2>
-        <CreateGeneticSheet />
+        <GeneticSheet mode="create" />
       </div>
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>

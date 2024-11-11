@@ -66,13 +66,14 @@ export const genetics = createTable(
   {
     id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
     type: geneticTypeEnum('type').notNull(),
     breeder: varchar('breeder', { length: 255 }),
     description: text('description'),
     floweringTime: integer('flowering_time'),
     thcPotential: decimal('thc_potential'),
     cbdPotential: decimal('cbd_potential'),
-    terpeneProfie: json('terpene_profile').$type<Record<string, number>>(),
+    terpeneProfile: json('terpene_profile').$type<Record<string, number>>(),
     growthCharacteristics: json('growth_characteristics').$type<{
       height?: number
       spread?: number
@@ -98,6 +99,7 @@ export const genetics = createTable(
     nameIdx: index('genetic_name_idx').on(genetic.name),
     typeIdx: index('genetic_type_idx').on(genetic.type),
     createdByIdx: index('genetic_created_by_idx').on(genetic.createdById),
+    slugIdx: index('genetic_slug_idx').on(genetic.slug),
   })
 )
 
@@ -139,6 +141,7 @@ export const plants = createTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
       () => new Date()
     ),
+    status: varchar('status', { length: 50 }).notNull().default('active'),
   },
   (plant) => ({
     codeIdx: index('plant_code_idx').on(plant.code),

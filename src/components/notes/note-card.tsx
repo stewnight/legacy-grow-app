@@ -14,7 +14,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { MoreVertical, Reply, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '~/lib/utils'
-import Image from 'next/image'
+import { MediaPreview } from './media-preview'
 
 type NoteWithUser = RouterOutputs['notes']['list']['items'][number]
 
@@ -33,88 +33,74 @@ export function NoteCard({
   onDelete,
   className,
 }: NoteCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleDelete = async () => {
-    if (!onDelete) return
-    setIsDeleting(true)
-    try {
-      await onDelete(note.id)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
+  const [isEditing, setIsEditing] = useState(false)
 
   return (
-    <Card className={cn('relative', className)}>
+    <Card className={cn('', className)}>
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2">
         <Avatar className="h-8 w-8">
           <AvatarImage src={note.createdBy.image ?? undefined} />
           <AvatarFallback>
-            {note.createdBy.name?.[0] ?? note.createdBy.email?.[0] ?? '?'}
+            {note.createdBy.name?.charAt(0) ?? 'U'}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1">
+        <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium leading-none">
-                {note.createdBy.name ?? note.createdBy.email}
-              </p>
-              <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-medium">{note.createdBy.name}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
                 {format(new Date(note.createdAt), 'PPp')}
-              </p>
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onReply && (
+                    <DropdownMenuItem onClick={() => onReply(note.id)}>
+                      <Reply className="mr-2 h-4 w-4" />
+                      Reply
+                    </DropdownMenuItem>
+                  )}
+                  {onEdit && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setIsEditing(true)
+                        onEdit(note)
+                      }}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => onDelete(note.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {onReply && (
-                  <DropdownMenuItem onClick={() => onReply(note.id)}>
-                    <Reply className="mr-2 h-4 w-4" />
-                    Reply
-                  </DropdownMenuItem>
-                )}
-                {onEdit && (
-                  <DropdownMenuItem onClick={() => onEdit(note)}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                )}
-                {onDelete && (
-                  <DropdownMenuItem
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        {note.type === 'image' && note.metadata?.url && (
-          <div className="mb-4">
-            <Image
-              src={note.metadata.url}
-              alt="Note attachment"
-              width={300}
-              height={300}
-              className="rounded-md"
-            />
-          </div>
+        <p className="text-sm text-muted-foreground">{note.content}</p>
+        {note.type !== 'text' && (
+          <MediaPreview note={note} className="mt-2" />
         )}
-        <p className="text-sm">{note.content}</p>
       </CardContent>
       {note.parentId && (
-        <CardFooter className="text-xs text-muted-foreground">
-          Reply to note #{note.parentId}
+        <CardFooter>
+          <div className="text-xs text-muted-foreground">
+            Reply to note #{note.parentId}
+          </div>
         </CardFooter>
       )}
     </Card>

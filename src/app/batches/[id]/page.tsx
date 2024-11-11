@@ -10,7 +10,6 @@ import { format } from 'date-fns'
 import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Timeline } from '~/components/notes/timeline'
-import { NoteInput } from '~/components/notes/note-input'
 import Link from 'next/link'
 
 export default async function BatchPage({
@@ -44,7 +43,7 @@ export default async function BatchPage({
                   <span className="text-muted-foreground">Genetic:</span>{' '}
                   {batch.genetic ? (
                     <Link
-                      href={`/genetics/${batch.genetic.name}`}
+                      href={`/genetics/${batch.genetic.slug}`}
                       className="hover:underline"
                     >
                       {batch.genetic.name}
@@ -112,12 +111,7 @@ export default async function BatchPage({
               entityId={parseInt(resolvedParams.id)}
             />
           </CardContent>
-          <CardFooter>
-            <NoteInput
-              entityType="batch"
-              entityId={parseInt(resolvedParams.id)}
-            />
-          </CardFooter>
+          <CardFooter></CardFooter>
         </Card>
       </div>
     )

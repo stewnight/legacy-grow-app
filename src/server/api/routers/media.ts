@@ -11,6 +11,13 @@ export const mediaRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      return generatePresignedUrl(input.filename, input.contentType)
+      const { uploadUrl, publicUrl } = await generatePresignedUrl(
+        input.filename,
+        input.contentType
+      )
+      return {
+        uploadUrl,
+        publicUrl,
+      }
     }),
 })

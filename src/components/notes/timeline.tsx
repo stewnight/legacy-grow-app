@@ -2,7 +2,6 @@
 
 import { api } from '~/trpc/react'
 import { NoteCard } from './note-card'
-import { Button } from '~/components/ui/button'
 import { useInView } from 'react-intersection-observer'
 import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
@@ -30,10 +29,10 @@ export function Timeline({
 
   const {
     data,
-    fetchNextPage,
-    hasNextPage,
+    isLoading,
     isFetchingNextPage,
-    status,
+    hasNextPage,
+    fetchNextPage,
     error,
   } = api.notes.list.useInfiniteQuery(
     {
@@ -43,68 +42,59 @@ export function Timeline({
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
+      enabled: true,
     }
   )
 
   useEffect(() => {
-    if (inView && hasNextPage) {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       void fetchNextPage()
     }
-  }, [inView, fetchNextPage, hasNextPage])
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  if (status === 'pending') {
-    return (
-      <div className="flex justify-center p-4">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    )
-  }
-
-  if (status === 'error') {
+  if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>
-          Failed to load notes: {error.message}{' '}
-          <Button variant="link" onClick={() => void fetchNextPage()}>
-            Retry
-          </Button>
-        </AlertDescription>
+        <AlertDescription>Failed to load notes</AlertDescription>
       </Alert>
     )
   }
 
+  const notes = data?.pages.flatMap((page) => page.items) ?? []
+  const isEmpty = !isLoading && notes.length === 0
+
   return (
-    <ScrollArea className="max-h-[600px] pr-4">
-      <div className="space-y-4">
-        <CreateNoteForm entityType={entityType} entityId={entityId} />
+    <div className="space-y-4">
+      <CreateNoteForm entityType={entityType} entityId={entityId} />
 
-        {data?.pages.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground">
-            No notes found
-          </div>
-        )}
-        {data?.pages.map((page, i) => (
-          <div key={i} className="space-y-4">
-            {page.items.map((note) => (
-              <NoteCard
-                key={note.id}
-                note={note}
-                onReply={onReply}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-          </div>
-        ))}
+      <ScrollArea className="h-[600px] rounded-md border p-4">
+        <div className="space-y-4">
+          {notes.map((note) => (
+            <NoteCard
+              key={note.id}
+              note={note}
+              onReply={onReply}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
 
-        <div ref={ref} className="h-8">
-          {isFetchingNextPage && (
-            <div className="flex justify-center p-4">
-              <Loader2 className="h-6 w-6 animate-spin" />
+          {isEmpty && (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              No notes yet. Add one to get started.
             </div>
           )}
+
+          <div ref={ref} className="py-2">
+            {isFetchingNextPage && (
+              <div className="flex justify-center">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </ScrollArea>
+      </ScrollArea>
+    </div>
   )
 }

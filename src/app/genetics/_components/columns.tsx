@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type Genetic } from '~/server/db/schemas/cultivation'
+import { type Genetic } from '~/server/db/schemas'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
@@ -23,7 +23,7 @@ export const columns: ColumnDef<Genetic>[] = [
       const genetic = row.original
       return (
         <Link
-          href={`/genetics/${slugify(genetic.name)}`}
+          href={`/genetics/${genetic.slug}`}
           className="font-medium hover:underline"
         >
           {genetic.name}
@@ -68,9 +68,7 @@ export const columns: ColumnDef<Genetic>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/genetics/${slugify(genetic.name)}`}>
-                View Details
-              </Link>
+              <Link href={`/genetics/${genetic.slug}`}>View Details</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

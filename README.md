@@ -1,79 +1,79 @@
 # Legacy Grow App
 
-A modern cultivation management system built with the T3 Stack, focusing on cannabis plant tracking and cultivation logging.
+A modern cannabis cultivation management system built with Next.js 15, focusing on essential growing operations and compliance tracking.
 
 ## Tech Stack
 
-- [Next.js 15](https://nextjs.org)
-- [NextAuth.js 5](https://next-auth.js.org)
-- [Drizzle ORM](https://orm.drizzle.team)
-- [Tanstack React Query](https://tanstack.com/query)
-- [tRPC](https://trpc.io)
-- [Shadcn/ui](https://ui.shadcn.com)
-- [Tailwind CSS](https://tailwindcss.com)
+- Next.js 15 with App Router
+- NextAuth.js 5 for authentication
+- Drizzle ORM with PostgreSQL
+- tRPC for type-safe APIs
+- Tanstack React Query for data management
+- Shadcn/ui components
+- Tailwind CSS for styling
 
-## Core Features
+## Current Implementation Status
 
-The app provides comprehensive tracking and management for cannabis cultivation:
+### Completed Features
+- [x] User authentication with Discord
+- [x] Plant creation and reading
+- [x] Genetic strain creation and reading
+- [x] Batch creation and reading
+- [x] Basic text-based note system
+- [x] Mobile-responsive layout foundation
+- [x] Initial offline data persistence with React Query
 
-- Plant lifecycle tracking from seed/clone to harvest
-- Genetic strain management and lineage tracking
-- Location and environment monitoring
-- Task management and scheduling
-- Compliance logging and reporting
-- Input and supply chain management
+### In Progress Features
+- [ ] Plant updates and deletion
+- [ ] Genetic strain updates and deletion
+- [ ] Batch updates and deletion
+- [ ] Media handling for notes (images, voice, files)
+- [ ] Timeline UI/UX improvements
+- [ ] Complete offline functionality (Service Worker + PWA)
 
 ## MVP Roadmap
 
-### Phase 1: Basic Plant Logging
+### Phase 1: Core Functionality Completion
+- [ ] Complete CRUD operations
+  - Plant management
+  - Genetic strains
+  - Batches
+- [ ] Enhanced note system
+  - Improved UI/UX
+  - Media upload support
+  - Better timeline visualization
+- [ ] Full offline support
+  - Service Worker implementation
+  - PWA configuration
+  - Robust data synchronization
 
-- [ ] Plant creation and basic details entry
-- [ ] Growth stage tracking (seedling, vegetative, flowering)
-- [ ] Daily/weekly logging functionality
-- [ ] Basic location tracking
-- [ ] Mobile-friendly image upload
-- [ ] Simple task creation and completion
-- [ ] Data and note logging
+### Phase 2: Essential Growing Operations
+- [ ] Plant Dashboard
+  - Active plants overview
+  - Growth stage tracking
+  - Health status monitoring
+- [ ] Batch Management
+  - Batch creation wizard
+  - Plant grouping and tracking
+  - Batch timeline view
+- [ ] Daily Operations
+  - Task scheduling
+  - Growth stage transitions
+  - Basic environmental logging
 
-### Data and note logging phases
-
-#### Phase 1: Core Note Infrastructure
-
-- [x] Database schema for notes
-- [x] Basic text note creation/display
-- [x] Timeline component
-
-#### Phase 2: Media Handling
-
-- [ ] Image upload/display
-- [ ] Voice recording/playback
-- [ ] File attachments
-
-#### Phase 3: Social Features
-
-- [ ] Threading/replies
-- [ ] Mentions/tags
-- [ ] Real-time updates
-
-### Phase 2: Enhanced Tracking
-
-- [ ] Genetic strain database
-- [ ] Environmental data logging
-- [ ] Nutrient schedules
-- [ ] Growth metrics tracking
-- [ ] Basic reporting
-- [ ] Offline functionality
-
-### Phase 3: Advanced Features
-
-- [ ] Harvest tracking
-- [ ] Processing workflows
-- [ ] Compliance reporting
-- [ ] Advanced analytics
-- [ ] Multi-facility support
-- [ ] Batch operations
+### Phase 3: Compliance & Documentation
+- [ ] Automated compliance logging
+- [ ] Plant history tracking
+- [ ] Export capabilities
+- [ ] Image documentation
+- [ ] Batch reporting
 
 ## Development
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+- Cloudflare R2 or compatible S3 storage
 
 ### Getting Started
 
@@ -118,3 +118,11 @@ pnpm dev
 3. Set up image upload and storage
 4. Implement offline functionality using React Query
 5. Add basic reporting and visualization
+
+## Contributing
+
+Please read our contributing guidelines before submitting pull requests.
+
+## License
+
+[MIT License](LICENSE)

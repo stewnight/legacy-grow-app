@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from '~/components/ui/card'
 import { Timeline } from '~/components/notes/timeline'
-import { NoteInput } from '~/components/notes/note-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { PlantActions } from './_components/plant-actions'
 import { PlantHealthStatus } from './_components/plant-health-status'
@@ -149,7 +148,7 @@ export default function PlantPage({
                 <div>
                   <p className="text-sm text-muted-foreground">Genetic</p>
                   <Link
-                    href={`/genetics/${slugify(plant.genetic.name)}`}
+                    href={`/genetics/${plant.genetic.slug}`}
                     className="font-medium hover:underline"
                   >
                     {plant.genetic.name}
@@ -223,7 +222,6 @@ export default function PlantPage({
             </CardHeader>
             <CardContent className="space-y-4">
               <Timeline entityType="plant" entityId={plant.id} />
-              <NoteInput entityType="plant" entityId={plant.id} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -136,4 +136,33 @@ export const plantRouter = createTRPCRouter({
         })
       }
     }),
+
+  delete: protectedProcedure
+    .input(z.object({ 
+      id: z.number(),
+      destroyReason: z.string().optional()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // First update the plant with destroy reason if provided
+        if (input.destroyReason) {
+          await ctx.db
+            .update(plants)
+            .set({
+              destroyReason: input.destroyReason,
+              updatedAt: new Date(),
+            })
+            .where(eq(plants.id, input.id))
+        }
+
+        // Then delete the plant
+        await ctx.db.delete(plants).where(eq(plants.id, input.id))
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to delete plant',
+          cause: error,
+        })
+      }
+    }),
 })
