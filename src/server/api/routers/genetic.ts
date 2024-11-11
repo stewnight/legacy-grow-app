@@ -6,7 +6,6 @@ import { genetics, plants, batches } from '~/server/db/schemas'
 import { slugify } from '~/lib/utils'
 import { type NewGenetic } from '~/server/db/schemas/cultivation'
 
-// Use the same validation schema for both create and update
 const geneticInput = z.object({
   name: z.string().min(1, 'Name is required'),
   type: z.enum(['sativa', 'indica', 'hybrid']),
@@ -102,7 +101,6 @@ export const geneticRouter = createTRPCRouter({
           ? `${slug}-${Date.now().toString().slice(-4)}`
           : slug
 
-        // Replace the insertData section with this:
         const insertData = {
           name: input.name,
           slug: finalSlug,
@@ -122,7 +120,12 @@ export const geneticRouter = createTRPCRouter({
           createdById: ctx.session.user.id,
         } satisfies Omit<NewGenetic, 'id' | 'createdAt' | 'updatedAt'>
 
-        await ctx.db.insert(genetics).values(insertData as NewGenetic)
+        const [created] = await ctx.db
+          .insert(genetics)
+          .values(insertData as NewGenetic)
+          .returning({ id: genetics.id, slug: genetics.slug })
+
+        return created
       } catch (error) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -145,7 +148,6 @@ export const geneticRouter = createTRPCRouter({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        // Check if genetic is in use by any plants using count
         const plantsResult = await ctx.db
           .select({ count: sql<number>`count(*)::int` })
           .from(plants)
@@ -160,7 +162,6 @@ export const geneticRouter = createTRPCRouter({
           })
         }
 
-        // Check if genetic is in use by any batches using count
         const batchesResult = await ctx.db
           .select({ count: sql<number>`count(*)::int` })
           .from(batches)
@@ -239,7 +240,6 @@ export const geneticRouter = createTRPCRouter({
           updateData.cbdPotential = data.cbdPotential?.toString() ?? null
         }
 
-        // Add updatedAt timestamp
         updateData.updatedAt = new Date()
 
         const [updated] = await ctx.db

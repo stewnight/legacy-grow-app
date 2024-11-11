@@ -108,6 +108,15 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
     onSettled: () => {
       void utils.genetic.list.invalidate()
     },
+    onSuccess: (data) => {
+      form.reset()
+      toast({
+        title: 'Success',
+        description: 'Genetic created successfully',
+      })
+      onSuccess?.()
+      router.push(`/genetics/${data?.slug}`)
+    },
   })
 
   const updateGenetic = api.genetic.update.useMutation({
