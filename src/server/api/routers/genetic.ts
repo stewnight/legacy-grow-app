@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { TRPCError } from '@trpc/server'
-import { eq, ilike, sql, desc, and, ne } from 'drizzle-orm'
+import { eq, sql, and, ne } from 'drizzle-orm'
 import { genetics, plants, batches } from '~/server/db/schemas'
 import { slugify } from '~/lib/utils'
 
@@ -98,15 +98,13 @@ export const geneticRouter = createTRPCRouter({
           : slug
 
         // Convert number values to strings for decimal fields
-        const insertData = {
+        const insertData: Partial<NewGenetic> = {
           ...input,
           slug: finalSlug,
-          thcPotential: input.thcPotential?.toString() ?? null,
-          cbdPotential: input.cbdPotential?.toString() ?? null,
           createdById: ctx.session.user.id,
         }
 
-        await ctx.db.insert(genetics).values(insertData)
+        await ctx.db.insert(genetics).values(insertData as Partial<NewGenetic>)
       } catch (error) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -175,7 +173,7 @@ export const geneticRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.number(),
-        data: geneticInput.partial(), // Make all fields optional for updates
+        data: geneticInput.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {

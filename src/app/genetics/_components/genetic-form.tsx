@@ -56,8 +56,8 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
 
       const optimisticGenetic = createOptimisticGenetic(newGenetic, {
         id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
+        name: session.user.name ?? '',
+        email: session.user.email ?? '',
       })
 
       utils.genetic.list.setData(undefined, (old) => {
@@ -99,13 +99,15 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
       if (genetic) {
         utils.genetic.getBySlug.setData(genetic.slug, (old) => {
           if (!old) return old
-          return updateOptimisticEntity(old, data as Partial<GeneticModel>)
+          return updateOptimisticEntity(old, data as Partial<Genetic>)
         })
 
         utils.genetic.list.setData(undefined, (old) => {
           if (!old) return old
           return old.map((g) =>
-            g.id === id ? updateOptimisticEntity(g, data) : g
+            g.id === id
+              ? updateOptimisticEntity(g, data as Partial<Genetic>)
+              : g
           )
         })
       }
@@ -149,8 +151,8 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
             breeder: genetic.breeder,
             description: genetic.description,
             floweringTime: genetic.floweringTime,
-            thcPotential: genetic.thcPotential,
-            cbdPotential: genetic.cbdPotential,
+            thcPotential: Number(genetic.thcPotential),
+            cbdPotential: Number(genetic.cbdPotential),
             growthCharacteristics: genetic.growthCharacteristics,
             terpeneProfile: genetic.terpeneProfile,
             lineage: genetic.lineage,
