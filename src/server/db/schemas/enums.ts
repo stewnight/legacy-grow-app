@@ -95,9 +95,14 @@ export const taskPriorityEnum = pgEnum('task_priority', [
 
 export const taskCategoryEnum = pgEnum('task_category', [
   'maintenance',
+  'transplanting',
+  'cloning',
   'feeding',
   'environmental',
   'harvest',
+  'drying',
+  'trimming',
+  'packing',   
 ])
 
 // Processing and harvest enums
