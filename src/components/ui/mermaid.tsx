@@ -53,7 +53,7 @@ export function Mermaid({ chart }: MermaidProps) {
   }
 
   return (
-    <div className="mermaid-wrapper">
+    <div>
       <div ref={containerRef} className="mermaid" />
     </div>
   )

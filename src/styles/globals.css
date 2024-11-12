@@ -113,7 +113,7 @@
   }
 }
 .mermaid {
-  background-color: hsl(var(--background));
+  background-color: transparent;
 }
 
 .dark .mermaid {
