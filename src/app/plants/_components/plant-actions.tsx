@@ -22,7 +22,7 @@ import {
 } from '~/components/ui/dialog'
 import { BaseSheet } from '../../../components/base-sheet'
 import { PlantForm } from './plant-form'
-import { Plant, Genetic, Batch } from '../../../server/db/schemas'
+import { Plant, Genetic, Batch } from '../../../server/db/schema'
 
 interface PlantActionsProps {
   plant: Plant & {

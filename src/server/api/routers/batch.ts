@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches, type Batch, plants } from '~/server/db/schemas'
+import { batches, type Batch, plants } from '~/server/db/schema'
 import { eq, sql } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { batchFormSchema } from '~/lib/validations/batch'

@@ -2,9 +2,9 @@ import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { TRPCError } from '@trpc/server'
 import { eq, sql, and, ne } from 'drizzle-orm'
-import { genetics, plants, batches } from '~/server/db/schemas'
+import { genetics, plants, batches } from '~/server/db/schema'
 import { slugify } from '~/lib/utils'
-import { type NewGenetic } from '~/server/db/schemas/cultivation'
+import { type NewGenetic } from '~/server/db/schema/cultivation'
 
 const geneticInput = z.object({
   name: z.string().min(1, 'Name is required'),

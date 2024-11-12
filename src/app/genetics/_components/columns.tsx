@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type Genetic } from '~/server/db/schemas'
+import { type Genetic } from '~/server/db/schema'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {

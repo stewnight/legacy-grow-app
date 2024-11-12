@@ -112,3 +112,10 @@
     @apply bg-background text-foreground;
   }
 }
+.mermaid {
+  background-color: hsl(var(--background));
+}
+
+.dark .mermaid {
+  filter: invert(0.9) hue-rotate(180deg);
+}

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { type Batch, type Genetic, type Plant } from '~/server/db/schemas'
+import { type Batch, type Genetic, type Plant } from '~/server/db/schema'
 
 export const healthStatusEnum = z.enum(['healthy', 'sick', 'pest', 'nutrient'])
 export type HealthStatus = z.infer<typeof healthStatusEnum>

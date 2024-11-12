@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { type Genetic, type Plant, type Batch } from '~/server/db/schemas'
+import { type Genetic, type Plant, type Batch } from '~/server/db/schema'
 
 export const geneticFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),

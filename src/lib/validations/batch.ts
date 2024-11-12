@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { type Batch, type Plant } from '~/server/db/schemas'
+import { type Batch, type Plant } from '~/server/db/schema'
 
 export const batchFormSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
