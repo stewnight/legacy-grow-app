@@ -1,7 +1,15 @@
 'use client'
 
 import * as React from 'react'
-import { Github, Command, Sprout, Package, Dna, PieChart } from 'lucide-react'
+import {
+  Github,
+  Command,
+  Sprout,
+  Package,
+  Dna,
+  PieChart,
+  DatabaseIcon,
+} from 'lucide-react'
 import { NavMain } from '~/components/nav-main'
 import { NavSecondary } from '~/components/nav-secondary'
 import { NavUser } from '~/components/nav-user'
@@ -15,6 +23,7 @@ import {
   SidebarMenuItem,
 } from '~/components/ui/sidebar'
 import type { User } from 'next-auth'
+import { Schema } from 'zod'
 
 const data = {
   navMain: [
@@ -45,6 +54,11 @@ const data = {
       title: 'Github',
       url: 'https://github.com/stewnight/legacy-grow-app',
       icon: Github,
+    },
+    {
+      title: 'Schema',
+      url: '/schema',
+      icon: DatabaseIcon,
     },
   ],
 }

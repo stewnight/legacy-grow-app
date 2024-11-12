@@ -5,7 +5,7 @@ import {
   type Plant,
   type Batch,
   type Note,
-} from '~/server/db/schemas'
+} from '~/server/db/schema'
 import { slugify } from '~/lib/utils'
 import { format } from 'date-fns'
 

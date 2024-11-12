@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type Plant } from '~/server/db/schemas/cultivation'
+import { type Plant } from '~/server/db/schema/cultivation'
 import { Badge } from '~/components/ui/badge'
 import { format, formatDistanceToNow } from 'date-fns'
 import { MoreHorizontal } from 'lucide-react'

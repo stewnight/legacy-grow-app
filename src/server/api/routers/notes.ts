@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { desc, eq, and } from 'drizzle-orm'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
-import { notes } from '~/server/db/schemas'
+import { notes } from '~/server/db/schema'
 
 const noteMetadataSchema = z
   .object({

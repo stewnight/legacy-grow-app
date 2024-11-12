@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { type Genetic, type Plant, type Batch } from '~/server/db/schemas'
+import { type Genetic, type Plant, type Batch } from '~/server/db/schema'
 import { BaseSheet } from '~/components/base-sheet'
 import { GeneticForm } from './genetic-form'
 

@@ -2,7 +2,7 @@
 
 import { MapPin } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { type Plant } from '~/server/db/schemas/cultivation'
+import { type Plant } from '~/server/db/schema/cultivation'
 
 export function PlantLocation({ plant }: { plant: Plant }) {
   return (

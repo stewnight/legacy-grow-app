@@ -112,3 +112,27 @@
     @apply bg-background text-foreground;
   }
 }
+.mermaid {
+  @apply bg-transparent text-sm;
+}
+
+.mermaid .classText {
+  @apply font-bold text-sm;
+}
+
+.mermaid .classRect {
+  @apply min-w-[200px] min-h-[100px];
+  fill: hsl(var(--card));
+  stroke: hsl(var(--border));
+}
+
+.mermaid .nodeLabel {
+  @apply text-xs font-mono;
+  white-space: pre-wrap;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.dark .mermaid {
+  filter: invert(0.9) hue-rotate(180deg);
+}

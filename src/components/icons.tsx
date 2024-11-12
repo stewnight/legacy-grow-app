@@ -28,7 +28,7 @@ import type {
   PlantSex,
   PlantStage,
   PlantSource,
-} from '../server/db/schemas/enums'
+} from '../server/db/schema/enums'
 
 interface StatusIconProps {
   className?: string

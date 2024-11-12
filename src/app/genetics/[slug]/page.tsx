@@ -18,8 +18,8 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { type RouterOutputs } from '~/trpc/shared'
 import Link from 'next/link'
 import { Leaf as PlantIcon, Dna, Sprout, LineChart } from 'lucide-react'
-import { type Plant, type Batch } from '~/server/db/schemas'
-import { type Genetic } from '~/server/db/schemas'
+import { type Plant, type Batch } from '~/server/db/schema'
+import { type Genetic } from '~/server/db/schema'
 import { type GeneticWithRelations } from '~/lib/validations/genetic'
 
 export default function GeneticPage({

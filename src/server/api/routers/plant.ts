@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { plants } from '~/server/db/schemas'
+import { plants } from '~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { plantFormSchema } from '~/lib/validations/plant'

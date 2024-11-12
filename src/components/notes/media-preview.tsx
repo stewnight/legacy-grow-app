@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { type Note } from '~/server/db/schemas/notes'
+import { type Note } from '~/server/db/schema/notes'
 
 interface MediaPreviewProps {
   note: Note
@@ -88,4 +88,4 @@ export function MediaPreview({ note, className }: MediaPreviewProps) {
       )}
     </>
   )
-} 
+}
