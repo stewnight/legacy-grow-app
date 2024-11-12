@@ -43,12 +43,6 @@ mermaid.initialize({
     mergeEdges: true,
     nodePlacementStrategy: 'NETWORK_SIMPLEX',
   },
-  enableZoom: true,
-  zoomScale: 1,
-  pan: {
-    enabled: true,
-    useZoom: true,
-  },
 })
 
 interface MermaidProps {
@@ -61,6 +55,30 @@ export function Mermaid({ chart, className }: MermaidProps) {
   const [error, setError] = useState<string | null>(null)
   const { theme } = useTheme()
   const [zoom, setZoom] = useState(1)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
 
   // Add zoom controls
   const handleZoomIn = () => {
@@ -73,6 +91,31 @@ export function Mermaid({ chart, className }: MermaidProps) {
 
   const handleZoomReset = () => {
     setZoom(1)
+  }
+
+  // Add these handlers to the component
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    if (!touch) return
+    setIsDragging(true)
+    setDragStart({
+      x: touch.clientX - position.x,
+      y: touch.clientY - position.y,
+    })
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const touch = e.touches[0]
+    if (!touch) return
+    setPosition({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    })
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
   }
 
   useEffect(() => {
@@ -110,9 +153,10 @@ export function Mermaid({ chart, className }: MermaidProps) {
           // Add zoom transform to the SVG
           const svgElement = containerRef.current.querySelector('svg')
           if (svgElement) {
-            svgElement.style.transform = `scale(${zoom})`
+            svgElement.style.transform = `scale(${zoom}) translate(${position.x}px, ${position.y}px)`
             svgElement.style.transformOrigin = 'center'
-            svgElement.style.transition = 'transform 0.2s'
+            svgElement.style.transition = isDragging ? 'none' : 'transform 0.2s'
+            svgElement.style.cursor = isDragging ? 'grabbing' : 'grab'
           }
         }
       } catch (err) {
@@ -124,7 +168,7 @@ export function Mermaid({ chart, className }: MermaidProps) {
     }
 
     void renderChart()
-  }, [chart, theme, zoom])
+  }, [chart, theme, zoom, position, isDragging])
 
   if (error) {
     return (
@@ -158,15 +202,23 @@ export function Mermaid({ chart, className }: MermaidProps) {
           <PlusIcon className="h-4 w-4" />
         </button>
       </div>
-      <div className={cn('overflow-hidden', className)}>
+      <div className={cn('relative overflow-hidden', className)}>
         <div
           ref={containerRef}
           className="mermaid min-h-[500px] w-full p-4"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           style={{
-            touchAction: 'pan-x pan-y',
+            touchAction: 'none',
             shapeRendering: 'geometricPrecision',
             textRendering: 'optimizeLegibility',
-            cursor: 'grab',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none',
           }}
         />
       </div>
