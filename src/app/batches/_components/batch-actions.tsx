@@ -23,6 +23,8 @@ import {
 } from '~/components/ui/dialog'
 import { BatchSheet } from './batch-sheet'
 import { type BatchWithRelations } from '~/lib/validations/batch'
+import { BaseSheet } from '../../../components/base-sheet'
+import { BatchForm } from './batch-form'
 
 interface BatchActionsProps {
   batch: BatchWithRelations
@@ -93,12 +95,9 @@ export function BatchActions({ batch }: BatchActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <BatchSheet
-        mode="edit"
-        batch={batch}
-        open={showEditSheet}
-        onOpenChange={setShowEditSheet}
-      />
+      <BaseSheet mode="edit" title="Edit Batch" description="Edit a batch">
+        <BatchForm mode="edit" />
+      </BaseSheet>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>

@@ -2,7 +2,6 @@
 
 import { api } from '~/trpc/react'
 import { useParams } from 'next/navigation'
-import { type PlantWithRelations } from '~/lib/validations/plant'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { PlantHealthStatus } from './_components/plant-health-status'
@@ -10,6 +9,7 @@ import { Timeline } from '~/components/notes/timeline'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { LeafIcon } from 'lucide-react'
+import { PlantActions } from '../_components/plant-actions'
 
 export default function PlantPage() {
   const params = useParams()
@@ -34,6 +34,7 @@ export default function PlantPage() {
             Manage your plant and view its details
           </p>
         </div>
+        <PlantActions plant={plant} />
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">

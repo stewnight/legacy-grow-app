@@ -24,16 +24,12 @@ import { api } from '@/trpc/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '~/hooks/use-toast'
 import { useSession } from 'next-auth/react'
-import {
-  batchFormSchema,
-  type BatchFormData,
-  type BatchWithRelations,
-} from '~/lib/validations/batch'
 import { createOptimisticBatch } from '~/lib/optimistic-update'
 import { DatePicker } from '~/components/ui/date-picker'
 import { updateOptimisticEntity } from '~/lib/optimistic-update'
-import { type User } from 'next-auth'
 import { format } from 'date-fns'
+import { batchFormSchema } from '../../../lib/validations/batch'
+import type { BatchFormData, BatchWithRelations } from '~/lib/validations/batch'
 
 interface BatchFormProps {
   mode: 'create' | 'edit'
@@ -66,7 +62,7 @@ export function BatchForm({
         (batch?.healthStatus as BatchFormData['healthStatus']) ?? 'healthy',
       motherId: batch?.motherId ?? undefined,
       generation: batch?.generation ?? undefined,
-      sex: (batch?.sex) ?? undefined,
+      sex: batch?.sex ?? undefined,
       phenotype: batch?.phenotype ?? '',
       locationId: batch?.locationId ?? undefined,
     },
@@ -177,7 +173,10 @@ export function BatchForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 max-h-[calc(100vh-10rem)] px-2"
+      >
         <FormField
           control={form.control}
           name="name"

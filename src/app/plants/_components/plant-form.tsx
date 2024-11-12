@@ -159,10 +159,7 @@ export function PlantForm({ mode, plant, batchId, onSuccess }: PlantFormProps) {
     },
     onError: (err, variables, context) => {
       if (context?.previousData) {
-        utils.plant.getByCode.setData(
-          variables.code,
-          context.previousData
-        )
+        utils.plant.getByCode.setData(variables.code, context.previousData)
       }
       toast({
         title: 'Error',
@@ -188,7 +185,10 @@ export function PlantForm({ mode, plant, batchId, onSuccess }: PlantFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 max-h-[calc(100vh-10rem)] px-2"
+      >
         <FormField
           control={form.control}
           name="source"

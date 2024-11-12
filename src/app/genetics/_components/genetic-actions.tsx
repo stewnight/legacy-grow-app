@@ -21,8 +21,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { GeneticSheet } from './genetic-sheet'
 import { type Genetic, type Plant, type Batch } from '~/server/db/schemas'
+import { BaseSheet } from '~/components/base-sheet'
+import { GeneticForm } from './genetic-form'
 
 interface GeneticActionsProps {
   genetic: Genetic & {
@@ -126,7 +127,7 @@ export function GeneticActions({ genetic }: GeneticActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <GeneticSheet
+      {/* <GeneticSheet
         mode="edit"
         genetic={{
           ...genetic,
@@ -136,7 +137,22 @@ export function GeneticActions({ genetic }: GeneticActionsProps) {
         }}
         open={isEditSheetOpen}
         onOpenChange={setIsEditSheetOpen}
-      />
+      /> */}
+      <BaseSheet
+        mode="edit"
+        title="Genetic"
+        description="genetic strain"
+        entity={{
+          ...genetic,
+          plants: genetic.plants || [],
+          batches: genetic.batches || [],
+          _count: genetic._count || { plants: 0, batches: 0 },
+        }}
+        open={isEditSheetOpen}
+        onOpenChange={setIsEditSheetOpen}
+      >
+        <GeneticForm mode="edit" />
+      </BaseSheet>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>

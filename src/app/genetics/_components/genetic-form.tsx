@@ -250,7 +250,10 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 max-h-[calc(100vh-10rem)] px-2"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -408,16 +411,18 @@ export function GeneticForm({ mode, genetic, onSuccess }: GeneticFormProps) {
           )}
         />
 
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateGenetic.isPending}
-        >
-          {createMutation.isPending || updateGenetic.isPending
-            ? 'Saving...'
-            : mode === 'edit'
-              ? 'Save Changes'
-              : 'Create Genetic'}
-        </Button>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="submit"
+            disabled={createMutation.isPending || updateGenetic.isPending}
+          >
+            {createMutation.isPending || updateGenetic.isPending
+              ? 'Saving...'
+              : mode === 'edit'
+                ? 'Save Changes'
+                : 'Create Genetic'}
+          </Button>
+        </div>
       </form>
     </Form>
   )

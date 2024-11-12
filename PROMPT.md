@@ -14,7 +14,7 @@ Key Technical Requirements:
    - Optimistic updates with proper typing
    - Proper error handling and recovery
    - Transaction support for multi-table operations
-   - Consistent date/time handling
+   - Consistent date/time handling with date-fns
 
 3. API Design
 

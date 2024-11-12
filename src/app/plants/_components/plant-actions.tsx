@@ -20,11 +20,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { PlantSheet } from './plant-sheet'
-import { type PlantWithRelations } from '~/lib/validations/plant'
+import { BaseSheet } from '../../../components/base-sheet'
+import { PlantForm } from './plant-form'
+import { Plant, Genetic, Batch } from '../../../server/db/schemas'
 
 interface PlantActionsProps {
-  plant: PlantWithRelations
+  plant: Plant & {
+    genetic: Genetic
+    batch: Batch
+  }
 }
 
 export function PlantActions({ plant }: PlantActionsProps) {
@@ -97,12 +101,9 @@ export function PlantActions({ plant }: PlantActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <PlantSheet
-        mode="edit"
-        plant={plant}
-        open={showEditSheet}
-        onOpenChange={setShowEditSheet}
-      />
+      <BaseSheet mode="edit" title="Edit Plant" description="Edit a plant">
+        <PlantForm mode="edit" />
+      </BaseSheet>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>

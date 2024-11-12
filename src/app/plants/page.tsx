@@ -5,6 +5,8 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { PlantErrorBoundary } from './_components/plant-error-boundary'
+import { BaseSheet } from '../../components/base-sheet'
+import { PlantForm } from './_components/plant-form'
 
 export default async function PlantsPage() {
   const session = await auth()
@@ -17,7 +19,13 @@ export default async function PlantsPage() {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Plants</h2>
-        <PlantSheet mode="create" />
+        <BaseSheet
+          mode="create"
+          title="Create Plant"
+          description="Create a new plant"
+        >
+          <PlantForm mode="create" />
+        </BaseSheet>
       </div>
       <div className="h-full">
         <PlantErrorBoundary>
