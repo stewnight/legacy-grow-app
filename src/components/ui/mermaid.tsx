@@ -38,7 +38,6 @@ mermaid.initialize({
   },
   // Enable pan and zoom with elk layout engine
   layout: 'elk',
-  maxTextSize: 5000,
   elk: {
     mergeEdges: true,
     nodePlacementStrategy: 'NETWORK_SIMPLEX',
