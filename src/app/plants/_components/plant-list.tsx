@@ -1,29 +1,21 @@
 'use client'
 
 import { useEntity } from '~/hooks/use-entity'
-import { type Plant } from '~/server/db/schema'
+import { type Plant } from '~/server/db/schema/cultivation'
 import { columns } from './columns'
 import { DataTable } from '~/components/ui/data-table'
 import { Card } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
+import { api } from '~/trpc/react'
 
 export function PlantList() {
-  const {
-    data: plants,
-    isLoading,
-    error,
-    create,
-    update,
-    delete: deletePlant,
-  } = useEntity({
-    path: 'plant',
-    queryKey: ['plants'],
+  const { data: plants, isLoading } = api.plant.getAll.useQuery({
+    limit: 100,
   })
 
   if (isLoading) return <PlantListLoading />
-  if (error) return <div>{error.message}</div>
 
-  if (!plants?.length) {
+  if (!plants?.items.length) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <p className="text-muted-foreground">
@@ -33,7 +25,7 @@ export function PlantList() {
     )
   }
 
-  return <DataTable columns={columns} data={plants} filterColumn="code" />
+  return <DataTable columns={columns} data={plants.items} filterColumn="code" />
 }
 
 export function PlantListLoading() {

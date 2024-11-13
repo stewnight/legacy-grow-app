@@ -40,12 +40,12 @@ export function PlantActions({ plant }: PlantActionsProps) {
 
   const deleteMutation = api.plant.delete.useMutation({
     onMutate: async () => {
-      await utils.plant.list.cancel()
-      const previousData = utils.plant.list.getData({
+      await utils.plant.getAll.cancel()
+      const previousData = utils.plant.getAll.getData({
         filters: plant.batchId ? { batchId: plant.batchId } : undefined,
       })
 
-      utils.plant.list.setData(
+      utils.plant.getAll.setData(
         { filters: plant.batchId ? { batchId: plant.batchId } : undefined },
         (old) => {
           if (!old) return []

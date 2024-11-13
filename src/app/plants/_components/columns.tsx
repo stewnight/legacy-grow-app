@@ -32,20 +32,22 @@ export const columns: ColumnDef<Plant>[] = [
     },
   },
   {
-    accessorKey: 'batchId',
-    header: 'Batch',
+    accessorKey: 'genetic',
+    header: 'Genetic',
     cell: ({ row }) => {
-      return (
+      const genetic = row.original.genetic
+      return genetic ? (
         <Link
           className="hover:underline whitespace-nowrap"
-          href={`/batches/${row.original.batchId}`}
+          href={`/genetics/${genetic.slug}`}
         >
-          {row.original.batchId}
+          {genetic.name}
         </Link>
+      ) : (
+        'N/A'
       )
     },
   },
-
   {
     accessorKey: 'source',
     header: 'Source',
@@ -114,7 +116,7 @@ export const columns: ColumnDef<Plant>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/plants/${plant.id}`}>View Details</Link>
+              <Link href={`/plants/${plant.code}`}>View Details</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

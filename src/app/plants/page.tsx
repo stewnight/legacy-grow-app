@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { PlantSheet } from './_components/plant-sheet'
 import { PlantList } from './_components/plant-list'
 import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'

@@ -1,36 +1,26 @@
 import { z } from 'zod'
-import { type Batch, type Genetic, type Plant } from '~/server/db/schema'
-
-export const healthStatusEnum = z.enum(['healthy', 'sick', 'pest', 'nutrient'])
-export type HealthStatus = z.infer<typeof healthStatusEnum>
+import {
+  plantSourceEnum,
+  plantStageEnum,
+  plantSexEnum,
+  healthStatusEnum,
+} from '~/server/db/schema/enums'
 
 export const plantFormSchema = z.object({
-  batchId: z.number().optional(),
-  source: z.enum(['seed', 'clone', 'mother']),
-  stage: z.enum(['seedling', 'vegetative', 'flowering', 'harvested']),
-  plantDate: z.date(),
+  geneticId: z.string().uuid().optional(),
+  batchId: z.string().uuid().optional(),
+  source: z.enum(plantSourceEnum.enumValues),
+  stage: z.enum(plantStageEnum.enumValues),
+  plantDate: z.date().optional(),
   harvestDate: z.date().optional(),
-  notes: z.string().optional(),
-  healthStatus: healthStatusEnum,
-  quarantine: z.boolean().default(false),
-  geneticId: z.number().optional(),
-  motherId: z.number().optional(),
+  motherId: z.string().uuid().optional(),
   generation: z.number().optional(),
-  sex: z.enum(['male', 'female', 'hermaphrodite', 'unknown']),
+  sex: z.enum(plantSexEnum.enumValues),
   phenotype: z.string().optional(),
-  locationId: z.number().optional(),
-  destroyReason: z.string().optional(),
+  healthStatus: z.enum(healthStatusEnum.enumValues),
+  quarantine: z.boolean().optional(),
+  locationId: z.string().uuid().optional(),
+  notes: z.string().optional(),
 })
 
 export type PlantFormData = z.infer<typeof plantFormSchema>
-
-export interface PlantWithRelations extends Omit<Plant, 'genetic' | 'batch'> {
-  genetic: Genetic | null
-  batch: Batch | null
-
-  createdBy: {
-    id: string
-    name: string | null
-    email: string | null
-  }
-}
