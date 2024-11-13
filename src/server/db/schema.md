@@ -13,7 +13,7 @@ classDiagram
         lastLogin timestamp
         createdAt* timestamp
     }
-    
+
     class account {
         userId* varchar
         type* varchar
@@ -27,13 +27,13 @@ classDiagram
         id_token text
         session_state varchar
     }
-    
+
     class session {
         sessionToken* varchar
         userId* varchar
         expires* timestamp
     }
-    
+
     class batch {
         id* integer
         code* varchar
@@ -55,25 +55,24 @@ classDiagram
         createdAt timestamp
         updatedAt timestamp
     }
-    
+
     class genetic {
         id* integer
         name* varchar
-        slug* varchar
-        type* genetic_type
+        type varchar
         breeder varchar
         description text
-        floweringTime integer
-        thcPotential decimal
-        cbdPotential decimal
-        terpeneProfile json
+        flowerTime integer
+        yield varchar
+        terpenoids json
+        cannabinoids json
         growthCharacteristics json
         lineage json
         createdById* varchar
         createdAt* timestamp
         updatedAt timestamp
     }
-    
+
     class plant {
         id* integer
         code* varchar
@@ -96,7 +95,7 @@ classDiagram
         updatedAt timestamp
         status* varchar
     }
-    
+
     class Note {
         id* integer
         content* text
@@ -109,12 +108,156 @@ classDiagram
         createdAt* timestamp
         updatedAt timestamp
     }
-    <<entity>> Note
+
+    class sensor {
+        id* integer
+        name* varchar
+        type* sensor_type
+        model varchar
+        locationId integer
+        calibrationDate date
+        calibrationDue date
+        accuracy decimal
+        range json
+        metadata json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class sensorReading {
+        id* integer
+        sensorId* integer
+        value* decimal
+        unit varchar
+        timestamp* timestamp
+        metadata json
+    }
+
+    class task {
+        id* integer
+        title* varchar
+        description text
+        category* task_category
+        priority* task_priority
+        status* task_status
+        dueDate timestamp
+        completedAt timestamp
+        assignedToId varchar
+        templateId integer
+        metadata json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class taskTemplate {
+        id* integer
+        title* varchar
+        description text
+        category* task_category
+        priority task_priority
+        metadata json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class harvest {
+        id* integer
+        plantId integer
+        batchId* varchar
+        date* date
+        wetWeight decimal
+        dryWeight decimal
+        trimWeight decimal
+        wasteWeight decimal
+        location varchar
+        quality harvest_quality
+        notes text
+        labResults json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class processing {
+        id* integer
+        harvestId* integer
+        type* varchar
+        startDate* date
+        endDate date
+        inputWeight decimal
+        outputWeight decimal
+        yield decimal
+        method varchar
+        notes text
+        labResults json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class complianceLog {
+        id* integer
+        type* varchar
+        category* varchar
+        details json
+        attachments json
+        status varchar
+        verifiedById varchar
+        verifiedAt timestamp
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class facility {
+        id* integer
+        name* varchar
+        type* varchar
+        address json
+        license json
+        status varchar
+        metadata json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class area {
+        id* integer
+        name* varchar
+        type* varchar
+        facilityId* integer
+        parentId integer
+        metadata json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
+
+    class location {
+        id* integer
+        name* varchar
+        type* varchar
+        areaId* integer
+        capacity integer
+        metadata json
+        createdById* varchar
+        createdAt* timestamp
+        updatedAt timestamp
+    }
 
     user --> "*" account
     user --> "*" plant
     user --> "*" genetic
     user --> "*" Note
+    user --> "*" task
+    user --> "*" sensor
+    user --> "*" area
+    user --> "*" harvest
+    user --> "*" processing
     account --> user
     session --> user
     batch --> genetic
@@ -124,6 +267,22 @@ classDiagram
     plant --> genetic
     plant --> batch
     plant --> user
+    plant --> location
     Note --> user
     Note --> Note
+    sensor --> location
+    sensor --> user
+    sensorReading --> sensor
+    task --> user
+    task --> taskTemplate
+    taskTemplate --> user
+    harvest --> plant
+    harvest --> user
+    processing --> harvest
+    processing --> user
+    complianceLog --> user
+    area --> facility
+    area --> user
+    location --> area
+    location --> user
 ```
