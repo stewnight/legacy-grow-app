@@ -52,8 +52,11 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
   parent: one(notes, {
     fields: [notes.parentId],
     references: [notes.id],
+    relationName: 'parentNote',
   }),
-  children: many(notes),
+  children: many(notes, {
+    relationName: 'parentNote',
+  }),
 }))
 
 // Facility relations
@@ -73,8 +76,11 @@ export const areasRelations = relations(areas, ({ one, many }) => ({
   parent: one(areas, {
     fields: [areas.parentId],
     references: [areas.id],
+    relationName: 'parentArea',
   }),
-  children: many(areas),
+  children: many(areas, {
+    relationName: 'parentArea',
+  }),
   locations: many(locations),
   createdBy: one(users, {
     fields: [areas.createdById],
@@ -98,7 +104,7 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
 }))
 
 // Cultivation relations
-export const plantsRelations = relations(plants, ({ one }) => ({
+export const plantsRelations = relations(plants, ({ one, many }) => ({
   genetic: one(genetics, {
     fields: [plants.geneticId],
     references: [genetics.id],
@@ -119,6 +125,10 @@ export const plantsRelations = relations(plants, ({ one }) => ({
   mother: one(plants, {
     fields: [plants.motherId],
     references: [plants.id],
+    relationName: 'motherPlant',
+  }),
+  children: many(plants, {
+    relationName: 'motherPlant',
   }),
 }))
 

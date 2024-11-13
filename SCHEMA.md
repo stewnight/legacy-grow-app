@@ -526,7 +526,3 @@ Documentation and annotation system.
 6. Store structured metadata in JSON fields
 7. Implement proper cascading deletes
 8. Use enum types for constrained values
-
-```
-
-```
