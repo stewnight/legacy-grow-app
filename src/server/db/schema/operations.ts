@@ -8,7 +8,9 @@ import {
   decimal,
   json,
   date,
+  uuid,
 } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
 import {
@@ -21,93 +23,111 @@ import { users } from './core'
 import { locations } from './facility'
 
 // ================== SENSORS & MONITORING ==================
-export type Sensor = typeof sensors.$inferSelect
-export type NewSensor = Omit<Sensor, 'id' | 'createdAt' | 'updatedAt'>
-export type SensorReading = typeof sensorReadings.$inferSelect
-
 export const sensors = createTable(
   'sensor',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
     type: sensorTypeEnum('type').notNull(),
     model: varchar('model', { length: 255 }),
-    locationId: integer('location_id').references(() => locations.id),
+    locationId: uuid('location_id').references(() => locations.id, {
+      onDelete: 'set null',
+    }),
     calibrationDate: date('calibration_date'),
     calibrationDue: date('calibration_due'),
-    accuracy: decimal('accuracy'),
-    range: json('range').$type<{ min: number; max: number; unit: string }>(),
+    accuracy: decimal('accuracy', { precision: 10, scale: 4 }),
+    range: json('range').$type<{
+      min: number
+      max: number
+      unit: string
+    }>(),
     metadata: json('metadata').$type<{
       ipAddress?: string
       protocol?: string
       firmware?: string
-      lastCalibration?: Date
+      lastCalibration?: string
+      manufacturer?: string
+      serialNumber?: string
     }>(),
-    createdById: varchar('created_by', { length: 255 })
+    status: varchar('status', { length: 50 }).default('active'),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
     nameIdx: index('sensor_name_idx').on(table.name),
     typeIdx: index('sensor_type_idx').on(table.type),
     locationIdIdx: index('sensor_location_id_idx').on(table.locationId),
+    statusIdx: index('sensor_status_idx').on(table.status),
   })
 )
 
 export const sensorReadings = createTable(
   'sensor_reading',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    sensorId: integer('sensor_id').references(() => sensors.id),
-    value: decimal('value').notNull(),
+    id: uuid('id').primaryKey().defaultRandom(),
+    sensorId: uuid('sensor_id')
+      .notNull()
+      .references(() => sensors.id, { onDelete: 'cascade' }),
+    value: decimal('value', { precision: 10, scale: 4 }).notNull(),
     unit: varchar('unit', { length: 50 }).notNull(),
-    quality: varchar('quality', { length: 50 }),
-    metadata: json('metadata'),
+    quality: decimal('quality', { precision: 5, scale: 2 }),
+    metadata: json('metadata').$type<{
+      raw?: number
+      calibrated?: boolean
+      errors?: string[]
+    }>(),
     timestamp: timestamp('timestamp', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
   },
   (table) => ({
     sensorIdIdx: index('sensor_reading_sensor_id_idx').on(table.sensorId),
     timestampIdx: index('sensor_reading_timestamp_idx').on(table.timestamp),
+    valueIdx: index('sensor_reading_value_idx').on(table.value),
   })
 )
 
 // ================== TASKS & TEMPLATES ==================
-export type TaskTemplate = typeof taskTemplates.$inferSelect
-export type NewTaskTemplate = Omit<
-  TaskTemplate,
-  'id' | 'createdAt' | 'updatedAt'
->
-export type Task = typeof tasks.$inferSelect
-export type NewTask = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>
-
 export const taskTemplates = createTable(
   'task_template',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
     category: taskCategoryEnum('category').notNull(),
     description: text('description'),
     instructions: json('instructions').$type<string[]>(),
     estimatedDuration: integer('estimated_duration'),
     requiredSkills: json('required_skills').$type<string[]>(),
-    checklist: json('checklist').$type<{ item: string; required: boolean }[]>(),
-    createdById: varchar('created_by', { length: 255 })
+    checklist: json('checklist').$type<
+      Array<{
+        item: string
+        required: boolean
+        order: number
+      }>
+    >(),
+    metadata: json('metadata').$type<{
+      tools?: string[]
+      safety?: string[]
+      references?: string[]
+    }>(),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
     nameIdx: index('task_template_name_idx').on(table.name),
@@ -118,96 +138,63 @@ export const taskTemplates = createTable(
 export const tasks = createTable(
   'task',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    templateId: integer('template_id').references(() => taskTemplates.id),
-    assignedToId: varchar('assigned_to', { length: 255 }).references(
-      () => users.id
-    ),
-    status: taskStatusEnum('status').notNull(),
-    priority: taskPriorityEnum('priority').notNull(),
+    id: uuid('id').primaryKey().defaultRandom(),
+    templateId: uuid('template_id').references(() => taskTemplates.id),
+    assignedToId: uuid('assigned_to').references(() => users.id),
+    status: taskStatusEnum('status').notNull().default('pending'),
+    priority: taskPriorityEnum('priority').notNull().default('medium'),
     dueDate: timestamp('due_date', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     notes: text('notes'),
-    metadata: json('metadata'),
-    createdById: varchar('created_by', { length: 255 })
+    checklist: json('checklist').$type<
+      Array<{
+        item: string
+        completed: boolean
+        completedAt?: string
+        completedBy?: string
+      }>
+    >(),
+    metadata: json('metadata').$type<{
+      location?: string
+      equipment?: string[]
+      attachments?: string[]
+    }>(),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
     statusIdx: index('task_status_idx').on(table.status),
     priorityIdx: index('task_priority_idx').on(table.priority),
     assignedToIdx: index('task_assigned_to_idx').on(table.assignedToId),
     dueDateIdx: index('task_due_date_idx').on(table.dueDate),
+    templateIdIdx: index('task_template_id_idx').on(table.templateId),
   })
 )
 
-// ================== SUPPLIERS & INPUTS ==================
-export type Supplier = typeof suppliers.$inferSelect
-export type NewSupplier = Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'>
-export type Input = typeof inputs.$inferSelect
-export type NewInput = Omit<Input, 'id' | 'createdAt' | 'updatedAt'>
+// Zod Schemas
+export const insertSensorSchema = createInsertSchema(sensors)
+export const selectSensorSchema = createSelectSchema(sensors)
+export const insertSensorReadingSchema = createInsertSchema(sensorReadings)
+export const selectSensorReadingSchema = createSelectSchema(sensorReadings)
+export const insertTaskTemplateSchema = createInsertSchema(taskTemplates)
+export const selectTaskTemplateSchema = createSelectSchema(taskTemplates)
+export const insertTaskSchema = createInsertSchema(tasks)
+export const selectTaskSchema = createSelectSchema(tasks)
 
-export const suppliers = createTable(
-  'supplier',
-  {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
-    contact: json('contact'),
-    address: text('address'),
-    license: varchar('license', { length: 255 }),
-    status: varchar('status', { length: 50 }),
-    rating: integer('rating'),
-    notes: text('notes'),
-    createdById: varchar('created_by', { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
-  },
-  (table) => ({
-    nameIdx: index('supplier_name_idx').on(table.name),
-    typeIdx: index('supplier_type_idx').on(table.type),
-    statusIdx: index('supplier_status_idx').on(table.status),
-  })
-)
-
-export const inputs = createTable(
-  'input',
-  {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    supplierId: integer('supplier_id').references(() => suppliers.id),
-    name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
-    manufacturer: varchar('manufacturer', { length: 255 }),
-    composition: json('composition'),
-    applicationMethods: json('application_methods'),
-    safetyData: json('safety_data'),
-    storage: json('storage'),
-    certifications: json('certifications'),
-    createdById: varchar('created_by', { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
-  },
-  (table) => ({
-    nameIdx: index('input_name_idx').on(table.name),
-    typeIdx: index('input_type_idx').on(table.type),
-    supplierIdIdx: index('input_supplier_id_idx').on(table.supplierId),
-  })
-)
+// Types
+export type Sensor = typeof sensors.$inferSelect
+export type NewSensor = typeof sensors.$inferInsert
+export type SensorReading = typeof sensorReadings.$inferSelect
+export type NewSensorReading = typeof sensorReadings.$inferInsert
+export type TaskTemplate = typeof taskTemplates.$inferSelect
+export type NewTaskTemplate = typeof taskTemplates.$inferInsert
+export type Task = typeof tasks.$inferSelect
+export type NewTask = typeof tasks.$inferInsert

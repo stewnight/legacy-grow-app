@@ -9,7 +9,9 @@ import {
   json,
   date,
   boolean,
+  uuid,
 } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
 import {
@@ -23,61 +25,19 @@ import {
 import { users } from './core'
 import { locations } from './facility'
 
-// ================== BATCHES ==================
-export type Batch = typeof batches.$inferSelect
-export type NewBatch = Omit<Batch, 'id' | 'createdAt' | 'updatedAt'>
-
-export const batches = createTable(
-  'batch',
-  {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    code: varchar('code', { length: 255 })
-      .notNull()
-      .$defaultFn(
-        () => `b${Date.now()}${Math.random().toString(24).substr(2, 9)}`
-      ),
-    name: varchar('name', { length: 255 }).notNull(),
-    geneticId: integer('genetic_id').references(() => genetics.id),
-    plantCount: integer('plant_count').notNull(),
-    notes: text('notes'),
-    status: varchar('status', { length: 255 }).notNull().default('active'),
-    userId: varchar('user_id', { length: 255 }).notNull(),
-    source: varchar('source', { length: 255 }),
-    stage: varchar('stage', { length: 255 }),
-    plantDate: timestamp('plant_date', { withTimezone: true }),
-    healthStatus: varchar('health_status', { length: 255 }),
-    motherId: integer('mother_id'),
-    generation: integer('generation'),
-    sex: varchar('sex', { length: 255 }),
-    phenotype: varchar('phenotype', { length: 255 }),
-    locationId: integer('location_id'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-  },
-  (batch) => ({
-    codeIdx: index('batch_code_idx').on(batch.code),
-    nameIdx: index('batch_name_idx').on(batch.name),
-    statusIdx: index('batch_status_idx').on(batch.status),
-    userIdIdx: index('batch_user_id_idx').on(batch.userId),
-  })
-)
-
 // ================== GENETICS ==================
-export type Genetic = typeof genetics.$inferSelect
-export type NewGenetic = Omit<Genetic, 'id' | 'createdAt' | 'updatedAt'>
-
 export const genetics = createTable(
   'genetic',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
-    slug: varchar('slug', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
     type: geneticTypeEnum('type').notNull(),
     breeder: varchar('breeder', { length: 255 }),
     description: text('description'),
     floweringTime: integer('flowering_time'),
-    thcPotential: decimal('thc_potential'),
-    cbdPotential: decimal('cbd_potential'),
+    thcPotential: decimal('thc_potential', { precision: 4, scale: 2 }),
+    cbdPotential: decimal('cbd_potential', { precision: 4, scale: 2 }),
     terpeneProfile: json('terpene_profile').$type<Record<
       string,
       number
@@ -93,70 +53,127 @@ export const genetics = createTable(
       father?: string
       generation?: number
     }>(),
-    createdById: varchar('created_by', { length: 255 })
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow(),
   },
-  (genetic) => ({
-    nameIdx: index('genetic_name_idx').on(genetic.name),
-    typeIdx: index('genetic_type_idx').on(genetic.type),
-    createdByIdx: index('genetic_created_by_idx').on(genetic.createdById),
-    slugIdx: index('genetic_slug_idx').on(genetic.slug),
+  (table) => ({
+    nameIdx: index('genetic_name_idx').on(table.name),
+    typeIdx: index('genetic_type_idx').on(table.type),
+    createdByIdx: index('genetic_created_by_idx').on(table.createdById),
+    slugIdx: index('genetic_slug_idx').on(table.slug),
   })
 )
 
-// ================== PLANTS ==================
-export type Plant = typeof plants.$inferSelect
-export type NewPlant = Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>
-
-export const plants = createTable(
-  'plant',
+// ================== BATCHES ==================
+export const batches = createTable(
+  'batch',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    id: uuid('id').primaryKey().defaultRandom(),
     code: varchar('code', { length: 255 })
       .notNull()
+      .unique()
       .$defaultFn(
-        () => `p${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+        () => `b${Date.now()}${Math.random().toString(36).slice(2, 11)}`
       ),
-    geneticId: integer('genetic_id').references(() => genetics.id),
-    batchId: integer('batch_id').references(() => batches.id),
-    source: plantSourceEnum('source').notNull(),
-    stage: plantStageEnum('stage').notNull(),
-    plantDate: date('plant_date'),
-    harvestDate: date('harvest_date'),
+    name: varchar('name', { length: 255 }).notNull(),
+    geneticId: uuid('genetic_id').references(() => genetics.id, {
+      onDelete: 'set null',
+    }),
+    plantCount: integer('plant_count').notNull().default(0),
+    notes: text('notes'),
+    status: batchStatusEnum('status').notNull().default('active'),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    source: varchar('source', { length: 255 }),
+    stage: plantStageEnum('stage'),
+    plantDate: timestamp('plant_date', { withTimezone: true }),
+    healthStatus: healthStatusEnum('health_status').default('healthy'),
     motherId: integer('mother_id'),
     generation: integer('generation'),
     sex: plantSexEnum('sex'),
     phenotype: varchar('phenotype', { length: 255 }),
+    locationId: uuid('location_id').references(() => locations.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    codeIdx: index('batch_code_idx').on(table.code),
+    nameIdx: index('batch_name_idx').on(table.name),
+    statusIdx: index('batch_status_idx').on(table.status),
+    userIdIdx: index('batch_user_id_idx').on(table.userId),
+    geneticIdIdx: index('batch_genetic_id_idx').on(table.geneticId),
+    locationIdIdx: index('batch_location_id_idx').on(table.locationId),
+    stageIdx: index('batch_stage_idx').on(table.stage),
+  })
+)
+
+// ================== PLANTS ==================
+export const plants = createTable(
+  'plant',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    code: text('code')
+      .notNull()
+      .unique()
+      .$defaultFn(
+        () => `p${Date.now()}${Math.random().toString(36).slice(2, 11)}`
+      ),
+    geneticId: uuid('genetic_id').references(() => genetics.id),
+    batchId: uuid('batch_id').references(() => batches.id),
+    source: plantSourceEnum('source').notNull(),
+    stage: plantStageEnum('stage').notNull(),
+    plantDate: date('plant_date'),
+    harvestDate: date('harvest_date'),
+    motherId: uuid('mother_id'),
+    generation: integer('generation'),
+    sex: plantSexEnum('sex'),
+    phenotype: text('phenotype'),
     healthStatus: healthStatusEnum('health_status')
       .notNull()
       .default('healthy'),
     quarantine: boolean('quarantine').default(false),
-    destroyReason: varchar('destroy_reason', { length: 255 }),
-    locationId: integer('location_id').references(() => locations.id),
-    createdById: varchar('created_by', { length: 255 })
+    destroyReason: text('destroy_reason'),
+    locationId: uuid('location_id').references(() => locations.id),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow(),
     status: varchar('status', { length: 50 }).notNull().default('active'),
   },
-  (plant) => ({
-    codeIdx: index('plant_code_idx').on(plant.code),
-    batchIdIdx: index('plant_batch_id_idx').on(plant.batchId),
-    stageIdx: index('plant_stage_idx').on(plant.stage),
-    createdByIdx: index('plant_created_by_idx').on(plant.createdById),
-    geneticIdIdx: index('plant_genetic_id_idx').on(plant.geneticId),
-    locationIdIdx: index('plant_location_id_idx').on(plant.locationId),
+  (table) => ({
+    codeIdx: index('plant_code_idx').on(table.code),
+    batchIdIdx: index('plant_batch_id_idx').on(table.batchId),
+    stageIdx: index('plant_stage_idx').on(table.stage),
+    createdByIdx: index('plant_created_by_idx').on(table.createdById),
+    geneticIdIdx: index('plant_genetic_id_idx').on(table.geneticId),
+    locationIdIdx: index('plant_location_id_idx').on(table.locationId),
   })
 )
+
+// Zod Schemas
+export const insertPlantSchema = createInsertSchema(plants)
+export const selectPlantSchema = createSelectSchema(plants)
+export const insertGeneticSchema = createInsertSchema(genetics)
+export const selectGeneticSchema = createSelectSchema(genetics)
+export const insertBatchSchema = createInsertSchema(batches)
+export const selectBatchSchema = createSelectSchema(batches)
+
+// Types
+export type Plant = typeof plants.$inferSelect
+export type NewPlant = typeof plants.$inferInsert
+export type Genetic = typeof genetics.$inferSelect
+export type NewGenetic = typeof genetics.$inferInsert
+export type Batch = typeof batches.$inferSelect
+export type NewBatch = typeof batches.$inferInsert

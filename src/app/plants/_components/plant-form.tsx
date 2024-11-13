@@ -87,7 +87,7 @@ export function PlantForm({ mode, plant, batchId, onSuccess }: PlantFormProps) {
 
       const optimisticPlant: PlantWithRelations = {
         ...createOptimisticPlant(newPlant, optimisticUser),
-        genetic: genetics?.find((g) => g.id === newPlant.geneticId) ?? null,
+        genetic: genetics?.find((g) => g.id === newPlant?.geneticId) ?? null,
         batch: null,
         createdBy: optimisticUser,
       }

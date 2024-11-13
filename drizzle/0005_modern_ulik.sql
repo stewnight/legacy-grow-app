@@ -1,1 +1,0 @@
-ALTER TABLE "legacy-grow-app_batch" DROP COLUMN IF EXISTS "strain";

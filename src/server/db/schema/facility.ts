@@ -6,85 +6,120 @@ import {
   timestamp,
   text,
   json,
+  uuid,
 } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
 import { locationTypeEnum } from './enums'
 import { users } from './core'
 
 // ================== FACILITIES ==================
-export type Facility = typeof facilities.$inferSelect
-export type NewFacility = Omit<Facility, 'id' | 'createdAt' | 'updatedAt'>
-
 export const facilities = createTable(
   'facility',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
     type: varchar('type', { length: 50 }).notNull(),
-    address: text('address'),
-    license: varchar('license', { length: 255 }),
-    capacity: json('capacity'),
-    properties: json('properties'),
-    createdById: varchar('created_by', { length: 255 })
+    address: json('address').$type<{
+      street: string
+      city: string
+      state: string
+      zip: string
+      country: string
+      coordinates?: { lat: number; lng: number }
+    }>(),
+    license: json('license').$type<{
+      number: string
+      type: string
+      expiryDate: string
+      issuedBy: string
+      status: string
+    }>(),
+    capacity: json('capacity').$type<{
+      plants?: number
+      sqFt?: number
+      rooms?: number
+    }>(),
+    properties: json('properties').$type<{
+      climate?: string
+      security?: string[]
+      utilities?: string[]
+    }>(),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
-  (facility) => ({
-    nameIdx: index('facility_name_idx').on(facility.name),
-    typeIdx: index('facility_type_idx').on(facility.type),
-    createdByIdx: index('facility_created_by_idx').on(facility.createdById),
+  (table) => ({
+    nameIdx: index('facility_name_idx').on(table.name),
+    typeIdx: index('facility_type_idx').on(table.type),
+    createdByIdx: index('facility_created_by_idx').on(table.createdById),
   })
 )
 
 // ================== AREAS ==================
-export type Area = typeof areas.$inferSelect
-export type NewArea = Omit<Area, 'id' | 'createdAt' | 'updatedAt'>
-
 export const areas = createTable(
   'area',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    facilityId: integer('facility_id').references(() => facilities.id),
+    id: uuid('id').primaryKey().defaultRandom(),
+    facilityId: uuid('facility_id')
+      .notNull()
+      .references(() => facilities.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
     type: varchar('type', { length: 50 }).notNull(),
-    parentId: integer('parent_id'),
-    dimensions: json('dimensions'),
-    capacity: json('capacity'),
-    environment: json('environment'),
-    status: varchar('status', { length: 50 }),
-    createdById: varchar('created_by', { length: 255 })
+    parentId: uuid('parent_id').references(() => areas.id),
+    dimensions: json('dimensions').$type<{
+      length?: number
+      width?: number
+      height?: number
+      unit?: 'ft' | 'm'
+    }>(),
+    capacity: json('capacity').$type<{
+      plants?: number
+      sqFt?: number
+    }>(),
+    environment: json('environment').$type<{
+      temperature?: { min: number; max: number; unit: 'C' | 'F' }
+      humidity?: { min: number; max: number }
+      co2?: { min: number; max: number }
+      light?: { type: string; intensity: number }
+    }>(),
+    status: varchar('status', { length: 50 }).default('active'),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
-  (area) => ({
-    nameIdx: index('area_name_idx').on(area.name),
-    typeIdx: index('area_type_idx').on(area.type),
-    facilityIdIdx: index('area_facility_id_idx').on(area.facilityId),
+  (table) => ({
+    nameIdx: index('area_name_idx').on(table.name),
+    typeIdx: index('area_type_idx').on(table.type),
+    facilityIdIdx: index('area_facility_id_idx').on(table.facilityId),
+    parentIdIdx: index('area_parent_id_idx').on(table.parentId),
+    statusIdx: index('area_status_idx').on(table.status),
   })
 )
 
 // ================== LOCATIONS ==================
-export type Location = typeof locations.$inferSelect
-export type NewLocation = Omit<Location, 'id' | 'createdAt' | 'updatedAt'>
-
 export const locations = createTable(
   'location',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    areaId: integer('area_id').references(() => areas.id),
+    id: uuid('id').primaryKey().defaultRandom(),
+    areaId: uuid('area_id')
+      .notNull()
+      .references(() => areas.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
     type: locationTypeEnum('type').notNull(),
     coordinates: json('coordinates').$type<{
@@ -98,19 +133,39 @@ export const locations = createTable(
       humidity?: { min: number; max: number }
       light?: { type: string; intensity: number }
     }>(),
-    createdById: varchar('created_by', { length: 255 })
+    capacity: integer('capacity'),
+    status: varchar('status', { length: 50 }).default('active'),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
-  (location) => ({
-    nameIdx: index('location_name_idx').on(location.name),
-    typeIdx: index('location_type_idx').on(location.type),
-    areaIdIdx: index('location_area_id_idx').on(location.areaId),
+  (table) => ({
+    nameIdx: index('location_name_idx').on(table.name),
+    typeIdx: index('location_type_idx').on(table.type),
+    areaIdIdx: index('location_area_id_idx').on(table.areaId),
+    statusIdx: index('location_status_idx').on(table.status),
   })
 )
+
+// Zod Schemas
+export const insertFacilitySchema = createInsertSchema(facilities)
+export const selectFacilitySchema = createSelectSchema(facilities)
+export const insertAreaSchema = createInsertSchema(areas)
+export const selectAreaSchema = createSelectSchema(areas)
+export const insertLocationSchema = createInsertSchema(locations)
+export const selectLocationSchema = createSelectSchema(locations)
+
+// Types
+export type Facility = typeof facilities.$inferSelect
+export type NewFacility = typeof facilities.$inferInsert
+export type Area = typeof areas.$inferSelect
+export type NewArea = typeof areas.$inferInsert
+export type Location = typeof locations.$inferSelect
+export type NewLocation = typeof locations.$inferInsert

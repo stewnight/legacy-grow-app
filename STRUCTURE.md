@@ -1,34 +1,5 @@
 ```
 └── 📁legacy-grow-app
-    └── 📁drizzle
-        └── 📁meta
-            └── _journal.json
-            └── 0000_snapshot.json
-            └── 0001_snapshot.json
-            └── 0002_snapshot.json
-            └── 0003_snapshot.json
-            └── 0004_snapshot.json
-            └── 0005_snapshot.json
-            └── 0006_snapshot.json
-            └── 0007_snapshot.json
-        └── 0000_youthful_luckman.sql
-        └── 0001_massive_lorna_dane.sql
-        └── 0002_slim_killmonger.sql
-        └── 0003_short_marten_broadcloak.sql
-        └── 0004_special_shinko_yamashiro.sql
-        └── 0005_modern_ulik.sql
-        └── 0006_naive_lily_hollister.sql
-        └── 0007_nappy_warpath.sql
-    └── 📁example-data
-        └── areas.csv
-        └── asset_types.csv
-        └── log_types.csv
-        └── quantity_types.csv
-        └── quick_forms.csv
-        └── sensor_alerts.csv
-        └── sensors.csv
-        └── taxonomies.csv
-        └── user_roles.csv
     └── 📁public
         └── favicon.svg
     └── 📁src
@@ -46,7 +17,6 @@
                     └── batch-error-boundary.tsx
                     └── batch-form.tsx
                     └── batch-list.tsx
-                    └── batch-sheet.tsx
                     └── columns.tsx
                 └── 📁[code]
                     └── loading.tsx
@@ -60,6 +30,9 @@
                     └── recent-plants.tsx
                     └── strain-distribution.tsx
                 └── page.tsx
+            └── 📁facilities
+                └── 📁_components
+                └── page.tsx
             └── 📁genetics
                 └── 📁_components
                     └── columns.tsx
@@ -67,7 +40,6 @@
                     └── genetic-error-boundary.tsx
                     └── genetic-form.tsx
                     └── genetic-list.tsx
-                    └── genetic-sheet.tsx
                 └── 📁[slug]
                     └── loading.tsx
                     └── not-found.tsx
@@ -80,22 +52,21 @@
                     └── plant-error-boundary.tsx
                     └── plant-form.tsx
                     └── plant-list.tsx
-                    └── plant-sheet.tsx
                 └── 📁[code]
                     └── 📁_components
-                        └── plant-actions.tsx
                         └── plant-health-status.tsx
                         └── plant-location.tsx
                     └── loading.tsx
                     └── not-found.tsx
                     └── page.tsx
                 └── page.tsx
+            └── 📁schema
+                └── page.tsx
             └── layout.tsx
             └── page.tsx
         └── 📁components
             └── 📁layout
                 └── header.tsx
-                └── sidebar.tsx
             └── 📁notes
                 └── create-note-form.tsx
                 └── media-preview.tsx
@@ -122,6 +93,7 @@
                 └── hover-card.tsx
                 └── input.tsx
                 └── label.tsx
+                └── mermaid.tsx
                 └── popover.tsx
                 └── progress.tsx
                 └── scroll-area.tsx
@@ -137,6 +109,7 @@
                 └── toaster.tsx
                 └── tooltip.tsx
             └── app-sidebar.tsx
+            └── base-sheet.tsx
             └── create-form-wrapper.tsx
             └── icons.tsx
             └── media-upload.tsx
@@ -148,6 +121,7 @@
             └── theme-provider.tsx
             └── theme-toggle.tsx
         └── 📁hooks
+            └── use-entity.ts
             └── use-mobile.tsx
             └── use-toast.ts
         └── 📁lib
@@ -155,13 +129,16 @@
                 └── batch.ts
                 └── genetic.ts
                 └── plant.ts
+            └── create-router.ts
             └── optimistic-update.ts
+            └── schema-to-mermaid.ts
             └── storage.ts
             └── utils.ts
         └── 📁server
             └── 📁api
                 └── 📁routers
                     └── batch.ts
+                    └── facility.ts
                     └── genetic.ts
                     └── media.ts
                     └── notes.ts
@@ -172,15 +149,11 @@
                 └── config.ts
                 └── index.ts
             └── 📁db
-                └── 📁migrations
-                    └── [timestamp]_add_genetic_id_to_batches.ts
-                    └── [timestamp]_migrate_strains_to_genetics.ts
-                    └── [timestamp]_remove_strain_column.ts
-                    └── [timestamp]_remove_strains_table.ts
-                └── 📁schemas
+                └── 📁schema
                     └── core.ts
                     └── cultivation.ts
                     └── enums.ts
+                    └── facility.md
                     └── facility.ts
                     └── index.ts
                     └── notes.ts
@@ -188,6 +161,7 @@
                     └── processing.ts
                     └── relations.ts
                 └── index.ts
+                └── schema.md
                 └── utils.ts
             └── storage.ts
         └── 📁services
@@ -202,7 +176,6 @@
         └── env.js
     └── .env
     └── .env.example
-    └── .env.local
     └── .eslintignore
     └── .eslintrc.cjs
     └── .gitignore
@@ -215,7 +188,9 @@
     └── pnpm-lock.yaml
     └── postcss.config.js
     └── prettier.config.js
+    └── PROMPT.md
     └── README.md
+    └── STRUCTURE.md
     └── tailwind.config.ts
     └── tsconfig.json
     └── tsconfig.tsbuildinfo

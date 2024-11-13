@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1731109084583,
-      "tag": "0000_youthful_luckman",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1731109471565,
-      "tag": "0001_massive_lorna_dane",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1731190669248,
-      "tag": "0002_slim_killmonger",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1731213846966,
-      "tag": "0003_short_marten_broadcloak",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1731220603319,
-      "tag": "0004_special_shinko_yamashiro",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1731221990065,
-      "tag": "0005_modern_ulik",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1731279673777,
-      "tag": "0006_naive_lily_hollister",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1731312817361,
-      "tag": "0007_nappy_warpath",
+      "when": 1731486963266,
+      "tag": "0000_purple_the_fallen",
       "breakpoints": true
     }
   ]
