@@ -1,19 +1,16 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { generateMermaidER } from '../../lib/schema-to-mermaid'
-
-const Mermaid = dynamic(
-  () => import('~/components/ui/mermaid').then((mod) => mod.Mermaid),
-  { ssr: true }
-)
+import { Mermaid } from '~/components/ui/mermaid'
+import { generateMermaidER } from '~/lib/schema-to-mermaid'
 
 export default function SchemaPage() {
+  const mermaidMarkup = generateMermaidER()
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="mb-8 text-2xl font-bold">Database Schema</h1>
-      <div className="rounded-lg border bg-card p-4">
-        <Mermaid chart={generateMermaidER()} />
+      <h1 className="text-2xl font-bold mb-4">Database Schema</h1>
+      <div className="bg-white rounded-lg shadow-lg p-4">
+        <Mermaid chart={mermaidMarkup} />
       </div>
     </div>
   )

@@ -1,7 +1,16 @@
 import * as schema from '~/server/db/schema'
 
-// List of Mermaid class diagram reserved words that need escaping
 const RESERVED_WORDS = ['note', 'class', 'end']
+
+// Add schema groups for better organization
+const SCHEMA_GROUPS = {
+  'Core Schema': ['user', 'account', 'session', 'systemLog'],
+  'Facility Schema': ['facility', 'area', 'location'],
+  'Cultivation Schema': ['genetic', 'batch', 'plant'],
+  'Operations Schema': ['sensor', 'sensorReading', 'taskTemplate', 'task'],
+  'Processing Schema': ['harvest', 'processing', 'complianceLog'],
+  'Notes Schema': ['Note'],
+}
 
 function escapeName(name: string | undefined): string {
   if (!name) {
@@ -14,8 +23,14 @@ function escapeName(name: string | undefined): string {
   return name
 }
 
+// Helper to get the group for a table
+function getTableGroup(tableName: string): string | undefined {
+  return Object.entries(SCHEMA_GROUPS).find(([_, tables]) =>
+    tables.includes(tableName)
+  )?.[0]
+}
+
 export function generateMermaidER() {
-  // Get all tables (excluding relation objects and enums)
   const tables = Object.entries(schema).filter(([key, value]) => {
     const isTable =
       value &&
@@ -27,6 +42,11 @@ export function generateMermaidER() {
   })
 
   let mermaidMarkup = 'classDiagram\n'
+
+  // Add group comments
+  Object.entries(SCHEMA_GROUPS).forEach(([groupName, _]) => {
+    mermaidMarkup += `    %% ${groupName}\n`
+  })
 
   // First pass: Create all table definitions
   tables.forEach(([tableKey, tableDefinition]) => {
@@ -57,7 +77,17 @@ export function generateMermaidER() {
     mermaidMarkup += '    }\n'
   })
 
-  // Second pass: Add relationships from relations.ts
+  // Custom relationships map for special cases
+  const CUSTOM_RELATIONSHIPS = new Map([
+    ['plant:plant', 'mother'],
+    ['Note:Note', 'parent'],
+    ['area:area', ''],
+    ['task:user', 'assignedTo'],
+    ['complianceLog:user', 'verifiedBy'],
+    ['Note:user', 'createdBy'],
+  ])
+
+  // Second pass: Add relationships
   Object.entries(schema).forEach(([key, value]) => {
     if (!key.endsWith('Relations')) return
 
@@ -77,12 +107,22 @@ export function generateMermaidER() {
       const sourceTable = escapeName(baseTable)
       const targetTableName = escapeName(targetTable)
 
-      // Add relationship
-      if (relation.fields?.length === 1) {
-        // One-to-one or many-to-one
-        mermaidMarkup += `    ${sourceTable} --> ${targetTableName}\n`
+      // Check for custom relationship
+      const relationKey = `${baseTable}:${targetTable}`
+      const customRelation = CUSTOM_RELATIONSHIPS.get(relationKey)
+
+      // Add relationship with proper cardinality
+      if (customRelation !== undefined) {
+        if (customRelation) {
+          mermaidMarkup += `    ${sourceTable} --> ${targetTableName}: ${customRelation}\n`
+        } else {
+          mermaidMarkup += `    ${sourceTable} --> ${targetTableName}\n`
+        }
+      } else if (relation.fields?.length === 1) {
+        // One-to-many relationship
+        mermaidMarkup += `    ${sourceTable} --> "*" ${targetTableName}\n`
       } else if (relation.type === 'many') {
-        // One-to-many
+        // Many-to-many relationship
         mermaidMarkup += `    ${sourceTable} --> "*" ${targetTableName}\n`
       }
     })
