@@ -9,6 +9,7 @@ import {
   Dna,
   PieChart,
   DatabaseIcon,
+  Building,
 } from 'lucide-react'
 import { NavMain } from '~/components/nav-main'
 import { NavSecondary } from '~/components/nav-secondary'
@@ -32,6 +33,11 @@ const data = {
       url: '/dashboard',
       icon: PieChart,
       isActive: true,
+    },
+    {
+      title: 'Facilities',
+      url: '/facilities',
+      icon: Building,
     },
     {
       title: 'Plants',

@@ -14,7 +14,7 @@ import { PlantActions } from '../_components/plant-actions'
 export default function PlantPage() {
   const params = useParams()
   const code = params.code as string
-  const { data: plant } = api.plant.getByCode.useQuery(code)
+  const { data: plant } = api.plant.get.useQuery(code)
   const updatePlant = api.plant.update.useMutation()
   const deletePlant = api.plant.delete.useMutation()
 
