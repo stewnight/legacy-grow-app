@@ -14,34 +14,7 @@ mermaid.initialize({
   fontFamily: 'ui-monospace, monospace',
   fontSize: 14,
   htmlLabels: true,
-  deterministicIds: true, // For consistent rendering
-  er: {
-    diagramPadding: 20,
-    useMaxWidth: true,
-  },
-  flowchart: {
-    htmlLabels: true,
-    curve: 'basis',
-    padding: 20,
-  },
-  sequence: {
-    diagramMarginX: 50,
-    diagramMarginY: 10,
-    actorMargin: 50,
-    width: 150,
-    height: 65,
-    boxMargin: 10,
-    boxTextMargin: 5,
-    noteMargin: 10,
-    messageMargin: 35,
-    mirrorActors: true,
-  },
-  // Enable pan and zoom with elk layout engine
-  layout: 'elk',
-  elk: {
-    mergeEdges: true,
-    nodePlacementStrategy: 'NETWORK_SIMPLEX',
-  },
+  deterministicIds: true,
 })
 
 interface MermaidProps {
@@ -81,7 +54,7 @@ export function Mermaid({ chart, className }: MermaidProps) {
 
   // Add zoom controls
   const handleZoomIn = () => {
-    setZoom((prev) => Math.min(prev + 0.2, 3)) // Max zoom 3x
+    setZoom((prev) => Math.min(prev + 0.2, 10)) // Max zoom 10x
   }
 
   const handleZoomOut = () => {
@@ -201,10 +174,10 @@ export function Mermaid({ chart, className }: MermaidProps) {
           <PlusIcon className="h-4 w-4" />
         </button>
       </div>
-      <div className={cn('relative overflow-hidden', className)}>
+      <div className={cn('relative overflow-hidden rounded-lg', className)}>
         <div
           ref={containerRef}
-          className="mermaid min-h-[500px] w-full p-4"
+          className="mermaid w-full min-h-96 p-4"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -214,8 +187,8 @@ export function Mermaid({ chart, className }: MermaidProps) {
           onTouchEnd={handleTouchEnd}
           style={{
             touchAction: 'none',
-            shapeRendering: 'geometricPrecision',
-            textRendering: 'optimizeLegibility',
+            transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
+            transformOrigin: '0 0',
             cursor: isDragging ? 'grabbing' : 'grab',
             userSelect: 'none',
           }}
