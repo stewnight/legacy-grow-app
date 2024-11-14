@@ -31,6 +31,15 @@ export const facilityRouter = createTRPCRouter({
         limit: limit + 1,
         offset: cursor || 0,
         orderBy: [desc(facilities.updatedAt)],
+        with: {
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
       })
 
       let nextCursor: typeof cursor | undefined = undefined
@@ -39,10 +48,7 @@ export const facilityRouter = createTRPCRouter({
         nextCursor = cursor ? cursor + limit : limit
       }
 
-      return {
-        items,
-        nextCursor,
-      }
+      return { items, nextCursor }
     }),
 
   get: protectedProcedure
@@ -72,14 +78,7 @@ export const facilityRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertFacilitySchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertFacilitySchema)
     .mutation(async ({ ctx, input }) => {
       const [facility] = await ctx.db
         .insert(facilities)
@@ -103,12 +102,7 @@ export const facilityRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertFacilitySchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertFacilitySchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {

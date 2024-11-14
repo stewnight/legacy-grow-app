@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { type Plant } from '~/server/db/schema/cultivation'
+import { type Plant } from '~/server/db/schema/plants'
 
 export function PlantHealthStatus({ plant }: { plant: Plant }) {
   return (

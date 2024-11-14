@@ -15,7 +15,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { harvestQualityEnum } from './enums'
 import { users } from './core'
-import { plants } from './cultivation'
+import { plants } from './plants'
 
 // ================== HARVESTS ==================
 export const harvests = createTable(

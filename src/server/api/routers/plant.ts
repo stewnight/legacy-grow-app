@@ -5,7 +5,7 @@ import {
   plants,
   insertPlantSchema,
   selectPlantSchema,
-} from '~/server/db/schema/cultivation'
+} from '~/server/db/schema/plants'
 import {
   plantStageEnum,
   plantSourceEnum,

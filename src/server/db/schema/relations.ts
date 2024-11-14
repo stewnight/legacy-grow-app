@@ -7,9 +7,13 @@ import {
   systemLogs,
 } from './core'
 import { notes } from './notes'
-import { plants, genetics, batches } from './cultivation'
+import { plants } from './plants'
+import { genetics } from './genetics'
+import { batches } from './batches'
 import { tasks, sensors, sensorReadings, taskTemplates } from './operations'
-import { areas, locations, facilities } from './facility'
+import { facilities } from './facilities'
+import { areas } from './areas'
+import { locations } from './locations'
 import { harvests, processing, complianceLogs } from './processing'
 
 // Core relations
