@@ -99,6 +99,9 @@ export const batches = createTable(
     locationId: uuid('location_id').references(() => locations.id, {
       onDelete: 'set null',
     }),
+    createdById: uuid('created_by')
+      .notNull()
+      .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -115,6 +118,7 @@ export const batches = createTable(
     geneticIdIdx: index('batch_genetic_id_idx').on(table.geneticId),
     locationIdIdx: index('batch_location_id_idx').on(table.locationId),
     stageIdx: index('batch_stage_idx').on(table.stage),
+    createdByIdx: index('batch_created_by_idx').on(table.createdById),
   })
 )
 

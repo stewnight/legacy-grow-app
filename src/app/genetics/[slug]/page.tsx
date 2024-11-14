@@ -25,13 +25,13 @@ import { type GeneticWithRelations } from '~/lib/validations/genetic'
 export default function GeneticPage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ id: string }>
 }) {
   const resolvedParams = React.use(params)
   const utils = api.useUtils()
 
-  const { data: genetic, isLoading } = api.genetic.getBySlug.useQuery(
-    resolvedParams.slug,
+  const { data: genetic, isLoading } = api.genetic.get.useQuery(
+    resolvedParams.id,
     {
       staleTime: 5 * 60 * 1000,
       networkMode: 'offlineFirst',
@@ -40,12 +40,10 @@ export default function GeneticPage({
 
   const updateGenetic = api.genetic.update.useMutation({
     onMutate: async (newData) => {
-      await utils.genetic.getBySlug.cancel(resolvedParams.slug)
-      const previousGenetic = utils.genetic.getBySlug.getData(
-        resolvedParams.slug
-      )
+      await utils.genetic.get.cancel(resolvedParams.id)
+      const previousGenetic = utils.genetic.get.getData(resolvedParams.id)
 
-      utils.genetic.getBySlug.setData(resolvedParams.slug, (old) => {
+      utils.genetic.get.setData(resolvedParams.id, (old) => {
         if (!old) return old
         return {
           ...old,
@@ -69,13 +67,10 @@ export default function GeneticPage({
       return { previousGenetic }
     },
     onError: (err, newData, context) => {
-      utils.genetic.getBySlug.setData(
-        resolvedParams.slug,
-        context?.previousGenetic
-      )
+      utils.genetic.get.setData(resolvedParams.id, context?.previousGenetic)
     },
     onSettled: () => {
-      void utils.genetic.getBySlug.invalidate(resolvedParams.slug)
+      void utils.genetic.get.invalidate(resolvedParams.id)
     },
   })
 
@@ -135,7 +130,7 @@ export default function GeneticPage({
             {genetic.breeder ? `By ${genetic.breeder}` : 'Unknown breeder'}
           </p>
         </div>
-        <GeneticActions genetic={genetic} />
+        {/* <GeneticActions genetic={genetic} /> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

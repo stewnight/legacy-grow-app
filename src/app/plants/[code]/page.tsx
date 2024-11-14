@@ -34,7 +34,7 @@ export default function PlantPage() {
             Manage your plant and view its details
           </p>
         </div>
-        <PlantActions plant={plant} />
+        {/* <PlantActions plant={plant} /> */}
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">

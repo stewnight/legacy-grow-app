@@ -17,13 +17,13 @@ export default async function GeneticsPage() {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Genetics</h2>
-        <BaseSheet mode="create" title="Genetic" description="genetic strain">
+        {/* <BaseSheet mode="create" title="Genetic" description="genetic strain">
           <GeneticForm mode="create" />
-        </BaseSheet>
+        </BaseSheet> */}
       </div>
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <GeneticList />
+          <DataTable columns={columns} data={genetics} />
         </Suspense>
       </div>
     </div>

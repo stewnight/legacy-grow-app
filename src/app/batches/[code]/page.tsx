@@ -33,7 +33,7 @@ export default async function BatchPage({
               Manage your batch and view its details
             </p>
           </div>
-          <BatchActions batch={batch} />
+          {/* <BatchActions batch={batch} /> */}
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
