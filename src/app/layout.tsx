@@ -4,11 +4,10 @@ import { type Metadata } from 'next'
 import { TRPCReactProvider } from '~/trpc/react'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Header from '~/components/layout/header'
-import { AppSidebar } from '~/components/app-sidebar'
+import { AppSidebar } from '~/components/layout/app-sidebar'
 import { auth } from '~/server/auth'
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar'
 import { ThemeProvider } from '~/components/theme-provider'
-import { NetworkStatus } from '~/components/network-status'
 import { SessionProvider } from '~/components/session-provider'
 import { Toaster } from '../components/ui/toaster'
 
@@ -52,7 +51,6 @@ export default async function RootLayout({
                   {children}
                 </div>
               )}
-              <NetworkStatus />
               <Toaster />
             </SessionProvider>
             {process.env.NODE_ENV === 'development' && (

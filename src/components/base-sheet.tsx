@@ -17,18 +17,15 @@ interface BaseSheetProps<T> {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   trigger?: React.ReactNode
-  title: string
-  description: string
   children: React.ReactNode
 }
 
 export function BaseSheet<T>({
   mode,
   open,
+  entity,
   onOpenChange,
   trigger,
-  title,
-  description,
   children,
 }: BaseSheetProps<T>) {
   return (
@@ -44,25 +41,16 @@ export function BaseSheet<T>({
       <SheetContent className="w-full p-0 sm:max-w-2xl max-h-[calc(100vh)]">
         <SheetHeader className="p-4 pb-0">
           <SheetTitle>
-            {mode === 'edit' ? `Edit ${title}` : `Create ${title}`}
+            {mode === 'edit' ? `Edit ${entity}` : `Create ${entity}`}
           </SheetTitle>
           <SheetDescription>
             {mode === 'edit'
-              ? `Make changes to your ${description}.`
-              : `Add a new ${description} to your grow operation.`}
+              ? `Make changes to your ${entity}.`
+              : `Add a new ${entity} to your grow operation.`}
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-8rem)] p-4">{children}</ScrollArea>
-        <SheetFooter className="pb-12 px-4">
-          <div className="flex justify-end gap-2">
-            <Button type="submit">
-              {mode === 'edit' ? 'Save Changes' : 'Create'}
-            </Button>
-            <Button type="button" variant="ghost" size="sm">
-              Cancel
-            </Button>
-          </div>
-        </SheetFooter>
+        <SheetFooter className="pb-12 px-4"></SheetFooter>
       </SheetContent>
     </Sheet>
   )

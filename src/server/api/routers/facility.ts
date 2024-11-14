@@ -1,127 +1,136 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { TRPCError } from '@trpc/server'
-import { eq } from 'drizzle-orm'
-import { facilities, NewFacility } from '~/server/db/schema'
+import { and, desc, eq, like, SQL } from 'drizzle-orm'
+import { facilities, insertFacilitySchema } from '~/server/db/schema'
 
-export const facilityInput = z.object({
-  name: z.string().min(1, 'Name is required'),
-  type: z.enum(['indoor', 'outdoor', 'greenhouse']),
-  address: z.record(z.unknown()).nullish(),
-  license: z.record(z.unknown()).nullish(),
-  status: z.enum(['active', 'inactive', 'under_construction']),
-  metadata: z.record(z.unknown()).nullish(),
+const facilityFiltersSchema = z.object({
+  search: z.string().optional(),
 })
 
-export type FacilityFormData = z.infer<typeof facilityInput>
-
 export const facilityRouter = createTRPCRouter({
-  get: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
-    const facility = await ctx.db.query.facilities.findFirst({
-      where: eq(facilities.id, input),
-      with: {
-        createdBy: true,
-      },
-    })
-
-    if (!facility) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Facility not found',
+  getAll: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(10),
+        cursor: z.number().nullish(),
+        filters: facilityFiltersSchema.optional(),
       })
-    }
+    )
+    .query(async ({ ctx, input }) => {
+      const { limit, cursor, filters } = input
 
-    return facility
-  }),
+      const conditions = [
+        filters?.search
+          ? like(facilities.name, `%${filters.search}%`)
+          : undefined,
+      ].filter((condition): condition is SQL => condition !== undefined)
 
-  create: protectedProcedure
-    .input(facilityInput)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        const createData = {
-          name: input.name,
-          type: input.type,
-          address: input.address ? JSON.stringify(input.address) : null,
-          license: input.license ? JSON.stringify(input.license) : null,
-          status: input.status
-            ? (input.status as 'Active' | 'Inactive' | 'Under Construction')
-            : 'Inactive',
-          metadata: input.metadata ? JSON.stringify(input.metadata) : null,
-          createdById: ctx.session.user.id,
-        } satisfies Omit<NewFacility, 'id' | 'createdAt' | 'updatedAt'>
+      const items = await ctx.db.query.facilities.findMany({
+        where: conditions.length ? and(...conditions) : undefined,
+        limit: limit + 1,
+        offset: cursor || 0,
+        orderBy: [desc(facilities.updatedAt)],
+      })
 
-        const [created] = await ctx.db
-          .insert(facilities)
-          .values(createData as NewFacility)
-          .returning()
+      let nextCursor: typeof cursor | undefined = undefined
+      if (items.length > limit) {
+        items.pop()
+        nextCursor = cursor ? cursor + limit : limit
+      }
 
-        return created
-      } catch (error) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create facility',
-          cause: error,
-        })
+      return {
+        items,
+        nextCursor,
       }
     }),
 
-  list: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.query.facilities.findMany({
-      orderBy: (facilities) => [facilities.name],
-      with: {
-        createdBy: true,
-      },
-    })
-  }),
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const facility = await ctx.db.query.facilities.findFirst({
+        where: eq(facilities.id, input),
+        with: {
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      })
 
-  delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.delete(facilities).where(eq(facilities.id, input.id))
-      } catch (error) {
+      if (!facility) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to delete facility',
-          cause: error,
+          code: 'NOT_FOUND',
+          message: 'Facility not found',
         })
       }
+
+      return facility
+    }),
+
+  create: protectedProcedure
+    .input(
+      insertFacilitySchema.omit({
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        createdById: true,
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [facility] = await ctx.db
+        .insert(facilities)
+        .values({
+          ...input,
+          createdById: ctx.session.user.id,
+        })
+        .returning()
+
+      if (!facility) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create facility',
+        })
+      }
+
+      return facility
     }),
 
   update: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
-        data: facilityInput.partial(),
+        id: z.string().uuid(),
+        data: insertFacilitySchema.partial().omit({
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          createdById: true,
+        }),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        const { id, data } = input
-        const updateData: Record<string, unknown> = {}
+      const [facility] = await ctx.db
+        .update(facilities)
+        .set({ ...input.data, updatedAt: new Date() })
+        .where(eq(facilities.id, input.id))
+        .returning()
 
-        if (data.name !== undefined) updateData.name = data.name
-        if (data.type !== undefined) updateData.type = data.type
-        if (data.address !== undefined) updateData.address = data.address
-        if (data.license !== undefined) updateData.license = data.license
-        if (data.status !== undefined) updateData.status = data.status
-        if (data.metadata !== undefined) updateData.metadata = data.metadata
-
-        updateData.updatedAt = new Date()
-
-        const [updated] = await ctx.db
-          .update(facilities)
-          .set(updateData)
-          .where(eq(facilities.id, id))
-          .returning()
-
-        return updated
-      } catch (error) {
+      if (!facility) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update facility',
-          cause: error,
+          code: 'NOT_FOUND',
+          message: 'Facility not found',
         })
       }
+
+      return facility
+    }),
+
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.delete(facilities).where(eq(facilities.id, input))
     }),
 })

@@ -45,9 +45,14 @@ import { z } from 'zod'
 interface BatchFormProps {
   mode: 'create' | 'edit'
   initialData?: Partial<NewBatch>
+  onSuccessfulSubmit?: () => void
 }
 
-export function BatchesForm({ mode, initialData }: BatchFormProps) {
+export function BatchesForm({
+  mode,
+  initialData,
+  onSuccessfulSubmit,
+}: BatchFormProps): JSX.Element {
   const form = useForm<NewBatch>({
     resolver: zodResolver(insertBatchSchema),
     defaultValues: {
