@@ -24,7 +24,6 @@ interface BaseSheetProps<T> {
 
 export function BaseSheet<T>({
   mode,
-  entity,
   open,
   onOpenChange,
   trigger,
@@ -59,7 +58,7 @@ export function BaseSheet<T>({
             <Button type="submit">
               {mode === 'edit' ? 'Save Changes' : 'Create'}
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button type="button" variant="ghost" size="sm">
               Cancel
             </Button>
           </div>

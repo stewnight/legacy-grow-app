@@ -13,7 +13,6 @@ import {
   healthStatusEnum,
 } from '~/server/db/schema/enums'
 
-// Filter schema derived from plant schema
 const plantFiltersSchema = z.object({
   status: z.enum(healthStatusEnum.enumValues).optional(),
   stage: z.enum(plantStageEnum.enumValues).optional(),

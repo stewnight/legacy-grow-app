@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { batches, insertBatchSchema } from '~/server/db/schema/cultivation'
 import { batchStatusEnum } from '~/server/db/schema/enums'
 import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
 
 const batchFiltersSchema = z.object({
   status: z.enum(batchStatusEnum.enumValues).optional(),
@@ -30,7 +31,7 @@ export const batchRouter = createTRPCRouter({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(batches.createdAt)],
+        orderBy: [desc(batches.updatedAt)],
         with: {
           genetic: true,
           location: true,
@@ -55,7 +56,7 @@ export const batchRouter = createTRPCRouter({
     }),
 
   get: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return ctx.db.query.batches.findFirst({
+    const batch = await ctx.db.query.batches.findFirst({
       where: eq(batches.code, input),
       with: {
         genetic: true,
@@ -70,12 +71,22 @@ export const batchRouter = createTRPCRouter({
         },
       },
     })
+
+    if (!batch) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Batch not found',
+      })
+    }
+
+    return batch
   }),
 
   create: protectedProcedure
     .input(
       insertBatchSchema.omit({
         id: true,
+        code: true,
         createdAt: true,
         updatedAt: true,
         createdById: true,
@@ -90,6 +101,13 @@ export const batchRouter = createTRPCRouter({
         })
         .returning()
 
+      if (!batch) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create batch',
+        })
+      }
+
       return batch
     }),
 
@@ -99,6 +117,7 @@ export const batchRouter = createTRPCRouter({
         code: z.string(),
         data: insertBatchSchema.partial().omit({
           id: true,
+          code: true,
           createdAt: true,
           updatedAt: true,
           createdById: true,
@@ -112,12 +131,19 @@ export const batchRouter = createTRPCRouter({
         .where(eq(batches.code, input.code))
         .returning()
 
+      if (!batch) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Batch not found',
+        })
+      }
+
       return batch
     }),
 
   delete: protectedProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(batches).where(eq(batches.code, input))
+      await ctx.db.delete(batches).where(eq(batches.id, input))
     }),
 })

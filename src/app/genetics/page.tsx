@@ -1,13 +1,18 @@
 import { Suspense } from 'react'
-import { GeneticList } from './_components/genetic-list'
 import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { BaseSheet } from '../../components/base-sheet'
 import { GeneticForm } from './_components/genetic-form'
+import { DataTable } from '../../components/ui/data-table'
+import { columns } from './_components/genetics-columns'
+import { api } from '../../trpc/react'
 
 export default async function GeneticsPage() {
   const session = await auth()
+  const genetics = await api.genetic.getAll.useQuery({
+    limit: 100,
+  })
 
   if (!session) {
     redirect('/')

@@ -1,40 +1,16 @@
 import { Suspense } from 'react'
-import { PlantList } from './_components/plant-list'
 import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
-import { PlantErrorBoundary } from './_components/plant-error-boundary'
-import { BaseSheet } from '../../components/base-sheet'
-import { PlantForm } from './_components/plant-form'
 import { api } from '~/trpc/react'
 import { DataTable } from '~/components/ui/data-table'
-import { ColumnDef } from '@tanstack/react-table'
-import { Plant } from '../../server/db/schema'
+import { columns } from './_components/plant-columns'
 
 export default async function PlantsPage() {
   const session = await auth()
-  const { data: plants } = await api.plant.getAll.useQuery({
+  const { data: plants } = api.plant.getAll.useQuery({
     limit: 100,
   })
-
-  const columns: ColumnDef<Plant>[] = [
-    {
-      header: 'Code',
-      accessorFn: (row) => row.code,
-    },
-    {
-      header: 'Status',
-      accessorFn: (row) => row.status,
-    },
-    {
-      header: 'Source',
-      accessorFn: (row) => row.source,
-    },
-    {
-      header: 'Destroy Reason',
-      accessorFn: (row) => row.destroyReason ?? 'N/A',
-    },
-  ]
 
   if (!session) {
     redirect('/')
@@ -53,11 +29,9 @@ export default async function PlantsPage() {
         </BaseSheet> */}
       </div>
       <div className="h-full">
-        <PlantErrorBoundary>
-          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-            <DataTable columns={columns} data={plants?.items ?? []} />
-          </Suspense>
-        </PlantErrorBoundary>
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <DataTable columns={columns} data={plants?.items ?? []} />
+        </Suspense>
       </div>
     </div>
   )

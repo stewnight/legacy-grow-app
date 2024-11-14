@@ -4,8 +4,6 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { BatchActions } from '../_components/batch-actions'
-import { PlantList } from '~/app/plants/_components/plant-list'
 
 export default async function BatchPage({
   params,
@@ -14,9 +12,7 @@ export default async function BatchPage({
 }) {
   try {
     const resolvedParams = await params
-    const batch = await api.batch.getByCode({
-      code: resolvedParams.code,
-    })
+    const batch = await api.batch.get(resolvedParams.code)
 
     if (!batch) {
       return notFound()
