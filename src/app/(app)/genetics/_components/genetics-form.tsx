@@ -62,7 +62,11 @@ export function GeneticForm({
     api.genetic.create.useMutation({
       onSuccess: (data) => {
         toast({ title: 'Genetic created successfully' })
-        void utils.genetic.getAll.invalidate()
+        void Promise.all([
+          utils.genetic.getAll.invalidate(),
+          utils.genetic.get.invalidate(data.id),
+        ])
+        router.push(`/genetics/${data.id}`)
         onSuccess?.(data)
       },
       onError: (error) => {
@@ -78,7 +82,10 @@ export function GeneticForm({
     api.genetic.update.useMutation({
       onSuccess: (data) => {
         toast({ title: 'Genetic updated successfully' })
-        void utils.genetic.getAll.invalidate()
+        void Promise.all([
+          utils.genetic.getAll.invalidate(),
+          utils.genetic.get.invalidate(data.id),
+        ])
         onSuccess?.(data)
       },
       onError: (error) => {

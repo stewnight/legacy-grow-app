@@ -17,7 +17,7 @@ import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { GeneticForm } from './genetics-form'
-
+import { useRouter } from 'next/navigation'
 export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
   {
     accessorKey: 'name',
@@ -65,11 +65,12 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
       const genetic = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
-
+      const router = useRouter()
       const { mutate: deleteGenetic } = api.genetic.delete.useMutation({
         onSuccess: () => {
           toast({ title: 'Genetic deleted successfully' })
           void utils.genetic.getAll.invalidate()
+          router.refresh()
         },
         onError: (error) => {
           toast({
