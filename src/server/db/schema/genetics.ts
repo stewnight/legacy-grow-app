@@ -99,7 +99,18 @@ export const geneticsRelations = relations(genetics, ({ one, many }) => ({
 }))
 
 // Zod Schemas
-export const insertGeneticSchema = createInsertSchema(genetics)
+export const insertGeneticSchema = createInsertSchema(genetics, {
+  // Explicitly define field transformations and validations
+  name: (schema) => schema.name.min(1).max(255),
+  type: (schema) => schema.type,
+  breeder: (schema) => schema.breeder.optional(),
+  description: (schema) => schema.description.optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectGeneticSchema = createSelectSchema(genetics)
 
 // Types

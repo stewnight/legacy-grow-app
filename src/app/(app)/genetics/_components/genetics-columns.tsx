@@ -15,7 +15,7 @@ import {
 import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
-import { BaseSheet } from '../../../components/base-sheet'
+import { AppSheet } from '../../../../components/layout/app-sheet'
 import { GeneticForm } from './genetics-form'
 
 export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
@@ -92,9 +92,6 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
               <Link href={`/genetics/${genetic.id}`}>View Details</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <BaseSheet mode="edit" entity="genetic"></BaseSheet>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {

@@ -6,6 +6,11 @@ import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
+// Define the type for the JSON fields based on your schema
+type GeneticProperties = typeof genetics.$inferInsert.properties
+type GeneticGrowProperties = typeof genetics.$inferInsert.growProperties
+type GeneticLineage = typeof genetics.$inferInsert.lineage
+
 // Schema for filters
 const geneticFiltersSchema = z.object({
   type: z.enum(geneticTypeEnum.enumValues).optional(),
@@ -89,27 +94,19 @@ export const geneticRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertGeneticSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertGeneticSchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, growProperties, lineage, ...rest } = input
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as GeneticProperties,
+        growProperties: input.growProperties as GeneticGrowProperties,
+        lineage: input.lineage as GeneticLineage,
+      }
 
       const [genetic] = await ctx.db
         .insert(genetics)
-        .values({
-          ...rest,
-          properties: properties as typeof genetics.$inferInsert.properties,
-          growProperties:
-            growProperties as typeof genetics.$inferInsert.growProperties,
-          lineage: lineage as typeof genetics.$inferInsert.lineage,
-          createdById: ctx.session.user.id,
-        })
+        .values(insertData)
         .returning()
 
       if (!genetic) {
@@ -126,27 +123,21 @@ export const geneticRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertGeneticSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertGeneticSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, growProperties, lineage, ...rest } = input.data
+      const updateData = {
+        ...input.data,
+        updatedAt: new Date(),
+        properties: input.data.properties as GeneticProperties,
+        growProperties: input.data.growProperties as GeneticGrowProperties,
+        lineage: input.data.lineage as GeneticLineage,
+      }
 
       const [genetic] = await ctx.db
         .update(genetics)
-        .set({
-          ...rest,
-          properties: properties as typeof genetics.$inferInsert.properties,
-          growProperties:
-            growProperties as typeof genetics.$inferInsert.growProperties,
-          lineage: lineage as typeof genetics.$inferInsert.lineage,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(genetics.id, input.id))
         .returning()
 

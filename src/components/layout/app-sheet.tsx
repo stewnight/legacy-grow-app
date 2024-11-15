@@ -8,10 +8,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '~/components/ui/sheet'
-import { Plus } from 'lucide-react'
 import { ScrollArea } from '~/components/ui/scroll-area'
 
-interface BaseSheetProps<T> {
+interface AppSheetProps<T> {
   mode: 'create' | 'edit'
   entity?: T
   open?: boolean
@@ -20,22 +19,19 @@ interface BaseSheetProps<T> {
   children: React.ReactNode
 }
 
-export function BaseSheet<T>({
+export function AppSheet<T>({
   mode,
   open,
   entity,
   onOpenChange,
   trigger,
   children,
-}: BaseSheetProps<T>) {
+}: AppSheetProps<T>) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       {trigger ?? (
         <SheetTrigger asChild>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {mode === 'edit' ? 'Edit' : 'Create'}
-          </Button>
+          <Button>{mode === 'edit' ? 'Edit' : 'Create'}</Button>
         </SheetTrigger>
       )}
       <SheetContent className="w-full p-0 sm:max-w-2xl max-h-[calc(100vh)]">

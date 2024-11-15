@@ -27,7 +27,7 @@ import { geneticTypeEnum } from '~/server/db/schema/enums'
 import { type inferRouterOutputs } from '@trpc/server'
 import { type AppRouter } from '~/server/api/root'
 import { Checkbox } from '@/components/ui/checkbox'
-import { api } from '../../../trpc/react'
+import { api } from '../../../../trpc/react'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type GeneticFormValues = z.infer<typeof insertGeneticSchema>
@@ -36,13 +36,11 @@ interface GeneticFormProps {
   mode?: 'create' | 'edit'
   defaultValues?: RouterOutputs['genetic']['get']
   onSuccess?: (data: GeneticFormValues) => void
-  session: Session
 }
 
 export function GeneticForm({
   mode = 'create',
   defaultValues,
-  session,
   onSuccess,
 }: GeneticFormProps) {
   const { toast } = useToast()
@@ -57,7 +55,6 @@ export function GeneticForm({
       description: defaultValues?.description || '',
       inHouse: defaultValues?.inHouse || false,
       status: defaultValues?.status || 'active',
-      createdById: defaultValues?.createdById || session.userId,
     },
   })
 
@@ -94,23 +91,10 @@ export function GeneticForm({
     })
 
   function onSubmit(values: GeneticFormValues) {
-    const userId = session?.userId
-    if (!userId) {
-      console.error('User ID is missing.')
-      return
-    }
-
-    console.log('User ID:', userId)
-
-    console.log('Form Submitted:', values)
-    const dataWithUserId = { ...values, createdById: userId }
-
     if (mode === 'create') {
-      console.log('Creating Genetic')
-      createGenetic(dataWithUserId)
+      createGenetic(values)
     } else if (defaultValues?.id) {
-      console.log('Updating Genetic')
-      updateGenetic({ id: defaultValues.id, data: dataWithUserId })
+      updateGenetic({ id: defaultValues.id, data: values })
     }
   }
 
