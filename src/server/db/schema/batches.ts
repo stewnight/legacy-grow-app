@@ -88,10 +88,12 @@ export const batchesRelations = relations(batches, ({ one }) => ({
   genetic: one(genetics, {
     fields: [batches.geneticId],
     references: [genetics.id],
+    relationName: 'geneticBatches',
   }),
   location: one(locations, {
     fields: [batches.locationId],
     references: [locations.id],
+    relationName: 'locationBatches',
   }),
   createdBy: one(users, {
     fields: [batches.createdById],

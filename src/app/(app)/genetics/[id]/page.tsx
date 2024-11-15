@@ -155,7 +155,7 @@ export default function GeneticPage({
               {genetic.plants && genetic.plants.length > 0 ? (
                 genetic.plants.map((plant) => (
                   <div key={plant.id} className="border rounded p-4">
-                    <h4>{plant.name}</h4>
+                    <h4>{plant.id}</h4>
                   </div>
                 ))
               ) : (
@@ -174,7 +174,7 @@ export default function GeneticPage({
               {genetic.batches && genetic.batches.length > 0 ? (
                 genetic.batches.map((batch) => (
                   <div key={batch.id} className="border rounded p-4">
-                    <h4>{batch.name}</h4>
+                    <h4>{batch.id}</h4>
                   </div>
                 ))
               ) : (

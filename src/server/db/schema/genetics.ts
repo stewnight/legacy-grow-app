@@ -13,6 +13,7 @@ import { createTable } from '../utils'
 import { geneticTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { batches } from './batches'
+import { plants } from './plants'
 
 export const genetics = createTable(
   'genetic',
@@ -91,7 +92,12 @@ export const genetics = createTable(
 )
 
 export const geneticsRelations = relations(genetics, ({ one, many }) => ({
-  batches: many(batches),
+  batches: many(batches, {
+    relationName: 'geneticBatches',
+  }),
+  plants: many(plants, {
+    relationName: 'geneticPlants',
+  }),
   createdBy: one(users, {
     fields: [genetics.createdById],
     references: [users.id],

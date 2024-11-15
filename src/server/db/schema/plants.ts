@@ -95,7 +95,7 @@ export const plants = createTable(
 )
 
 // ================== RELATIONS ==================
-const plantsRelations = relations(plants, ({ one, many }) => ({
+export const plantsRelations = relations(plants, ({ one, many }) => ({
   genetic: one(genetics, {
     fields: [plants.geneticId],
     references: [genetics.id],

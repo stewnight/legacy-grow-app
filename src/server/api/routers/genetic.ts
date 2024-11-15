@@ -1,7 +1,12 @@
 // src/server/api/routers/genetic.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { genetics, insertGeneticSchema } from '~/server/db/schema'
+import {
+  batches,
+  genetics,
+  insertGeneticSchema,
+  plants,
+} from '~/server/db/schema'
 import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'
@@ -47,6 +52,7 @@ export const geneticRouter = createTRPCRouter({
         orderBy: [desc(genetics.createdAt)],
         with: {
           batches: true,
+
           createdBy: {
             columns: {
               id: true,
@@ -72,7 +78,12 @@ export const geneticRouter = createTRPCRouter({
       const genetic = await ctx.db.query.genetics.findFirst({
         where: eq(genetics.id, input),
         with: {
-          batches: true,
+          batches: {
+            where: eq(batches.status, 'active'),
+          },
+          plants: {
+            where: eq(plants.status, 'active'),
+          },
           createdBy: {
             columns: {
               id: true,
@@ -90,7 +101,11 @@ export const geneticRouter = createTRPCRouter({
         })
       }
 
-      return genetic
+      return {
+        ...genetic,
+        plantCount: genetic.plants?.length ?? 0,
+        batchCount: genetic.batches?.length ?? 0,
+      }
     }),
 
   create: protectedProcedure
