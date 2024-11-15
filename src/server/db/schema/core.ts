@@ -158,7 +158,7 @@ export const verificationTokens = createTable(
  * @remarks
  * Users can create multiple entities and be assigned to tasks
  */
-const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts, { relationName: 'userAccounts' }),
   sessions: many(sessions, { relationName: 'userSessions' }),
   // Created entities
@@ -180,7 +180,7 @@ const usersRelations = relations(users, ({ many }) => ({
 /**
  * Authentication relations for NextAuth.js
  */
-const accountsRelations = relations(accounts, ({ one }) => ({
+export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, {
     fields: [accounts.userId],
     references: [users.id],
@@ -188,7 +188,7 @@ const accountsRelations = relations(accounts, ({ one }) => ({
   }),
 }))
 
-const sessionsRelations = relations(sessions, ({ one }) => ({
+export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
     references: [users.id],

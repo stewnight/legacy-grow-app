@@ -10,6 +10,8 @@ import {
   PieChart,
   DatabaseIcon,
   Building,
+  Grid2x2,
+  LandPlot,
 } from 'lucide-react'
 import { NavMain } from '~/components/layout/nav-main'
 import { NavSecondary } from '~/components/layout/nav-secondary'
@@ -38,6 +40,16 @@ const data = {
       title: 'Facilities',
       url: '/facilities',
       icon: Building,
+    },
+    {
+      title: 'Areas',
+      url: '/areas',
+      icon: Grid2x2,
+    },
+    {
+      title: 'Locations',
+      url: '/locations',
+      icon: LandPlot,
     },
     {
       title: 'Plants',

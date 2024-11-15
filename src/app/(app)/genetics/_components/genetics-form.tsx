@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertGeneticSchema, Session } from '~/server/db/schema'
+import { insertGeneticSchema } from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,

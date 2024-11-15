@@ -8,6 +8,13 @@
       "when": 1731638333030,
       "tag": "0000_fast_warstar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1731712409562,
+      "tag": "0001_tricky_sue_storm",
+      "breakpoints": true
     }
   ]
 }

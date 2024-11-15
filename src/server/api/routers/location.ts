@@ -5,6 +5,11 @@ import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { locationTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
+// Define the type for the JSON fields based on your schema
+type LocationProperties = typeof locations.$inferInsert.properties
+type LocationCoordinates = typeof locations.$inferInsert.coordinates
+type LocationDimensions = typeof locations.$inferInsert.dimensions
+
 // Schema for filters
 const locationFiltersSchema = z.object({
   type: z.enum(locationTypeEnum.enumValues).optional(),
@@ -92,26 +97,19 @@ export const locationRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertLocationSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertLocationSchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, coordinates, dimensions, ...rest } = input
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as LocationProperties,
+        coordinates: input.coordinates as LocationCoordinates,
+        dimensions: input.dimensions as LocationDimensions,
+      }
 
       const [location] = await ctx.db
         .insert(locations)
-        .values({
-          ...rest,
-          properties: properties as typeof locations.$inferInsert.properties,
-          coordinates: coordinates as typeof locations.$inferInsert.coordinates,
-          dimensions: dimensions as typeof locations.$inferInsert.dimensions,
-          createdById: ctx.session.user.id,
-        })
+        .values(insertData)
         .returning()
 
       if (!location) {
@@ -128,26 +126,21 @@ export const locationRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertLocationSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertLocationSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, coordinates, dimensions, ...rest } = input.data
+      const updateData = {
+        ...input.data,
+        updatedAt: new Date(),
+        properties: input.data.properties as LocationProperties,
+        coordinates: input.data.coordinates as LocationCoordinates,
+        dimensions: input.data.dimensions as LocationDimensions,
+      }
 
       const [location] = await ctx.db
         .update(locations)
-        .set({
-          ...rest,
-          properties: properties as typeof locations.$inferInsert.properties,
-          coordinates: coordinates as typeof locations.$inferInsert.coordinates,
-          dimensions: dimensions as typeof locations.$inferInsert.dimensions,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(locations.id, input.id))
         .returning()
 

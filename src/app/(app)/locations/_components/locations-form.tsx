@@ -34,14 +34,18 @@ type LocationFormValues = z.infer<typeof insertLocationSchema>
 interface LocationFormProps {
   mode?: 'create' | 'edit'
   defaultValues?: RouterOutputs['location']['get']
-  onSubmit: (data: LocationFormValues) => void
+  onSuccess?: (data: LocationFormValues) => void
 }
 
 export function LocationForm({
   mode = 'create',
   defaultValues,
-  onSubmit,
+  onSuccess,
 }: LocationFormProps) {
+  const { toast } = useToast()
+  const router = useRouter()
+  const utils = api.useUtils()
+
   const form = useForm<LocationFormValues>({
     resolver: zodResolver(insertLocationSchema),
     defaultValues: {
@@ -52,6 +56,53 @@ export function LocationForm({
       status: defaultValues?.status || 'active',
     },
   })
+
+  const { mutate: createLocation, isPending: isCreating } =
+    api.location.create.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Location created successfully' })
+        void Promise.all([
+          utils.location.getAll.invalidate(),
+          utils.location.get.invalidate(data.id),
+        ])
+        router.push(`/locations/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error creating location',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
+
+  const { mutate: updateLocation, isPending: isUpdating } =
+    api.location.update.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Location updated successfully' })
+        void Promise.all([
+          utils.location.getAll.invalidate(),
+          utils.location.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error updating location',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
+
+  function onSubmit(values: LocationFormValues) {
+    if (mode === 'create') {
+      createLocation(values)
+    } else if (defaultValues?.id) {
+      updateLocation({ id: defaultValues.id, data: values })
+    }
+  }
 
   return (
     <Form {...form}>
@@ -124,6 +175,7 @@ export function LocationForm({
                 <Input
                   type="number"
                   {...field}
+                  value={field.value ?? ''}
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>

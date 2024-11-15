@@ -73,14 +73,14 @@ export const locations = createTable(
     statusIdx: index('location_status_idx').on(table.status),
   })
 )
-const locationsRelations = relations(locations, ({ one, many }) => ({
+export const locationsRelations = relations(locations, ({ one, many }) => ({
   area: one(areas, {
     fields: [locations.areaId],
     references: [areas.id],
     relationName: 'areaLocations',
   }),
   plants: many(plants, { relationName: 'locationPlants' }),
-  sensors: many(sensors, { relationName: 'locationSensors' }),
+  sensors: many(sensors, { relationName: 'sensorLocation' }),
   batches: many(batches, { relationName: 'locationBatches' }),
   tasks: many(tasks, { relationName: 'locationTasks' }),
   harvests: many(harvests, { relationName: 'locationHarvests' }),

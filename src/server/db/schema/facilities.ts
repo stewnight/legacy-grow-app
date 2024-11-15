@@ -68,7 +68,7 @@ export const facilities = createTable(
   })
 )
 
-const facilitiesRelations = relations(facilities, ({ one, many }) => ({
+export const facilitiesRelations = relations(facilities, ({ one, many }) => ({
   areas: many(areas, { relationName: 'facilityAreas' }),
   createdBy: one(users, {
     fields: [facilities.createdById],

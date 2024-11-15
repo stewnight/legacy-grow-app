@@ -12,8 +12,8 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { sensorTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { sensorReadings } from './sensorReadings' // Ensure this is correctly imported
-
+import { sensorReadings } from './sensorReadings'
+import { locations } from './locations'
 export const sensors = createTable(
   'sensor',
   {
@@ -54,11 +54,6 @@ export const sensors = createTable(
       }
     }>(),
     metadata: json('metadata').$type<{
-      location?: {
-        id: string
-        type: string
-        name: string
-      }
       installation: {
         date: string
         by: string
@@ -71,6 +66,9 @@ export const sensors = createTable(
         performedBy: string
       }>
     }>(),
+    locationId: uuid('location_id')
+      .notNull()
+      .references(() => locations.id),
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
@@ -93,12 +91,22 @@ export const sensors = createTable(
       table.manufacturer,
       table.model
     ),
+    locationIdx: index('sensor_location_idx').on(table.locationId),
   })
 )
 
-const sensorsRelations = relations(sensors, ({ many }) => ({
+export const sensorsRelations = relations(sensors, ({ one, many }) => ({
+  location: one(locations, {
+    fields: [sensors.locationId],
+    references: [locations.id],
+    relationName: 'sensorLocation',
+  }),
   readings: many(sensorReadings, { relationName: 'sensorReadings' }),
-  createdBy: many(users, { relationName: 'sensorCreator' }),
+  createdBy: one(users, {
+    fields: [sensors.createdById],
+    references: [users.id],
+    relationName: 'sensorCreator',
+  }),
 }))
 
 // Zod Schemas

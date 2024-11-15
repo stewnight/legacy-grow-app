@@ -4,6 +4,13 @@ import { batchRouter } from './routers/batch'
 import { plantRouter } from './routers/plant'
 import { notesRouter } from './routers/notes'
 import { mediaRouter } from './routers/media'
+import { locationRouter } from './routers/location'
+import { areaRouter } from './routers/area'
+import { facilityRouter } from './routers/facility'
+import { sensorRouter } from './routers/sensor'
+import { taskRouter } from './routers/task'
+import { harvestRouter } from './routers/harvest'
+import { processingRouter } from './routers/processing'
 
 export const appRouter = createTRPCRouter({
   genetic: geneticRouter,
@@ -11,6 +18,13 @@ export const appRouter = createTRPCRouter({
   plant: plantRouter,
   notes: notesRouter,
   media: mediaRouter,
+  location: locationRouter,
+  area: areaRouter,
+  facility: facilityRouter,
+  sensor: sensorRouter,
+  task: taskRouter,
+  harvest: harvestRouter,
+  processing: processingRouter,
 })
 
 export type AppRouter = typeof appRouter

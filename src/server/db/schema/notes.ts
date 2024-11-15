@@ -88,7 +88,7 @@ export const notes = createTable(
 )
 
 // Relationships
-const notesRelations = relations(notes, ({ one, many }) => ({
+export const notesRelations = relations(notes, ({ one, many }) => ({
   parent: one(notes, {
     fields: [notes.parentId],
     references: [notes.id],

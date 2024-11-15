@@ -99,7 +99,7 @@ export const tasks = createTable(
 )
 
 // Relationships
-const tasksRelations = relations(tasks, ({ one, many }) => ({
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
   assignedTo: one(users, {
     fields: [tasks.assignedToId],
     references: [users.id],
