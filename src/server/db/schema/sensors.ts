@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -12,27 +12,23 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { sensorTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { locations } from './locations'
+import { sensorReadings } from './sensorReadings' // Ensure this is correctly imported
 
 export const sensors = createTable(
   'sensor',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     identifier: varchar('identifier', { length: 100 }).notNull().unique(),
-    locationId: uuid('location_id')
-      .notNull()
-      .references(() => locations.id),
     type: sensorTypeEnum('type').notNull(),
     manufacturer: varchar('manufacturer', { length: 255 }),
     model: varchar('model', { length: 255 }),
     serialNumber: varchar('serial_number', { length: 100 }),
-    // Calibration tracking
     lastCalibration: timestamp('last_calibration', { withTimezone: true }),
     nextCalibration: timestamp('next_calibration', { withTimezone: true }),
     calibrationInterval: numeric('calibration_interval', {
       precision: 5,
       scale: 2,
-    }), // in days
+    }),
     specifications: json('specifications').$type<{
       range: {
         min: number
@@ -57,52 +53,23 @@ export const sensors = createTable(
         type: 'AC' | 'DC'
       }
     }>(),
-    configuration: json('configuration').$type<{
-      readingInterval: number // in seconds
-      alarmThresholds?: {
-        low: number
-        high: number
-        criticalLow?: number
-        criticalHigh?: number
-      }
-      connectivity: {
-        type: 'wifi' | 'bluetooth' | 'ethernet' | 'zigbee'
-        address?: string
-        protocol?: string
-        port?: number
-      }
-      calibrationPoints?: Array<{
-        expected: number
-        measured: number
-        unit: string
-      }>
-    }>(),
     metadata: json('metadata').$type<{
+      location?: {
+        id: string
+        type: string
+        name: string
+      }
       installation: {
         date: string
         by: string
         notes?: string
-        height?: number
-        orientation?: string
       }
-      maintenance: Array<{
+      maintenance?: Array<{
         date: string
         type: string
         description: string
         performedBy: string
-        parts?: string[]
       }>
-      firmware?: {
-        version: string
-        lastUpdated: string
-        updateAvailable?: boolean
-      }
-      warranty?: {
-        startDate: string
-        endDate: string
-        provider: string
-        details: string
-      }
     }>(),
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
@@ -119,7 +86,6 @@ export const sensors = createTable(
   },
   (table) => ({
     identifierIdx: index('sensor_identifier_idx').on(table.identifier),
-    locationIdIdx: index('sensor_location_id_idx').on(table.locationId),
     typeIdx: index('sensor_type_idx').on(table.type),
     statusIdx: index('sensor_status_idx').on(table.status),
     calibrationIdx: index('sensor_calibration_idx').on(table.nextCalibration),
@@ -129,6 +95,11 @@ export const sensors = createTable(
     ),
   })
 )
+
+const sensorsRelations = relations(sensors, ({ many }) => ({
+  readings: many(sensorReadings, { relationName: 'sensorReadings' }),
+  createdBy: many(users, { relationName: 'sensorCreator' }),
+}))
 
 // Zod Schemas
 export const insertSensorSchema = createInsertSchema(sensors)

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -12,6 +12,12 @@ import { createTable } from '../utils'
 import { locationTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { areas } from './areas'
+import { plants } from './plants'
+import { tasks } from './tasks'
+import { batches } from './batches'
+import { sensors } from './sensors'
+import { harvests } from './harvests'
+import { processing } from './processing'
 
 export const locations = createTable(
   'location',
@@ -67,6 +73,24 @@ export const locations = createTable(
     statusIdx: index('location_status_idx').on(table.status),
   })
 )
+const locationsRelations = relations(locations, ({ one, many }) => ({
+  area: one(areas, {
+    fields: [locations.areaId],
+    references: [areas.id],
+    relationName: 'areaLocations',
+  }),
+  plants: many(plants, { relationName: 'locationPlants' }),
+  sensors: many(sensors, { relationName: 'locationSensors' }),
+  batches: many(batches, { relationName: 'locationBatches' }),
+  tasks: many(tasks, { relationName: 'locationTasks' }),
+  harvests: many(harvests, { relationName: 'locationHarvests' }),
+  processing: many(processing, { relationName: 'locationProcessing' }),
+  createdBy: one(users, {
+    fields: [locations.createdById],
+    references: [users.id],
+    relationName: 'locationCreator',
+  }),
+}))
 
 // Zod Schemas
 export const insertLocationSchema = createInsertSchema(locations)

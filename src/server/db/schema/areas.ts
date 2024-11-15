@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, relations } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -6,6 +6,7 @@ import {
   timestamp,
   json,
   uuid,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
@@ -21,6 +22,9 @@ export const areas = createTable(
     facilityId: uuid('facility_id')
       .notNull()
       .references(() => facilities.id, { onDelete: 'cascade' }),
+    parentId: uuid('parent_id').references((): AnyPgColumn => areas.id, {
+      onDelete: 'cascade',
+    }),
     name: varchar('name', { length: 255 }).notNull(),
     type: areaTypeEnum('type').notNull(),
     properties: json('properties').$type<{
@@ -53,14 +57,34 @@ export const areas = createTable(
     typeIdx: index('area_type_idx').on(table.type),
     facilityIdIdx: index('area_facility_id_idx').on(table.facilityId),
     statusIdx: index('area_status_idx').on(table.status),
+    parentIdIdx: index('area_parent_id_idx').on(table.parentId),
   })
 )
-// Zod Schemas
 
+// ================== RELATIONS ==================
+export const areasRelations = relations(areas, ({ one, many }) => ({
+  facility: one(facilities, {
+    fields: [areas.facilityId],
+    references: [facilities.id],
+    relationName: 'facilityAreas',
+  }),
+  parent: one(areas, {
+    fields: [areas.parentId],
+    references: [areas.id],
+    relationName: 'parentArea',
+  }),
+  children: many(areas, { relationName: 'parentArea' }),
+  createdBy: one(users, {
+    fields: [areas.createdById],
+    references: [users.id],
+    relationName: 'areaCreator',
+  }),
+}))
+
+// ================== SCHEMAS ==================
 export const insertAreaSchema = createInsertSchema(areas)
 export const selectAreaSchema = createSelectSchema(areas)
 
-// Types
-
+// ================== TYPES ==================
 export type Area = typeof areas.$inferSelect
 export type NewArea = typeof areas.$inferInsert

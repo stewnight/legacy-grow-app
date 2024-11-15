@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -17,6 +17,7 @@ import {
   statusEnum,
 } from './enums'
 import { users } from './core'
+import { notes } from './notes'
 
 export const tasks = createTable(
   'task',
@@ -96,6 +97,21 @@ export const tasks = createTable(
     statusIdx: index('task_general_status_idx').on(table.status),
   })
 )
+
+// Relationships
+const tasksRelations = relations(tasks, ({ one, many }) => ({
+  assignedTo: one(users, {
+    fields: [tasks.assignedToId],
+    references: [users.id],
+    relationName: 'assignedTasks',
+  }),
+  notes: many(notes, { relationName: 'taskNotes' }),
+  createdBy: one(users, {
+    fields: [tasks.createdById],
+    references: [users.id],
+    relationName: 'taskCreator',
+  }),
+}))
 
 // Zod Schemas
 export const insertTaskSchema = createInsertSchema(tasks)

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -10,11 +10,20 @@ import {
   json,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { facilities } from './facilities'
+import { areas } from './areas'
+import { locations } from './locations'
+import { plants } from './plants'
+import { genetics } from './genetics'
+import { batches } from './batches'
 import { type AdapterAccount } from 'next-auth/adapters'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
 import { logLevelEnum, systemLogSourceEnum, userRoleEnum } from './enums'
+import { tasks } from './tasks'
+import { sensors } from './sensors'
+import { harvests, notes, processing } from '.'
 
 // ================== SYSTEM LOGS ==================
 export const systemLogs = createTable(
@@ -143,6 +152,49 @@ export const verificationTokens = createTable(
     expiresIdx: index('verification_token_expires_idx').on(table.expires),
   })
 )
+
+/**
+ * Core user relations including all created and assigned entities
+ * @remarks
+ * Users can create multiple entities and be assigned to tasks
+ */
+const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts, { relationName: 'userAccounts' }),
+  sessions: many(sessions, { relationName: 'userSessions' }),
+  // Created entities
+  createdFacilities: many(facilities, { relationName: 'facilityCreator' }),
+  createdAreas: many(areas, { relationName: 'areaCreator' }),
+  createdLocations: many(locations, { relationName: 'locationCreator' }),
+  createdPlants: many(plants, { relationName: 'plantCreator' }),
+  createdGenetics: many(genetics, { relationName: 'geneticCreator' }),
+  createdBatches: many(batches, { relationName: 'batchCreator' }),
+  createdTasks: many(tasks, { relationName: 'taskCreator' }),
+  createdSensors: many(sensors, { relationName: 'sensorCreator' }),
+  createdHarvests: many(harvests, { relationName: 'harvestCreator' }),
+  createdProcessing: many(processing, { relationName: 'processingCreator' }),
+  createdNotes: many(notes, { relationName: 'noteCreator' }),
+  // Assigned entities
+  assignedTasks: many(tasks, { relationName: 'assignedTasks' }),
+}))
+
+/**
+ * Authentication relations for NextAuth.js
+ */
+const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+    relationName: 'userAccounts',
+  }),
+}))
+
+const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+    relationName: 'userSessions',
+  }),
+}))
 
 // Zod Schemas
 export const insertUserSchema = createInsertSchema(users)

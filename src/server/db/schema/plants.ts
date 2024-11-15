@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -7,6 +7,7 @@ import {
   uuid,
   date,
   text,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
@@ -20,6 +21,8 @@ import {
 import { users } from './core'
 import { locations } from './locations'
 import { genetics } from './genetics'
+import { notes } from './notes'
+import { batches } from './batches'
 
 export const plants = createTable(
   'plant',
@@ -32,6 +35,8 @@ export const plants = createTable(
     locationId: uuid('location_id')
       .notNull()
       .references(() => locations.id),
+    batchId: uuid('batch_id').references(() => batches.id),
+    motherId: uuid('mother_id').references((): AnyPgColumn => plants.id),
     source: plantSourceEnum('source').notNull(),
     stage: plantStageEnum('stage').notNull(),
     sex: plantSexEnum('sex').default('unknown').notNull(),
@@ -51,10 +56,8 @@ export const plants = createTable(
         lastTrained?: string
         nextTraining?: string
       }
-    }>(),
+    }>(), // Environmental properties
     metadata: json('metadata').$type<{
-      motherIdentifier?: string
-      batchNumber?: string
       generation?: number
       clonedFrom?: string
       germination?: {
@@ -62,7 +65,7 @@ export const plants = createTable(
         method: string
         medium: string
       }
-    }>(),
+    }>(), // Metadata
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
     destroyedAt: timestamp('destroyed_at', { withTimezone: true }),
@@ -82,12 +85,45 @@ export const plants = createTable(
     identifierIdx: index('plant_identifier_idx').on(table.identifier),
     geneticIdIdx: index('plant_genetic_id_idx').on(table.geneticId),
     locationIdIdx: index('plant_location_id_idx').on(table.locationId),
+    batchIdIdx: index('plant_batch_id_idx').on(table.batchId),
+    motherIdIdx: index('plant_mother_id_idx').on(table.motherId),
     stageIdx: index('plant_stage_idx').on(table.stage),
     healthIdx: index('plant_health_idx').on(table.health),
     statusIdx: index('plant_status_idx').on(table.status),
     plantedDateIdx: index('plant_planted_date_idx').on(table.plantedDate),
   })
 )
+
+// ================== RELATIONS ==================
+const plantsRelations = relations(plants, ({ one, many }) => ({
+  genetic: one(genetics, {
+    fields: [plants.geneticId],
+    references: [genetics.id],
+    relationName: 'geneticPlants',
+  }),
+  location: one(locations, {
+    fields: [plants.locationId],
+    references: [locations.id],
+    relationName: 'locationPlants',
+  }),
+  batch: one(batches, {
+    fields: [plants.batchId],
+    references: [batches.id],
+    relationName: 'batchPlants',
+  }),
+  mother: one(plants, {
+    fields: [plants.motherId],
+    references: [plants.id],
+    relationName: 'motherPlant',
+  }),
+  children: many(plants, { relationName: 'motherPlant' }),
+  notes: many(notes, { relationName: 'plantNotes' }),
+  createdBy: one(users, {
+    fields: [plants.createdById],
+    references: [users.id],
+    relationName: 'plantCreator',
+  }),
+}))
 
 // Zod Schemas
 export const insertPlantSchema = createInsertSchema(plants)

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -12,6 +12,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { facilityTypeEnum, statusEnum } from './enums'
 import { users } from './core'
+import { areas } from './areas'
 
 // ================== FACILITIES ==================
 export const facilities = createTable(
@@ -66,6 +67,15 @@ export const facilities = createTable(
     licenseIdx: index('facility_license_idx').on(table.licenseNumber),
   })
 )
+
+const facilitiesRelations = relations(facilities, ({ one, many }) => ({
+  areas: many(areas, { relationName: 'facilityAreas' }),
+  createdBy: one(users, {
+    fields: [facilities.createdById],
+    references: [users.id],
+    relationName: 'facilityCreator',
+  }),
+}))
 
 // Zod Schemas
 export const insertFacilitySchema = createInsertSchema(facilities)

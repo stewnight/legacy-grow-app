@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -6,6 +6,7 @@ import {
   json,
   uuid,
   text,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
@@ -19,9 +20,11 @@ export const notes = createTable(
     type: noteTypeEnum('type').default('text').notNull(),
     title: varchar('title', { length: 255 }),
     content: text('content'),
-    // Generic reference fields for linking to any entity
     entityId: uuid('entity_id').notNull(),
     entityType: varchar('entity_type', { length: 50 }).notNull(),
+    parentId: uuid('parent_id').references((): AnyPgColumn => notes.id, {
+      onDelete: 'cascade',
+    }),
     properties: json('properties').$type<{
       tags?: string[]
       priority?: 'low' | 'medium' | 'high'
@@ -83,6 +86,21 @@ export const notes = createTable(
     createdAtIdx: index('note_created_at_idx').on(table.createdAt),
   })
 )
+
+// Relationships
+const notesRelations = relations(notes, ({ one, many }) => ({
+  parent: one(notes, {
+    fields: [notes.parentId],
+    references: [notes.id],
+    relationName: 'parentNote',
+  }),
+  children: many(notes, { relationName: 'parentNote' }),
+  createdBy: one(users, {
+    fields: [notes.createdById],
+    references: [users.id],
+    relationName: 'noteCreator',
+  }),
+}))
 
 // Zod Schemas
 export const insertNoteSchema = createInsertSchema(notes)
