@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type genetics } from '~/server/db/schema'
+import { type locations } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -15,21 +15,19 @@ import {
 import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
-import { BaseSheet } from '../../../components/base-sheet'
-import { GeneticForm } from './genetics-form'
 
-export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
+export const columns: ColumnDef<typeof locations.$inferSelect>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => {
-      const genetic = row.original
+      const location = row.original
       return (
         <Link
-          href={`/genetics/${genetic.id}`}
+          href={`/locations/${location.id}`}
           className="font-medium hover:underline"
         >
-          {genetic.name}
+          {location.name}
         </Link>
       )
     },
@@ -42,15 +40,8 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
     },
   },
   {
-    accessorKey: 'breeder',
-    header: 'Breeder',
-  },
-  {
-    accessorKey: 'inHouse',
-    header: 'In House',
-    cell: ({ row }) => {
-      return row.getValue('inHouse') ? 'Yes' : 'No'
-    },
+    accessorKey: 'capacity',
+    header: 'Capacity',
   },
   {
     accessorKey: 'status',
@@ -62,18 +53,18 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const genetic = row.original
+      const location = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
 
-      const { mutate: deleteGenetic } = api.genetic.delete.useMutation({
+      const { mutate: deleteLocation } = api.location.delete.useMutation({
         onSuccess: () => {
-          toast({ title: 'Genetic deleted successfully' })
-          void utils.genetic.getAll.invalidate()
+          toast({ title: 'Location deleted successfully' })
+          void utils.location.getAll.invalidate()
         },
         onError: (error) => {
           toast({
-            title: 'Error deleting genetic',
+            title: 'Error deleting location',
             description: error.message,
             variant: 'destructive',
           })
@@ -91,19 +82,16 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/genetics/${genetic.id}`}>View Details</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <BaseSheet mode="edit" entity="genetic"></BaseSheet>
+              <Link href={`/locations/${location.id}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 if (
                   window.confirm(
-                    'Are you sure you want to delete this genetic?'
+                    'Are you sure you want to delete this location?'
                   )
                 ) {
-                  deleteGenetic(genetic.id)
+                  deleteLocation(location.id)
                 }
               }}
               className="text-red-600"

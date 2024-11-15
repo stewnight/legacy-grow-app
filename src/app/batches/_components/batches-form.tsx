@@ -34,7 +34,7 @@ type BatchFormValues = z.infer<typeof insertBatchSchema>
 
 interface BatchesFormProps {
   mode: 'create' | 'edit'
-  defaultValues?: RouterOutputs['batch']['get'] // Fix defaultValues type
+  defaultValues?: RouterOutputs['batch']['get']
   onSuccess?: () => void
 }
 

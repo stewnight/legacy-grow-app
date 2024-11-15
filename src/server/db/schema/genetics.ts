@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -12,6 +12,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { geneticTypeEnum, statusEnum } from './enums'
 import { users } from './core'
+import { batches } from './batches'
 
 export const genetics = createTable(
   'genetic',
@@ -88,6 +89,14 @@ export const genetics = createTable(
     inHouseIdx: index('genetic_in_house_idx').on(table.inHouse),
   })
 )
+
+export const geneticsRelations = relations(genetics, ({ one, many }) => ({
+  batches: many(batches),
+  createdBy: one(users, {
+    fields: [genetics.createdById],
+    references: [users.id],
+  }),
+}))
 
 // Zod Schemas
 export const insertGeneticSchema = createInsertSchema(genetics)

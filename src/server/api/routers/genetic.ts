@@ -41,6 +41,7 @@ export const geneticRouter = createTRPCRouter({
         offset: cursor || 0,
         orderBy: [desc(genetics.createdAt)],
         with: {
+          batches: true,
           createdBy: {
             columns: {
               id: true,
@@ -66,6 +67,7 @@ export const geneticRouter = createTRPCRouter({
       const genetic = await ctx.db.query.genetics.findFirst({
         where: eq(genetics.id, input),
         with: {
+          batches: true,
           createdBy: {
             columns: {
               id: true,
