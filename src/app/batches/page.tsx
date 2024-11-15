@@ -6,18 +6,20 @@ import { DataTable } from '../../components/ui/data-table'
 import { columns } from './_components/batches-columns'
 import { api } from '../../trpc/server'
 import { BaseSheet } from '../../components/base-sheet'
-import { Form } from '~/components/ui/form'
 import { BatchesForm } from './_components/batches-form'
 
 export default async function BatchesPage() {
   const session = await auth()
-  const batches = api.batch.getAll({
-    limit: 100,
-  })
-
   if (!session) {
     redirect('/')
   }
+
+  const { items: batches } = await api.batch.getAll({
+    limit: 100,
+    filters: {
+      status: 'active',
+    },
+  })
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -31,7 +33,8 @@ export default async function BatchesPage() {
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
           <DataTable
             columns={columns}
-            data={batches.then((data) => data.items)}
+            data={batches}
+            filterColumn="identifier"
           />
         </Suspense>
       </div>

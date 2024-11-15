@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, relations } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -16,7 +16,6 @@ import { users } from './core'
 import { genetics } from './genetics'
 import { locations } from './locations'
 
-// Define JSON field types
 export interface BatchProperties {
   source?: 'seed' | 'clone' | 'tissue_culture'
   medium?: string
@@ -84,6 +83,21 @@ export const batches = createTable(
     statusIdx: index('batch_general_status_idx').on(table.status),
   })
 )
+
+export const batchesRelations = relations(batches, ({ one }) => ({
+  genetic: one(genetics, {
+    fields: [batches.geneticId],
+    references: [genetics.id],
+  }),
+  location: one(locations, {
+    fields: [batches.locationId],
+    references: [locations.id],
+  }),
+  createdBy: one(users, {
+    fields: [batches.createdById],
+    references: [users.id],
+  }),
+}))
 
 // Zod Schemas
 export const insertBatchSchema = createInsertSchema(batches)
