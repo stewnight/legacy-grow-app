@@ -1,63 +1,45 @@
-// src/server/api/routers/plant.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { plants, insertPlantSchema } from '~/server/db/schema'
-import { eq, desc, like, and, or, SQL } from 'drizzle-orm'
+import { processing, insertProcessingSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import {
-  plantStageEnum,
-  plantSourceEnum,
-  plantSexEnum,
-  healthStatusEnum,
-  statusEnum,
-} from '~/server/db/schema/enums'
+import { batchStatusEnum, harvestQualityEnum } from '~/server/db/schema/enums'
 
 // Schema for filters
-const plantFiltersSchema = z.object({
-  stage: z.enum(plantStageEnum.enumValues).optional(),
-  source: z.enum(plantSourceEnum.enumValues).optional(),
-  sex: z.enum(plantSexEnum.enumValues).optional(),
-  health: z.enum(healthStatusEnum.enumValues).optional(),
-  status: z.enum(statusEnum.enumValues).optional(),
+const processingFiltersSchema = z.object({
+  status: z.enum(batchStatusEnum.enumValues).optional(),
+  quality: z.enum(harvestQualityEnum.enumValues).optional(),
   search: z.string().optional(),
 })
 
-export const plantRouter = createTRPCRouter({
+export const processingRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(10),
         cursor: z.number().nullish(),
-        filters: plantFiltersSchema.optional(),
+        filters: processingFiltersSchema.optional(),
       })
     )
     .query(async ({ ctx, input }) => {
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.stage ? eq(plants.stage, filters.stage) : undefined,
-        filters?.source ? eq(plants.source, filters.source) : undefined,
-        filters?.sex ? eq(plants.sex, filters.sex) : undefined,
-        filters?.health ? eq(plants.health, filters.health) : undefined,
-        filters?.status ? eq(plants.status, filters.status) : undefined,
+        filters?.status
+          ? eq(processing.processStatus, filters.status)
+          : undefined,
+        filters?.quality ? eq(processing.quality, filters.quality) : undefined,
         filters?.search
-          ? or(
-              like(plants.identifier, `%${filters.search}%`),
-              like(plants.notes || '', `%${filters.search}%`)
-            )
+          ? like(processing.identifier, `%${filters.search}%`)
           : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
-      const items = await ctx.db.query.plants.findMany({
+      const items = await ctx.db.query.processing.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(plants.createdAt)],
+        orderBy: [desc(processing.createdAt)],
         with: {
-          genetic: true,
-          location: true,
-          batch: true,
-          mother: true,
           createdBy: {
             columns: {
               id: true,
@@ -80,14 +62,9 @@ export const plantRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
-      const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.id, input),
+      const process = await ctx.db.query.processing.findFirst({
+        where: eq(processing.id, input),
         with: {
-          genetic: true,
-          location: true,
-          batch: true,
-          mother: true,
-          children: true,
           createdBy: {
             columns: {
               id: true,
@@ -98,19 +75,19 @@ export const plantRouter = createTRPCRouter({
         },
       })
 
-      if (!plant) {
+      if (!process) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Processing record not found',
         })
       }
 
-      return plant
+      return process
     }),
 
   create: protectedProcedure
     .input(
-      insertPlantSchema.omit({
+      insertProcessingSchema.omit({
         id: true,
         createdAt: true,
         updatedAt: true,
@@ -118,33 +95,34 @@ export const plantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input
+      const { properties, metadata, labResults, ...rest } = input
 
-      const [plant] = await ctx.db
-        .insert(plants)
+      const [process] = await ctx.db
+        .insert(processing)
         .values({
           ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
+          properties: properties as typeof processing.$inferInsert.properties,
+          metadata: metadata as typeof processing.$inferInsert.metadata,
+          labResults: labResults as typeof processing.$inferInsert.labResults,
           createdById: ctx.session.user.id,
         })
         .returning()
 
-      if (!plant) {
+      if (!process) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create plant',
+          message: 'Failed to create processing record',
         })
       }
 
-      return plant
+      return process
     }),
 
   update: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertPlantSchema.partial().omit({
+        data: insertProcessingSchema.partial().omit({
           id: true,
           createdAt: true,
           updatedAt: true,
@@ -153,41 +131,42 @@ export const plantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input.data
+      const { properties, metadata, labResults, ...rest } = input.data
 
-      const [plant] = await ctx.db
-        .update(plants)
+      const [process] = await ctx.db
+        .update(processing)
         .set({
           ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
+          properties: properties as typeof processing.$inferInsert.properties,
+          metadata: metadata as typeof processing.$inferInsert.metadata,
+          labResults: labResults as typeof processing.$inferInsert.labResults,
           updatedAt: new Date(),
         })
-        .where(eq(plants.id, input.id))
+        .where(eq(processing.id, input.id))
         .returning()
 
-      if (!plant) {
+      if (!process) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Processing record not found',
         })
       }
 
-      return plant
+      return process
     }),
 
   delete: protectedProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
       const [deleted] = await ctx.db
-        .delete(plants)
-        .where(eq(plants.id, input))
+        .delete(processing)
+        .where(eq(processing.id, input))
         .returning()
 
       if (!deleted) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Processing record not found',
         })
       }
 

@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { batches, insertBatchSchema } from '~/server/db/schema'
-import { batchStatusEnum } from '~/server/db/schema/enums'
 import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
+import { batchStatusEnum } from '~/server/db/schema/enums'
 
+// Schema for filters
 const batchFiltersSchema = z.object({
   status: z.enum(batchStatusEnum.enumValues).optional(),
   search: z.string().optional(),
@@ -23,8 +24,10 @@ export const batchRouter = createTRPCRouter({
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.status ? eq(batches.status, filters.status) : undefined,
-        filters?.search ? like(batches.code, `%${filters.search}%`) : undefined,
+        filters?.status ? eq(batches.batchStatus, filters.status) : undefined,
+        filters?.search
+          ? like(batches.identifier, `%${filters.search}%`)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.batches.findMany({
@@ -35,7 +38,6 @@ export const batchRouter = createTRPCRouter({
         with: {
           genetic: true,
           location: true,
-          plants: true,
           createdBy: {
             columns: {
               id: true,
@@ -55,48 +57,52 @@ export const batchRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const batch = await ctx.db.query.batches.findFirst({
-      where: eq(batches.code, input),
-      with: {
-        genetic: true,
-        location: true,
-        plants: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const batch = await ctx.db.query.batches.findFirst({
+        where: eq(batches.id, input),
+        with: {
+          genetic: true,
+          location: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!batch) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Batch not found',
       })
-    }
 
-    return batch
-  }),
+      if (!batch) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Batch not found',
+        })
+      }
+
+      return batch
+    }),
 
   create: protectedProcedure
     .input(
       insertBatchSchema.omit({
         id: true,
-        code: true,
         createdAt: true,
         updatedAt: true,
         createdById: true,
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { properties, metadata, ...rest } = input
+
       const [batch] = await ctx.db
         .insert(batches)
         .values({
-          ...input,
+          ...rest,
+          properties: properties as typeof batches.$inferInsert.properties,
+          metadata: metadata as typeof batches.$inferInsert.metadata,
           createdById: ctx.session.user.id,
         })
         .returning()
@@ -114,10 +120,9 @@ export const batchRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        code: z.string(),
+        id: z.string().uuid(),
         data: insertBatchSchema.partial().omit({
           id: true,
-          code: true,
           createdAt: true,
           updatedAt: true,
           createdById: true,
@@ -125,10 +130,17 @@ export const batchRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { properties, metadata, ...rest } = input.data
+
       const [batch] = await ctx.db
         .update(batches)
-        .set({ ...input.data, updatedAt: new Date() })
-        .where(eq(batches.code, input.code))
+        .set({
+          ...rest,
+          properties: properties as typeof batches.$inferInsert.properties,
+          metadata: metadata as typeof batches.$inferInsert.metadata,
+          updatedAt: new Date(),
+        })
+        .where(eq(batches.id, input.id))
         .returning()
 
       if (!batch) {
@@ -142,8 +154,20 @@ export const batchRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .input(z.string())
+    .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(batches).where(eq(batches.id, input))
+      const [deleted] = await ctx.db
+        .delete(batches)
+        .where(eq(batches.id, input))
+        .returning()
+
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Batch not found',
+        })
+      }
+
+      return { success: true }
     }),
 })

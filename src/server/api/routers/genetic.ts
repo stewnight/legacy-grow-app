@@ -1,18 +1,17 @@
+// src/server/api/routers/genetic.ts
 import { z } from 'zod'
-import { desc, eq, and, sql, like, SQL } from 'drizzle-orm'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import {
-  genetics,
-  insertGeneticSchema,
-  selectGeneticSchema,
-  plants,
-  batches,
-} from '~/server/db/schema'
-import { geneticTypeEnum } from '~/server/db/schema/enums'
+import { genetics, insertGeneticSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
+import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
+// Schema for filters
 const geneticFiltersSchema = z.object({
   type: z.enum(geneticTypeEnum.enumValues).optional(),
+  status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
+  inHouse: z.boolean().optional(),
 })
 
 export const geneticRouter = createTRPCRouter({
@@ -29,6 +28,8 @@ export const geneticRouter = createTRPCRouter({
 
       const conditions = [
         filters?.type ? eq(genetics.type, filters.type) : undefined,
+        filters?.status ? eq(genetics.status, filters.status) : undefined,
+        filters?.inHouse ? eq(genetics.inHouse, filters.inHouse) : undefined,
         filters?.search
           ? like(genetics.name, `%${filters.search}%`)
           : undefined,
@@ -39,6 +40,15 @@ export const geneticRouter = createTRPCRouter({
         limit: limit + 1,
         offset: cursor || 0,
         orderBy: [desc(genetics.createdAt)],
+        with: {
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
       })
 
       let nextCursor: typeof cursor | undefined = undefined
@@ -50,16 +60,31 @@ export const geneticRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const genetic = await ctx.db.query.genetics.findFirst({
-      where: eq(genetics.slug, input),
-      with: {
-        batches: true,
-        plants: true,
-      },
-    })
-    return genetic
-  }),
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const genetic = await ctx.db.query.genetics.findFirst({
+        where: eq(genetics.id, input),
+        with: {
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      })
+
+      if (!genetic) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Genetic not found',
+        })
+      }
+
+      return genetic
+    }),
 
   create: protectedProcedure
     .input(
@@ -67,24 +92,38 @@ export const geneticRouter = createTRPCRouter({
         id: true,
         createdAt: true,
         updatedAt: true,
+        createdById: true,
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { properties, growProperties, lineage, ...rest } = input
+
       const [genetic] = await ctx.db
         .insert(genetics)
         .values({
-          ...input,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          ...rest,
+          properties: properties as typeof genetics.$inferInsert.properties,
+          growProperties:
+            growProperties as typeof genetics.$inferInsert.growProperties,
+          lineage: lineage as typeof genetics.$inferInsert.lineage,
+          createdById: ctx.session.user.id,
         })
         .returning()
+
+      if (!genetic) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create genetic',
+        })
+      }
+
       return genetic
     }),
 
   update: protectedProcedure
     .input(
       z.object({
-        slug: z.string(),
+        id: z.string().uuid(),
         data: insertGeneticSchema.partial().omit({
           id: true,
           createdAt: true,
@@ -94,20 +133,46 @@ export const geneticRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { properties, growProperties, lineage, ...rest } = input.data
+
       const [genetic] = await ctx.db
         .update(genetics)
         .set({
-          ...input.data,
+          ...rest,
+          properties: properties as typeof genetics.$inferInsert.properties,
+          growProperties:
+            growProperties as typeof genetics.$inferInsert.growProperties,
+          lineage: lineage as typeof genetics.$inferInsert.lineage,
           updatedAt: new Date(),
         })
         .where(eq(genetics.id, input.id))
         .returning()
+
+      if (!genetic) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Genetic not found',
+        })
+      }
+
       return genetic
     }),
 
   delete: protectedProcedure
-    .input(z.string())
+    .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(genetics).where(eq(genetics.id, input))
+      const [deleted] = await ctx.db
+        .delete(genetics)
+        .where(eq(genetics.id, input))
+        .returning()
+
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Genetic not found',
+        })
+      }
+
+      return { success: true }
     }),
 })

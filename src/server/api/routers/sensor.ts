@@ -1,63 +1,43 @@
-// src/server/api/routers/plant.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { plants, insertPlantSchema } from '~/server/db/schema'
-import { eq, desc, like, and, or, SQL } from 'drizzle-orm'
+import { sensors, insertSensorSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import {
-  plantStageEnum,
-  plantSourceEnum,
-  plantSexEnum,
-  healthStatusEnum,
-  statusEnum,
-} from '~/server/db/schema/enums'
+import { sensorTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
 // Schema for filters
-const plantFiltersSchema = z.object({
-  stage: z.enum(plantStageEnum.enumValues).optional(),
-  source: z.enum(plantSourceEnum.enumValues).optional(),
-  sex: z.enum(plantSexEnum.enumValues).optional(),
-  health: z.enum(healthStatusEnum.enumValues).optional(),
+const sensorFiltersSchema = z.object({
+  type: z.enum(sensorTypeEnum.enumValues).optional(),
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
 })
 
-export const plantRouter = createTRPCRouter({
+export const sensorRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(10),
         cursor: z.number().nullish(),
-        filters: plantFiltersSchema.optional(),
+        filters: sensorFiltersSchema.optional(),
       })
     )
     .query(async ({ ctx, input }) => {
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.stage ? eq(plants.stage, filters.stage) : undefined,
-        filters?.source ? eq(plants.source, filters.source) : undefined,
-        filters?.sex ? eq(plants.sex, filters.sex) : undefined,
-        filters?.health ? eq(plants.health, filters.health) : undefined,
-        filters?.status ? eq(plants.status, filters.status) : undefined,
+        filters?.type ? eq(sensors.type, filters.type) : undefined,
+        filters?.status ? eq(sensors.status, filters.status) : undefined,
         filters?.search
-          ? or(
-              like(plants.identifier, `%${filters.search}%`),
-              like(plants.notes || '', `%${filters.search}%`)
-            )
+          ? like(sensors.identifier, `%${filters.search}%`)
           : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
-      const items = await ctx.db.query.plants.findMany({
+      const items = await ctx.db.query.sensors.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(plants.createdAt)],
+        orderBy: [desc(sensors.createdAt)],
         with: {
-          genetic: true,
-          location: true,
-          batch: true,
-          mother: true,
           createdBy: {
             columns: {
               id: true,
@@ -80,14 +60,9 @@ export const plantRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
-      const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.id, input),
+      const sensor = await ctx.db.query.sensors.findFirst({
+        where: eq(sensors.id, input),
         with: {
-          genetic: true,
-          location: true,
-          batch: true,
-          mother: true,
-          children: true,
           createdBy: {
             columns: {
               id: true,
@@ -95,22 +70,26 @@ export const plantRouter = createTRPCRouter({
               email: true,
             },
           },
+          readings: {
+            limit: 100,
+            orderBy: [desc(sensors.createdAt)],
+          },
         },
       })
 
-      if (!plant) {
+      if (!sensor) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Sensor not found',
         })
       }
 
-      return plant
+      return sensor
     }),
 
   create: protectedProcedure
     .input(
-      insertPlantSchema.omit({
+      insertSensorSchema.omit({
         id: true,
         createdAt: true,
         updatedAt: true,
@@ -118,33 +97,34 @@ export const plantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input
+      const { specifications, metadata, ...rest } = input
 
-      const [plant] = await ctx.db
-        .insert(plants)
+      const [sensor] = await ctx.db
+        .insert(sensors)
         .values({
           ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
+          specifications:
+            specifications as typeof sensors.$inferInsert.specifications,
+          metadata: metadata as typeof sensors.$inferInsert.metadata,
           createdById: ctx.session.user.id,
         })
         .returning()
 
-      if (!plant) {
+      if (!sensor) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create plant',
+          message: 'Failed to create sensor',
         })
       }
 
-      return plant
+      return sensor
     }),
 
   update: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertPlantSchema.partial().omit({
+        data: insertSensorSchema.partial().omit({
           id: true,
           createdAt: true,
           updatedAt: true,
@@ -153,41 +133,42 @@ export const plantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input.data
+      const { specifications, metadata, ...rest } = input.data
 
-      const [plant] = await ctx.db
-        .update(plants)
+      const [sensor] = await ctx.db
+        .update(sensors)
         .set({
           ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
+          specifications:
+            specifications as typeof sensors.$inferInsert.specifications,
+          metadata: metadata as typeof sensors.$inferInsert.metadata,
           updatedAt: new Date(),
         })
-        .where(eq(plants.id, input.id))
+        .where(eq(sensors.id, input.id))
         .returning()
 
-      if (!plant) {
+      if (!sensor) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Sensor not found',
         })
       }
 
-      return plant
+      return sensor
     }),
 
   delete: protectedProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
       const [deleted] = await ctx.db
-        .delete(plants)
-        .where(eq(plants.id, input))
+        .delete(sensors)
+        .where(eq(sensors.id, input))
         .returning()
 
       if (!deleted) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Sensor not found',
         })
       }
 

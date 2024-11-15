@@ -1,10 +1,15 @@
+// src/server/api/routers/facility.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { TRPCError } from '@trpc/server'
-import { and, desc, eq, like, SQL } from 'drizzle-orm'
 import { facilities, insertFacilitySchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
+import { facilityTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
+// Schema for filters
 const facilityFiltersSchema = z.object({
+  type: z.enum(facilityTypeEnum.enumValues).optional(),
+  status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
 })
 
@@ -21,6 +26,8 @@ export const facilityRouter = createTRPCRouter({
       const { limit, cursor, filters } = input
 
       const conditions = [
+        filters?.type ? eq(facilities.type, filters.type) : undefined,
+        filters?.status ? eq(facilities.status, filters.status) : undefined,
         filters?.search
           ? like(facilities.name, `%${filters.search}%`)
           : undefined,
@@ -30,8 +37,9 @@ export const facilityRouter = createTRPCRouter({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(facilities.updatedAt)],
+        orderBy: [desc(facilities.createdAt)],
         with: {
+          areas: true,
           createdBy: {
             columns: {
               id: true,
@@ -57,6 +65,11 @@ export const facilityRouter = createTRPCRouter({
       const facility = await ctx.db.query.facilities.findFirst({
         where: eq(facilities.id, input),
         with: {
+          areas: {
+            with: {
+              children: true,
+            },
+          },
           createdBy: {
             columns: {
               id: true,
@@ -78,12 +91,23 @@ export const facilityRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(insertFacilitySchema)
+    .input(
+      insertFacilitySchema.omit({
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        createdById: true,
+      })
+    )
     .mutation(async ({ ctx, input }) => {
+      const { properties, address, ...rest } = input
+
       const [facility] = await ctx.db
         .insert(facilities)
         .values({
-          ...input,
+          ...rest,
+          properties: properties as typeof facilities.$inferInsert.properties,
+          address: address as typeof facilities.$inferInsert.address,
           createdById: ctx.session.user.id,
         })
         .returning()
@@ -102,13 +126,25 @@ export const facilityRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertFacilitySchema.partial(),
+        data: insertFacilitySchema.partial().omit({
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          createdById: true,
+        }),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { properties, address, ...rest } = input.data
+
       const [facility] = await ctx.db
         .update(facilities)
-        .set({ ...input.data, updatedAt: new Date() })
+        .set({
+          ...rest,
+          properties: properties as typeof facilities.$inferInsert.properties,
+          address: address as typeof facilities.$inferInsert.address,
+          updatedAt: new Date(),
+        })
         .where(eq(facilities.id, input.id))
         .returning()
 
@@ -125,6 +161,18 @@ export const facilityRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(facilities).where(eq(facilities.id, input))
+      const [deleted] = await ctx.db
+        .delete(facilities)
+        .where(eq(facilities.id, input))
+        .returning()
+
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Facility not found',
+        })
+      }
+
+      return { success: true }
     }),
 })

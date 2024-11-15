@@ -16,6 +16,32 @@ import { users } from './core'
 import { genetics } from './genetics'
 import { locations } from './locations'
 
+// Define JSON field types
+export interface BatchProperties {
+  source?: 'seed' | 'clone' | 'tissue_culture'
+  medium?: string
+  container?: string
+  nutrients?: Array<{
+    name: string
+    schedule?: string
+    amount?: string
+  }>
+  environment?: {
+    temperature?: { min: number; max: number }
+    humidity?: { min: number; max: number }
+    light?: { hours: number; intensity?: number }
+  }
+}
+
+export interface BatchMetadata {
+  motherBatch?: string
+  generation?: number
+  phenotype?: string
+  selectionCriteria?: string[]
+  targetYield?: number
+}
+
+// Create table
 export const batches = createTable(
   'batch',
   {
@@ -33,28 +59,8 @@ export const batches = createTable(
     expectedEndDate: date('expected_end_date'),
     actualEndDate: date('actual_end_date'),
     plantCount: integer('plant_count').default(0),
-    properties: json('properties').$type<{
-      source?: 'seed' | 'clone' | 'tissue_culture'
-      medium?: string
-      container?: string
-      nutrients?: Array<{
-        name: string
-        schedule?: string
-        amount?: string
-      }>
-      environment?: {
-        temperature?: { min: number; max: number }
-        humidity?: { min: number; max: number }
-        light?: { hours: number; intensity?: number }
-      }
-    }>(),
-    metadata: json('metadata').$type<{
-      motherBatch?: string
-      generation?: number
-      phenotype?: string
-      selectionCriteria?: string[]
-      targetYield?: number
-    }>(),
+    properties: json('properties').$type<BatchProperties>(),
+    metadata: json('metadata').$type<BatchMetadata>(),
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')

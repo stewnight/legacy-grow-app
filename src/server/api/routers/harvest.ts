@@ -1,63 +1,45 @@
-// src/server/api/routers/plant.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { plants, insertPlantSchema } from '~/server/db/schema'
-import { eq, desc, like, and, or, SQL } from 'drizzle-orm'
+import { harvests, insertHarvestSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import {
-  plantStageEnum,
-  plantSourceEnum,
-  plantSexEnum,
-  healthStatusEnum,
-  statusEnum,
-} from '~/server/db/schema/enums'
+import { batchStatusEnum, harvestQualityEnum } from '~/server/db/schema/enums'
 
 // Schema for filters
-const plantFiltersSchema = z.object({
-  stage: z.enum(plantStageEnum.enumValues).optional(),
-  source: z.enum(plantSourceEnum.enumValues).optional(),
-  sex: z.enum(plantSexEnum.enumValues).optional(),
-  health: z.enum(healthStatusEnum.enumValues).optional(),
-  status: z.enum(statusEnum.enumValues).optional(),
+const harvestFiltersSchema = z.object({
+  status: z.enum(batchStatusEnum.enumValues).optional(),
+  quality: z.enum(harvestQualityEnum.enumValues).optional(),
   search: z.string().optional(),
 })
 
-export const plantRouter = createTRPCRouter({
+export const harvestRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(10),
         cursor: z.number().nullish(),
-        filters: plantFiltersSchema.optional(),
+        filters: harvestFiltersSchema.optional(),
       })
     )
     .query(async ({ ctx, input }) => {
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.stage ? eq(plants.stage, filters.stage) : undefined,
-        filters?.source ? eq(plants.source, filters.source) : undefined,
-        filters?.sex ? eq(plants.sex, filters.sex) : undefined,
-        filters?.health ? eq(plants.health, filters.health) : undefined,
-        filters?.status ? eq(plants.status, filters.status) : undefined,
+        filters?.status
+          ? eq(harvests.harvestStatus, filters.status)
+          : undefined,
+        filters?.quality ? eq(harvests.quality, filters.quality) : undefined,
         filters?.search
-          ? or(
-              like(plants.identifier, `%${filters.search}%`),
-              like(plants.notes || '', `%${filters.search}%`)
-            )
+          ? like(harvests.identifier, `%${filters.search}%`)
           : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
-      const items = await ctx.db.query.plants.findMany({
+      const items = await ctx.db.query.harvests.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(plants.createdAt)],
+        orderBy: [desc(harvests.createdAt)],
         with: {
-          genetic: true,
-          location: true,
-          batch: true,
-          mother: true,
           createdBy: {
             columns: {
               id: true,
@@ -80,14 +62,9 @@ export const plantRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
-      const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.id, input),
+      const harvest = await ctx.db.query.harvests.findFirst({
+        where: eq(harvests.id, input),
         with: {
-          genetic: true,
-          location: true,
-          batch: true,
-          mother: true,
-          children: true,
           createdBy: {
             columns: {
               id: true,
@@ -98,19 +75,19 @@ export const plantRouter = createTRPCRouter({
         },
       })
 
-      if (!plant) {
+      if (!harvest) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Harvest not found',
         })
       }
 
-      return plant
+      return harvest
     }),
 
   create: protectedProcedure
     .input(
-      insertPlantSchema.omit({
+      insertHarvestSchema.omit({
         id: true,
         createdAt: true,
         updatedAt: true,
@@ -118,33 +95,34 @@ export const plantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input
+      const { properties, metadata, labResults, ...rest } = input
 
-      const [plant] = await ctx.db
-        .insert(plants)
+      const [harvest] = await ctx.db
+        .insert(harvests)
         .values({
           ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
+          properties: properties as typeof harvests.$inferInsert.properties,
+          metadata: metadata as typeof harvests.$inferInsert.metadata,
+          labResults: labResults as typeof harvests.$inferInsert.labResults,
           createdById: ctx.session.user.id,
         })
         .returning()
 
-      if (!plant) {
+      if (!harvest) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create plant',
+          message: 'Failed to create harvest',
         })
       }
 
-      return plant
+      return harvest
     }),
 
   update: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertPlantSchema.partial().omit({
+        data: insertHarvestSchema.partial().omit({
           id: true,
           createdAt: true,
           updatedAt: true,
@@ -153,41 +131,42 @@ export const plantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input.data
+      const { properties, metadata, labResults, ...rest } = input.data
 
-      const [plant] = await ctx.db
-        .update(plants)
+      const [harvest] = await ctx.db
+        .update(harvests)
         .set({
           ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
+          properties: properties as typeof harvests.$inferInsert.properties,
+          metadata: metadata as typeof harvests.$inferInsert.metadata,
+          labResults: labResults as typeof harvests.$inferInsert.labResults,
           updatedAt: new Date(),
         })
-        .where(eq(plants.id, input.id))
+        .where(eq(harvests.id, input.id))
         .returning()
 
-      if (!plant) {
+      if (!harvest) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Harvest not found',
         })
       }
 
-      return plant
+      return harvest
     }),
 
   delete: protectedProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
       const [deleted] = await ctx.db
-        .delete(plants)
-        .where(eq(plants.id, input))
+        .delete(harvests)
+        .where(eq(harvests.id, input))
         .returning()
 
       if (!deleted) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Plant not found',
+          message: 'Harvest not found',
         })
       }
 
