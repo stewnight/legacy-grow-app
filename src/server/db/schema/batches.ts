@@ -1,62 +1,62 @@
 import { sql } from 'drizzle-orm'
 import {
   index,
-  integer,
   varchar,
   timestamp,
-  text,
-  decimal,
   json,
-  date,
-  boolean,
   uuid,
+  text,
+  date,
+  integer,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import {
-  batchStatusEnum,
-  plantSourceEnum,
-  plantStageEnum,
-  plantSexEnum,
-  healthStatusEnum,
-  geneticTypeEnum,
-} from './enums'
+import { batchStatusEnum, plantStageEnum, statusEnum } from './enums'
 import { users } from './core'
-import { locations } from './locations'
 import { genetics } from './genetics'
+import { locations } from './locations'
 
-// ================== BATCHES ==================
 export const batches = createTable(
   'batch',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    code: varchar('code', { length: 255 })
+    identifier: varchar('identifier', { length: 100 }).notNull().unique(),
+    geneticId: uuid('genetic_id')
       .notNull()
-      .unique()
-      .$defaultFn(
-        () => `b${Date.now()}${Math.random().toString(36).slice(2, 11)}`
-      ),
-    name: varchar('name', { length: 255 }).notNull(),
-    geneticId: uuid('genetic_id').references(() => genetics.id, {
-      onDelete: 'set null',
-    }),
-    plantCount: integer('plant_count').notNull().default(0),
+      .references(() => genetics.id),
+    locationId: uuid('location_id')
+      .notNull()
+      .references(() => locations.id),
+    stage: plantStageEnum('stage').notNull(),
+    batchStatus: batchStatusEnum('batch_status').default('active').notNull(),
+    startDate: date('start_date').notNull(),
+    expectedEndDate: date('expected_end_date'),
+    actualEndDate: date('actual_end_date'),
+    plantCount: integer('plant_count').default(0),
+    properties: json('properties').$type<{
+      source?: 'seed' | 'clone' | 'tissue_culture'
+      medium?: string
+      container?: string
+      nutrients?: Array<{
+        name: string
+        schedule?: string
+        amount?: string
+      }>
+      environment?: {
+        temperature?: { min: number; max: number }
+        humidity?: { min: number; max: number }
+        light?: { hours: number; intensity?: number }
+      }
+    }>(),
+    metadata: json('metadata').$type<{
+      motherBatch?: string
+      generation?: number
+      phenotype?: string
+      selectionCriteria?: string[]
+      targetYield?: number
+    }>(),
     notes: text('notes'),
-    status: batchStatusEnum('status').notNull().default('active'),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.id),
-    source: varchar('source', { length: 255 }),
-    stage: plantStageEnum('stage'),
-    plantDate: timestamp('plant_date', { withTimezone: true }),
-    healthStatus: healthStatusEnum('health_status').default('healthy'),
-    motherId: integer('mother_id'),
-    generation: integer('generation'),
-    sex: plantSexEnum('sex'),
-    phenotype: varchar('phenotype', { length: 255 }),
-    locationId: uuid('location_id').references(() => locations.id, {
-      onDelete: 'set null',
-    }),
+    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -69,19 +69,20 @@ export const batches = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    codeIdx: index('batch_code_idx').on(table.code),
-    nameIdx: index('batch_name_idx').on(table.name),
-    statusIdx: index('batch_status_idx').on(table.status),
-    userIdIdx: index('batch_user_id_idx').on(table.userId),
+    identifierIdx: index('batch_identifier_idx').on(table.identifier),
     geneticIdIdx: index('batch_genetic_id_idx').on(table.geneticId),
     locationIdIdx: index('batch_location_id_idx').on(table.locationId),
     stageIdx: index('batch_stage_idx').on(table.stage),
-    createdByIdx: index('batch_created_by_idx').on(table.createdById),
+    batchStatusIdx: index('batch_status_idx').on(table.batchStatus),
+    startDateIdx: index('batch_start_date_idx').on(table.startDate),
+    statusIdx: index('batch_general_status_idx').on(table.status),
   })
 )
 
+// Zod Schemas
 export const insertBatchSchema = createInsertSchema(batches)
 export const selectBatchSchema = createSelectSchema(batches)
 
+// Types
 export type Batch = typeof batches.$inferSelect
 export type NewBatch = typeof batches.$inferInsert

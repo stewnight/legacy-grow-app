@@ -1,17 +1,16 @@
 import { sql } from 'drizzle-orm'
 import {
   index,
-  integer,
   varchar,
   timestamp,
-  text,
   json,
   uuid,
+  text,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
-import { locationTypeEnum } from './enums'
+import { facilityTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 
 // ================== FACILITIES ==================
@@ -20,32 +19,35 @@ export const facilities = createTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
+    type: facilityTypeEnum('type').notNull(),
     address: json('address').$type<{
       street: string
       city: string
       state: string
-      zip: string
       country: string
-      coordinates?: { lat: number; lng: number }
-    }>(),
-    license: json('license').$type<{
-      number: string
-      type: string
-      expiryDate: string
-      issuedBy: string
-      status: string
-    }>(),
-    capacity: json('capacity').$type<{
-      plants?: number
-      sqFt?: number
-      rooms?: number
+      postalCode: string
+      coordinates?: {
+        latitude: number
+        longitude: number
+      }
     }>(),
     properties: json('properties').$type<{
-      climate?: string
-      security?: string[]
-      utilities?: string[]
+      climate?: {
+        controlType: 'manual' | 'automated'
+        hvacSystem?: string
+      }
+      security?: {
+        accessControl: boolean
+        cameraSystem: boolean
+      }
+      power?: {
+        mainSource: string
+        backup: boolean
+      }
     }>(),
+    licenseNumber: varchar('license_number', { length: 100 }),
+    description: text('description'),
+    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -60,7 +62,8 @@ export const facilities = createTable(
   (table) => ({
     nameIdx: index('facility_name_idx').on(table.name),
     typeIdx: index('facility_type_idx').on(table.type),
-    createdByIdx: index('facility_created_by_idx').on(table.createdById),
+    statusIdx: index('facility_status_idx').on(table.status),
+    licenseIdx: index('facility_license_idx').on(table.licenseNumber),
   })
 )
 

@@ -5,13 +5,11 @@ import {
   plants,
   insertPlantSchema,
   selectPlantSchema,
-} from '~/server/db/schema/plants'
-import {
   plantStageEnum,
   plantSourceEnum,
   plantSexEnum,
   healthStatusEnum,
-} from '~/server/db/schema/enums'
+} from '~/server/db/schema'
 
 const plantFiltersSchema = z.object({
   status: z.enum(healthStatusEnum.enumValues).optional(),

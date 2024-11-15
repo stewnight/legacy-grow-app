@@ -4,12 +4,12 @@ import {
   integer,
   varchar,
   timestamp,
-  text,
   json,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
+import { areaTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { facilities } from './facilities'
 
@@ -22,25 +22,21 @@ export const areas = createTable(
       .notNull()
       .references(() => facilities.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
-    type: varchar('type', { length: 50 }).notNull(),
-    parentId: uuid('parent_id'),
-    dimensions: json('dimensions').$type<{
-      length?: number
-      width?: number
-      height?: number
-      unit?: 'm' | 'ft'
-    }>(),
-    capacity: json('capacity').$type<{
-      plants?: number
-      sqFt?: number
-    }>(),
-    environment: json('environment').$type<{
-      temperature?: { min: number; max: number; unit: 'C' | 'F' }
+    type: areaTypeEnum('type').notNull(),
+    properties: json('properties').$type<{
+      temperature?: { min: number; max: number }
       humidity?: { min: number; max: number }
-      co2?: { min: number; max: number }
       light?: { type: string; intensity: number }
+      co2?: { min: number; max: number }
     }>(),
-    status: varchar('status', { length: 50 }).default('active'),
+    dimensions: json('dimensions').$type<{
+      length: number
+      width: number
+      height?: number
+      unit: 'ft' | 'm'
+    }>(),
+    capacity: integer('capacity').default(0),
+    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -56,7 +52,6 @@ export const areas = createTable(
     nameIdx: index('area_name_idx').on(table.name),
     typeIdx: index('area_type_idx').on(table.type),
     facilityIdIdx: index('area_facility_id_idx').on(table.facilityId),
-    parentIdIdx: index('area_parent_id_idx').on(table.parentId),
     statusIdx: index('area_status_idx').on(table.status),
   })
 )

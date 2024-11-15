@@ -20,7 +20,7 @@ import {
   taskCategoryEnum,
 } from './enums'
 import { users } from './core'
-import { locations } from './facilities'
+import { locations } from './locations'
 
 // ================== SENSORS & MONITORING ==================
 export const sensors = createTable(

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches, insertBatchSchema } from '~/server/db/schema/plants'
+import { batches, insertBatchSchema } from '~/server/db/schema'
 import { batchStatusEnum } from '~/server/db/schema/enums'
 import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'

@@ -1,20 +1,18 @@
 import { sql } from 'drizzle-orm'
 import {
   index,
-  integer,
   varchar,
   timestamp,
-  text,
   json,
   uuid,
+  integer,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { locationTypeEnum } from './enums'
+import { locationTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { areas } from './areas'
 
-// ================== LOCATIONS ==================
 export const locations = createTable(
   'location',
   {
@@ -28,15 +26,29 @@ export const locations = createTable(
       x: number
       y: number
       z?: number
-      level?: number
+      unit: 'ft' | 'm'
     }>(),
     properties: json('properties').$type<{
       temperature?: { min: number; max: number }
       humidity?: { min: number; max: number }
-      light?: { type: string; intensity: number }
+      light?: {
+        type: string
+        intensity: number
+        height?: number
+      }
+      irrigation?: {
+        type: string
+        schedule?: string
+      }
     }>(),
-    capacity: integer('capacity'),
-    status: varchar('status', { length: 50 }).default('active'),
+    dimensions: json('dimensions').$type<{
+      length: number
+      width: number
+      height?: number
+      unit: 'ft' | 'm'
+    }>(),
+    capacity: integer('capacity').default(0),
+    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -57,11 +69,9 @@ export const locations = createTable(
 )
 
 // Zod Schemas
-
 export const insertLocationSchema = createInsertSchema(locations)
 export const selectLocationSchema = createSelectSchema(locations)
 
 // Types
-
 export type Location = typeof locations.$inferSelect
 export type NewLocation = typeof locations.$inferInsert

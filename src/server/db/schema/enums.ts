@@ -159,6 +159,31 @@ export const destroyReasonEnum = pgEnum('destroy_reason', [
   'other',
 ])
 
+export const facilityTypeEnum = pgEnum('facility_type', [
+  'indoor',
+  'outdoor',
+  'greenhouse',
+  'hybrid',
+])
+
+export const areaTypeEnum = pgEnum('area_type', [
+  'vegetation',
+  'flowering',
+  'drying',
+  'storage',
+  'processing',
+  'mother',
+  'clone',
+  'quarantine',
+])
+
+export const statusEnum = pgEnum('status', [
+  'active',
+  'inactive',
+  'archived',
+  'maintenance',
+])
+
 // Export types for all enums
 export type LogLevel = (typeof logLevelEnum.enumValues)[number]
 export type SystemLogSource = (typeof systemLogSourceEnum.enumValues)[number]
@@ -177,3 +202,6 @@ export type TaskCategory = (typeof taskCategoryEnum.enumValues)[number]
 export type HarvestQuality = (typeof harvestQualityEnum.enumValues)[number]
 export type NoteType = (typeof noteTypeEnum.enumValues)[number]
 export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
+export type FacilityType = (typeof facilityTypeEnum.enumValues)[number]
+export type AreaType = (typeof areaTypeEnum.enumValues)[number]
+export type Status = (typeof statusEnum.enumValues)[number]

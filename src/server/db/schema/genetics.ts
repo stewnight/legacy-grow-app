@@ -1,65 +1,91 @@
+import { sql } from 'drizzle-orm'
 import {
   index,
-  integer,
   varchar,
   timestamp,
-  text,
-  decimal,
   json,
   uuid,
+  text,
+  boolean,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-
 import { createTable } from '../utils'
-import {
-  batchStatusEnum,
-  plantSourceEnum,
-  plantStageEnum,
-  plantSexEnum,
-  healthStatusEnum,
-  geneticTypeEnum,
-} from './enums'
+import { geneticTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 
-// ================== GENETICS ==================
 export const genetics = createTable(
   'genetic',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
-    slug: varchar('slug', { length: 255 }).notNull().unique(),
     type: geneticTypeEnum('type').notNull(),
     breeder: varchar('breeder', { length: 255 }),
     description: text('description'),
-    floweringTime: integer('flowering_time'),
-    thcPotential: decimal('thc_potential', { precision: 4, scale: 2 }),
-    cbdPotential: decimal('cbd_potential', { precision: 4, scale: 2 }),
-    terpeneProfile: json('terpene_profile').$type<Record<
-      string,
-      number
-    > | null>(),
-    growthCharacteristics: json('growth_characteristics').$type<{
-      height?: number
-      spread?: number
-      internodeSpacing?: number
-      leafPattern?: string
+    properties: json('properties').$type<{
+      effects?: string[]
+      flavors?: string[]
+      thc?: {
+        min?: number
+        max?: number
+      }
+      cbd?: {
+        min?: number
+        max?: number
+      }
+      terpenes?: Array<{
+        name: string
+        percentage?: number
+      }>
+    }>(),
+    growProperties: json('grow_properties').$type<{
+      floweringTime?: {
+        min: number
+        max: number
+        unit: 'days' | 'weeks'
+      }
+      height?: {
+        min: number
+        max: number
+        unit: 'cm' | 'inches'
+      }
+      yield?: {
+        min: number
+        max: number
+        unit: 'g' | 'oz' | 'kg'
+      }
+      difficulty?: 'easy' | 'medium' | 'hard'
+      environment?: 'indoor' | 'outdoor' | 'both'
     }>(),
     lineage: json('lineage').$type<{
       mother?: string
       father?: string
       generation?: number
+      hybridRatio?: string
+      parents?: Array<{
+        name: string
+        type: string
+        role: 'mother' | 'father'
+      }>
     }>(),
+    inHouse: boolean('in_house').default(false),
+    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
     nameIdx: index('genetic_name_idx').on(table.name),
     typeIdx: index('genetic_type_idx').on(table.type),
-    createdByIdx: index('genetic_created_by_idx').on(table.createdById),
-    slugIdx: index('genetic_slug_idx').on(table.slug),
+    breederIdx: index('genetic_breeder_idx').on(table.breeder),
+    statusIdx: index('genetic_status_idx').on(table.status),
+    inHouseIdx: index('genetic_in_house_idx').on(table.inHouse),
   })
 )
 
