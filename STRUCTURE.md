@@ -1,5 +1,20 @@
 ```
 └── 📁legacy-grow-app
+    └── 📁drizzle
+        └── 📁meta
+            └── _journal.json
+            └── 0000_snapshot.json
+        └── 0000_purple_the_fallen.sql
+    └── 📁example-data
+        └── areas.csv
+        └── asset_types.csv
+        └── log_types.csv
+        └── quantity_types.csv
+        └── quick_forms.csv
+        └── sensor_alerts.csv
+        └── sensors.csv
+        └── taxonomies.csv
+        └── user_roles.csv
     └── 📁public
         └── favicon.svg
     └── 📁src
@@ -13,14 +28,9 @@
                         └── route.ts
             └── 📁batches
                 └── 📁_components
-                    └── batch-actions.tsx
-                    └── batch-error-boundary.tsx
-                    └── batch-form.tsx
-                    └── batch-list.tsx
-                    └── columns.tsx
+                    └── batches-columns.tsx
+                    └── batches-form.tsx
                 └── 📁[code]
-                    └── loading.tsx
-                    └── not-found.tsx
                     └── page.tsx
                 └── page.tsx
             └── 📁dashboard
@@ -32,26 +42,18 @@
                 └── page.tsx
             └── 📁facilities
                 └── 📁_components
+                    └── facilities-columns.tsx
+                    └── facilities-form.tsx
                 └── page.tsx
             └── 📁genetics
                 └── 📁_components
-                    └── columns.tsx
-                    └── genetic-actions.tsx
-                    └── genetic-error-boundary.tsx
-                    └── genetic-form.tsx
-                    └── genetic-list.tsx
+                    └── genetics-columns.tsx
                 └── 📁[slug]
-                    └── loading.tsx
-                    └── not-found.tsx
                     └── page.tsx
                 └── page.tsx
             └── 📁plants
                 └── 📁_components
-                    └── columns.tsx
-                    └── plant-actions.tsx
-                    └── plant-error-boundary.tsx
-                    └── plant-form.tsx
-                    └── plant-list.tsx
+                    └── plant-columns.tsx
                 └── 📁[code]
                     └── 📁_components
                         └── plant-health-status.tsx
@@ -66,7 +68,11 @@
             └── page.tsx
         └── 📁components
             └── 📁layout
+                └── app-sidebar.tsx
                 └── header.tsx
+                └── nav-main.tsx
+                └── nav-secondary.tsx
+                └── nav-user.tsx
             └── 📁notes
                 └── create-note-form.tsx
                 └── media-preview.tsx
@@ -108,31 +114,18 @@
                 └── toast.tsx
                 └── toaster.tsx
                 └── tooltip.tsx
-            └── app-sidebar.tsx
             └── base-sheet.tsx
             └── create-form-wrapper.tsx
             └── icons.tsx
             └── media-upload.tsx
-            └── nav-main.tsx
-            └── nav-secondary.tsx
-            └── nav-user.tsx
-            └── network-status.tsx
             └── session-provider.tsx
             └── theme-provider.tsx
             └── theme-toggle.tsx
         └── 📁hooks
-            └── use-entity.ts
             └── use-mobile.tsx
             └── use-toast.ts
         └── 📁lib
-            └── 📁validations
-                └── batch.ts
-                └── genetic.ts
-                └── plant.ts
-            └── create-router.ts
-            └── optimistic-update.ts
             └── schema-to-mermaid.ts
-            └── storage.ts
             └── utils.ts
         └── 📁server
             └── 📁api
@@ -143,6 +136,7 @@
                     └── media.ts
                     └── notes.ts
                     └── plant.ts
+                └── .DS_Store
                 └── root.ts
                 └── trpc.ts
             └── 📁auth
@@ -150,30 +144,36 @@
                 └── index.ts
             └── 📁db
                 └── 📁schema
+                    └── areas.ts
+                    └── batches.ts
                     └── core.ts
-                    └── cultivation.ts
                     └── enums.ts
-                    └── facility.md
-                    └── facility.ts
+                    └── facilities.ts
+                    └── genetics.ts
+                    └── harvests.ts
                     └── index.ts
+                    └── locations.ts
                     └── notes.ts
                     └── operations.ts
+                    └── plants.ts
                     └── processing.ts
                     └── relations.ts
+                    └── sensors.ts
+                    └── tasks.ts
+                └── .DS_Store
                 └── index.ts
-                └── schema.md
                 └── utils.ts
+            └── .DS_Store
             └── storage.ts
-        └── 📁services
-            └── syncService.ts
         └── 📁styles
             └── globals.css
         └── 📁trpc
             └── query-client.ts
             └── react.tsx
             └── server.ts
-            └── shared.ts
+        └── .DS_Store
         └── env.js
+    └── .DS_Store
     └── .env
     └── .env.example
     └── .eslintignore
@@ -190,6 +190,7 @@
     └── prettier.config.js
     └── PROMPT.md
     └── README.md
+    └── SCHEMA.md
     └── STRUCTURE.md
     └── tailwind.config.ts
     └── tsconfig.json
