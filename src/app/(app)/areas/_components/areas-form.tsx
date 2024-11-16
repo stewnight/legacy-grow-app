@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertGeneticSchema } from '~/server/db/schema'
+import { insertAreaSchema } from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -20,103 +20,105 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from '~/hooks/use-toast'
-import { useRouter } from 'next/navigation'
 import { type z } from 'zod'
-import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'
+import { areaTypeEnum, statusEnum } from '~/server/db/schema/enums'
 import { type inferRouterOutputs } from '@trpc/server'
 import { type AppRouter } from '~/server/api/root'
-import { Checkbox } from '@/components/ui/checkbox'
-import { api } from '../../../../trpc/react'
+import { api } from '~/trpc/react'
+import { useToast } from '~/hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
-type GeneticFormValues = z.infer<typeof insertGeneticSchema>
+type AreaFormValues = z.infer<typeof insertAreaSchema>
+type AreaProperties = z.infer<typeof insertAreaSchema.shape.properties>
+type AreaDimensions = z.infer<typeof insertAreaSchema.shape.dimensions>
 
-interface GeneticFormProps {
+interface AreaFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['genetic']['get']
-  onSuccess?: (data: GeneticFormValues) => void
+  defaultValues?: RouterOutputs['area']['get']
+  onSuccess?: (data: AreaFormValues) => void
 }
 
-export function GeneticForm({
+export function AreaForm({
   mode = 'create',
   defaultValues,
   onSuccess,
-}: GeneticFormProps) {
+}: AreaFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
-  const form = useForm<GeneticFormValues>({
-    resolver: zodResolver(insertGeneticSchema),
+  const form = useForm<AreaFormValues>({
+    resolver: zodResolver(insertAreaSchema),
     defaultValues: {
       name: defaultValues?.name || '',
-      type: defaultValues?.type || 'hybrid',
-      breeder: defaultValues?.breeder || '',
-      description: defaultValues?.description || '',
-      inHouse: defaultValues?.inHouse || false,
+      capacity: defaultValues?.capacity || 0,
       status: defaultValues?.status || 'active',
+      parentId: defaultValues?.parentId || null,
+      facilityId: defaultValues?.facilityId || '',
+      type: defaultValues?.type || undefined,
     },
   })
 
-  const { mutate: createGenetic, isPending: isCreating } =
-    api.genetic.create.useMutation({
+  const { mutate: createArea, isPending: isCreating } =
+    api.area.create.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Genetic created successfully' })
+        toast({ title: 'Area created successfully' })
         void Promise.all([
-          utils.genetic.getAll.invalidate(),
-          utils.genetic.get.invalidate(data.id),
+          utils.area.getAll.invalidate(),
+          utils.area.get.invalidate(data.id),
         ])
-        router.push(`/genetics/${data.id}`)
+        router.push(`/areas/${data.id}`)
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error creating genetic',
+          title: 'Error creating area',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  const { mutate: updateGenetic, isPending: isUpdating } =
-    api.genetic.update.useMutation({
+  const { mutate: updateArea, isPending: isUpdating } =
+    api.area.update.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Genetic updated successfully' })
+        toast({ title: 'Area updated successfully' })
         void Promise.all([
-          utils.genetic.getAll.invalidate(),
-          utils.genetic.get.invalidate(data.id),
+          utils.area.getAll.invalidate(),
+          utils.area.get.invalidate(data.id),
         ])
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error updating genetic',
+          title: 'Error updating area',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  function onSubmit(values: GeneticFormValues) {
+  function onSubmit(values: AreaFormValues) {
     if (mode === 'create') {
-      createGenetic(values)
+      createArea(values)
     } else if (defaultValues?.id) {
-      updateGenetic({ id: defaultValues.id, data: values })
+      updateArea({ id: defaultValues.id, data: values })
     }
   }
 
+  const { data: facilities } = api.facility.getAll.useQuery({
+    limit: 100,
+    filters: { status: 'active' },
+  })
+
+  const { data: parentAreas } = api.area.getAll.useQuery({
+    limit: 100,
+    filters: { status: 'active' },
+  })
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          console.log('Form Submitted Event')
-          form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors)
-          })(e)
-        }}
-        className="space-y-4"
-        noValidate
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -144,7 +146,7 @@ export function GeneticForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {geneticTypeEnum.enumValues.map((type) => (
+                  {areaTypeEnum.enumValues.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}
                     </SelectItem>
@@ -158,13 +160,24 @@ export function GeneticForm({
 
         <FormField
           control={form.control}
-          name="breeder"
+          name="facilityId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Breeder</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} />
-              </FormControl>
+              <FormLabel>Facility</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select facility" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {facilities?.items.map((facility) => (
+                    <SelectItem key={facility.id} value={facility.id}>
+                      {facility.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -172,13 +185,28 @@ export function GeneticForm({
 
         <FormField
           control={form.control}
-          name="description"
+          name="parentId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} />
-              </FormControl>
+              <FormLabel>Parent Area</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value || undefined}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select parent area" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value={'null'}>None</SelectItem>
+                  {parentAreas?.items.map((area) => (
+                    <SelectItem key={area.id} value={area.id}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -186,16 +214,22 @@ export function GeneticForm({
 
         <FormField
           control={form.control}
-          name="inHouse"
+          name="capacity"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+            <FormItem>
+              <FormLabel>Capacity</FormLabel>
               <FormControl>
-                <Checkbox
-                  checked={field.value || false}
-                  onCheckedChange={field.onChange}
+                <Input
+                  type="number"
+                  {...field}
+                  value={field.value ?? ''}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? null : Number(e.target.value)
+                    )
+                  }
                 />
               </FormControl>
-              <FormLabel>In House</FormLabel>
               <FormMessage />
             </FormItem>
           )}
@@ -227,7 +261,7 @@ export function GeneticForm({
         />
 
         <Button type="submit" disabled={isCreating || isUpdating}>
-          {mode === 'create' ? 'Create Genetic' : 'Update Genetic'}
+          {mode === 'create' ? 'Create Area' : 'Update Area'}
         </Button>
       </form>
     </Form>

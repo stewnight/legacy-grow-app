@@ -5,11 +5,17 @@ import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { areaTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
+// Define the type for the JSON fields based on your schema
+type AreaProperties = typeof areas.$inferInsert.properties
+type AreaDimensions = typeof areas.$inferInsert.dimensions
+
 // Schema for filters
 const areaFiltersSchema = z.object({
   type: z.enum(areaTypeEnum.enumValues).optional(),
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
+  facilityId: z.string().uuid().optional(),
+  parentId: z.string().uuid().optional(),
 })
 
 export const areaRouter = createTRPCRouter({
@@ -28,6 +34,10 @@ export const areaRouter = createTRPCRouter({
         filters?.type ? eq(areas.type, filters.type) : undefined,
         filters?.status ? eq(areas.status, filters.status) : undefined,
         filters?.search ? like(areas.name, `%${filters.search}%`) : undefined,
+        filters?.facilityId
+          ? eq(areas.facilityId, filters.facilityId)
+          : undefined,
+        filters?.parentId ? eq(areas.parentId, filters.parentId) : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.areas.findMany({
@@ -88,28 +98,16 @@ export const areaRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertAreaSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertAreaSchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, dimensions, ...rest } = input
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as AreaProperties,
+        dimensions: input.dimensions as AreaDimensions,
+      }
 
-      const [area] = await ctx.db
-        .insert(areas)
-        .values({
-          ...rest,
-          properties:
-            (properties as typeof areas.$inferInsert.properties) || null,
-          dimensions:
-            (dimensions as typeof areas.$inferInsert.dimensions) || null,
-          createdById: ctx.session.user.id,
-        })
-        .returning()
+      const [area] = await ctx.db.insert(areas).values(insertData).returning()
 
       if (!area) {
         throw new TRPCError({
@@ -125,27 +123,20 @@ export const areaRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertAreaSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertAreaSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, dimensions, ...rest } = input.data
+      const updateData = {
+        ...input.data,
+        updatedAt: new Date(),
+        properties: input.data.properties as AreaProperties,
+        dimensions: input.data.dimensions as AreaDimensions,
+      }
 
       const [area] = await ctx.db
         .update(areas)
-        .set({
-          ...rest,
-          properties:
-            (properties as typeof areas.$inferInsert.properties) || null,
-          dimensions:
-            (dimensions as typeof areas.$inferInsert.dimensions) || null,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(areas.id, input.id))
         .returning()
 

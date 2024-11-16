@@ -15,6 +15,7 @@ import { users } from './core'
 import { batches } from './batches'
 import { plants } from './plants'
 
+// ================== GENETICS ==================
 export const genetics = createTable(
   'genetic',
   {
@@ -91,6 +92,8 @@ export const genetics = createTable(
   })
 )
 
+// ================== RELATIONS ==================
+
 export const geneticsRelations = relations(genetics, ({ one, many }) => ({
   batches: many(batches, {
     relationName: 'geneticBatches',
@@ -104,7 +107,7 @@ export const geneticsRelations = relations(genetics, ({ one, many }) => ({
   }),
 }))
 
-// Zod Schemas
+// ================== ZOD SCHEMAS ==================
 export const insertGeneticSchema = createInsertSchema(genetics, {
   // Explicitly define field transformations and validations
   name: (schema) => schema.name.min(1).max(255),
@@ -119,6 +122,6 @@ export const insertGeneticSchema = createInsertSchema(genetics, {
 })
 export const selectGeneticSchema = createSelectSchema(genetics)
 
-// Types
+// ================== TYPES ==================
 export type Genetic = typeof genetics.$inferSelect
 export type NewGenetic = typeof genetics.$inferInsert
