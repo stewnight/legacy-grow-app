@@ -6,6 +6,9 @@ import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { facilityTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
+type FacilityProperties = typeof facilities.$inferInsert.properties
+type FacilityAddress = typeof facilities.$inferInsert.address
+
 // Schema for filters
 const facilityFiltersSchema = z.object({
   type: z.enum(facilityTypeEnum.enumValues).optional(),
@@ -91,25 +94,18 @@ export const facilityRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertFacilitySchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertFacilitySchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, address, ...rest } = input
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as FacilityProperties,
+        address: input.address as FacilityAddress,
+      }
 
       const [facility] = await ctx.db
         .insert(facilities)
-        .values({
-          ...rest,
-          properties: properties as typeof facilities.$inferInsert.properties,
-          address: address as typeof facilities.$inferInsert.address,
-          createdById: ctx.session.user.id,
-        })
+        .values(insertData)
         .returning()
 
       if (!facility) {
@@ -126,25 +122,21 @@ export const facilityRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertFacilitySchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertFacilitySchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, address, ...rest } = input.data
+      const updateData = {
+        ...input.data,
+        updatedAt: new Date(),
+        properties: input.data
+          .properties as typeof facilities.$inferInsert.properties,
+        address: input.data.address as typeof facilities.$inferInsert.address,
+      }
 
       const [facility] = await ctx.db
         .update(facilities)
-        .set({
-          ...rest,
-          properties: properties as typeof facilities.$inferInsert.properties,
-          address: address as typeof facilities.$inferInsert.address,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(facilities.id, input.id))
         .returning()
 

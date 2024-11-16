@@ -68,6 +68,8 @@ export const facilities = createTable(
   })
 )
 
+// ================== RELATIONS ==================
+
 export const facilitiesRelations = relations(facilities, ({ one, many }) => ({
   areas: many(areas, { relationName: 'facilityAreas' }),
   createdBy: one(users, {
@@ -77,10 +79,14 @@ export const facilitiesRelations = relations(facilities, ({ one, many }) => ({
   }),
 }))
 
-// Zod Schemas
-export const insertFacilitySchema = createInsertSchema(facilities)
+export const insertFacilitySchema = createInsertSchema(facilities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
+
 export const selectFacilitySchema = createSelectSchema(facilities)
 
-// Types
 export type Facility = typeof facilities.$inferSelect
 export type NewFacility = typeof facilities.$inferInsert

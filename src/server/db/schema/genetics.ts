@@ -104,6 +104,7 @@ export const geneticsRelations = relations(genetics, ({ one, many }) => ({
   createdBy: one(users, {
     fields: [genetics.createdById],
     references: [users.id],
+    relationName: 'geneticCreatedBy',
   }),
 }))
 
