@@ -4,7 +4,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { type facilities } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
 import { format } from 'date-fns'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Shield, Thermometer, Zap } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -36,17 +36,65 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
     },
   },
   {
-    accessorKey: 'code',
-    header: 'Code',
+    accessorKey: 'type',
+    header: 'Type',
   },
   {
-    accessorKey: 'genetic',
-    header: 'Genetic',
+    accessorKey: 'status',
+    header: 'Status',
+  },
+  {
+    accessorKey: 'licenseNumber',
+    header: 'License Number',
+  },
+  {
+    accessorKey: 'description',
+    header: 'Description',
+  },
+  {
+    accessorKey: 'properties',
+    header: 'Properties',
+    cell: ({ row }) => {
+      const facility = row.original
+      const props = facility.properties
+      return (
+        <div className="flex gap-2">
+          {props?.climate && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Climate Control: ${props.climate.controlType}${props.climate.hvacSystem ? ` - ${props.climate.hvacSystem}` : ''}`}
+            >
+              <Thermometer className="h-4 w-4" />
+            </div>
+          )}
+          {props?.security && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Security: ${props.security.accessControl ? 'Access Control, ' : ''}${props.security.cameraSystem ? 'Camera System' : ''}`}
+            >
+              <Shield className="h-4 w-4" />
+            </div>
+          )}
+          {props?.power && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Power: ${props.power.mainSource}${props.power.backup ? ' + Backup' : ''}`}
+            >
+              <Zap className="h-4 w-4" />
+            </div>
+          )}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'address',
+    header: 'Address',
     cell: ({ row }) => {
       const facility = row.original
       return (
         <Link href={`/facilities/${facility.id}`} className="hover:underline">
-          {facility.name}
+          {facility.address?.city},{facility.address?.country}
         </Link>
       )
     },

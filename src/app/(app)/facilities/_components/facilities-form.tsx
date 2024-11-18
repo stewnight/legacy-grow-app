@@ -33,18 +33,8 @@ import {
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type FacilityFormValues = z.infer<typeof insertFacilitySchema>
-
-interface AddressType {
-  street: string
-  city: string
-  state: string
-  country: string
-  postalCode: string
-  coordinates?: {
-    latitude: number
-    longitude: number
-  }
-}
+type FacilityProperties = z.infer<typeof insertFacilitySchema.shape.properties>
+type FacilityAddress = z.infer<typeof insertFacilitySchema.shape.address>
 
 interface FacilityFormProps {
   mode: 'create' | 'edit'
@@ -61,24 +51,14 @@ export function FacilitiesForm({
   const router = useRouter()
   const utils = api.useUtils()
 
-  const defaultAddress: AddressType = {
-    street: '',
-    city: '',
-    state: '',
-    country: '',
-    postalCode: '',
-    coordinates: {
-      latitude: 0,
-      longitude: 0,
-    },
-  }
-
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(insertFacilitySchema),
     defaultValues: {
       name: defaultValues?.name ?? '',
       type: defaultValues?.type ?? facilityTypeEnum.enumValues[0],
       status: defaultValues?.status ?? statusEnum.enumValues[0],
+      address: defaultValues?.address ?? ({} as FacilityAddress),
+      properties: defaultValues?.properties ?? ({} as FacilityProperties),
     },
   })
 
@@ -137,7 +117,7 @@ export function FacilitiesForm({
             console.log('Form Errors:', errors)
           })(e)
         }}
-        className="space-y-4"
+        className="space-y-4 p-1"
         noValidate
       >
         <FormField
@@ -148,6 +128,18 @@ export function FacilitiesForm({
               <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="licenseNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>License Number</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value ?? ''} />
               </FormControl>
             </FormItem>
           )}
@@ -349,6 +341,148 @@ export function FacilitiesForm({
               )}
             />
           </div>
+        </div>
+
+        <h3 className="font-medium">Facility Properties</h3>
+
+        {/* Climate Properties */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h4 className="font-medium">Climate</h4>
+          <FormField
+            control={form.control}
+            name="properties.climate.controlType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Control Type</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value as string}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select control type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="manual">Manual</SelectItem>
+                      <SelectItem value="automated">Automated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="properties.climate.hvacSystem"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>HVAC System</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value as string} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Security Properties */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h4 className="font-medium">Security</h4>
+          <FormField
+            control={form.control}
+            name="properties.security.accessControl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Access Control</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'true')}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select access control" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Yes</SelectItem>
+                      <SelectItem value="false">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="properties.security.cameraSystem"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Camera System</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'true')}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select camera system" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Yes</SelectItem>
+                      <SelectItem value="false">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Power Properties */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h4 className="font-medium">Power</h4>
+          <FormField
+            control={form.control}
+            name="properties.power.mainSource"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Main Power Source</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value as string} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="properties.power.backup"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Backup Power</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'true')}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select backup power" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Yes</SelectItem>
+                      <SelectItem value="false">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <FormField

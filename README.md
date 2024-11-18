@@ -17,18 +17,18 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 
 - [x] User authentication with Discord
 - [x] Initial schema design and integration using Drizzle ORM
-- [] Basic CRUD scaffolding for:
-  - Facilities
-  - Areas
-  - Locations
-  - Plants
-  - Genetic strains
-  - Batches
-  - Tasks
-  - Notes
-  - Sensors
-  - Processing
-  - Harvests
+- [o] Basic CRUD scaffolding for:
+  - [x] Facilities
+  - [] Areas
+  - [] Locations
+  - [] Plants
+  - [x] Genetic strains
+  - [] Batches
+  - [] Tasks
+  - [] Notes
+  - [] Sensors
+  - [] Processing
+  - [] Harvests
 - [x] Mobile-first responsive layout
 - [x] Reusable UI components (forms, tables, and navigation)
 
