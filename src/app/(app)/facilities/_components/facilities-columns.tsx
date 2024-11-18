@@ -16,6 +16,8 @@ import {
 } from '~/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { api } from '~/trpc/react'
+import { toast, useToast } from '../../../../hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
 export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
   {
@@ -53,6 +55,24 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
     id: 'actions',
     cell: ({ row }) => {
       const facility = row.original
+      const utils = api.useUtils()
+      const { toast } = useToast()
+      const router = useRouter()
+      const { mutate: deleteFacility } = api.facility.delete.useMutation({
+        onSuccess: () => {
+          toast({ title: 'Facility deleted successfully' })
+          void utils.facility.getAll.invalidate()
+          router.refresh()
+        },
+        onError: (error) => {
+          toast({
+            title: 'Error deleting facility',
+            description: error.message,
+            variant: 'destructive',
+          })
+        },
+      })
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -71,6 +91,20 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
               <Link href={`/facilities/${facility.id}/batches`}>
                 View Batches
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                if (
+                  window.confirm(
+                    'Are you sure you want to delete this facility?'
+                  )
+                ) {
+                  deleteFacility(facility.id)
+                }
+              }}
+              className="text-red-600"
+            >
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

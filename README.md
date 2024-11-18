@@ -14,9 +14,10 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 ## Current State
 
 ### Completed Features
+
 - [x] User authentication with Discord
 - [x] Initial schema design and integration using Drizzle ORM
-- [x] Basic CRUD scaffolding for:
+- [] Basic CRUD scaffolding for:
   - Facilities
   - Areas
   - Locations
@@ -32,6 +33,7 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 - [x] Reusable UI components (forms, tables, and navigation)
 
 ### In Progress Features
+
 - [ ] Schema consistency and standardization (pending metadata alignment, field naming, cascading relationships, etc.)
 - [ ] Router integration for CRUD operations with tRPC
 - [ ] Complete CRUD operations for:
@@ -49,12 +51,14 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 ### MVP Roadmap
 
 #### Phase 1: Core Functionality Completion
+
 - [ ] Finalize schemas with consistent relationships and field structures
 - [ ] Align all routers with finalized schemas
 - [ ] Create mobile-friendly forms for CRUD operations
 - [ ] Set up offline functionality (React Query + Service Worker)
 
 #### Phase 2: Enhanced Operations
+
 - [ ] Develop Plant Dashboard:
   - Active plant overview
   - Growth stage tracking
@@ -68,6 +72,7 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
   - Environmental logging
 
 #### Phase 3: Compliance and Reporting
+
 - [ ] Automated compliance logging
 - [ ] Comprehensive plant and batch history tracking
 - [ ] Export and reporting tools
@@ -76,6 +81,7 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 ## Development
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL database
 - Cloudflare R2 or compatible S3 storage
@@ -94,3 +100,4 @@ pnpm db:push
 
 # Start the development server
 pnpm dev
+```
