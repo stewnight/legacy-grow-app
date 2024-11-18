@@ -12,6 +12,11 @@ import {
   Building,
   Grid2x2,
   LandPlot,
+  Factory,
+  FileText,
+  ListCheck,
+  Thermometer,
+  Wheat,
 } from 'lucide-react'
 import { NavMain } from '~/components/layout/nav-main'
 import { NavSecondary } from '~/components/layout/nav-secondary'
@@ -52,9 +57,9 @@ const data = {
       icon: LandPlot,
     },
     {
-      title: 'Plants',
-      url: '/plants',
-      icon: Sprout,
+      title: 'Genetics',
+      url: '/genetics',
+      icon: Dna,
     },
     {
       title: 'Batches',
@@ -62,9 +67,34 @@ const data = {
       icon: Package,
     },
     {
-      title: 'Genetics',
-      url: '/genetics',
-      icon: Dna,
+      title: 'Plants',
+      url: '/plants',
+      icon: Sprout,
+    },
+    {
+      title: 'Tasks',
+      url: '/tasks',
+      icon: ListCheck,
+    },
+    {
+      title: 'Notes',
+      url: '/notes',
+      icon: FileText,
+    },
+    {
+      title: 'Sensors',
+      url: '/sensors',
+      icon: Thermometer,
+    },
+    {
+      title: 'Processing',
+      url: '/processing',
+      icon: Factory,
+    },
+    {
+      title: 'Harvests',
+      url: '/harvests',
+      icon: Wheat,
     },
   ],
   navSecondary: [

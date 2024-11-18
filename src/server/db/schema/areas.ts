@@ -82,7 +82,13 @@ export const areasRelations = relations(areas, ({ one, many }) => ({
 }))
 
 // ================== SCHEMAS ==================
-export const insertAreaSchema = createInsertSchema(areas)
+export const insertAreaSchema = createInsertSchema(areas).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
+
 export const selectAreaSchema = createSelectSchema(areas)
 
 // ================== TYPES ==================

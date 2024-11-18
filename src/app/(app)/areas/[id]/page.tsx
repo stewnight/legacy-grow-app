@@ -82,9 +82,19 @@ export default function AreaPage({
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{area.name}</h2>
           <p className="text-muted-foreground">
-            {area.facility?.name
-              ? `In ${area.facility.name}`
-              : 'No facility assigned'}
+            {area.facility?.name ? (
+              <>
+                In{' '}
+                <Link
+                  href={`/facilities/${area.facility.id}`}
+                  className="hover:underline"
+                >
+                  {area.facility.name}
+                </Link>
+              </>
+            ) : (
+              'No facility assigned'
+            )}
           </p>
         </div>
         <AppSheet mode="edit" entity="area">

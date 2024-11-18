@@ -30,8 +30,7 @@ import { useRouter } from 'next/navigation'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type AreaFormValues = z.infer<typeof insertAreaSchema>
-type AreaProperties = z.infer<typeof insertAreaSchema.shape.properties>
-type AreaDimensions = z.infer<typeof insertAreaSchema.shape.dimensions>
+// Removed unused types
 
 interface AreaFormProps {
   mode?: 'create' | 'edit'
@@ -51,11 +50,23 @@ export function AreaForm({
     resolver: zodResolver(insertAreaSchema),
     defaultValues: {
       name: defaultValues?.name || '',
-      capacity: defaultValues?.capacity || 0,
-      status: defaultValues?.status || 'active',
+      capacity: defaultValues?.capacity || 10,
+      status: defaultValues?.status || statusEnum.enumValues[0],
       parentId: defaultValues?.parentId || null,
       facilityId: defaultValues?.facilityId || '',
       type: defaultValues?.type || undefined,
+      properties: defaultValues?.properties || {
+        temperature: { min: 65, max: 80 },
+        humidity: { min: 40, max: 60 },
+        light: { type: 'LED', intensity: 100 },
+        co2: { min: 400, max: 1500 },
+      },
+      dimensions: defaultValues?.dimensions || {
+        length: 10,
+        width: 10,
+        height: 8,
+        unit: 'm',
+      },
     },
   })
 
@@ -118,7 +129,15 @@ export function AreaForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={(e) => {
+          form.handleSubmit(onSubmit, (errors) => {
+            console.log('Form Errors:', errors)
+          })(e)
+        }}
+        className="space-y-4 p-1"
+        noValidate
+      >
         <FormField
           control={form.control}
           name="name"
@@ -139,7 +158,10 @@ export function AreaForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? ''}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -164,7 +186,10 @@ export function AreaForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Facility</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? ''}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select facility" />
@@ -222,7 +247,12 @@ export function AreaForm({
                 <Input
                   type="number"
                   {...field}
-                  value={field.value ?? ''}
+                  value={
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
+                      ? field.value
+                      : ''
+                  }
                   onChange={(e) =>
                     field.onChange(
                       e.target.value === '' ? null : Number(e.target.value)
@@ -230,6 +260,115 @@ export function AreaForm({
                   }
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dimensions.length"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Length</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  value={
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
+                      ? field.value
+                      : ''
+                  }
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? null : Number(e.target.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dimensions.width"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Width</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  value={
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
+                      ? field.value
+                      : ''
+                  }
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dimensions.height"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Height</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  value={
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
+                      ? field.value
+                      : ''
+                  }
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dimensions.unit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unit</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value?.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select unit" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="m">Meters</SelectItem>
+                  <SelectItem value="ft">Feet</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

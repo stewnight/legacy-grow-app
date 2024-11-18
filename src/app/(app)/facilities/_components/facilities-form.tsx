@@ -51,14 +51,41 @@ export function FacilitiesForm({
   const router = useRouter()
   const utils = api.useUtils()
 
+  const defaultProperties: FacilityProperties = defaultValues?.properties ?? {
+    climate: {
+      controlType: 'manual',
+      hvacSystem: '',
+    },
+    security: {
+      accessControl: false,
+      cameraSystem: false,
+    },
+    power: {
+      mainSource: '',
+      backup: false,
+    },
+  }
+
+  const defaultAddress: FacilityAddress = defaultValues?.address ?? {
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+    postalCode: '',
+    coordinates: {
+      latitude: 0,
+      longitude: 0,
+    },
+  }
+
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(insertFacilitySchema),
     defaultValues: {
       name: defaultValues?.name ?? '',
       type: defaultValues?.type ?? facilityTypeEnum.enumValues[0],
       status: defaultValues?.status ?? statusEnum.enumValues[0],
-      address: defaultValues?.address ?? ({} as FacilityAddress),
-      properties: defaultValues?.properties ?? ({} as FacilityProperties),
+      address: defaultAddress,
+      properties: defaultProperties,
     },
   })
 
