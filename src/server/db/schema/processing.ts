@@ -149,7 +149,11 @@ export const processing = createTable(
 )
 
 // Zod Schemas
-export const insertProcessingSchema = createInsertSchema(processing)
+export const insertProcessingSchema = createInsertSchema(processing).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectProcessingSchema = createSelectSchema(processing)
 
 // Types

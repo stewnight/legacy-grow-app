@@ -86,14 +86,7 @@ export const batchRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertBatchSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertBatchSchema.omit({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const { properties, metadata, ...rest } = input
 

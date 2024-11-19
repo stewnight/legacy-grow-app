@@ -110,7 +110,11 @@ export const sensorsRelations = relations(sensors, ({ one, many }) => ({
 }))
 
 // Zod Schemas
-export const insertSensorSchema = createInsertSchema(sensors)
+export const insertSensorSchema = createInsertSchema(sensors).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectSensorSchema = createSelectSchema(sensors)
 
 // Types

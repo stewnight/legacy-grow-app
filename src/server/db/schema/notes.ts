@@ -103,7 +103,11 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
 }))
 
 // Zod Schemas
-export const insertNoteSchema = createInsertSchema(notes)
+export const insertNoteSchema = createInsertSchema(notes).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectNoteSchema = createSelectSchema(notes)
 
 // Types

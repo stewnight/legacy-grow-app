@@ -3,7 +3,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { type genetics } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Dna, Sprout, Timer } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -15,9 +15,7 @@ import {
 import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
-import { AppSheet } from '../../../../components/layout/app-sheet'
-import { GeneticForm } from './genetics-form'
-import { useRouter } from 'next/navigation'
+
 export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
   {
     accessorKey: 'name',
@@ -46,10 +44,39 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
     header: 'Breeder',
   },
   {
-    accessorKey: 'inHouse',
-    header: 'In House',
+    accessorKey: 'properties',
+    header: 'Properties',
     cell: ({ row }) => {
-      return row.getValue('inHouse') ? 'Yes' : 'No'
+      const genetic = row.original
+      const props = genetic.properties
+      return (
+        <div className="flex gap-2">
+          {props?.thc && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`THC: ${props.thc.min}% - ${props.thc.max}%`}
+            >
+              <Dna className="h-4 w-4" />
+            </div>
+          )}
+          {props?.effects && props.effects.length > 0 && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Effects: ${props.effects.join(', ')}`}
+            >
+              <Sprout className="h-4 w-4" />
+            </div>
+          )}
+          {genetic.growProperties?.floweringTime && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Flowering: ${genetic.growProperties.floweringTime.min}-${genetic.growProperties.floweringTime.max} ${genetic.growProperties.floweringTime.unit}`}
+            >
+              <Timer className="h-4 w-4" />
+            </div>
+          )}
+        </div>
+      )
     },
   },
   {
@@ -65,12 +92,11 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
       const genetic = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
-      const router = useRouter()
+
       const { mutate: deleteGenetic } = api.genetic.delete.useMutation({
         onSuccess: () => {
           toast({ title: 'Genetic deleted successfully' })
           void utils.genetic.getAll.invalidate()
-          router.refresh()
         },
         onError: (error) => {
           toast({

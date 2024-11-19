@@ -54,7 +54,7 @@ export const batches = createTable(
       .references(() => locations.id),
     stage: plantStageEnum('stage').notNull(),
     batchStatus: batchStatusEnum('batch_status').default('active').notNull(),
-    startDate: date('start_date').notNull(),
+    startDate: date('start_date'),
     expectedEndDate: date('expected_end_date'),
     actualEndDate: date('actual_end_date'),
     plantCount: integer('plant_count').default(0),
@@ -102,7 +102,14 @@ export const batchesRelations = relations(batches, ({ one }) => ({
 }))
 
 // Zod Schemas
-export const insertBatchSchema = createInsertSchema(batches)
+export const insertBatchSchema = createInsertSchema(batches).omit({
+  properties: true,
+  metadata: true,
+  notes: true,
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectBatchSchema = createSelectSchema(batches)
 
 // Types

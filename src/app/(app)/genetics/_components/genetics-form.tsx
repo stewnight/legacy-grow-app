@@ -114,7 +114,7 @@ export function GeneticForm({
             console.log('Form Errors:', errors)
           })(e)
         }}
-        className="space-y-4"
+        className="space-y-4 p-1"
         noValidate
       >
         <FormField

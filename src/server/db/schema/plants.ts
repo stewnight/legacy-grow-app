@@ -126,7 +126,11 @@ export const plantsRelations = relations(plants, ({ one, many }) => ({
 }))
 
 // Zod Schemas
-export const insertPlantSchema = createInsertSchema(plants)
+export const insertPlantSchema = createInsertSchema(plants).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectPlantSchema = createSelectSchema(plants)
 
 // Types

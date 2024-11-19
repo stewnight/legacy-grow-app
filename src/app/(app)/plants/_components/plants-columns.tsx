@@ -1,9 +1,9 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type batches } from '~/server/db/schema'
+import { type plants } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
-import { MoreHorizontal, Calendar, Leaf, MapPin } from 'lucide-react'
+import { MoreHorizontal, Leaf, MapPin, Calendar, Activity } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -18,7 +18,7 @@ import { useToast } from '~/hooks/use-toast'
 import { format } from 'date-fns'
 
 // Define the type including relations
-type BatchWithRelations = typeof batches.$inferSelect & {
+type PlantWithRelations = typeof plants.$inferSelect & {
   genetic?: {
     id: string
     name: string
@@ -27,20 +27,28 @@ type BatchWithRelations = typeof batches.$inferSelect & {
     id: string
     name: string
   } | null
+  batch?: {
+    id: string
+    identifier: string
+  } | null
+  mother?: {
+    id: string
+    identifier: string
+  } | null
 }
 
-export const columns: ColumnDef<BatchWithRelations>[] = [
+export const columns: ColumnDef<PlantWithRelations>[] = [
   {
     accessorKey: 'identifier',
     header: 'Identifier',
     cell: ({ row }) => {
-      const batch = row.original
+      const plant = row.original
       return (
         <Link
-          href={`/batches/${batch.id}`}
+          href={`/plants/${plant.id}`}
           className="font-medium hover:underline"
         >
-          {batch.identifier}
+          {plant.identifier}
         </Link>
       )
     },
@@ -49,15 +57,15 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
     accessorKey: 'genetic',
     header: 'Genetic',
     cell: ({ row }) => {
-      const batch = row.original
-      return batch.genetic ? (
+      const plant = row.original
+      return plant.genetic ? (
         <div className="flex items-center gap-2">
           <Leaf className="h-4 w-4 text-muted-foreground" />
           <Link
-            href={`/genetics/${batch.genetic.id}`}
+            href={`/genetics/${plant.genetic.id}`}
             className="hover:underline"
           >
-            {batch.genetic.name}
+            {plant.genetic.name}
           </Link>
         </div>
       ) : (
@@ -69,15 +77,15 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
     accessorKey: 'location',
     header: 'Location',
     cell: ({ row }) => {
-      const batch = row.original
-      return batch.location ? (
+      const plant = row.original
+      return plant.location ? (
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-muted-foreground" />
           <Link
-            href={`/locations/${batch.location.id}`}
+            href={`/locations/${plant.location.id}`}
             className="hover:underline"
           >
-            {batch.location.name}
+            {plant.location.name}
           </Link>
         </div>
       ) : (
@@ -93,10 +101,33 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
     },
   },
   {
-    accessorKey: 'startDate',
-    header: 'Start Date',
+    accessorKey: 'health',
+    header: 'Health',
     cell: ({ row }) => {
-      const date = row.getValue('startDate')
+      const health = row.getValue('health') as string
+      return (
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 text-muted-foreground" />
+          <Badge
+            variant={
+              health === 'healthy'
+                ? 'default'
+                : health === 'sick' || health === 'pest'
+                  ? 'destructive'
+                  : 'secondary'
+            }
+          >
+            {health}
+          </Badge>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'plantedDate',
+    header: 'Planted Date',
+    cell: ({ row }) => {
+      const date = row.getValue('plantedDate')
       if (!date) return null
       return (
         <div className="flex items-center gap-2">
@@ -107,31 +138,34 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
     },
   },
   {
-    accessorKey: 'plantCount',
-    header: 'Plants',
-  },
-  {
-    accessorKey: 'batchStatus',
-    header: 'Status',
+    accessorKey: 'batch',
+    header: 'Batch',
     cell: ({ row }) => {
-      return <Badge variant="secondary">{row.getValue('batchStatus')}</Badge>
+      const plant = row.original
+      return plant.batch ? (
+        <Link href={`/batches/${plant.batch.id}`} className="hover:underline">
+          {plant.batch.identifier}
+        </Link>
+      ) : (
+        'N/A'
+      )
     },
   },
   {
     id: 'actions',
     cell: ({ row }) => {
-      const batch = row.original
+      const plant = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
 
-      const { mutate: deleteBatch } = api.batch.delete.useMutation({
+      const { mutate: deletePlant } = api.plant.delete.useMutation({
         onSuccess: () => {
-          toast({ title: 'Batch deleted successfully' })
-          void utils.batch.getAll.invalidate()
+          toast({ title: 'Plant deleted successfully' })
+          void utils.plant.getAll.invalidate()
         },
         onError: (error) => {
           toast({
-            title: 'Error deleting batch',
+            title: 'Error deleting plant',
             description: error.message,
             variant: 'destructive',
           })
@@ -149,14 +183,14 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/batches/${batch.id}`}>View Details</Link>
+              <Link href={`/plants/${plant.id}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 if (
-                  window.confirm('Are you sure you want to delete this batch?')
+                  window.confirm('Are you sure you want to delete this plant?')
                 ) {
-                  deleteBatch(batch.id)
+                  deletePlant(plant.id)
                 }
               }}
               className="text-red-600"

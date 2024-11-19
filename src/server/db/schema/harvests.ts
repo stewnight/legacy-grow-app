@@ -126,7 +126,11 @@ export const harvests = createTable(
 )
 
 // Zod Schemas
-export const insertHarvestSchema = createInsertSchema(harvests)
+export const insertHarvestSchema = createInsertSchema(harvests).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectHarvestSchema = createSelectSchema(harvests)
 
 // Types

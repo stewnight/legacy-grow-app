@@ -6,7 +6,6 @@ import {
   json,
   uuid,
   text,
-  date,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
@@ -25,41 +24,32 @@ export const tasks = createTable(
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
-    // Entity reference fields
     entityId: uuid('entity_id').notNull(),
-    entityType: varchar('entity_type', { length: 50 }).notNull(),
-    // Task management fields
+    entityType: varchar('entity_type', { length: 255 }).notNull(),
     assignedToId: uuid('assigned_to_id').references(() => users.id),
     category: taskCategoryEnum('category').notNull(),
-    priority: taskPriorityEnum('priority').default('medium').notNull(),
-    taskStatus: taskStatusEnum('task_status').default('pending').notNull(),
-    dueDate: date('due_date'),
+    priority: taskPriorityEnum('priority').notNull(),
+    taskStatus: taskStatusEnum('task_status').notNull(),
+    status: statusEnum('status').default('active').notNull(),
+    dueDate: timestamp('due_date', { withTimezone: true }),
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     properties: json('properties').$type<{
       recurring?: {
-        frequency: 'daily' | 'weekly' | 'monthly'
+        frequency: string
         interval?: number
         endDate?: string
       }
       checklist?: Array<{
         item: string
-        required: boolean
         completed: boolean
-        completedAt?: string
-        completedBy?: string
+        completedAt?: string | null
       }>
-      instructions?: Array<{
-        step: number
-        description: string
-        imageUrl?: string
-        duration?: number
-      }>
+      instructions?: string[]
       requirements?: {
         tools?: string[]
         supplies?: string[]
         ppe?: string[]
-        certifications?: string[]
       }
     }>(),
     metadata: json('metadata').$type<{
@@ -74,7 +64,6 @@ export const tasks = createTable(
       }
       customFields?: Record<string, unknown>
     }>(),
-    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -87,30 +76,27 @@ export const tasks = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    entityIdx: index('task_entity_idx').on(table.entityId, table.entityType),
-    assignedToIdx: index('task_assigned_to_idx').on(table.assignedToId),
+    titleIdx: index('task_title_idx').on(table.title),
     categoryIdx: index('task_category_idx').on(table.category),
     priorityIdx: index('task_priority_idx').on(table.priority),
-    taskStatusIdx: index('task_status_idx').on(table.taskStatus),
-    dueDateIdx: index('task_due_date_idx').on(table.dueDate),
-    createdByIdx: index('task_created_by_idx').on(table.createdById),
-    statusIdx: index('task_general_status_idx').on(table.status),
+    statusIdx: index('task_status_idx').on(table.status),
+    assignedToIdx: index('task_assigned_to_idx').on(table.assignedToId),
+    entityIdx: index('task_entity_idx').on(table.entityId, table.entityType),
   })
 )
 
-// Relationships
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
   assignedTo: one(users, {
     fields: [tasks.assignedToId],
     references: [users.id],
-    relationName: 'assignedTasks',
+    relationName: 'taskAssignee',
   }),
-  notes: many(notes, { relationName: 'taskNotes' }),
   createdBy: one(users, {
     fields: [tasks.createdById],
     references: [users.id],
     relationName: 'taskCreator',
   }),
+  notes: many(notes, { relationName: 'taskNotes' }),
 }))
 
 // Zod Schemas

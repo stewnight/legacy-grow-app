@@ -93,7 +93,12 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
 }))
 
 // Zod Schemas
-export const insertLocationSchema = createInsertSchema(locations)
+export const insertLocationSchema = createInsertSchema(locations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectLocationSchema = createSelectSchema(locations)
 
 // Types

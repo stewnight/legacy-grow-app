@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { insertBatchSchema } from '~/server/db/schema'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -10,39 +11,40 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
-import { Button } from '~/components/ui/button'
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '~/components/ui/select'
+} from '@/components/ui/select'
+import { type z } from 'zod'
+import { plantStageEnum, batchStatusEnum } from '~/server/db/schema/enums'
+import { type inferRouterOutputs } from '@trpc/server'
+import { type AppRouter } from '~/server/api/root'
+import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
-import { type z } from 'zod'
-import { plantStageEnum } from '~/server/db/schema/enums'
-import { api } from '~/trpc/react'
-import { type inferRouterOutputs } from '@trpc/server'
-import { AppRouter } from '~/server/api/root'
+import { Textarea } from '@/components/ui/textarea'
+import { DatePicker } from '@/components/ui/date-picker'
+import { format } from 'date-fns'
 
-// Use TRPC type inference for the batch router
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type BatchFormValues = z.infer<typeof insertBatchSchema>
 
-interface BatchesFormProps {
-  mode: 'create' | 'edit'
+interface BatchFormProps {
+  mode?: 'create' | 'edit'
   defaultValues?: RouterOutputs['batch']['get']
-  onSuccess?: () => void
+  onSuccess?: (data: BatchFormValues) => void
 }
 
-export function BatchesForm({
-  mode,
+export function BatchForm({
+  mode = 'create',
   defaultValues,
   onSuccess,
-}: BatchesFormProps) {
+}: BatchFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -51,22 +53,26 @@ export function BatchesForm({
     resolver: zodResolver(insertBatchSchema),
     defaultValues: {
       identifier: defaultValues?.identifier || '',
-      stage: defaultValues?.stage || 'seedling',
-      batchStatus: defaultValues?.batchStatus || 'active',
-      plantCount: defaultValues?.plantCount || 0,
-      startDate:
-        defaultValues?.startDate || new Date().toISOString().split('T')[0],
       geneticId: defaultValues?.geneticId || '',
       locationId: defaultValues?.locationId || '',
+      stage: defaultValues?.stage || 'germination',
+      batchStatus: defaultValues?.batchStatus || 'active',
+      startDate: defaultValues?.startDate || new Date().toISOString(),
+      plantCount: defaultValues?.plantCount || 0,
+      notes: defaultValues?.notes || '',
     },
   })
 
   const { mutate: createBatch, isPending: isCreating } =
     api.batch.create.useMutation({
-      onSuccess: () => {
+      onSuccess: (data) => {
         toast({ title: 'Batch created successfully' })
-        void utils.batch.getAll.invalidate()
-        onSuccess?.()
+        void Promise.all([
+          utils.batch.getAll.invalidate(),
+          utils.batch.get.invalidate(data.id),
+        ])
+        router.push(`/batches/${data.id}`)
+        onSuccess?.(data)
       },
       onError: (error) => {
         toast({
@@ -79,10 +85,13 @@ export function BatchesForm({
 
   const { mutate: updateBatch, isPending: isUpdating } =
     api.batch.update.useMutation({
-      onSuccess: () => {
+      onSuccess: (data) => {
         toast({ title: 'Batch updated successfully' })
-        void utils.batch.getAll.invalidate()
-        onSuccess?.()
+        void Promise.all([
+          utils.batch.getAll.invalidate(),
+          utils.batch.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
       },
       onError: (error) => {
         toast({
@@ -93,25 +102,28 @@ export function BatchesForm({
       },
     })
 
-  function onSubmit(data: BatchFormValues) {
+  function onSubmit(values: BatchFormValues) {
     if (mode === 'create') {
-      if (!data.geneticId || !data.locationId) {
-        toast({
-          title: 'Missing required fields',
-          description: 'Genetic and Location are required',
-          variant: 'destructive',
-        })
-        return
-      }
-      createBatch(data)
+      createBatch(values)
     } else if (defaultValues?.id) {
-      updateBatch({ id: defaultValues.id, data })
+      updateBatch({ id: defaultValues.id, data: values })
     }
   }
 
+  // Fetch related data
+  const { data: genetics } = api.genetic.getAll.useQuery({
+    limit: 100,
+    filters: { status: 'active' },
+  })
+
+  const { data: locations } = api.location.getAll.useQuery({
+    limit: 100,
+    filters: { status: 'active' },
+  })
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-1">
         <FormField
           control={form.control}
           name="identifier"
@@ -119,8 +131,58 @@ export function BatchesForm({
             <FormItem>
               <FormLabel>Identifier</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ''} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="geneticId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Genetic</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select genetic" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {genetics?.items.map((genetic) => (
+                    <SelectItem key={genetic.id} value={genetic.id}>
+                      {genetic.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="locationId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {locations?.items.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -151,45 +213,13 @@ export function BatchesForm({
           )}
         />
 
-        {/* Add Genetic Selection */}
         <FormField
           control={form.control}
-          name="geneticId"
+          name="startDate"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Genetic</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select genetic" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {/* Add your genetics options here */}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Add Location Selection */}
-        <FormField
-          control={form.control}
-          name="locationId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {/* Add your locations options here */}
-                </SelectContent>
-              </Select>
+            <FormItem className="flex flex-col">
+              <FormLabel>Start Date</FormLabel>
+              <DatePicker date={field.value} onDateChange={field.onChange} />
               <FormMessage />
             </FormItem>
           )}
@@ -205,12 +235,8 @@ export function BatchesForm({
                 <Input
                   type="number"
                   {...field}
-                  value={field.value?.toString() || ''}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value ? parseInt(e.target.value, 10) : 0
-                    )
-                  }
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
@@ -220,23 +246,44 @@ export function BatchesForm({
 
         <FormField
           control={form.control}
-          name="startDate"
+          name="batchStatus"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Start Date</FormLabel>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {batchStatusEnum.enumValues.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Textarea {...field} value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button
-          type="submit"
-          disabled={isCreating || isUpdating}
-          className="w-full"
-        >
+        <Button type="submit" disabled={isCreating || isUpdating}>
           {mode === 'create' ? 'Create Batch' : 'Update Batch'}
         </Button>
       </form>

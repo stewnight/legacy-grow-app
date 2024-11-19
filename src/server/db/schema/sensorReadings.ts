@@ -57,7 +57,12 @@ export const sensorReadingsRelations = relations(sensorReadings, ({ one }) => ({
 }))
 
 // Zod Schemas
-export const insertSensorReadingSchema = createInsertSchema(sensorReadings)
+export const insertSensorReadingSchema = createInsertSchema(
+  sensorReadings
+).omit({
+  createdAt: true,
+  updatedAt: true,
+})
 export const selectSensorReadingSchema = createSelectSchema(sensorReadings)
 
 // Types

@@ -27,9 +27,23 @@ import { type AppRouter } from '~/server/api/root'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
+import { createSelectSchema } from 'drizzle-zod'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type LocationFormValues = z.infer<typeof insertLocationSchema>
+type LocationDimensions = {
+  length: number
+  width: number
+  height: number
+  unit: 'm' | 'ft'
+}
+
+type LocationProperties = {
+  temperature: { min: number; max: number }
+  humidity: { min: number; max: number }
+  light: { type: string; intensity: number }
+  co2: { min: number; max: number }
+}
 
 interface LocationFormProps {
   mode?: 'create' | 'edit'
@@ -46,14 +60,27 @@ export function LocationForm({
   const router = useRouter()
   const utils = api.useUtils()
 
+  const createDefaultProperties = (): LocationProperties => ({
+    temperature: { min: 15, max: 30 },
+    humidity: { min: 40, max: 60 },
+    light: { type: 'LED', intensity: 100 },
+    co2: { min: 400, max: 1500 },
+  })
+
+  const createDefaultDimensions = (): LocationDimensions => ({
+    length: 10,
+    width: 10,
+    height: 8,
+    unit: 'm',
+  })
+
   const form = useForm<LocationFormValues>({
     resolver: zodResolver(insertLocationSchema),
     defaultValues: {
-      name: defaultValues?.name || '',
-      type: defaultValues?.type || 'room',
-      areaId: defaultValues?.areaId || '',
-      capacity: defaultValues?.capacity || 0,
-      status: defaultValues?.status || 'active',
+      name: defaultValues?.name ?? '',
+      type: defaultValues?.type ?? locationTypeEnum.enumValues[0],
+      properties: defaultValues?.properties ?? createDefaultProperties(),
+      dimensions: defaultValues?.dimensions ?? createDefaultDimensions(),
     },
   })
 
@@ -104,9 +131,22 @@ export function LocationForm({
     }
   }
 
+  const { data: areas } = api.area.getAll.useQuery({
+    limit: 100,
+    filters: { status: 'active' },
+  })
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={(e) => {
+          form.handleSubmit(onSubmit, (errors) => {
+            console.log('Form Errors:', errors)
+          })(e)
+        }}
+        className="space-y-4 p-1"
+        noValidate
+      >
         <FormField
           control={form.control}
           name="name"
@@ -158,12 +198,206 @@ export function LocationForm({
                     <SelectValue placeholder="Select area" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>{/* Add area options here */}</SelectContent>
+                <SelectContent>
+                  {areas?.items.map((area) => (
+                    <SelectItem key={area.id} value={area.id}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Environmental Properties */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h4 className="font-medium">Environmental Settings</h4>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="properties.temperature.min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Min Temperature</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="properties.temperature.max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Temperature</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="properties.humidity.min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Min Humidity</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="properties.humidity.max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Humidity</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Dimensions */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h4 className="font-medium">Dimensions</h4>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="dimensions.length"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Length</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="dimensions.width"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Width</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="dimensions.height"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Height</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    value={field.value?.toString() ?? ''}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dimensions.unit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unit</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="m">Meters</SelectItem>
+                    <SelectItem value="ft">Feet</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -174,9 +408,11 @@ export function LocationForm({
               <FormControl>
                 <Input
                   type="number"
-                  {...field}
-                  value={field.value ?? ''}
+                  value={field.value?.toString() ?? ''}
                   onChange={(e) => field.onChange(Number(e.target.value))}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
                 />
               </FormControl>
               <FormMessage />
@@ -208,7 +444,7 @@ export function LocationForm({
           )}
         />
 
-        <Button type="submit">
+        <Button type="submit" disabled={isCreating || isUpdating}>
           {mode === 'create' ? 'Create Location' : 'Update Location'}
         </Button>
       </form>

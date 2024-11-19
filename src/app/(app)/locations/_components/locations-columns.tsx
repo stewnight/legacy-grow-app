@@ -3,7 +3,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { type locations } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Thermometer, Droplets } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -42,6 +42,34 @@ export const columns: ColumnDef<typeof locations.$inferSelect>[] = [
   {
     accessorKey: 'capacity',
     header: 'Capacity',
+  },
+  {
+    accessorKey: 'properties',
+    header: 'Environment',
+    cell: ({ row }) => {
+      const location = row.original
+      const props = location.properties
+      return (
+        <div className="flex gap-2">
+          {props?.temperature && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Temperature: ${props.temperature.min}° - ${props.temperature.max}°`}
+            >
+              <Thermometer className="h-4 w-4" />
+            </div>
+          )}
+          {props?.humidity && (
+            <div
+              className="flex items-center gap-1 text-sm"
+              title={`Humidity: ${props.humidity.min}% - ${props.humidity.max}%`}
+            >
+              <Droplets className="h-4 w-4" />
+            </div>
+          )}
+        </div>
+      )
+    },
   },
   {
     accessorKey: 'status',

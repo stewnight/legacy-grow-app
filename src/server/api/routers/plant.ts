@@ -109,26 +109,18 @@ export const plantRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertPlantSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertPlantSchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input
+      const { batchId, motherId, ...rest } = input
 
-      const [plant] = await ctx.db
-        .insert(plants)
-        .values({
-          ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
-          createdById: ctx.session.user.id,
-        })
-        .returning()
+      const insertData = {
+        ...rest,
+        batchId: batchId === 'none' ? null : batchId,
+        motherId: motherId === 'none' ? null : motherId,
+        createdById: ctx.session.user.id,
+      }
+
+      const [plant] = await ctx.db.insert(plants).values(insertData).returning()
 
       if (!plant) {
         throw new TRPCError({

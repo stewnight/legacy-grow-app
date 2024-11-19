@@ -32,6 +32,7 @@ export const userRoleEnum = pgEnum('user_role', [
 export const batchStatusEnum = pgEnum('batch_status', [
   'active',
   'completed',
+  'pending',
   'cancelled',
   'archived',
 ])

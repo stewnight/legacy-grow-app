@@ -19,24 +19,24 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 - [x] Initial schema design and integration using Drizzle ORM
 - [o] Basic CRUD scaffolding for:
   - [x] Facilities
-  - [o] Areas
-  - [] Locations
+  - [x] Areas
+  - [x] Locations
   - [x] Genetic strains
-  - [] Batches
-  - [] Plants
-  - [] Tasks
-  - [] Notes
-  - [] Sensors
-  - [] Processing
-  - [] Harvests
+  - [x] Batches
+  - [x] Plants
+  - [x] Tasks
+  - [x] Notes
+  - [x] Sensors
+  - [x] Processing
+  - [x] Harvests
 - [x] Mobile-first responsive layout
 - [x] Reusable UI components (forms, tables, and navigation)
 
 ### In Progress Features
 
-- [ ] Schema consistency and standardization (pending metadata alignment, field naming, cascading relationships, etc.)
-- [ ] Router integration for CRUD operations with tRPC
-- [ ] Complete CRUD operations for:
+- [x] Schema consistency and standardization (pending metadata alignment, field naming, cascading relationships, etc.)
+- [x] Router integration for CRUD operations with tRPC
+- [x] Complete CRUD operations for:
   - Plant updates and deletions
   - Genetic strain updates and deletions
   - Batch updates and deletions
