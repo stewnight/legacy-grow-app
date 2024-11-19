@@ -1,39 +1,93 @@
+// src/server/api/routers/plant.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { plants } from '~/server/db/schema'
-import { eq } from 'drizzle-orm'
+import { plants, insertPlantSchema } from '~/server/db/schema'
+import { eq, desc, like, and, or, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import { plantFormSchema } from '~/lib/validations/plant'
+import {
+  plantStageEnum,
+  plantSourceEnum,
+  plantSexEnum,
+  healthStatusEnum,
+  statusEnum,
+} from '~/server/db/schema/enums'
 
-const plantInput = z.object({
-  name: z.string().min(1, 'Name is required'),
-  geneticId: z.number().min(1, 'Genetic is required'),
-  batchId: z.number().min(1, 'Batch is required'),
-  plantDate: z.string().min(1, 'Plant date is required'),
-  harvestDate: z.string().min(1, 'Harvest date is required'),
+// Schema for filters
+const plantFiltersSchema = z.object({
+  stage: z.enum(plantStageEnum.enumValues).optional(),
+  source: z.enum(plantSourceEnum.enumValues).optional(),
+  sex: z.enum(plantSexEnum.enumValues).optional(),
+  health: z.enum(healthStatusEnum.enumValues).optional(),
+  status: z.enum(statusEnum.enumValues).optional(),
+  search: z.string().optional(),
 })
 
 export const plantRouter = createTRPCRouter({
-  getByCode: protectedProcedure
-    .input(z.string())
+  getAll: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(10),
+        cursor: z.number().nullish(),
+        filters: plantFiltersSchema.optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { limit, cursor, filters } = input
+
+      const conditions = [
+        filters?.stage ? eq(plants.stage, filters.stage) : undefined,
+        filters?.source ? eq(plants.source, filters.source) : undefined,
+        filters?.sex ? eq(plants.sex, filters.sex) : undefined,
+        filters?.health ? eq(plants.health, filters.health) : undefined,
+        filters?.status ? eq(plants.status, filters.status) : undefined,
+        filters?.search
+          ? or(
+              like(plants.identifier, `%${filters.search}%`),
+              like(plants.notes || '', `%${filters.search}%`)
+            )
+          : undefined,
+      ].filter((condition): condition is SQL => condition !== undefined)
+
+      const items = await ctx.db.query.plants.findMany({
+        where: conditions.length ? and(...conditions) : undefined,
+        limit: limit + 1,
+        offset: cursor || 0,
+        orderBy: [desc(plants.createdAt)],
+        with: {
+          genetic: true,
+          location: true,
+          batch: true,
+          mother: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      })
+
+      let nextCursor: typeof cursor | undefined = undefined
+      if (items.length > limit) {
+        items.pop()
+        nextCursor = cursor ? cursor + limit : limit
+      }
+
+      return { items, nextCursor }
+    }),
+
+  get: protectedProcedure
+    .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
       const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.code, input),
+        where: eq(plants.id, input),
         with: {
-          genetic: {
-            columns: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-          batch: {
-            columns: {
-              id: true,
-              name: true,
-              code: true,
-            },
-          },
+          genetic: true,
+          location: true,
+          batch: true,
+          mother: true,
+          children: true,
           createdBy: {
             columns: {
               id: true,
@@ -53,68 +107,27 @@ export const plantRouter = createTRPCRouter({
 
       return plant
     }),
-  list: protectedProcedure
-    .input(
-      z.object({
-        filters: z
-          .object({
-            batchId: z.number(),
-          })
-          .optional(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const where = input.filters?.batchId
-        ? eq(plants.batchId, input.filters.batchId)
-        : undefined
-
-      return ctx.db.query.plants.findMany({
-        where,
-        with: {
-          genetic: {
-            columns: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-          batch: {
-            columns: {
-              id: true,
-              name: true,
-              code: true,
-            },
-          },
-          createdBy: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: (plants, { desc }) => [desc(plants.createdAt)],
-      })
-    }),
 
   create: protectedProcedure
-    .input(plantFormSchema)
+    .input(insertPlantSchema)
     .mutation(async ({ ctx, input }) => {
-      const code = `p${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+      const { batchId, motherId, ...rest } = input
 
-      const [plant] = await ctx.db
-        .insert(plants)
-        .values({
-          ...input,
-          code,
-          status: 'active',
-          createdById: ctx.session.user.id,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          plantDate: input.plantDate.toISOString(),
-          harvestDate: input.harvestDate?.toISOString() ?? null,
+      const insertData = {
+        ...rest,
+        batchId: batchId === 'none' ? null : batchId,
+        motherId: motherId === 'none' ? null : motherId,
+        createdById: ctx.session.user.id,
+      }
+
+      const [plant] = await ctx.db.insert(plants).values(insertData).returning()
+
+      if (!plant) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create plant',
         })
-        .returning()
+      }
 
       return plant
     }),
@@ -122,14 +135,28 @@ export const plantRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        code: z.string(),
-        data: plantFormSchema.partial(),
+        id: z.string().uuid(),
+        data: insertPlantSchema.partial().omit({
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          createdById: true,
+        }),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.code, input.code),
-      })
+      const { properties, metadata, ...rest } = input.data
+
+      const [plant] = await ctx.db
+        .update(plants)
+        .set({
+          ...rest,
+          properties: properties as typeof plants.$inferInsert.properties,
+          metadata: metadata as typeof plants.$inferInsert.metadata,
+          updatedAt: new Date(),
+        })
+        .where(eq(plants.id, input.id))
+        .returning()
 
       if (!plant) {
         throw new TRPCError({
@@ -138,41 +165,24 @@ export const plantRouter = createTRPCRouter({
         })
       }
 
-      const [updated] = await ctx.db
-        .update(plants)
-        .set({
-          ...(input.data as Partial<typeof plants.$inferSelect>),
-          updatedAt: new Date(),
-        })
-        .where(eq(plants.code, input.code))
-        .returning()
-
-      return updated
+      return plant
     }),
 
   delete: protectedProcedure
-    .input(z.object({ code: z.string() }))
+    .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
-      const plant = await ctx.db.query.plants.findFirst({
-        where: eq(plants.code, input.code),
-      })
+      const [deleted] = await ctx.db
+        .delete(plants)
+        .where(eq(plants.id, input))
+        .returning()
 
-      if (!plant) {
+      if (!deleted) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Plant not found',
         })
       }
 
-      if (plant.createdById !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Not authorized to delete this plant',
-        })
-      }
-
-      await ctx.db.delete(plants).where(eq(plants.code, input.code))
-
-      return plant
+      return { success: true }
     }),
 })

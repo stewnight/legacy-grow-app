@@ -1,7 +1,9 @@
 import { z } from 'zod'
-import { desc, eq, and } from 'drizzle-orm'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { notes } from '~/server/db/schema'
+import { eq, desc, and } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
+import { noteTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
 const noteMetadataSchema = z
   .object({
@@ -23,26 +25,25 @@ export const notesRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string(),
-        type: z.enum(['text', 'voice', 'image', 'file']),
+        type: z.enum(noteTypeEnum.enumValues),
         entityType: z.string(),
-        entityId: z.number(),
-        parentId: z.number().optional(),
+        entityId: z.string().uuid(),
+        parentId: z.string().uuid().optional(),
         metadata: noteMetadataSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { metadata, ...rest } = input
+
       const [note] = await ctx.db
         .insert(notes)
         .values({
-          content: input.content,
-          type: input.type,
-          entityType: input.entityType,
-          entityId: input.entityId,
-          parentId: input.parentId,
-          metadata: input.metadata ?? null,
+          ...rest,
+          metadata: (metadata as typeof notes.$inferInsert.metadata) || null,
           createdById: ctx.session.user.id,
         })
         .returning()
+
       return note
     }),
 
@@ -50,9 +51,9 @@ export const notesRouter = createTRPCRouter({
     .input(
       z.object({
         entityType: z.string(),
-        entityId: z.number(),
+        entityId: z.string().uuid(),
         limit: z.number().min(1).max(100).default(50),
-        cursor: z.number().optional(),
+        cursor: z.string().uuid().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -71,7 +72,7 @@ export const notesRouter = createTRPCRouter({
         },
       })
 
-      let nextCursor: typeof cursor | undefined = undefined
+      let nextCursor: string | undefined = undefined
       if (items.length > limit) {
         const nextItem = items.pop()
         nextCursor = nextItem?.id
@@ -86,7 +87,7 @@ export const notesRouter = createTRPCRouter({
   getThread: protectedProcedure
     .input(
       z.object({
-        noteId: z.number(),
+        noteId: z.string().uuid(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -103,28 +104,31 @@ export const notesRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: z.string().uuid(),
         content: z.string(),
-        metadata: noteMetadataSchema.optional(),
+        metadata: noteMetadataSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { metadata, ...rest } = input
+
       const [updated] = await ctx.db
         .update(notes)
         .set({
-          content: input.content,
-          metadata: input.metadata,
+          ...rest,
+          metadata: (metadata as typeof notes.$inferInsert.metadata) || null,
           updatedAt: new Date(),
         })
         .where(eq(notes.id, input.id))
         .returning()
+
       return updated
     }),
 
   delete: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: z.string().uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -132,6 +136,7 @@ export const notesRouter = createTRPCRouter({
         .delete(notes)
         .where(eq(notes.id, input.id))
         .returning()
+
       return deleted
     }),
 })

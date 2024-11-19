@@ -1,128 +1,103 @@
 # Legacy Grow App
 
-A modern cannabis cultivation management system built with Next.js 15, focusing on essential growing operations and compliance tracking.
+A modern cannabis cultivation management system built with Next.js 15, focusing on essential growing operations, compliance tracking, and mobile-first usability.
 
 ## Tech Stack
 
-- Next.js 15 with App Router
-- NextAuth.js 5 for authentication
-- Drizzle ORM with PostgreSQL
-- tRPC for type-safe APIs
-- Tanstack React Query for data management
-- Shadcn/ui components
-- Tailwind CSS for styling
+- **Next.js 15** with App Router for modern server-side rendering
+- **NextAuth.js 5** for Discord-based authentication
+- **Drizzle ORM** with PostgreSQL for type-safe database interactions
+- **tRPC** for type-safe APIs and simplified backend/frontend communication
+- **Tanstack React Query** for efficient data fetching and optimistic updates
+- **Shadcn UI components** with **Tailwind CSS** for responsive design and styling
 
-## Current Implementation Status
+## Current State
 
 ### Completed Features
+
 - [x] User authentication with Discord
-- [x] Plant creation and reading
-- [x] Genetic strain creation and reading
-- [x] Batch creation and reading
-- [x] Basic text-based note system
-- [x] Mobile-responsive layout foundation
-- [x] Initial offline data persistence with React Query
+- [x] Initial schema design and integration using Drizzle ORM
+- [o] Basic CRUD scaffolding for:
+  - [x] Facilities
+  - [x] Areas
+  - [x] Locations
+  - [x] Genetic strains
+  - [x] Batches
+  - [x] Plants
+  - [x] Tasks
+  - [x] Notes
+  - [x] Sensors
+  - [x] Processing
+  - [x] Harvests
+- [x] Mobile-first responsive layout
+- [x] Reusable UI components (forms, tables, and navigation)
 
 ### In Progress Features
-- [ ] Plant updates and deletion
-- [ ] Genetic strain updates and deletion
-- [ ] Batch updates and deletion
-- [ ] Media handling for notes (images, voice, files)
-- [ ] Timeline UI/UX improvements
-- [ ] Complete offline functionality (Service Worker + PWA)
 
-## MVP Roadmap
-
-### Phase 1: Core Functionality Completion
-- [ ] Complete CRUD operations
-  - Plant management
-  - Genetic strains
-  - Batches
-- [ ] Enhanced note system
-  - Improved UI/UX
+- [x] Schema consistency and standardization (pending metadata alignment, field naming, cascading relationships, etc.)
+- [x] Router integration for CRUD operations with tRPC
+- [x] Complete CRUD operations for:
+  - Plant updates and deletions
+  - Genetic strain updates and deletions
+  - Batch updates and deletions
+- [ ] Enhanced note system:
   - Media upload support
   - Better timeline visualization
-- [ ] Full offline support
-  - Service Worker implementation
+- [ ] Offline-first capabilities:
+  - React Query caching
+  - Service Worker integration
   - PWA configuration
-  - Robust data synchronization
 
-### Phase 2: Essential Growing Operations
-- [ ] Plant Dashboard
-  - Active plants overview
+### MVP Roadmap
+
+#### Phase 1: Core Functionality Completion
+
+- [ ] Finalize schemas with consistent relationships and field structures
+- [ ] Align all routers with finalized schemas
+- [ ] Create mobile-friendly forms for CRUD operations
+- [ ] Set up offline functionality (React Query + Service Worker)
+
+#### Phase 2: Enhanced Operations
+
+- [ ] Develop Plant Dashboard:
+  - Active plant overview
   - Growth stage tracking
   - Health status monitoring
-- [ ] Batch Management
-  - Batch creation wizard
-  - Plant grouping and tracking
-  - Batch timeline view
-- [ ] Daily Operations
+- [ ] Implement Batch Management:
+  - Batch creation and grouping
+  - Batch timeline visualization
+- [ ] Add Daily Operations Tracking:
   - Task scheduling
   - Growth stage transitions
-  - Basic environmental logging
+  - Environmental logging
 
-### Phase 3: Compliance & Documentation
+#### Phase 3: Compliance and Reporting
+
 - [ ] Automated compliance logging
-- [ ] Plant history tracking
-- [ ] Export capabilities
-- [ ] Image documentation
-- [ ] Batch reporting
+- [ ] Comprehensive plant and batch history tracking
+- [ ] Export and reporting tools
+- [ ] Image and media-based documentation
 
 ## Development
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL database
 - Cloudflare R2 or compatible S3 storage
 
 ### Getting Started
 
+```bash
 # Install dependencies
-
 pnpm install
 
 # Set up environment variables
-
-cp [.env.example] .env
+cp .env.example .env
 
 # Push database schema
-
 pnpm db:push
 
-# Start development server
-
+# Start the development server
 pnpm dev
-
-## Mobile-First Features
-
-- Progressive Web App (PWA) support
-- Offline-first architecture using React Query
-- Touch-friendly UI components
-- Quick-action buttons for common tasks
-- Camera integration for plant photos
-- Simple data entry forms
-
-## Calculators & Tools
-
-- Nutrient ratio calculator
-- Growth phase timeline
-- Environmental condition optimizer
-- Yield estimator
-- Harvest scheduling
-- Drying room conditions
-
-## Next steps
-
-1. Implement basic CRUD operations for plants using the existing schema
-2. Create mobile-friendly forms for daily logging
-3. Set up image upload and storage
-4. Implement offline functionality using React Query
-5. Add basic reporting and visualization
-
-## Contributing
-
-Please read our contributing guidelines before submitting pull requests.
-
-## License
-
-[MIT License](LICENSE)
+```

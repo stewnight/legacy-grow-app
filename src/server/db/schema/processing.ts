@@ -1,122 +1,161 @@
 import { sql } from 'drizzle-orm'
 import {
   index,
-  integer,
   varchar,
   timestamp,
-  text,
-  decimal,
   json,
-  date,
+  uuid,
+  text,
+  numeric,
 } from 'drizzle-orm/pg-core'
-
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { harvestQualityEnum } from './enums'
+import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
 import { users } from './core'
-import { plants } from './cultivation'
-
-// ================== HARVESTS ==================
-export type Harvest = typeof harvests.$inferSelect
-export type NewHarvest = Omit<Harvest, 'id' | 'createdAt' | 'updatedAt'>
-
-export const harvests = createTable(
-  'harvest',
-  {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    plantId: integer('plant_id').references(() => plants.id),
-    batchId: varchar('batch_id', { length: 255 }).notNull(),
-    date: date('date').notNull(),
-    wetWeight: decimal('wet_weight'),
-    dryWeight: decimal('dry_weight'),
-    trimWeight: decimal('trim_weight'),
-    wasteWeight: decimal('waste_weight'),
-    location: varchar('location', { length: 255 }),
-    quality: harvestQualityEnum('quality'),
-    notes: text('notes'),
-    labResults: json('lab_results'),
-    createdById: varchar('created_by', { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
-  },
-  (table) => ({
-    batchIdIdx: index('harvest_batch_id_idx').on(table.batchId),
-    dateIdx: index('harvest_date_idx').on(table.date),
-    plantIdIdx: index('harvest_plant_id_idx').on(table.plantId),
-  })
-)
-
-// ================== PROCESSING ==================
-export type Processing = typeof processing.$inferSelect
-export type NewProcessing = Omit<Processing, 'id' | 'createdAt' | 'updatedAt'>
+import { batches } from './batches'
+import { harvests } from './harvests'
+import { locations } from './locations'
 
 export const processing = createTable(
   'processing',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    harvestId: integer('harvest_id').references(() => harvests.id),
-    type: varchar('type', { length: 50 }).notNull(),
-    startDate: timestamp('start_date', { withTimezone: true }),
-    endDate: timestamp('end_date', { withTimezone: true }),
-    inputWeight: decimal('input_weight'),
-    outputWeight: decimal('output_weight'),
-    yield: decimal('yield'),
-    method: varchar('method', { length: 255 }),
-    equipment: json('equipment'),
-    parameters: json('parameters'),
+    id: uuid('id').primaryKey().defaultRandom(),
+    identifier: varchar('identifier', { length: 100 }).notNull().unique(),
+    harvestId: uuid('harvest_id')
+      .notNull()
+      .references(() => harvests.id),
+    batchId: uuid('batch_id')
+      .notNull()
+      .references(() => batches.id),
+    locationId: uuid('location_id')
+      .notNull()
+      .references(() => locations.id),
+    // Processing type and method
+    type: varchar('type', { length: 50 }).notNull(), // drying, curing, extraction, etc.
+    method: varchar('method', { length: 100 }).notNull(), // specific technique used
+    // Weight tracking
+    inputWeight: numeric('input_weight', { precision: 10, scale: 3 }).notNull(),
+    outputWeight: numeric('output_weight', { precision: 10, scale: 3 }),
+    yieldPercentage: numeric('yield_percentage', { precision: 5, scale: 2 }),
+    // Timing
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    duration: numeric('duration', { precision: 10, scale: 2 }), // in hours
+    processStatus: batchStatusEnum('process_status')
+      .default('active')
+      .notNull(),
+    quality: harvestQualityEnum('quality'),
+    properties: json('properties').$type<{
+      equipment?: Array<{
+        name: string
+        type: string
+        settings?: Record<string, unknown>
+      }>
+      environment?: {
+        temperature: number
+        humidity: number
+        pressure?: number
+        lightLevel?: number
+        airflow?: number
+      }
+      materials?: Array<{
+        name: string
+        amount: number
+        unit: string
+        batch?: string
+      }>
+      stages?: Array<{
+        name: string
+        duration: number
+        conditions?: Record<string, unknown>
+        completedAt?: string
+      }>
+    }>(),
+    labResults: json('lab_results').$type<{
+      potency?: {
+        thc: number
+        cbd: number
+        totalCannabinoids: number
+      }
+      terpenes?: Array<{
+        name: string
+        percentage: number
+      }>
+      contaminants?: {
+        microbial: boolean
+        metals: boolean
+        pesticides: boolean
+        solvents?: boolean
+      }
+      moisture?: number
+      density?: number
+      viscosity?: number
+      color?: string
+      testedAt?: string
+      testedBy?: string
+      certificateUrl?: string
+    }>(),
+    metadata: json('metadata').$type<{
+      operators?: Array<{
+        userId: string
+        role: string
+        hours: number
+      }>
+      qualityChecks?: Array<{
+        timestamp: string
+        parameter: string
+        value: unknown
+        operator: string
+      }>
+      notes?: string[]
+      images?: Array<{
+        url: string
+        type: string
+        timestamp: string
+      }>
+      costs?: {
+        labor: number
+        materials: number
+        energy: number
+        other?: number
+      }
+    }>(),
     notes: text('notes'),
-    labResults: json('lab_results'),
-    createdById: varchar('created_by', { length: 255 })
+    status: statusEnum('status').default('active').notNull(),
+    createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
+    identifierIdx: index('processing_identifier_idx').on(table.identifier),
     harvestIdIdx: index('processing_harvest_id_idx').on(table.harvestId),
-    typeIdx: index('processing_type_idx').on(table.type),
-    startDateIdx: index('processing_start_date_idx').on(table.startDate),
+    batchIdIdx: index('processing_batch_id_idx').on(table.batchId),
+    locationIdIdx: index('processing_location_id_idx').on(table.locationId),
+    typeMethodIdx: index('processing_type_method_idx').on(
+      table.type,
+      table.method
+    ),
+    processStatusIdx: index('processing_status_idx').on(table.processStatus),
+    startedAtIdx: index('processing_started_at_idx').on(table.startedAt),
+    statusIdx: index('processing_general_status_idx').on(table.status),
   })
 )
 
-// ================== COMPLIANCE LOGS ==================
-export type ComplianceLog = typeof complianceLogs.$inferSelect
+// Zod Schemas
+export const insertProcessingSchema = createInsertSchema(processing).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
+export const selectProcessingSchema = createSelectSchema(processing)
 
-export const complianceLogs = createTable(
-  'compliance_log',
-  {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
-    type: varchar('type', { length: 50 }).notNull(),
-    category: varchar('category', { length: 50 }).notNull(),
-    details: json('details'),
-    attachments: json('attachments'),
-    status: varchar('status', { length: 50 }),
-    verifiedById: varchar('verified_by', { length: 255 }).references(
-      () => users.id
-    ),
-    verifiedAt: timestamp('verified_at', { withTimezone: true }),
-    createdById: varchar('created_by', { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
-  },
-  (table) => ({
-    typeIdx: index('compliance_log_type_idx').on(table.type),
-    categoryIdx: index('compliance_log_category_idx').on(table.category),
-    statusIdx: index('compliance_log_status_idx').on(table.status),
-  })
-)
+// Types
+export type Processing = typeof processing.$inferSelect
+export type NewProcessing = typeof processing.$inferInsert

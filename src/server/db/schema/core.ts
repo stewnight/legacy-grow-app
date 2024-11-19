@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -8,80 +8,93 @@ import {
   varchar,
   boolean,
   json,
+  uuid,
 } from 'drizzle-orm/pg-core'
+import { facilities } from './facilities'
+import { areas } from './areas'
+import { locations } from './locations'
+import { plants } from './plants'
+import { genetics } from './genetics'
+import { batches } from './batches'
 import { type AdapterAccount } from 'next-auth/adapters'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
 import { logLevelEnum, systemLogSourceEnum, userRoleEnum } from './enums'
+import { tasks } from './tasks'
+import { sensors } from './sensors'
+import { harvests, notes, processing } from '.'
 
 // ================== SYSTEM LOGS ==================
-export type SystemLog = typeof systemLogs.$inferSelect
-
 export const systemLogs = createTable(
   'system_log',
   {
-    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    id: uuid('id').primaryKey().defaultRandom(),
     level: logLevelEnum('level').notNull(),
     source: systemLogSourceEnum('source').notNull(),
     message: text('message').notNull(),
-    metadata: json('metadata'),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
   },
-  (self) => ({
-    levelIdx: index('system_log_level_idx').on(self.level),
-    sourceIdx: index('system_log_source_idx').on(self.source),
-    createdAtIdx: index('system_log_created_at_idx').on(self.createdAt),
+  (table) => ({
+    levelIdx: index('system_log_level_idx').on(table.level),
+    sourceIdx: index('system_log_source_idx').on(table.source),
+    createdAtIdx: index('system_log_created_at_idx').on(table.createdAt),
   })
 )
 
 // ================== USERS & AUTH ==================
-export type User = typeof users.$inferSelect
-export type Account = typeof accounts.$inferSelect
-export type Session = typeof sessions.$inferSelect
-export type VerificationToken = typeof verificationTokens.$inferSelect
+export type UserPreferences = {
+  theme?: 'light' | 'dark' | 'system'
+  notifications?: {
+    email?: boolean
+    push?: boolean
+    inApp?: boolean
+  }
+  units?: 'metric' | 'imperial'
+  language?: string
+  timezone?: string
+}
 
 export const users = createTable(
   'user',
   {
-    id: varchar('id', { length: 255 })
-      .notNull()
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }),
-    email: varchar('email', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
     emailVerified: timestamp('email_verified', {
       mode: 'date',
       withTimezone: true,
-    }).default(sql`CURRENT_TIMESTAMP`),
+    }),
     image: varchar('image', { length: 255 }),
     role: userRoleEnum('role').notNull().default('user'),
     active: boolean('active').default(true),
-    permissions: json('permissions').$type<string[]>(),
-    preferences: json('preferences').$type<{
-      theme?: 'light' | 'dark'
-      notifications?: boolean
-      units?: 'metric' | 'imperial'
-    }>(),
+    permissions: json('permissions').$type<string[]>().default([]),
+    preferences: json('preferences').$type<UserPreferences>().default({}),
     lastLogin: timestamp('last_login', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .defaultNow()
       .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
-  (self) => ({
-    emailIdx: index('user_email_idx').on(self.email),
-    roleIdx: index('user_role_idx').on(self.role),
-    activeIdx: index('user_active_idx').on(self.active),
+  (table) => ({
+    emailIdx: index('user_email_idx').on(table.email),
+    roleIdx: index('user_role_idx').on(table.role),
+    activeIdx: index('user_active_idx').on(table.active),
   })
 )
 
 export const accounts = createTable(
   'account',
   {
-    userId: varchar('user_id', { length: 255 })
+    userId: uuid('user_id')
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: 'cascade' }),
     type: varchar('type', { length: 255 })
       .$type<AdapterAccount['type']>()
       .notNull(),
@@ -97,11 +110,11 @@ export const accounts = createTable(
     id_token: text('id_token'),
     session_state: varchar('session_state', { length: 255 }),
   },
-  (self) => ({
+  (table) => ({
     compoundKey: primaryKey({
-      columns: [self.provider, self.providerAccountId],
+      columns: [table.provider, table.providerAccountId],
     }),
-    userIdIdx: index('account_user_id_idx').on(self.userId),
+    userIdIdx: index('account_user_id_idx').on(table.userId),
   })
 )
 
@@ -111,16 +124,16 @@ export const sessions = createTable(
     sessionToken: varchar('session_token', { length: 255 })
       .notNull()
       .primaryKey(),
-    userId: varchar('user_id', { length: 255 })
+    userId: uuid('user_id')
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: 'cascade' }),
     expires: timestamp('expires', {
       mode: 'date',
       withTimezone: true,
     }).notNull(),
   },
-  (self) => ({
-    userIdIdx: index('session_user_id_idx').on(self.userId),
+  (table) => ({
+    userIdIdx: index('session_user_id_idx').on(table.userId),
   })
 )
 
@@ -134,7 +147,62 @@ export const verificationTokens = createTable(
       withTimezone: true,
     }).notNull(),
   },
-  (self) => ({
-    compoundKey: primaryKey({ columns: [self.identifier, self.token] }),
+  (table) => ({
+    compoundKey: primaryKey({ columns: [table.identifier, table.token] }),
+    expiresIdx: index('verification_token_expires_idx').on(table.expires),
   })
 )
+
+/**
+ * Core user relations including all created and assigned entities
+ * @remarks
+ * Users can create multiple entities and be assigned to tasks
+ */
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts, { relationName: 'userAccounts' }),
+  sessions: many(sessions, { relationName: 'userSessions' }),
+  // Created entities
+  createdFacilities: many(facilities, { relationName: 'facilityCreator' }),
+  createdAreas: many(areas, { relationName: 'areaCreator' }),
+  createdLocations: many(locations, { relationName: 'locationCreator' }),
+  createdPlants: many(plants, { relationName: 'plantCreator' }),
+  createdGenetics: many(genetics, { relationName: 'geneticCreator' }),
+  createdBatches: many(batches, { relationName: 'batchCreator' }),
+  createdTasks: many(tasks, { relationName: 'taskCreator' }),
+  createdSensors: many(sensors, { relationName: 'sensorCreator' }),
+  createdHarvests: many(harvests, { relationName: 'harvestCreator' }),
+  createdProcessing: many(processing, { relationName: 'processingCreator' }),
+  createdNotes: many(notes, { relationName: 'noteCreator' }),
+  // Assigned entities
+  assignedTasks: many(tasks, { relationName: 'assignedTasks' }),
+}))
+
+/**
+ * Authentication relations for NextAuth.js
+ */
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+    relationName: 'userAccounts',
+  }),
+}))
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+    relationName: 'userSessions',
+  }),
+}))
+
+// Zod Schemas
+export const insertUserSchema = createInsertSchema(users)
+export const selectUserSchema = createSelectSchema(users)
+
+// Types
+export type User = typeof users.$inferSelect
+export type NewUser = typeof users.$inferInsert
+export type Account = typeof accounts.$inferSelect
+export type Session = typeof sessions.$inferSelect
+export type VerificationToken = typeof verificationTokens.$inferSelect
