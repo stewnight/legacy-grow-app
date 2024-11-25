@@ -102,6 +102,7 @@ const data = {
       title: 'Github',
       url: 'https://github.com/stewnight/legacy-grow-app',
       icon: Github,
+      isExternal: true,
     },
     {
       title: 'Schema',

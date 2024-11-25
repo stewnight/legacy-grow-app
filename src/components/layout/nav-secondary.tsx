@@ -1,6 +1,6 @@
 'use client'
 
-import { type LucideIcon } from 'lucide-react'
+import { ExternalLink, type LucideIcon } from 'lucide-react'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,6 +17,7 @@ export function NavSecondary({
     title: string
     url: string
     icon: LucideIcon
+    isExternal?: boolean
   }[]
   className?: string
 }) {
@@ -29,7 +30,12 @@ export function NavSecondary({
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />
-                <span>{item.title}</span>
+                <span>
+                  {item.title}{' '}
+                  {item.isExternal ? (
+                    <ExternalLink className="inline size-3 text-muted-foreground" />
+                  ) : null}
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
