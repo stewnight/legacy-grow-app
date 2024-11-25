@@ -16,18 +16,18 @@ import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
 import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
-import { FacilitiesForm } from '../_components/facilities-form'
+import { BuildingsForm } from '../_components/buildings-form'
 import { Badge } from '../../../../components/ui/badge'
-import { AreaForm } from '../../areas/_components/areas-form'
+import { RoomForm } from '../../rooms/_components/rooms-form'
 
-export default function FacilityPage({
+export default function BuildingPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const resolvedParams = React.use(params)
 
-  const { data: facility, isLoading } = api.facility.get.useQuery(
+  const { data: building, isLoading } = api.building.get.useQuery(
     resolvedParams.id,
     {
       staleTime: 5 * 60 * 1000,
@@ -68,7 +68,7 @@ export default function FacilityPage({
     )
   }
 
-  if (!facility) {
+  if (!building) {
     return notFound()
   }
 
@@ -76,14 +76,14 @@ export default function FacilityPage({
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{facility.name}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{building.name}</h2>
           <p className="text-muted-foreground">
-            {facility.type.charAt(0).toUpperCase() + facility.type.slice(1)}{' '}
+            {building.type.charAt(0).toUpperCase() + building.type.slice(1)}{' '}
             Facility
           </p>
         </div>
-        <AppSheet mode="edit" entity="facility">
-          <FacilitiesForm mode="edit" defaultValues={facility} />
+        <AppSheet mode="edit" entity="building">
+          <BuildingsForm mode="edit" defaultValues={building} />
         </AppSheet>
       </div>
 
@@ -95,15 +95,15 @@ export default function FacilityPage({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {facility.address?.city || 'N/A'}
+              {building.address?.city || 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {facility.address?.country || 'No location set'}
+              {building.address?.country || 'No location set'}
             </p>
           </CardContent>
         </Card>
 
-        {facility.properties?.climate && (
+        {building.properties?.climate && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -113,16 +113,16 @@ export default function FacilityPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold capitalize">
-                {facility.properties.climate.controlType}
+                {building.properties.climate.controlType}
               </div>
               <p className="text-xs text-muted-foreground">
-                {facility.properties.climate.hvacSystem || 'Standard HVAC'}
+                {building.properties.climate.hvacSystem || 'Standard HVAC'}
               </p>
             </CardContent>
           </Card>
         )}
 
-        {facility.properties?.security && (
+        {building.properties?.security && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Security</CardTitle>
@@ -132,7 +132,7 @@ export default function FacilityPage({
               <div className="space-y-2">
                 <Badge
                   variant={
-                    facility.properties.security.accessControl
+                    building.properties.security.accessControl
                       ? 'default'
                       : 'secondary'
                   }
@@ -141,7 +141,7 @@ export default function FacilityPage({
                 </Badge>
                 <Badge
                   variant={
-                    facility.properties.security.cameraSystem
+                    building.properties.security.cameraSystem
                       ? 'default'
                       : 'secondary'
                   }
@@ -153,7 +153,7 @@ export default function FacilityPage({
           </Card>
         )}
 
-        {facility.properties?.power && (
+        {building.properties?.power && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -163,10 +163,10 @@ export default function FacilityPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold capitalize">
-                {facility.properties.power.mainSource}
+                {building.properties.power.mainSource}
               </div>
               <p className="text-xs text-muted-foreground">
-                {facility.properties.power.backup
+                {building.properties.power.backup
                   ? 'Backup Available'
                   : 'No Backup'}
               </p>
@@ -178,7 +178,7 @@ export default function FacilityPage({
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="areas">Areas</TabsTrigger>
+          <TabsTrigger value="rooms">Rooms</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
 
@@ -194,20 +194,20 @@ export default function FacilityPage({
                     <dt className="text-sm font-medium text-muted-foreground">
                       Type
                     </dt>
-                    <dd className="text-sm capitalize">{facility.type}</dd>
+                    <dd className="text-sm capitalize">{building.type}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-muted-foreground">
                       Status
                     </dt>
-                    <dd className="text-sm capitalize">{facility.status}</dd>
+                    <dd className="text-sm capitalize">{building.status}</dd>
                   </div>
-                  {facility.licenseNumber && (
+                  {building.licenseNumber && (
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         License Number
                       </dt>
-                      <dd className="text-sm">{facility.licenseNumber}</dd>
+                      <dd className="text-sm">{building.licenseNumber}</dd>
                     </div>
                   )}
                   <div>
@@ -215,15 +215,15 @@ export default function FacilityPage({
                       Created
                     </dt>
                     <dd className="text-sm">
-                      {formatDate(facility.createdAt)} by{' '}
-                      {facility.createdBy?.name}
+                      {formatDate(building.createdAt)} by{' '}
+                      {building.createdBy?.name}
                     </dd>
                   </div>
                 </dl>
               </CardContent>
             </Card>
 
-            {facility.address && (
+            {building.address && (
               <Card>
                 <CardHeader>
                   <CardTitle>Location Details</CardTitle>
@@ -234,36 +234,36 @@ export default function FacilityPage({
                       <dt className="text-sm font-medium text-muted-foreground">
                         Street Address
                       </dt>
-                      <dd className="text-sm">{facility.address.street}</dd>
+                      <dd className="text-sm">{building.address.street}</dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         City, State
                       </dt>
                       <dd className="text-sm">
-                        {facility.address.city}, {facility.address.state}
+                        {building.address.city}, {building.address.state}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         Country
                       </dt>
-                      <dd className="text-sm">{facility.address.country}</dd>
+                      <dd className="text-sm">{building.address.country}</dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         Postal Code
                       </dt>
-                      <dd className="text-sm">{facility.address.postalCode}</dd>
+                      <dd className="text-sm">{building.address.postalCode}</dd>
                     </div>
-                    {facility.address.coordinates && (
+                    {building.address.coordinates && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           Coordinates
                         </dt>
                         <dd className="text-sm">
-                          {facility.address.coordinates.latitude},{' '}
-                          {facility.address.coordinates.longitude}
+                          {building.address.coordinates.latitude},{' '}
+                          {building.address.coordinates.longitude}
                         </dd>
                       </div>
                     )}
@@ -274,17 +274,17 @@ export default function FacilityPage({
           </div>
         </TabsContent>
 
-        <TabsContent value="areas">
+        <TabsContent value="rooms">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Facility Areas</CardTitle>
-                <AppSheet mode="create" entity="area">
-                  <AreaForm
+                <CardTitle>Building Rooms</CardTitle>
+                <AppSheet mode="create" entity="room">
+                  <RoomForm
                     mode="create"
                     defaultValues={{
                       id: '',
-                      facilityId: facility.id,
+                      buildingId: building.id,
                       status: 'active' as const,
                       name: '',
                       type: 'storage' as const,
@@ -297,39 +297,39 @@ export default function FacilityPage({
                       capacity: 0,
                       parentId: null,
                       children: [],
-                      facility: facility,
+                      building: building,
                       createdBy: { id: '', name: '', email: '' },
                     }}
                   />
                 </AppSheet>
               </div>
-              <CardDescription>Areas within this facility</CardDescription>
+              <CardDescription>Rooms within this facility</CardDescription>
             </CardHeader>
             <CardContent>
-              {facility.areas && facility.areas.length > 0 ? (
+              {building.rooms && building.rooms.length > 0 ? (
                 <div className="space-y-4">
-                  {facility.areas.map((area) => (
+                  {building.rooms.map((room) => (
                     <div
-                      key={area.id}
+                      key={room.id}
                       className="flex items-center justify-between border rounded p-4"
                     >
                       <div>
                         <Link
-                          href={`/areas/${area.id}`}
+                          href={`/rooms/${room.id}`}
                           className="font-medium hover:underline"
                         >
-                          {area.name}
+                          {room.name}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          {area.type}
+                          {room.type}
                         </p>
                       </div>
-                      <Badge variant="secondary">{area.status}</Badge>
+                      <Badge variant="secondary">{room.status}</Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p>No areas found in this facility.</p>
+                <p>No rooms found in this facility.</p>
               )}
             </CardContent>
           </Card>
@@ -341,9 +341,9 @@ export default function FacilityPage({
               <CardTitle>Additional Details</CardTitle>
             </CardHeader>
             <CardContent>
-              {facility.description ? (
+              {building.description ? (
                 <div className="prose dark:prose-invert">
-                  <p>{facility.description}</p>
+                  <p>{building.description}</p>
                 </div>
               ) : (
                 <p className="text-muted-foreground">

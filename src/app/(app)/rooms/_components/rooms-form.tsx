@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertAreaSchema } from '~/server/db/schema'
+import { insertRoomSchema } from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { type z } from 'zod'
-import { areaTypeEnum, statusEnum } from '~/server/db/schema/enums'
+import { roomTypeEnum, statusEnum } from '~/server/db/schema/enums'
 import { type inferRouterOutputs } from '@trpc/server'
 import { type AppRouter } from '~/server/api/root'
 import { api } from '~/trpc/react'
@@ -29,16 +29,16 @@ import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
-type AreaFormValues = z.infer<typeof insertAreaSchema>
+type RoomFormValues = z.infer<typeof insertRoomSchema>
 // Removed unused types
 
 interface AreaFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['area']['get']
-  onSuccess?: (data: AreaFormValues) => void
+  defaultValues?: RouterOutputs['room']['get']
+  onSuccess?: (data: RoomFormValues) => void
 }
 
-export function AreaForm({
+export function RoomForm({
   mode = 'create',
   defaultValues,
   onSuccess,
@@ -46,14 +46,14 @@ export function AreaForm({
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
-  const form = useForm<AreaFormValues>({
-    resolver: zodResolver(insertAreaSchema),
+  const form = useForm<RoomFormValues>({
+    resolver: zodResolver(insertRoomSchema),
     defaultValues: {
       name: defaultValues?.name || '',
       capacity: defaultValues?.capacity || 10,
       status: defaultValues?.status || statusEnum.enumValues[0],
+      buildingId: defaultValues?.buildingId || '',
       parentId: defaultValues?.parentId || '',
-      facilityId: defaultValues?.facilityId || '',
       type: defaultValues?.type || undefined,
       properties: defaultValues?.properties || {
         temperature: { min: 65, max: 80 },
@@ -70,59 +70,59 @@ export function AreaForm({
     },
   })
 
-  const { mutate: createArea, isPending: isCreating } =
-    api.area.create.useMutation({
+  const { mutate: createRoom, isPending: isCreating } =
+    api.room.create.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Area created successfully' })
+        toast({ title: 'Room created successfully' })
         void Promise.all([
-          utils.area.getAll.invalidate(),
-          utils.area.get.invalidate(data.id),
+          utils.room.getAll.invalidate(),
+          utils.room.get.invalidate(data.id),
         ])
-        router.push(`/areas/${data.id}`)
+        router.push(`/rooms/${data.id}`)
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error creating area',
+          title: 'Error creating room',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  const { mutate: updateArea, isPending: isUpdating } =
-    api.area.update.useMutation({
+  const { mutate: updateRoom, isPending: isUpdating } =
+    api.room.update.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Area updated successfully' })
+        toast({ title: 'Room updated successfully' })
         void Promise.all([
-          utils.area.getAll.invalidate(),
-          utils.area.get.invalidate(data.id),
+          utils.room.getAll.invalidate(),
+          utils.room.get.invalidate(data.id),
         ])
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error updating area',
+          title: 'Error updating room',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  function onSubmit(values: AreaFormValues) {
+  function onSubmit(values: RoomFormValues) {
     if (mode === 'create') {
-      createArea(values)
+      createRoom(values)
     } else if (defaultValues?.id) {
-      updateArea({ id: defaultValues.id, data: values })
+      updateRoom({ id: defaultValues.id, data: values })
     }
   }
 
-  const { data: facilities } = api.facility.getAll.useQuery({
+  const { data: buildings } = api.building.getAll.useQuery({
     limit: 100,
     filters: { status: 'active' },
   })
 
-  const { data: parentAreas } = api.area.getAll.useQuery({
+  const { data: parentRooms } = api.room.getAll.useQuery({
     limit: 100,
     filters: { status: 'active' },
   })
@@ -168,7 +168,7 @@ export function AreaForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {areaTypeEnum.enumValues.map((type) => (
+                  {roomTypeEnum.enumValues.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}
                     </SelectItem>
@@ -182,23 +182,23 @@ export function AreaForm({
 
         <FormField
           control={form.control}
-          name="facilityId"
+          name="buildingId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Facility</FormLabel>
+              <FormLabel>Building</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value ?? ''}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select facility" />
+                    <SelectValue placeholder="Select building" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {facilities?.items.map((facility) => (
-                    <SelectItem key={facility.id} value={facility.id}>
-                      {facility.name}
+                  {buildings?.items.map((building) => (
+                    <SelectItem key={building.id} value={building.id}>
+                      {building.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -213,21 +213,21 @@ export function AreaForm({
           name="parentId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Parent Area</FormLabel>
+              <FormLabel>Parent Room</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value || undefined}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select parent area" />
+                    <SelectValue placeholder="Select parent room" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value={'null'}>None</SelectItem>
-                  {parentAreas?.items.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.name}
+                  {parentRooms?.items.map((room) => (
+                    <SelectItem key={room.id} value={room.id}>
+                      {room.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

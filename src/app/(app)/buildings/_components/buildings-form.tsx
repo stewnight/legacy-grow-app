@@ -3,8 +3,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  insertFacilitySchema,
-  facilityTypeEnum,
+  insertBuildingSchema,
+  buildingTypeEnum,
   statusEnum,
 } from '~/server/db/schema'
 import {
@@ -32,26 +32,26 @@ import {
 } from '../../../../components/ui/select'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
-type FacilityFormValues = z.infer<typeof insertFacilitySchema>
-type FacilityProperties = z.infer<typeof insertFacilitySchema.shape.properties>
-type FacilityAddress = z.infer<typeof insertFacilitySchema.shape.address>
+type BuildingFormValues = z.infer<typeof insertBuildingSchema>
+type BuildingProperties = z.infer<typeof insertBuildingSchema.shape.properties>
+type BuildingAddress = z.infer<typeof insertBuildingSchema.shape.address>
 
-interface FacilityFormProps {
+interface BuildingFormProps {
   mode: 'create' | 'edit'
-  defaultValues?: RouterOutputs['facility']['get']
-  onSuccess?: (data: FacilityFormValues) => void
+  defaultValues?: RouterOutputs['building']['get']
+  onSuccess?: (data: BuildingFormValues) => void
 }
 
-export function FacilitiesForm({
+export function BuildingsForm({
   mode = 'create',
   defaultValues,
   onSuccess,
-}: FacilityFormProps) {
+}: BuildingFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
 
-  const defaultProperties: FacilityProperties = defaultValues?.properties ?? {
+  const defaultProperties: BuildingProperties = defaultValues?.properties ?? {
     climate: {
       controlType: 'manual',
       hvacSystem: '',
@@ -66,7 +66,7 @@ export function FacilitiesForm({
     },
   }
 
-  const defaultAddress: FacilityAddress = defaultValues?.address ?? {
+  const defaultAddress: BuildingAddress = defaultValues?.address ?? {
     street: '',
     city: '',
     state: '',
@@ -78,61 +78,61 @@ export function FacilitiesForm({
     },
   }
 
-  const form = useForm<FacilityFormValues>({
-    resolver: zodResolver(insertFacilitySchema),
+  const form = useForm<BuildingFormValues>({
+    resolver: zodResolver(insertBuildingSchema),
     defaultValues: {
       name: defaultValues?.name ?? '',
-      type: defaultValues?.type ?? facilityTypeEnum.enumValues[0],
+      type: defaultValues?.type ?? buildingTypeEnum.enumValues[0],
       status: defaultValues?.status ?? statusEnum.enumValues[0],
       address: defaultAddress,
       properties: defaultProperties,
     },
   })
 
-  const { mutate: createFacility, isPending: isCreating } =
-    api.facility.create.useMutation({
+  const { mutate: createBuilding, isPending: isCreating } =
+    api.building.create.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Facility created successfully' })
+        toast({ title: 'Building created successfully' })
         void Promise.all([
-          utils.facility.getAll.invalidate(),
-          utils.facility.get.invalidate(data.id),
+          utils.building.getAll.invalidate(),
+          utils.building.get.invalidate(data.id),
         ])
-        router.push(`/facilities/${data.id}`)
+        router.push(`/buildings/${data.id}`)
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error creating facility',
+          title: 'Error creating building',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  const { mutate: updateFacility, isPending: isUpdating } =
-    api.facility.update.useMutation({
+  const { mutate: updateBuilding, isPending: isUpdating } =
+    api.building.update.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Facility updated successfully' })
+        toast({ title: 'Building updated successfully' })
         void Promise.all([
-          utils.facility.getAll.invalidate(),
-          utils.facility.get.invalidate(data.id),
+          utils.building.getAll.invalidate(),
+          utils.building.get.invalidate(data.id),
         ])
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error updating facility',
+          title: 'Error updating building',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  async function onSubmit(values: FacilityFormValues) {
+  async function onSubmit(values: BuildingFormValues) {
     if (mode === 'create') {
-      createFacility(values)
+      createBuilding(values)
     } else if (defaultValues?.id) {
-      updateFacility({ id: defaultValues.id, data: values })
+      updateBuilding({ id: defaultValues.id, data: values })
     }
   }
 
@@ -186,7 +186,7 @@ export function FacilitiesForm({
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {facilityTypeEnum.enumValues.map((type) => (
+                    {buildingTypeEnum.enumValues.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
@@ -370,7 +370,7 @@ export function FacilitiesForm({
           </div>
         </div>
 
-        <h3 className="font-medium">Facility Properties</h3>
+        <h3 className="font-medium">Building Properties</h3>
 
         {/* Climate Properties */}
         <div className="space-y-4 rounded-lg border p-4">
@@ -537,7 +537,7 @@ export function FacilitiesForm({
         />
 
         <Button type="submit" disabled={isCreating || isUpdating}>
-          {mode === 'create' ? 'Create Facility' : 'Save Changes'}
+          {mode === 'create' ? 'Create Building' : 'Save Changes'}
         </Button>
       </form>
     </Form>

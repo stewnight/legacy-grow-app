@@ -10,17 +10,17 @@ import {
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
-import { facilityTypeEnum, statusEnum } from './enums'
+import { buildingTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { areas } from './areas'
+import { rooms } from './rooms'
 
-// ================== FACILITIES ==================
-export const facilities = createTable(
-  'facility',
+// ================== buildings ==================
+export const buildings = createTable(
+  'building',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 255 }).notNull(),
-    type: facilityTypeEnum('type').notNull(),
+    type: buildingTypeEnum('type').notNull(),
     address: json('address').$type<{
       street: string
       city: string
@@ -61,32 +61,32 @@ export const facilities = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    nameIdx: index('facility_name_idx').on(table.name),
-    typeIdx: index('facility_type_idx').on(table.type),
-    statusIdx: index('facility_status_idx').on(table.status),
-    licenseIdx: index('facility_license_idx').on(table.licenseNumber),
+    nameIdx: index('building_name_idx').on(table.name),
+    typeIdx: index('building_type_idx').on(table.type),
+    statusIdx: index('building_status_idx').on(table.status),
+    licenseIdx: index('building_license_idx').on(table.licenseNumber),
   })
 )
 
 // ================== RELATIONS ==================
 
-export const facilitiesRelations = relations(facilities, ({ one, many }) => ({
-  areas: many(areas, { relationName: 'facilityAreas' }),
+export const buildingsRelations = relations(buildings, ({ one, many }) => ({
+  rooms: many(rooms, { relationName: 'buildingRooms' }),
   createdBy: one(users, {
-    fields: [facilities.createdById],
+    fields: [buildings.createdById],
     references: [users.id],
-    relationName: 'facilityCreator',
+    relationName: 'buildingCreator',
   }),
 }))
 
-export const insertFacilitySchema = createInsertSchema(facilities).omit({
+export const insertBuildingSchema = createInsertSchema(buildings).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   createdById: true,
 })
 
-export const selectFacilitySchema = createSelectSchema(facilities)
+export const selectBuildingSchema = createSelectSchema(buildings)
 
-export type Facility = typeof facilities.$inferSelect
-export type NewFacility = typeof facilities.$inferInsert
+export type Building = typeof buildings.$inferSelect
+export type NewBuilding = typeof buildings.$inferInsert

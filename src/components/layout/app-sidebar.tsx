@@ -42,13 +42,13 @@ const data = {
       isActive: true,
     },
     {
-      title: 'Facilities',
-      url: '/facilities',
+      title: 'Buildings',
+      url: '/buildings',
       icon: Building,
     },
     {
-      title: 'Areas',
-      url: '/areas',
+      title: 'Rooms',
+      url: '/rooms',
       icon: Grid2x2,
     },
     {

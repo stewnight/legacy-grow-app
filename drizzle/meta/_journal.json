@@ -22,6 +22,34 @@
       "when": 1731913491453,
       "tag": "0002_shiny_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1732571784445,
+      "tag": "0003_fresh_molten_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1732572114053,
+      "tag": "0004_safe_black_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1732573036440,
+      "tag": "0005_nice_wasp",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1732573779022,
+      "tag": "0006_common_puma",
+      "breakpoints": true
     }
   ]
 }

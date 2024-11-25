@@ -76,18 +76,18 @@ export default function LocationPage({
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{location.name}</h2>
           <p className="text-muted-foreground">
-            {location.area?.name ? (
+            {location.room?.name ? (
               <>
                 In{' '}
                 <Link
-                  href={`/areas/${location.area.id}`}
+                  href={`/rooms/${location.room.id}`}
                   className="hover:underline"
                 >
-                  {location.area.name}
+                  {location.room.name}
                 </Link>
               </>
             ) : (
-              'No area assigned'
+              'No room assigned'
             )}
           </p>
         </div>

@@ -11,7 +11,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { locationTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { areas } from './areas'
+import { rooms } from './rooms'
 import { plants } from './plants'
 import { tasks } from './tasks'
 import { batches } from './batches'
@@ -23,9 +23,9 @@ export const locations = createTable(
   'location',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    areaId: uuid('area_id')
+    roomId: uuid('room_id')
       .notNull()
-      .references(() => areas.id, { onDelete: 'cascade' }),
+      .references(() => rooms.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
     type: locationTypeEnum('type').notNull(),
     coordinates: json('coordinates').$type<{
@@ -69,15 +69,15 @@ export const locations = createTable(
   (table) => ({
     nameIdx: index('location_name_idx').on(table.name),
     typeIdx: index('location_type_idx').on(table.type),
-    areaIdIdx: index('location_area_id_idx').on(table.areaId),
+    roomIdIdx: index('location_room_id_idx').on(table.roomId),
     statusIdx: index('location_status_idx').on(table.status),
   })
 )
 export const locationsRelations = relations(locations, ({ one, many }) => ({
-  area: one(areas, {
-    fields: [locations.areaId],
-    references: [areas.id],
-    relationName: 'areaLocations',
+  room: one(rooms, {
+    fields: [locations.roomId],
+    references: [rooms.id],
+    relationName: 'roomLocations',
   }),
   plants: many(plants, { relationName: 'locationPlants' }),
   sensors: many(sensors, { relationName: 'sensorLocation' }),
