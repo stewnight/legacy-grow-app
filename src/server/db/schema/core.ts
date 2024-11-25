@@ -11,7 +11,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { buildings } from './buildings'
-import { areas } from './areas'
+import { rooms } from './rooms'
 import { locations } from './locations'
 import { plants } from './plants'
 import { genetics } from './genetics'
@@ -163,7 +163,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions, { relationName: 'userSessions' }),
   // Created entities
   createdBuildings: many(buildings, { relationName: 'buildingCreator' }),
-  createdAreas: many(areas, { relationName: 'areaCreator' }),
+  createdRooms: many(rooms, { relationName: 'roomCreator' }),
   createdLocations: many(locations, { relationName: 'locationCreator' }),
   createdPlants: many(plants, { relationName: 'plantCreator' }),
   createdGenetics: many(genetics, { relationName: 'geneticCreator' }),

@@ -12,7 +12,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { buildingTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { areas } from './areas'
+import { rooms } from './rooms'
 
 // ================== buildings ==================
 export const buildings = createTable(
@@ -71,7 +71,7 @@ export const buildings = createTable(
 // ================== RELATIONS ==================
 
 export const buildingsRelations = relations(buildings, ({ one, many }) => ({
-  areas: many(areas, { relationName: 'buildingAreas' }),
+  rooms: many(rooms, { relationName: 'buildingRooms' }),
   createdBy: one(users, {
     fields: [buildings.createdById],
     references: [users.id],

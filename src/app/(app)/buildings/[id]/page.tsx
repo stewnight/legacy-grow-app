@@ -18,7 +18,7 @@ import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { BuildingsForm } from '../_components/buildings-form'
 import { Badge } from '../../../../components/ui/badge'
-import { AreaForm } from '../../areas/_components/areas-form'
+import { RoomForm } from '../../rooms/_components/rooms-form'
 
 export default function BuildingPage({
   params,
@@ -178,7 +178,7 @@ export default function BuildingPage({
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="areas">Areas</TabsTrigger>
+          <TabsTrigger value="rooms">Rooms</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
 
@@ -274,13 +274,13 @@ export default function BuildingPage({
           </div>
         </TabsContent>
 
-        <TabsContent value="areas">
+        <TabsContent value="rooms">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Building Areas</CardTitle>
-                <AppSheet mode="create" entity="area">
-                  <AreaForm
+                <CardTitle>Building Rooms</CardTitle>
+                <AppSheet mode="create" entity="room">
+                  <RoomForm
                     mode="create"
                     defaultValues={{
                       id: '',
@@ -303,33 +303,33 @@ export default function BuildingPage({
                   />
                 </AppSheet>
               </div>
-              <CardDescription>Areas within this facility</CardDescription>
+              <CardDescription>Rooms within this facility</CardDescription>
             </CardHeader>
             <CardContent>
-              {building.areas && building.areas.length > 0 ? (
+              {building.rooms && building.rooms.length > 0 ? (
                 <div className="space-y-4">
-                  {building.areas.map((area) => (
+                  {building.rooms.map((room) => (
                     <div
-                      key={area.id}
+                      key={room.id}
                       className="flex items-center justify-between border rounded p-4"
                     >
                       <div>
                         <Link
-                          href={`/areas/${area.id}`}
+                          href={`/rooms/${room.id}`}
                           className="font-medium hover:underline"
                         >
-                          {area.name}
+                          {room.name}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          {area.type}
+                          {room.type}
                         </p>
                       </div>
-                      <Badge variant="secondary">{area.status}</Badge>
+                      <Badge variant="secondary">{room.status}</Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p>No areas found in this facility.</p>
+                <p>No rooms found in this facility.</p>
               )}
             </CardContent>
           </Card>

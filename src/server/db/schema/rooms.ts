@@ -10,23 +10,23 @@ import {
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { areaTypeEnum, statusEnum } from './enums'
+import { roomTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { buildings } from './buildings'
 
-// ================== AREAS ==================
-export const areas = createTable(
-  'area',
+// ================== ROOMS ==================
+export const rooms = createTable(
+  'room',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     buildingId: uuid('building_id')
       .notNull()
       .references(() => buildings.id, { onDelete: 'cascade' }),
-    parentId: uuid('parent_id').references((): AnyPgColumn => areas.id, {
+    parentId: uuid('parent_id').references((): AnyPgColumn => rooms.id, {
       onDelete: 'cascade',
     }),
     name: varchar('name', { length: 255 }).notNull(),
-    type: areaTypeEnum('type').notNull(),
+    type: roomTypeEnum('type').notNull(),
     properties: json('properties').$type<{
       temperature?: { min: number; max: number }
       humidity?: { min: number; max: number }
@@ -37,7 +37,7 @@ export const areas = createTable(
       length: number
       width: number
       height?: number
-      unit: 'ft' | 'm'
+      unit: 'm' | 'ft'
     }>(),
     capacity: integer('capacity').default(0),
     status: statusEnum('status').default('active').notNull(),
@@ -53,44 +53,44 @@ export const areas = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    nameIdx: index('area_name_idx').on(table.name),
-    typeIdx: index('area_type_idx').on(table.type),
-    buildingIdIdx: index('area_building_id_idx').on(table.buildingId),
-    statusIdx: index('area_status_idx').on(table.status),
-    parentIdIdx: index('area_parent_id_idx').on(table.parentId),
+    nameIdx: index('room_name_idx').on(table.name),
+    typeIdx: index('room_type_idx').on(table.type),
+    buildingIdIdx: index('room_building_id_idx').on(table.buildingId),
+    statusIdx: index('room_status_idx').on(table.status),
+    parentIdIdx: index('room_parent_id_idx').on(table.parentId),
   })
 )
 
 // ================== RELATIONS ==================
-export const areasRelations = relations(areas, ({ one, many }) => ({
+export const roomsRelations = relations(rooms, ({ one, many }) => ({
   building: one(buildings, {
-    fields: [areas.buildingId],
+    fields: [rooms.buildingId],
     references: [buildings.id],
-    relationName: 'buildingAreas',
+    relationName: 'buildingRooms',
   }),
-  parent: one(areas, {
-    fields: [areas.parentId],
-    references: [areas.id],
-    relationName: 'parentArea',
+  parent: one(rooms, {
+    fields: [rooms.parentId],
+    references: [rooms.id],
+    relationName: 'parentRoom',
   }),
-  children: many(areas, { relationName: 'parentArea' }),
+  children: many(rooms, { relationName: 'parentRoom' }),
   createdBy: one(users, {
-    fields: [areas.createdById],
+    fields: [rooms.createdById],
     references: [users.id],
-    relationName: 'areaCreator',
+    relationName: 'roomCreator',
   }),
 }))
 
 // ================== SCHEMAS ==================
-export const insertAreaSchema = createInsertSchema(areas).omit({
+export const insertRoomSchema = createInsertSchema(rooms).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   createdById: true,
 })
 
-export const selectAreaSchema = createSelectSchema(areas)
+export const selectRoomSchema = createSelectSchema(rooms)
 
 // ================== TYPES ==================
-export type Area = typeof areas.$inferSelect
-export type NewArea = typeof areas.$inferInsert
+export type Room = typeof rooms.$inferSelect
+export type NewRoom = typeof rooms.$inferInsert

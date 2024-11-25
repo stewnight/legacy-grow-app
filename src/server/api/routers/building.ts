@@ -42,7 +42,7 @@ export const buildingRouter = createTRPCRouter({
         offset: cursor || 0,
         orderBy: [desc(buildings.createdAt)],
         with: {
-          areas: true,
+          rooms: true,
           createdBy: {
             columns: {
               id: true,
@@ -68,7 +68,7 @@ export const buildingRouter = createTRPCRouter({
       const building = await ctx.db.query.buildings.findFirst({
         where: eq(buildings.id, input),
         with: {
-          areas: {
+          rooms: {
             with: {
               children: true,
             },

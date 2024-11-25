@@ -14,7 +14,7 @@ type LocationDimensions = typeof locations.$inferInsert.dimensions
 const locationFiltersSchema = z.object({
   type: z.enum(locationTypeEnum.enumValues).optional(),
   status: z.enum(statusEnum.enumValues).optional(),
-  areaId: z.string().uuid().optional(),
+  roomId: z.string().uuid().optional(),
   search: z.string().optional(),
 })
 
@@ -33,7 +33,7 @@ export const locationRouter = createTRPCRouter({
       const conditions = [
         filters?.type ? eq(locations.type, filters.type) : undefined,
         filters?.status ? eq(locations.status, filters.status) : undefined,
-        filters?.areaId ? eq(locations.areaId, filters.areaId) : undefined,
+        filters?.roomId ? eq(locations.roomId, filters.roomId) : undefined,
         filters?.search
           ? like(locations.name, `%${filters.search}%`)
           : undefined,
@@ -45,7 +45,7 @@ export const locationRouter = createTRPCRouter({
         offset: cursor || 0,
         orderBy: [desc(locations.createdAt)],
         with: {
-          area: true,
+          room: true,
           plants: true,
           sensors: true,
           batches: true,
@@ -74,7 +74,7 @@ export const locationRouter = createTRPCRouter({
       const location = await ctx.db.query.locations.findFirst({
         where: eq(locations.id, input),
         with: {
-          area: true,
+          room: true,
           plants: true,
           sensors: true,
           batches: true,

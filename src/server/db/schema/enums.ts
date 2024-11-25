@@ -167,7 +167,7 @@ export const buildingTypeEnum = pgEnum('building_type', [
   'hybrid',
 ])
 
-export const areaTypeEnum = pgEnum('area_type', [
+export const roomTypeEnum = pgEnum('room_type', [
   'vegetation',
   'flowering',
   'drying',
@@ -204,5 +204,5 @@ export type HarvestQuality = (typeof harvestQualityEnum.enumValues)[number]
 export type NoteType = (typeof noteTypeEnum.enumValues)[number]
 export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
 export type BuildingType = (typeof buildingTypeEnum.enumValues)[number]
-export type AreaType = (typeof areaTypeEnum.enumValues)[number]
+export type RoomType = (typeof roomTypeEnum.enumValues)[number]
 export type Status = (typeof statusEnum.enumValues)[number]

@@ -5,7 +5,7 @@ import { plantRouter } from './routers/plant'
 import { notesRouter } from './routers/notes'
 import { mediaRouter } from './routers/media'
 import { locationRouter } from './routers/location'
-import { areaRouter } from './routers/area'
+import { roomRouter } from './routers/room'
 import { buildingRouter } from './routers/building'
 import { sensorRouter } from './routers/sensor'
 import { taskRouter } from './routers/task'
@@ -20,7 +20,7 @@ export const appRouter = createTRPCRouter({
   notes: notesRouter,
   media: mediaRouter,
   location: locationRouter,
-  area: areaRouter,
+  room: roomRouter,
   building: buildingRouter,
   sensor: sensorRouter,
   task: taskRouter,

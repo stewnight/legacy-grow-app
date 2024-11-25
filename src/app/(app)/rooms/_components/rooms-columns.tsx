@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type areas } from '~/server/db/schema'
+import { type rooms } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -16,18 +16,18 @@ import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 
-export const columns: ColumnDef<typeof areas.$inferSelect>[] = [
+export const columns: ColumnDef<typeof rooms.$inferSelect>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => {
-      const area = row.original
+      const room = row.original
       return (
         <Link
-          href={`/areas/${area.id}`}
+          href={`/rooms/${room.id}`}
           className="font-medium hover:underline"
         >
-          {area.name}
+          {room.name}
         </Link>
       )
     },
@@ -53,18 +53,18 @@ export const columns: ColumnDef<typeof areas.$inferSelect>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const area = row.original
+      const room = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
 
-      const { mutate: deleteArea } = api.area.delete.useMutation({
+      const { mutate: deleteRoom } = api.room.delete.useMutation({
         onSuccess: () => {
-          toast({ title: 'Area deleted successfully' })
-          void utils.area.getAll.invalidate()
+          toast({ title: 'Room deleted successfully' })
+          void utils.room.getAll.invalidate()
         },
         onError: (error) => {
           toast({
-            title: 'Error deleting area',
+            title: 'Error deleting room',
             description: error.message,
             variant: 'destructive',
           })
@@ -82,14 +82,14 @@ export const columns: ColumnDef<typeof areas.$inferSelect>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/areas/${area.id}`}>View Details</Link>
+              <Link href={`/rooms/${room.id}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 if (
-                  window.confirm('Are you sure you want to delete this area?')
+                  window.confirm('Are you sure you want to delete this room?')
                 ) {
-                  deleteArea(area.id)
+                  deleteRoom(room.id)
                 }
               }}
               className="text-red-600"

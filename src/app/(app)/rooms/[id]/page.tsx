@@ -23,17 +23,17 @@ import {
   Wind,
 } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
-import { AreaForm } from '../_components/areas-form'
+import { RoomForm } from '../_components/rooms-form'
 import { Badge } from '../../../../components/ui/badge'
 
-export default function AreaPage({
+export default function RoomPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const resolvedParams = React.use(params)
 
-  const { data: area, isLoading } = api.area.get.useQuery(resolvedParams.id, {
+  const { data: room, isLoading } = api.room.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
@@ -72,7 +72,7 @@ export default function AreaPage({
     )
   }
 
-  if (!area) {
+  if (!room) {
     return notFound()
   }
 
@@ -80,16 +80,16 @@ export default function AreaPage({
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{area.name}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{room.name}</h2>
           <p className="text-muted-foreground">
-            {area.building?.name ? (
+            {room.building?.name ? (
               <>
                 In{' '}
                 <Link
-                  href={`/buildings/${area.building.id}`}
+                  href={`/buildings/${room.building.id}`}
                   className="hover:underline"
                 >
-                  {area.building.name}
+                  {room.building.name}
                 </Link>
               </>
             ) : (
@@ -97,8 +97,8 @@ export default function AreaPage({
             )}
           </p>
         </div>
-        <AppSheet mode="edit" entity="area">
-          <AreaForm mode="edit" defaultValues={area} />
+        <AppSheet mode="edit" entity="room">
+          <RoomForm mode="edit" defaultValues={room} />
         </AppSheet>
       </div>
 
@@ -109,12 +109,12 @@ export default function AreaPage({
             <Box className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{area.capacity ?? 0}</div>
+            <div className="text-2xl font-bold">{room.capacity ?? 0}</div>
             <p className="text-xs text-muted-foreground">Total capacity</p>
           </CardContent>
         </Card>
 
-        {area.properties?.temperature && (
+        {room.properties?.temperature && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -124,15 +124,15 @@ export default function AreaPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {area.properties.temperature.min}° -{' '}
-                {area.properties.temperature.max}°
+                {room.properties.temperature.min}° -{' '}
+                {room.properties.temperature.max}°
               </div>
               <p className="text-xs text-muted-foreground">Target range</p>
             </CardContent>
           </Card>
         )}
 
-        {area.properties?.humidity && (
+        {room.properties?.humidity && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -142,7 +142,7 @@ export default function AreaPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {area.properties.humidity.min}% - {area.properties.humidity.max}
+                {room.properties.humidity.min}% - {room.properties.humidity.max}
                 %
               </div>
               <p className="text-xs text-muted-foreground">Target range</p>
@@ -154,7 +154,7 @@ export default function AreaPage({
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="children">Child Areas</TabsTrigger>
+          <TabsTrigger value="children">Sub Rooms</TabsTrigger>
           <TabsTrigger value="sensors">Sensors</TabsTrigger>
         </TabsList>
 
@@ -170,25 +170,25 @@ export default function AreaPage({
                     <dt className="text-sm font-medium text-muted-foreground">
                       Type
                     </dt>
-                    <dd className="text-sm capitalize">{area.type}</dd>
+                    <dd className="text-sm capitalize">{room.type}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-muted-foreground">
                       Status
                     </dt>
-                    <dd className="text-sm capitalize">{area.status}</dd>
+                    <dd className="text-sm capitalize">{room.status}</dd>
                   </div>
-                  {area.dimensions && (
+                  {room.dimensions && (
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         Dimensions
                       </dt>
                       <dd className="text-sm">
-                        {area.dimensions.length} x {area.dimensions.width}
-                        {area.dimensions.height
-                          ? ` x ${area.dimensions.height}`
+                        {room.dimensions.length} x {room.dimensions.width}
+                        {room.dimensions.height
+                          ? ` x ${room.dimensions.height}`
                           : ''}{' '}
-                        {area.dimensions.unit}
+                        {room.dimensions.unit}
                       </dd>
                     </div>
                   )}
@@ -197,38 +197,38 @@ export default function AreaPage({
                       Created
                     </dt>
                     <dd className="text-sm">
-                      {formatDate(area.createdAt)} by {area.createdBy?.name}
+                      {formatDate(room.createdAt)} by {room.createdBy?.name}
                     </dd>
                   </div>
                 </dl>
               </CardContent>
             </Card>
 
-            {area.properties && (
+            {room.properties && (
               <Card>
                 <CardHeader>
                   <CardTitle>Environmental Settings</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <dl className="space-y-2">
-                    {area.properties.light && (
+                    {room.properties.light && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           Lighting
                         </dt>
                         <dd className="text-sm">
-                          {area.properties.light.type} -{' '}
-                          {area.properties.light.intensity}%
+                          {room.properties.light.type} -{' '}
+                          {room.properties.light.intensity}%
                         </dd>
                       </div>
                     )}
-                    {area.properties.co2 && (
+                    {room.properties.co2 && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           CO2 Range
                         </dt>
                         <dd className="text-sm">
-                          {area.properties.co2.min} - {area.properties.co2.max}{' '}
+                          {room.properties.co2.min} - {room.properties.co2.max}{' '}
                           ppm
                         </dd>
                       </div>
@@ -243,22 +243,22 @@ export default function AreaPage({
         <TabsContent value="children">
           <Card>
             <CardHeader>
-              <CardTitle>Child Areas</CardTitle>
+              <CardTitle>Sub Rooms</CardTitle>
               <CardDescription>
-                Areas contained within this area
+                Rooms or tents contained within this room
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {area.children && area.children.length > 0 ? (
+              {room.children && room.children.length > 0 ? (
                 <div className="space-y-4">
-                  {area.children.map((child) => (
+                  {room.children.map((child) => (
                     <div
                       key={child.id}
                       className="flex items-center justify-between border rounded p-4"
                     >
                       <div>
                         <Link
-                          href={`/areas/${child.id}`}
+                          href={`/rooms/${child.id}`}
                           className="font-medium hover:underline"
                         >
                           {child.name}
@@ -272,7 +272,7 @@ export default function AreaPage({
                   ))}
                 </div>
               ) : (
-                <p>No child areas found.</p>
+                <p>No sub rooms found.</p>
               )}
             </CardContent>
           </Card>
@@ -282,7 +282,7 @@ export default function AreaPage({
           <Card>
             <CardHeader>
               <CardTitle>Sensors</CardTitle>
-              <CardDescription>Monitoring devices in this area</CardDescription>
+              <CardDescription>Monitoring devices in this room</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Sensor list implementation here</p>

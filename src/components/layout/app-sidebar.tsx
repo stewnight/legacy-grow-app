@@ -47,8 +47,8 @@ const data = {
       icon: Building,
     },
     {
-      title: 'Areas',
-      url: '/areas',
+      title: 'Rooms',
+      url: '/rooms',
       icon: Grid2x2,
     },
     {
