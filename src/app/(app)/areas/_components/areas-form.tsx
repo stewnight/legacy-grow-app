@@ -52,7 +52,7 @@ export function AreaForm({
       name: defaultValues?.name || '',
       capacity: defaultValues?.capacity || 10,
       status: defaultValues?.status || statusEnum.enumValues[0],
-      parentId: defaultValues?.parentId || null,
+      parentId: defaultValues?.parentId || '',
       facilityId: defaultValues?.facilityId || '',
       type: defaultValues?.type || undefined,
       properties: defaultValues?.properties || {
