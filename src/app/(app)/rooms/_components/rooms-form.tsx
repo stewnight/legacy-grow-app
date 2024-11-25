@@ -52,8 +52,8 @@ export function RoomForm({
       name: defaultValues?.name || '',
       capacity: defaultValues?.capacity || 10,
       status: defaultValues?.status || statusEnum.enumValues[0],
-      parentId: defaultValues?.parentId || null,
       buildingId: defaultValues?.buildingId || '',
+      parentId: defaultValues?.parentId || '',
       type: defaultValues?.type || undefined,
       properties: defaultValues?.properties || {
         temperature: { min: 65, max: 80 },
