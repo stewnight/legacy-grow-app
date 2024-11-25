@@ -42,8 +42,8 @@ const data = {
       isActive: true,
     },
     {
-      title: 'Facilities',
-      url: '/facilities',
+      title: 'Buildings',
+      url: '/buildings',
       icon: Building,
     },
     {

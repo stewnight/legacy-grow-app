@@ -14,7 +14,7 @@ const areaFiltersSchema = z.object({
   type: z.enum(areaTypeEnum.enumValues).optional(),
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
-  facilityId: z.string().uuid().optional(),
+  buildingId: z.string().uuid().optional(),
   parentId: z.string().uuid().optional(),
 })
 
@@ -34,8 +34,8 @@ export const areaRouter = createTRPCRouter({
         filters?.type ? eq(areas.type, filters.type) : undefined,
         filters?.status ? eq(areas.status, filters.status) : undefined,
         filters?.search ? like(areas.name, `%${filters.search}%`) : undefined,
-        filters?.facilityId
-          ? eq(areas.facilityId, filters.facilityId)
+        filters?.buildingId
+          ? eq(areas.buildingId, filters.buildingId)
           : undefined,
         filters?.parentId ? eq(areas.parentId, filters.parentId) : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
@@ -46,7 +46,7 @@ export const areaRouter = createTRPCRouter({
         offset: cursor || 0,
         orderBy: [desc(areas.createdAt)],
         with: {
-          facility: true,
+          building: true,
           parent: true,
           children: true,
           createdBy: {
@@ -74,7 +74,7 @@ export const areaRouter = createTRPCRouter({
       const area = await ctx.db.query.areas.findFirst({
         where: eq(areas.id, input),
         with: {
-          facility: true,
+          building: true,
           parent: true,
           children: true,
           createdBy: {

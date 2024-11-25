@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type facilities } from '~/server/db/schema'
+import { type buildings } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
 import { format } from 'date-fns'
 import { MoreHorizontal, Shield, Thermometer, Zap } from 'lucide-react'
@@ -19,18 +19,18 @@ import { api } from '~/trpc/react'
 import { toast, useToast } from '../../../../hooks/use-toast'
 import { useRouter } from 'next/navigation'
 
-export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
+export const columns: ColumnDef<typeof buildings.$inferSelect>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => {
-      const facility = row.original
+      const building = row.original
       return (
         <Link
-          href={`/facilities/${facility.id}`}
+          href={`/buildings/${building.id}`}
           className="font-medium hover:underline"
         >
-          {facility.name}
+          {building.name}
         </Link>
       )
     },
@@ -55,8 +55,8 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
     accessorKey: 'properties',
     header: 'Properties',
     cell: ({ row }) => {
-      const facility = row.original
-      const props = facility.properties
+      const building = row.original
+      const props = building.properties
       return (
         <div className="flex gap-2">
           {props?.climate && (
@@ -91,10 +91,10 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
     accessorKey: 'address',
     header: 'Address',
     cell: ({ row }) => {
-      const facility = row.original
+      const building = row.original
       return (
-        <Link href={`/facilities/${facility.id}`} className="hover:underline">
-          {facility.address?.city},{facility.address?.country}
+        <Link href={`/buildings/${building.id}`} className="hover:underline">
+          {building.address?.city},{building.address?.country}
         </Link>
       )
     },
@@ -102,19 +102,19 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const facility = row.original
+      const building = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
       const router = useRouter()
-      const { mutate: deleteFacility } = api.facility.delete.useMutation({
+      const { mutate: deleteBuilding } = api.building.delete.useMutation({
         onSuccess: () => {
-          toast({ title: 'Facility deleted successfully' })
-          void utils.facility.getAll.invalidate()
+          toast({ title: 'Building deleted successfully' })
+          void utils.building.getAll.invalidate()
           router.refresh()
         },
         onError: (error) => {
           toast({
-            title: 'Error deleting facility',
+            title: 'Error deleting building',
             description: error.message,
             variant: 'destructive',
           })
@@ -133,10 +133,10 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/facilities/${facility.id}`}>View Details</Link>
+              <Link href={`/buildings/${building.id}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`/facilities/${facility.id}/batches`}>
+              <Link href={`/buildings/${building.id}/batches`}>
                 View Batches
               </Link>
             </DropdownMenuItem>
@@ -144,10 +144,10 @@ export const columns: ColumnDef<typeof facilities.$inferSelect>[] = [
               onClick={() => {
                 if (
                   window.confirm(
-                    'Are you sure you want to delete this facility?'
+                    'Are you sure you want to delete this building?'
                   )
                 ) {
-                  deleteFacility(facility.id)
+                  deleteBuilding(building.id)
                 }
               }}
               className="text-red-600"

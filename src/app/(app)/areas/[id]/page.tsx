@@ -82,18 +82,18 @@ export default function AreaPage({
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{area.name}</h2>
           <p className="text-muted-foreground">
-            {area.facility?.name ? (
+            {area.building?.name ? (
               <>
                 In{' '}
                 <Link
-                  href={`/facilities/${area.facility.id}`}
+                  href={`/buildings/${area.building.id}`}
                   className="hover:underline"
                 >
-                  {area.facility.name}
+                  {area.building.name}
                 </Link>
               </>
             ) : (
-              'No facility assigned'
+              'No building assigned'
             )}
           </p>
         </div>

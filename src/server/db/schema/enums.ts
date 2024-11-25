@@ -160,7 +160,7 @@ export const destroyReasonEnum = pgEnum('destroy_reason', [
   'other',
 ])
 
-export const facilityTypeEnum = pgEnum('facility_type', [
+export const buildingTypeEnum = pgEnum('building_type', [
   'indoor',
   'outdoor',
   'greenhouse',
@@ -203,6 +203,6 @@ export type TaskCategory = (typeof taskCategoryEnum.enumValues)[number]
 export type HarvestQuality = (typeof harvestQualityEnum.enumValues)[number]
 export type NoteType = (typeof noteTypeEnum.enumValues)[number]
 export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
-export type FacilityType = (typeof facilityTypeEnum.enumValues)[number]
+export type BuildingType = (typeof buildingTypeEnum.enumValues)[number]
 export type AreaType = (typeof areaTypeEnum.enumValues)[number]
 export type Status = (typeof statusEnum.enumValues)[number]

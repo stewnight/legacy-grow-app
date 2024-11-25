@@ -12,16 +12,16 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { areaTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { facilities } from './facilities'
+import { buildings } from './buildings'
 
 // ================== AREAS ==================
 export const areas = createTable(
   'area',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    facilityId: uuid('facility_id')
+    buildingId: uuid('building_id')
       .notNull()
-      .references(() => facilities.id, { onDelete: 'cascade' }),
+      .references(() => buildings.id, { onDelete: 'cascade' }),
     parentId: uuid('parent_id').references((): AnyPgColumn => areas.id, {
       onDelete: 'cascade',
     }),
@@ -55,7 +55,7 @@ export const areas = createTable(
   (table) => ({
     nameIdx: index('area_name_idx').on(table.name),
     typeIdx: index('area_type_idx').on(table.type),
-    facilityIdIdx: index('area_facility_id_idx').on(table.facilityId),
+    buildingIdIdx: index('area_building_id_idx').on(table.buildingId),
     statusIdx: index('area_status_idx').on(table.status),
     parentIdIdx: index('area_parent_id_idx').on(table.parentId),
   })
@@ -63,10 +63,10 @@ export const areas = createTable(
 
 // ================== RELATIONS ==================
 export const areasRelations = relations(areas, ({ one, many }) => ({
-  facility: one(facilities, {
-    fields: [areas.facilityId],
-    references: [facilities.id],
-    relationName: 'facilityAreas',
+  building: one(buildings, {
+    fields: [areas.buildingId],
+    references: [buildings.id],
+    relationName: 'buildingAreas',
   }),
   parent: one(areas, {
     fields: [areas.parentId],
