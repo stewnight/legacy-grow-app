@@ -9,7 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '~/components/ui/sidebar'
+import { cn } from '~/lib/utils'
 
 export function NavMain({
   items,
@@ -22,6 +24,8 @@ export function NavMain({
   }[]
 }) {
   const pathname = usePathname()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   return (
     <SidebarGroup>
@@ -32,11 +36,21 @@ export function NavMain({
             <SidebarMenuButton
               asChild
               tooltip={item.title}
-              className={pathname === item.url ? 'bg-accent' : ''}
+              className={cn(
+                pathname === item.url ? 'bg-accent' : '',
+                'transition-all duration-200'
+              )}
             >
-              <Link href={item.url}>
-                <item.icon />
-                <span>{item.title}</span>
+              <Link href={item.url} className="flex items-center gap-2">
+                <item.icon className="size-4 shrink-0" />
+                <span
+                  className={cn(
+                    'transition-[width,opacity] duration-200',
+                    isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                  )}
+                >
+                  {item.title}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -7,7 +7,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '~/components/ui/sidebar'
+import { cn } from '~/lib/utils'
 
 export function NavSecondary({
   items,
@@ -21,20 +23,28 @@ export function NavSecondary({
   }[]
   className?: string
 }) {
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
+
   return (
     <SidebarGroup className={className}>
       <SidebarGroupLabel>Support</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>
-                  {item.title}{' '}
-                  {item.isExternal ? (
+            <SidebarMenuButton asChild tooltip={item.title}>
+              <a href={item.url} className="flex items-center gap-2">
+                <item.icon className="size-4 shrink-0" />
+                <span
+                  className={cn(
+                    'transition-[width,opacity] duration-200 flex items-center gap-1',
+                    isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                  )}
+                >
+                  {item.title}
+                  {item.isExternal && (
                     <ExternalLink className="inline size-3 text-muted-foreground" />
-                  ) : null}
+                  )}
                 </span>
               </a>
             </SidebarMenuButton>
