@@ -1,1 +1,0 @@
-CREATE INDEX IF NOT EXISTS "task_due_date_idx" ON "legacy-grow-app_task" USING btree ("due_date");

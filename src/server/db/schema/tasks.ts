@@ -15,6 +15,7 @@ import {
   taskCategoryEnum,
   statusEnum,
   taskEntityTypeEnum,
+  TaskEntityType,
 } from './enums'
 import { users } from './core'
 import { Note, notes } from './notes'
@@ -61,7 +62,12 @@ export const tasks = createTable(
           ppe: string[]
         }
       }>()
-      .default({}),
+      .default({
+        recurring: null,
+        checklist: [],
+        instructions: [],
+        requirements: { tools: [], supplies: [], ppe: [] },
+      }),
     metadata: json('metadata')
       .$type<{
         previousTasks: string[]
@@ -74,7 +80,13 @@ export const tasks = createTable(
           name: string
         } | null
       }>()
-      .default({}),
+      .default({
+        previousTasks: [],
+        nextTasks: [],
+        estimatedDuration: null,
+        actualDuration: null,
+        location: null,
+      }),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -151,20 +163,31 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   properties: (schema) => schema.properties.optional(),
   metadata: (schema) => schema.metadata.optional(),
   entityId: (schema) =>
-    schema.entityId
-      .nullable()
-      .optional()
-      .refine(
-        (val, ctx) => {
-          const entityType =
-            ctx.path[0] === 'entityType'
-              ? ctx.path[1]
-              : (ctx as any).parent?.entityType
-          return entityType === 'none' ? true : typeof val === 'string'
-        },
-        { message: 'Entity ID is required unless entity type is none' }
-      ),
+    schema.entityId.nullable().superRefine((val, ctx: any) => {
+      const entityType = ctx.data?.entityType as TaskEntityType | undefined
+
+      if (!entityType) return
+
+      if (entityType === 'none' && val !== null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Entity ID must be null when entity type is none',
+          path: ['entityId'],
+        })
+        return
+      }
+
+      if (entityType !== 'none' && !val) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Entity ID is required when entity type is not none',
+          path: ['entityId'],
+        })
+        return
+      }
+    }),
 }).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
   createdById: true,
@@ -180,11 +203,11 @@ export type TaskWithRelations = Task & {
   assignedTo?: { id: string; name: string } | null
   createdBy: { id: string; name: string }
   notes?: Note[]
-  location?: Location
-  plant?: Plant
-  batch?: Batch
-  genetic?: Genetic
-  sensor?: Sensor
-  processing?: Processing
-  harvest?: Harvest
+  location?: Location | undefined
+  plant?: Plant | undefined
+  batch?: Batch | undefined
+  genetic?: Genetic | undefined
+  sensor?: Sensor | undefined
+  processing?: Processing | undefined
+  harvest?: Harvest | undefined
 }

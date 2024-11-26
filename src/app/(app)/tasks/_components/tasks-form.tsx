@@ -47,16 +47,12 @@ interface TaskFormProps {
   mode?: 'create' | 'edit'
   defaultValues?: RouterOutputs['task']['get']
   onSuccess?: (data: TaskFormValues) => void
-  entityId?: string
-  entityType?: TaskEntityType
 }
 
 export function TaskForm({
   mode = 'create',
   defaultValues,
   onSuccess,
-  entityId,
-  entityType,
 }: TaskFormProps) {
   const { toast } = useToast()
   const router = useRouter()
@@ -65,45 +61,18 @@ export function TaskForm({
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(insertTaskSchema),
     defaultValues: {
-      title: defaultValues?.title ?? '',
-      description: defaultValues?.description ?? null,
-      entityId:
-        entityType === 'none'
-          ? null
-          : (entityId ?? defaultValues?.entityId ?? null),
-      entityType: entityType ?? defaultValues?.entityType ?? 'none',
-      category: defaultValues?.category ?? 'maintenance',
-      priority: defaultValues?.priority ?? 'medium',
-      taskStatus: defaultValues?.taskStatus ?? 'pending',
-      status: defaultValues?.status ?? 'active',
-      assignedToId: defaultValues?.assignedToId ?? null,
-      dueDate: defaultValues?.dueDate ? new Date(defaultValues.dueDate) : null,
-      properties: defaultValues?.properties ?? {
-        recurring: null,
-        checklist: [],
-        instructions: [],
-        requirements: {
-          tools: [],
-          supplies: [],
-          ppe: [],
-        },
-      },
-      metadata: defaultValues?.metadata ?? {
-        previousTasks: [],
-        nextTasks: [],
-        estimatedDuration: null,
-        actualDuration: null,
-        location: null,
-      },
+      title: defaultValues?.title || '',
+      description: defaultValues?.description || '',
+      priority: defaultValues?.priority || 'medium',
+      category: defaultValues?.category || undefined,
+      taskStatus: defaultValues?.taskStatus || 'pending',
+      dueDate: defaultValues?.dueDate || undefined,
+      assignedToId: defaultValues?.assignedToId || undefined,
+      entityType: defaultValues?.entityType || 'none',
+      entityId: defaultValues?.entityId || undefined,
+      status: defaultValues?.status || 'active',
     },
   })
-
-  React.useEffect(() => {
-    const entityType = form.watch('entityType')
-    if (entityType === 'none') {
-      form.setValue('entityId', null)
-    }
-  }, [form.watch('entityType')])
 
   const { mutate: createTask, isPending: isCreating } =
     api.task.create.useMutation({
@@ -144,11 +113,17 @@ export function TaskForm({
       },
     })
 
-  function onSubmit(values: TaskFormValues) {
+  const onSubmit = async (data: TaskFormValues) => {
+    // Ensure entityId is null when entityType is 'none'
+    const formData = {
+      ...data,
+      entityId: data.entityType === 'none' ? null : data.entityId,
+    }
+
     if (mode === 'create') {
-      createTask(values)
-    } else if (defaultValues?.id) {
-      updateTask({ id: defaultValues.id, data: values })
+      createTask(formData)
+    } else if (mode === 'edit' && defaultValues?.id) {
+      updateTask({ id: defaultValues.id, data: formData })
     }
   }
 
@@ -177,7 +152,6 @@ export function TaskForm({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={!!entityType}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -197,7 +171,7 @@ export function TaskForm({
             )}
           />
 
-          {form.watch('entityType') && !entityId && (
+          {form.watch('entityType') && !form.watch('entityId') && (
             <FormField
               control={form.control}
               name="entityId"
@@ -207,7 +181,6 @@ export function TaskForm({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value ?? undefined}
-                    disabled={!!entityId}
                   >
                     <FormControl>
                       <SelectTrigger>

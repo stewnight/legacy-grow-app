@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type tasks } from '~/server/db/schema'
+import { type TaskWithRelations } from '~/server/db/schema/tasks'
 import { Badge } from '~/components/ui/badge'
 import {
   MoreHorizontal,
@@ -24,18 +24,6 @@ import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { format } from 'date-fns'
-
-// Define the type including relations
-type TaskWithRelations = typeof tasks.$inferSelect & {
-  assignedTo?: {
-    id: string
-    name: string
-  } | null
-  createdBy: {
-    id: string
-    name: string
-  }
-}
 
 export const columns: ColumnDef<TaskWithRelations>[] = [
   {

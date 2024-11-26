@@ -241,7 +241,7 @@ export default function TaskPage({
                   href={`/${task.entityType}s/${task.entityId}`}
                   className="text-sm text-blue-500 hover:underline"
                 >
-                  {getEntityName(task)}
+                  {getEntityName(task as TaskWithRelations)}
                 </Link>
               </div>
             </CardContent>
@@ -524,7 +524,7 @@ function getEntityName(
     case 'genetics':
       return task.genetic?.name
     case 'sensors':
-      return task.sensor?.name
+      return task.sensor?.id
     case 'processing':
       return task.processing?.identifier
     case 'harvest':

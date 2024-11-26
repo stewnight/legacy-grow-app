@@ -13,6 +13,7 @@ import {
   type TaskEntityType,
   type TaskStatus,
 } from '~/server/db/schema/enums'
+import { TaskWithRelations } from '../../../server/db/schema'
 
 export default async function TasksPage({
   searchParams,
@@ -24,13 +25,30 @@ export default async function TasksPage({
     redirect('/')
   }
 
-  const { items: tasks } = await api.task.getAll({
+  const params = await Promise.resolve(searchParams)
+
+  const { items: tasksData } = await api.task.getAll({
     limit: 100,
     filters: {
-      taskStatus: (searchParams.status as TaskStatus) || 'pending',
-      entityType: searchParams.entityType as TaskEntityType,
+      taskStatus: (params.status as TaskStatus) || 'pending',
+      entityType: params.entityType as TaskEntityType,
     },
   })
+
+  // Transform the data to match the expected type
+  const tasks: TaskWithRelations[] = tasksData.map((task) => ({
+    ...task,
+    assignedTo: task.assignedTo
+      ? {
+          id: task.assignedTo.id,
+          name: task.assignedTo.name || '', // Convert null to empty string
+        }
+      : null,
+    createdBy: {
+      id: task.createdBy.id,
+      name: task.createdBy.name || '', // Convert null to empty string
+    },
+  }))
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -43,29 +61,7 @@ export default async function TasksPage({
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
           {tasks && (
-            <DataTable
-              columns={columns}
-              data={tasks}
-              filterColumn="title"
-              filters={[
-                {
-                  id: 'entityType',
-                  title: 'Entity Type',
-                  options: taskEntityTypeEnum.enumValues.map((type) => ({
-                    label: type.charAt(0).toUpperCase() + type.slice(1),
-                    value: type,
-                  })),
-                },
-                {
-                  id: 'status',
-                  title: 'Status',
-                  options: taskStatusEnum.enumValues.map((status) => ({
-                    label: status.charAt(0).toUpperCase() + status.slice(1),
-                    value: status,
-                  })),
-                },
-              ]}
-            />
+            <DataTable columns={columns} data={tasks} filterColumn="title" />
           )}
         </Suspense>
       </div>

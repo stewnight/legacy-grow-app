@@ -1,23 +1,17 @@
 DO $$ BEGIN
- CREATE TYPE "public"."area_type" AS ENUM('vegetation', 'flowering', 'drying', 'storage', 'processing', 'mother', 'clone', 'quarantine');
+ CREATE TYPE "public"."batch_status" AS ENUM('active', 'completed', 'pending', 'cancelled', 'archived');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."batch_status" AS ENUM('active', 'completed', 'cancelled', 'archived');
+ CREATE TYPE "public"."building_type" AS ENUM('indoor', 'outdoor', 'greenhouse', 'hybrid');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  CREATE TYPE "public"."destroy_reason" AS ENUM('died', 'pest', 'disease', 'male', 'hermaphrodite', 'quality', 'regulatory', 'other');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."facility_type" AS ENUM('indoor', 'outdoor', 'greenhouse', 'hybrid');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -77,6 +71,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."room_type" AS ENUM('vegetation', 'flowering', 'drying', 'storage', 'processing', 'mother', 'clone', 'quarantine');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."sensor_type" AS ENUM('temperature', 'humidity', 'co2', 'light', 'ph', 'ec', 'moisture', 'pressure', 'airflow');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -101,6 +101,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."task_entity_type" AS ENUM('plant', 'batch', 'location', 'genetics', 'sensors', 'processing', 'harvest', 'none');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."task_priority" AS ENUM('low', 'medium', 'high', 'urgent', 'critical');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -118,21 +124,6 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "legacy-grow-app_area" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"facility_id" uuid NOT NULL,
-	"parent_id" uuid,
-	"name" varchar(255) NOT NULL,
-	"type" "area_type" NOT NULL,
-	"properties" json,
-	"dimensions" json,
-	"capacity" integer DEFAULT 0,
-	"status" "status" DEFAULT 'active' NOT NULL,
-	"created_by" uuid NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "legacy-grow-app_batch" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"identifier" varchar(100) NOT NULL,
@@ -140,7 +131,7 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_batch" (
 	"location_id" uuid NOT NULL,
 	"stage" "plant_stage" NOT NULL,
 	"batch_status" "batch_status" DEFAULT 'active' NOT NULL,
-	"start_date" date NOT NULL,
+	"start_date" date,
 	"expected_end_date" date,
 	"actual_end_date" date,
 	"plant_count" integer DEFAULT 0,
@@ -152,6 +143,20 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_batch" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "legacy-grow-app_batch_identifier_unique" UNIQUE("identifier")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "legacy-grow-app_building" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"type" "building_type" NOT NULL,
+	"address" json,
+	"properties" json,
+	"license_number" varchar(100),
+	"description" text,
+	"status" "status" DEFAULT 'active' NOT NULL,
+	"created_by" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "legacy-grow-app_account" (
@@ -205,20 +210,6 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_verification_token" (
 	"token" varchar(255) NOT NULL,
 	"expires" timestamp with time zone NOT NULL,
 	CONSTRAINT "legacy-grow-app_verification_token_identifier_token_pk" PRIMARY KEY("identifier","token")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "legacy-grow-app_facility" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(255) NOT NULL,
-	"type" "facility_type" NOT NULL,
-	"address" json,
-	"properties" json,
-	"license_number" varchar(100),
-	"description" text,
-	"status" "status" DEFAULT 'active' NOT NULL,
-	"created_by" uuid NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "legacy-grow-app_genetic" (
@@ -284,9 +275,24 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_plant" (
 	CONSTRAINT "legacy-grow-app_plant_identifier_unique" UNIQUE("identifier")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "legacy-grow-app_room" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"building_id" uuid NOT NULL,
+	"parent_id" uuid,
+	"name" varchar(255) NOT NULL,
+	"type" "room_type" NOT NULL,
+	"properties" json,
+	"dimensions" json,
+	"capacity" integer DEFAULT 0,
+	"status" "status" DEFAULT 'active' NOT NULL,
+	"created_by" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "legacy-grow-app_location" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"area_id" uuid NOT NULL,
+	"room_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"type" "location_type" NOT NULL,
 	"coordinates" json,
@@ -311,6 +317,7 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_sensor" (
 	"calibration_interval" numeric(5, 2),
 	"specifications" json,
 	"metadata" json,
+	"location_id" uuid NOT NULL,
 	"notes" text,
 	"status" "status" DEFAULT 'active' NOT NULL,
 	"created_by" uuid NOT NULL,
@@ -323,18 +330,18 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_task" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,
-	"entity_id" uuid NOT NULL,
-	"entity_type" varchar(50) NOT NULL,
+	"entity_id" uuid,
+	"entity_type" "task_entity_type" NOT NULL,
 	"assigned_to_id" uuid,
 	"category" "task_category" NOT NULL,
-	"priority" "task_priority" DEFAULT 'medium' NOT NULL,
-	"task_status" "task_status" DEFAULT 'pending' NOT NULL,
-	"due_date" date,
+	"priority" "task_priority" NOT NULL,
+	"task_status" "task_status" NOT NULL,
+	"status" "status" DEFAULT 'active' NOT NULL,
+	"due_date" timestamp with time zone,
 	"started_at" timestamp with time zone,
 	"completed_at" timestamp with time zone,
-	"properties" json,
-	"metadata" json,
-	"status" "status" DEFAULT 'active' NOT NULL,
+	"properties" json DEFAULT '{"recurring":null,"checklist":[],"instructions":[],"requirements":{"tools":[],"supplies":[],"ppe":[]}}'::json,
+	"metadata" json DEFAULT '{"previousTasks":[],"nextTasks":[],"estimatedDuration":null,"actualDuration":null,"location":null}'::json,
 	"created_by" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -395,24 +402,6 @@ CREATE TABLE IF NOT EXISTS "legacy-grow-app_sensor_reading" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "legacy-grow-app_area" ADD CONSTRAINT "legacy-grow-app_area_facility_id_legacy-grow-app_facility_id_fk" FOREIGN KEY ("facility_id") REFERENCES "public"."legacy-grow-app_facility"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "legacy-grow-app_area" ADD CONSTRAINT "legacy-grow-app_area_parent_id_legacy-grow-app_area_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."legacy-grow-app_area"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "legacy-grow-app_area" ADD CONSTRAINT "legacy-grow-app_area_created_by_legacy-grow-app_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "legacy-grow-app_batch" ADD CONSTRAINT "legacy-grow-app_batch_genetic_id_legacy-grow-app_genetic_id_fk" FOREIGN KEY ("genetic_id") REFERENCES "public"."legacy-grow-app_genetic"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -431,6 +420,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "legacy-grow-app_building" ADD CONSTRAINT "legacy-grow-app_building_created_by_legacy-grow-app_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "legacy-grow-app_account" ADD CONSTRAINT "legacy-grow-app_account_user_id_legacy-grow-app_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -438,12 +433,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "legacy-grow-app_session" ADD CONSTRAINT "legacy-grow-app_session_user_id_legacy-grow-app_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "legacy-grow-app_facility" ADD CONSTRAINT "legacy-grow-app_facility_created_by_legacy-grow-app_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -503,13 +492,37 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "legacy-grow-app_location" ADD CONSTRAINT "legacy-grow-app_location_area_id_legacy-grow-app_area_id_fk" FOREIGN KEY ("area_id") REFERENCES "public"."legacy-grow-app_area"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "legacy-grow-app_room" ADD CONSTRAINT "legacy-grow-app_room_building_id_legacy-grow-app_building_id_fk" FOREIGN KEY ("building_id") REFERENCES "public"."legacy-grow-app_building"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "legacy-grow-app_room" ADD CONSTRAINT "legacy-grow-app_room_parent_id_legacy-grow-app_room_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."legacy-grow-app_room"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "legacy-grow-app_room" ADD CONSTRAINT "legacy-grow-app_room_created_by_legacy-grow-app_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "legacy-grow-app_location" ADD CONSTRAINT "legacy-grow-app_location_room_id_legacy-grow-app_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."legacy-grow-app_room"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "legacy-grow-app_location" ADD CONSTRAINT "legacy-grow-app_location_created_by_legacy-grow-app_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."legacy-grow-app_user"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "legacy-grow-app_sensor" ADD CONSTRAINT "legacy-grow-app_sensor_location_id_legacy-grow-app_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."legacy-grow-app_location"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -574,11 +587,6 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "area_name_idx" ON "legacy-grow-app_area" USING btree ("name");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "area_type_idx" ON "legacy-grow-app_area" USING btree ("type");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "area_facility_id_idx" ON "legacy-grow-app_area" USING btree ("facility_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "area_status_idx" ON "legacy-grow-app_area" USING btree ("status");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "area_parent_id_idx" ON "legacy-grow-app_area" USING btree ("parent_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "batch_identifier_idx" ON "legacy-grow-app_batch" USING btree ("identifier");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "batch_genetic_id_idx" ON "legacy-grow-app_batch" USING btree ("genetic_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "batch_location_id_idx" ON "legacy-grow-app_batch" USING btree ("location_id");--> statement-breakpoint
@@ -586,6 +594,10 @@ CREATE INDEX IF NOT EXISTS "batch_stage_idx" ON "legacy-grow-app_batch" USING bt
 CREATE INDEX IF NOT EXISTS "batch_status_idx" ON "legacy-grow-app_batch" USING btree ("batch_status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "batch_start_date_idx" ON "legacy-grow-app_batch" USING btree ("start_date");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "batch_general_status_idx" ON "legacy-grow-app_batch" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "building_name_idx" ON "legacy-grow-app_building" USING btree ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "building_type_idx" ON "legacy-grow-app_building" USING btree ("type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "building_status_idx" ON "legacy-grow-app_building" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "building_license_idx" ON "legacy-grow-app_building" USING btree ("license_number");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "account_user_id_idx" ON "legacy-grow-app_account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "session_user_id_idx" ON "legacy-grow-app_session" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "system_log_level_idx" ON "legacy-grow-app_system_log" USING btree ("level");--> statement-breakpoint
@@ -595,10 +607,6 @@ CREATE INDEX IF NOT EXISTS "user_email_idx" ON "legacy-grow-app_user" USING btre
 CREATE INDEX IF NOT EXISTS "user_role_idx" ON "legacy-grow-app_user" USING btree ("role");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "user_active_idx" ON "legacy-grow-app_user" USING btree ("active");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "verification_token_expires_idx" ON "legacy-grow-app_verification_token" USING btree ("expires");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "facility_name_idx" ON "legacy-grow-app_facility" USING btree ("name");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "facility_type_idx" ON "legacy-grow-app_facility" USING btree ("type");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "facility_status_idx" ON "legacy-grow-app_facility" USING btree ("status");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "facility_license_idx" ON "legacy-grow-app_facility" USING btree ("license_number");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "genetic_name_idx" ON "legacy-grow-app_genetic" USING btree ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "genetic_type_idx" ON "legacy-grow-app_genetic" USING btree ("type");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "genetic_breeder_idx" ON "legacy-grow-app_genetic" USING btree ("breeder");--> statement-breakpoint
@@ -620,23 +628,28 @@ CREATE INDEX IF NOT EXISTS "plant_stage_idx" ON "legacy-grow-app_plant" USING bt
 CREATE INDEX IF NOT EXISTS "plant_health_idx" ON "legacy-grow-app_plant" USING btree ("health");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "plant_status_idx" ON "legacy-grow-app_plant" USING btree ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "plant_planted_date_idx" ON "legacy-grow-app_plant" USING btree ("planted_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "room_name_idx" ON "legacy-grow-app_room" USING btree ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "room_type_idx" ON "legacy-grow-app_room" USING btree ("type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "room_building_id_idx" ON "legacy-grow-app_room" USING btree ("building_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "room_status_idx" ON "legacy-grow-app_room" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "room_parent_id_idx" ON "legacy-grow-app_room" USING btree ("parent_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "location_name_idx" ON "legacy-grow-app_location" USING btree ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "location_type_idx" ON "legacy-grow-app_location" USING btree ("type");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "location_area_id_idx" ON "legacy-grow-app_location" USING btree ("area_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "location_room_id_idx" ON "legacy-grow-app_location" USING btree ("room_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "location_status_idx" ON "legacy-grow-app_location" USING btree ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sensor_identifier_idx" ON "legacy-grow-app_sensor" USING btree ("identifier");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sensor_type_idx" ON "legacy-grow-app_sensor" USING btree ("type");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sensor_status_idx" ON "legacy-grow-app_sensor" USING btree ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sensor_calibration_idx" ON "legacy-grow-app_sensor" USING btree ("next_calibration");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sensor_manufacturer_model_idx" ON "legacy-grow-app_sensor" USING btree ("manufacturer","model");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "task_entity_idx" ON "legacy-grow-app_task" USING btree ("entity_id","entity_type");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "task_assigned_to_idx" ON "legacy-grow-app_task" USING btree ("assigned_to_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "sensor_location_idx" ON "legacy-grow-app_sensor" USING btree ("location_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "task_title_idx" ON "legacy-grow-app_task" USING btree ("title");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "task_category_idx" ON "legacy-grow-app_task" USING btree ("category");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "task_priority_idx" ON "legacy-grow-app_task" USING btree ("priority");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "task_status_idx" ON "legacy-grow-app_task" USING btree ("task_status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "task_status_idx" ON "legacy-grow-app_task" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "task_assigned_to_idx" ON "legacy-grow-app_task" USING btree ("assigned_to_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "task_entity_idx" ON "legacy-grow-app_task" USING btree ("entity_id","entity_type");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "task_due_date_idx" ON "legacy-grow-app_task" USING btree ("due_date");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "task_created_by_idx" ON "legacy-grow-app_task" USING btree ("created_by");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "task_general_status_idx" ON "legacy-grow-app_task" USING btree ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "processing_identifier_idx" ON "legacy-grow-app_processing" USING btree ("identifier");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "processing_harvest_id_idx" ON "legacy-grow-app_processing" USING btree ("harvest_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "processing_batch_id_idx" ON "legacy-grow-app_processing" USING btree ("batch_id");--> statement-breakpoint
