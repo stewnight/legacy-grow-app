@@ -111,13 +111,13 @@ export const plantRouter = createTRPCRouter({
   create: protectedProcedure
     .input(insertPlantSchema)
     .mutation(async ({ ctx, input }) => {
-      const { batchId, motherId, ...rest } = input
-
       const insertData = {
-        ...rest,
-        batchId: batchId === 'none' ? null : batchId,
-        motherId: motherId === 'none' ? null : motherId,
+        ...input,
+        batchId: input.batchId === 'none' ? null : input.batchId,
+        motherId: input.motherId === 'none' ? null : input.motherId,
         createdById: ctx.session.user.id,
+        properties: input.properties as typeof plants.$inferInsert.properties,
+        metadata: input.metadata as typeof plants.$inferInsert.metadata,
       }
 
       const [plant] = await ctx.db.insert(plants).values(insertData).returning()
@@ -136,25 +136,23 @@ export const plantRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertPlantSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertPlantSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input.data
+      const updateData = {
+        ...input.data,
+        batchId: input.data.batchId === 'none' ? null : input.data.batchId,
+        motherId: input.data.motherId === 'none' ? null : input.data.motherId,
+        properties: input.data
+          .properties as typeof plants.$inferInsert.properties,
+        metadata: input.data.metadata as typeof plants.$inferInsert.metadata,
+        updatedAt: new Date(),
+      }
 
       const [plant] = await ctx.db
         .update(plants)
-        .set({
-          ...rest,
-          properties: properties as typeof plants.$inferInsert.properties,
-          metadata: metadata as typeof plants.$inferInsert.metadata,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(plants.id, input.id))
         .returning()
 

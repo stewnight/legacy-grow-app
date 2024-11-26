@@ -57,9 +57,8 @@ export function BatchForm({
       locationId: defaultValues?.locationId || '',
       stage: defaultValues?.stage || 'germination',
       batchStatus: defaultValues?.batchStatus || 'active',
-      startDate: defaultValues?.startDate || new Date().toISOString(),
+      startDate: defaultValues?.startDate || new Date(),
       plantCount: defaultValues?.plantCount || 0,
-      notes: defaultValues?.notes || '',
     },
   })
 
@@ -264,20 +263,6 @@ export function BatchForm({
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} value={field.value || ''} />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}

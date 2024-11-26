@@ -5,7 +5,6 @@ import {
   timestamp,
   json,
   uuid,
-  date,
   text,
   AnyPgColumn,
 } from 'drizzle-orm/pg-core'
@@ -42,7 +41,7 @@ export const plants = createTable(
     stage: plantStageEnum('stage').notNull(),
     sex: plantSexEnum('sex').default('unknown').notNull(),
     health: healthStatusEnum('health').default('healthy').notNull(),
-    plantedDate: date('planted_date').notNull(),
+    plantedDate: timestamp('planted_date', { withTimezone: true }).notNull(),
     properties: json('properties').$type<{
       height?: number
       width?: number

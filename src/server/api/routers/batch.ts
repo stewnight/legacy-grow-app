@@ -88,16 +88,14 @@ export const batchRouter = createTRPCRouter({
   create: protectedProcedure
     .input(insertBatchSchema.omit({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+      }
 
       const [batch] = await ctx.db
         .insert(batches)
-        .values({
-          ...rest,
-          properties: properties as typeof batches.$inferInsert.properties,
-          metadata: metadata as typeof batches.$inferInsert.metadata,
-          createdById: ctx.session.user.id,
-        })
+        .values(insertData)
         .returning()
 
       if (!batch) {
@@ -114,25 +112,18 @@ export const batchRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertBatchSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertBatchSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input.data
+      const updateData = {
+        ...input.data,
+        updatedAt: new Date(),
+      }
 
       const [batch] = await ctx.db
         .update(batches)
-        .set({
-          ...rest,
-          properties: properties as typeof batches.$inferInsert.properties,
-          metadata: metadata as typeof batches.$inferInsert.metadata,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(batches.id, input.id))
         .returning()
 
