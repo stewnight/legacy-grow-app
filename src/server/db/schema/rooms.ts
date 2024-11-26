@@ -13,6 +13,7 @@ import { createTable } from '../utils'
 import { roomTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { buildings } from './buildings'
+import { locations } from './locations'
 
 // ================== ROOMS ==================
 export const rooms = createTable(
@@ -74,6 +75,7 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
     relationName: 'parentRoom',
   }),
   children: many(rooms, { relationName: 'parentRoom' }),
+  locations: many(locations, { relationName: 'roomLocations' }),
   createdBy: one(users, {
     fields: [rooms.createdById],
     references: [users.id],

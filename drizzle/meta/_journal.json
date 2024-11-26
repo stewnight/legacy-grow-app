@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1731638333030,
-      "tag": "0000_fast_warstar",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1731712409562,
-      "tag": "0001_tricky_sue_storm",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1731913491453,
-      "tag": "0002_shiny_shinobi_shaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1732571784445,
-      "tag": "0003_fresh_molten_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1732572114053,
-      "tag": "0004_safe_black_knight",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1732573036440,
-      "tag": "0005_nice_wasp",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1732573779022,
-      "tag": "0006_common_puma",
+      "when": 1732599525740,
+      "tag": "0000_next_silk_fever",
       "breakpoints": true
     }
   ]

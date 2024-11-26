@@ -8,11 +8,14 @@ import {
   taskPriorityEnum,
   taskCategoryEnum,
   statusEnum,
+  taskEntityTypeEnum,
+  type TaskEntityType,
 } from '~/server/db/schema/enums'
 
-// Schema for filters
+// Schema for filters using the enum directly
 const taskFiltersSchema = z.object({
   taskStatus: z.enum(taskStatusEnum.enumValues).optional(),
+  entityType: z.enum(taskEntityTypeEnum.enumValues).optional(),
   priority: z.enum(taskPriorityEnum.enumValues).optional(),
   category: z.enum(taskCategoryEnum.enumValues).optional(),
   assignedToId: z.string().uuid().optional(),
@@ -43,6 +46,9 @@ export const taskRouter = createTRPCRouter({
           : undefined,
         filters?.status ? eq(tasks.status, filters.status) : undefined,
         filters?.search ? like(tasks.title, `%${filters.search}%`) : undefined,
+        filters?.entityType
+          ? eq(tasks.entityType, filters.entityType)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.tasks.findMany({
@@ -63,6 +69,7 @@ export const taskRouter = createTRPCRouter({
               name: true,
             },
           },
+          notes: true,
         },
       })
 
@@ -85,15 +92,24 @@ export const taskRouter = createTRPCRouter({
             columns: {
               id: true,
               name: true,
+              email: true,
             },
           },
           createdBy: {
             columns: {
               id: true,
               name: true,
+              email: true,
             },
           },
           notes: true,
+          location: true,
+          plant: true,
+          batch: true,
+          genetic: true,
+          sensor: true,
+          processing: true,
+          harvest: true,
         },
       })
 
@@ -108,21 +124,16 @@ export const taskRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertTaskSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertTaskSchema)
     .mutation(async ({ ctx, input }) => {
       const [task] = await ctx.db
         .insert(tasks)
         .values({
           ...input,
           createdById: ctx.session.user.id,
-        })
+          properties: input.properties ?? {},
+          metadata: input.metadata ?? {},
+        } as typeof tasks.$inferInsert)
         .returning()
 
       if (!task) {
@@ -139,14 +150,7 @@ export const taskRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertTaskSchema
-          .partial()
-          .omit({
-            id: true,
-            createdAt: true,
-            updatedAt: true,
-            createdById: true,
-          }),
+        data: insertTaskSchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -155,7 +159,9 @@ export const taskRouter = createTRPCRouter({
         .set({
           ...input.data,
           updatedAt: new Date(),
-        })
+          properties: input.data.properties ?? undefined,
+          metadata: input.data.metadata ?? undefined,
+        } as Partial<typeof tasks.$inferInsert>)
         .where(eq(tasks.id, input.id))
         .returning()
 

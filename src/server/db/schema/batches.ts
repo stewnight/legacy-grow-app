@@ -98,6 +98,7 @@ export const batchesRelations = relations(batches, ({ one }) => ({
   createdBy: one(users, {
     fields: [batches.createdById],
     references: [users.id],
+    relationName: 'batchCreator',
   }),
 }))
 

@@ -27,7 +27,6 @@ import { type AppRouter } from '~/server/api/root'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
-import { createSelectSchema } from 'drizzle-zod'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type LocationFormValues = z.infer<typeof insertLocationSchema>
@@ -79,8 +78,6 @@ export function LocationForm({
     defaultValues: {
       name: defaultValues?.name ?? '',
       type: defaultValues?.type ?? locationTypeEnum.enumValues[0],
-      properties: defaultValues?.properties ?? createDefaultProperties(),
-      dimensions: defaultValues?.dimensions ?? createDefaultDimensions(),
     },
   })
 
@@ -131,7 +128,7 @@ export function LocationForm({
     }
   }
 
-  const { data: areas } = api.area.getAll.useQuery({
+  const { data: rooms } = api.room.getAll.useQuery({
     limit: 100,
     filters: { status: 'active' },
   })
@@ -188,20 +185,20 @@ export function LocationForm({
 
         <FormField
           control={form.control}
-          name="areaId"
+          name="roomId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Area</FormLabel>
+              <FormLabel>Room</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select area" />
+                    <SelectValue placeholder="Select room" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {areas?.items.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.name}
+                  {rooms?.items.map((room) => (
+                    <SelectItem key={room.id} value={room.id}>
+                      {room.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

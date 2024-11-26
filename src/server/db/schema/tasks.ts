@@ -14,9 +14,18 @@ import {
   taskPriorityEnum,
   taskCategoryEnum,
   statusEnum,
+  taskEntityTypeEnum,
+  TaskEntityType,
 } from './enums'
 import { users } from './core'
-import { notes } from './notes'
+import { Note, notes } from './notes'
+import { Location, locations } from './locations'
+import { Plant, plants } from './plants'
+import { Batch, batches } from './batches'
+import { Genetic, genetics } from './genetics'
+import { Sensor, sensors } from './sensors'
+import { Processing, processing } from './processing'
+import { Harvest, harvests } from './harvests'
 
 export const tasks = createTable(
   'task',
@@ -24,8 +33,8 @@ export const tasks = createTable(
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
-    entityId: uuid('entity_id').notNull(),
-    entityType: varchar('entity_type', { length: 255 }).notNull(),
+    entityId: uuid('entity_id'),
+    entityType: taskEntityTypeEnum('entity_type').notNull(),
     assignedToId: uuid('assigned_to_id').references(() => users.id),
     category: taskCategoryEnum('category').notNull(),
     priority: taskPriorityEnum('priority').notNull(),
@@ -34,36 +43,50 @@ export const tasks = createTable(
     dueDate: timestamp('due_date', { withTimezone: true }),
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
-    properties: json('properties').$type<{
-      recurring?: {
-        frequency: string
-        interval?: number
-        endDate?: string
-      }
-      checklist?: Array<{
-        item: string
-        completed: boolean
-        completedAt?: string | null
-      }>
-      instructions?: string[]
-      requirements?: {
-        tools?: string[]
-        supplies?: string[]
-        ppe?: string[]
-      }
-    }>(),
-    metadata: json('metadata').$type<{
-      previousTasks?: string[]
-      nextTasks?: string[]
-      estimatedDuration?: number
-      actualDuration?: number
-      location?: {
-        id: string
-        type: string
-        name: string
-      }
-      customFields?: Record<string, unknown>
-    }>(),
+    properties: json('properties')
+      .$type<{
+        recurring: {
+          frequency: string
+          interval: number
+          endDate?: string
+        } | null
+        checklist: Array<{
+          item: string
+          completed: boolean
+          completedAt?: string | null
+        }>
+        instructions: string[]
+        requirements: {
+          tools: string[]
+          supplies: string[]
+          ppe: string[]
+        }
+      }>()
+      .default({
+        recurring: null,
+        checklist: [],
+        instructions: [],
+        requirements: { tools: [], supplies: [], ppe: [] },
+      }),
+    metadata: json('metadata')
+      .$type<{
+        previousTasks: string[]
+        nextTasks: string[]
+        estimatedDuration: number | null
+        actualDuration: number | null
+        location: {
+          id: string
+          type: string
+          name: string
+        } | null
+      }>()
+      .default({
+        previousTasks: [],
+        nextTasks: [],
+        estimatedDuration: null,
+        actualDuration: null,
+        location: null,
+      }),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -82,6 +105,7 @@ export const tasks = createTable(
     statusIdx: index('task_status_idx').on(table.status),
     assignedToIdx: index('task_assigned_to_idx').on(table.assignedToId),
     entityIdx: index('task_entity_idx').on(table.entityId, table.entityType),
+    dueDateIdx: index('task_due_date_idx').on(table.dueDate),
   })
 )
 
@@ -97,12 +121,93 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     relationName: 'taskCreator',
   }),
   notes: many(notes, { relationName: 'taskNotes' }),
+  location: one(locations, {
+    fields: [tasks.entityId],
+    references: [locations.id],
+    relationName: 'locationTasks',
+  }),
+  plant: one(plants, {
+    fields: [tasks.entityId],
+    references: [plants.id],
+    relationName: 'plantTasks',
+  }),
+  batch: one(batches, {
+    fields: [tasks.entityId],
+    references: [batches.id],
+    relationName: 'batchTasks',
+  }),
+  genetic: one(genetics, {
+    fields: [tasks.entityId],
+    references: [genetics.id],
+    relationName: 'geneticTasks',
+  }),
+  sensor: one(sensors, {
+    fields: [tasks.entityId],
+    references: [sensors.id],
+    relationName: 'sensorTasks',
+  }),
+  processing: one(processing, {
+    fields: [tasks.entityId],
+    references: [processing.id],
+    relationName: 'processingTasks',
+  }),
+  harvest: one(harvests, {
+    fields: [tasks.entityId],
+    references: [harvests.id],
+    relationName: 'harvestTasks',
+  }),
 }))
 
 // Zod Schemas
-export const insertTaskSchema = createInsertSchema(tasks)
+export const insertTaskSchema = createInsertSchema(tasks, {
+  properties: (schema) => schema.properties.optional(),
+  metadata: (schema) => schema.metadata.optional(),
+  entityId: (schema) =>
+    schema.entityId.nullable().superRefine((val, ctx: any) => {
+      const entityType = ctx.data?.entityType as TaskEntityType | undefined
+
+      if (!entityType) return
+
+      if (entityType === 'none' && val !== null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Entity ID must be null when entity type is none',
+          path: ['entityId'],
+        })
+        return
+      }
+
+      if (entityType !== 'none' && !val) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Entity ID is required when entity type is not none',
+          path: ['entityId'],
+        })
+        return
+      }
+    }),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
+
 export const selectTaskSchema = createSelectSchema(tasks)
 
 // Types
 export type Task = typeof tasks.$inferSelect
 export type NewTask = typeof tasks.$inferInsert
+
+export type TaskWithRelations = Task & {
+  assignedTo?: { id: string; name: string } | null
+  createdBy: { id: string; name: string }
+  notes?: Note[]
+  location?: Location | undefined
+  plant?: Plant | undefined
+  batch?: Batch | undefined
+  genetic?: Genetic | undefined
+  sensor?: Sensor | undefined
+  processing?: Processing | undefined
+  harvest?: Harvest | undefined
+}

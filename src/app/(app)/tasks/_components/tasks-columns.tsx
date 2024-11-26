@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type tasks } from '~/server/db/schema'
+import { type TaskWithRelations } from '~/server/db/schema/tasks'
 import { Badge } from '~/components/ui/badge'
 import {
   MoreHorizontal,
@@ -25,18 +25,6 @@ import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { format } from 'date-fns'
 
-// Define the type including relations
-type TaskWithRelations = typeof tasks.$inferSelect & {
-  assignedTo?: {
-    id: string
-    name: string
-  } | null
-  createdBy: {
-    id: string
-    name: string
-  }
-}
-
 export const columns: ColumnDef<TaskWithRelations>[] = [
   {
     accessorKey: 'title',
@@ -59,6 +47,27 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
     cell: ({ row }) => {
       const category = row.getValue('category') as string
       return <Badge variant="outline">{category}</Badge>
+    },
+  },
+  {
+    accessorKey: 'entityType',
+    header: 'Entity Type',
+    cell: ({ row }) => {
+      const entityType = row.getValue('entityType') as string
+      return <Badge variant="outline">{entityType}</Badge>
+    },
+  },
+  {
+    accessorKey: 'entityId',
+    header: 'Entity ID',
+    cell: ({ row }) => {
+      const entityId = row.getValue('entityId') as string
+      const entityType = row.getValue('entityType') as string
+      return (
+        <Link href={`/${entityType}s/${entityId}`} className="hover:underline">
+          {entityId}
+        </Link>
+      )
     },
   },
   {

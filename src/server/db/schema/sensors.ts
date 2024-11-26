@@ -14,6 +14,8 @@ import { sensorTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { sensorReadings } from './sensorReadings'
 import { locations } from './locations'
+import { tasks } from './tasks'
+import { notes } from './notes'
 export const sensors = createTable(
   'sensor',
   {
@@ -107,6 +109,8 @@ export const sensorsRelations = relations(sensors, ({ one, many }) => ({
     references: [users.id],
     relationName: 'sensorCreator',
   }),
+  tasks: many(tasks, { relationName: 'sensorTasks' }),
+  notes: many(notes, { relationName: 'sensorNotes' }),
 }))
 
 // Zod Schemas

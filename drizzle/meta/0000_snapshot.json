@@ -1,214 +1,9 @@
 {
-  "id": "365cd22a-74b0-4fdc-8940-f8ebb133d0fc",
+  "id": "206d5139-2650-465c-a9e4-82af97d3d099",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.legacy-grow-app_area": {
-      "name": "legacy-grow-app_area",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "facility_id": {
-          "name": "facility_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "area_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "properties": {
-          "name": "properties",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "dimensions": {
-          "name": "dimensions",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "capacity": {
-          "name": "capacity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "status": {
-          "name": "status",
-          "type": "status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "area_name_idx": {
-          "name": "area_name_idx",
-          "columns": [
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "area_type_idx": {
-          "name": "area_type_idx",
-          "columns": [
-            {
-              "expression": "type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "area_facility_id_idx": {
-          "name": "area_facility_id_idx",
-          "columns": [
-            {
-              "expression": "facility_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "area_status_idx": {
-          "name": "area_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "area_parent_id_idx": {
-          "name": "area_parent_id_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "legacy-grow-app_area_facility_id_legacy-grow-app_facility_id_fk": {
-          "name": "legacy-grow-app_area_facility_id_legacy-grow-app_facility_id_fk",
-          "tableFrom": "legacy-grow-app_area",
-          "tableTo": "legacy-grow-app_facility",
-          "columnsFrom": [
-            "facility_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "legacy-grow-app_area_parent_id_legacy-grow-app_area_id_fk": {
-          "name": "legacy-grow-app_area_parent_id_legacy-grow-app_area_id_fk",
-          "tableFrom": "legacy-grow-app_area",
-          "tableTo": "legacy-grow-app_area",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "legacy-grow-app_area_created_by_legacy-grow-app_user_id_fk": {
-          "name": "legacy-grow-app_area_created_by_legacy-grow-app_user_id_fk",
-          "tableFrom": "legacy-grow-app_area",
-          "tableTo": "legacy-grow-app_user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.legacy-grow-app_batch": {
       "name": "legacy-grow-app_batch",
       "schema": "",
@@ -257,7 +52,7 @@
           "name": "start_date",
           "type": "date",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "expected_end_date": {
           "name": "expected_end_date",
@@ -483,6 +278,163 @@
           ]
         }
       }
+    },
+    "public.legacy-grow-app_building": {
+      "name": "legacy-grow-app_building",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "building_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "properties": {
+          "name": "properties",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "license_number": {
+          "name": "license_number",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "building_name_idx": {
+          "name": "building_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "building_type_idx": {
+          "name": "building_type_idx",
+          "columns": [
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "building_status_idx": {
+          "name": "building_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "building_license_idx": {
+          "name": "building_license_idx",
+          "columns": [
+            {
+              "expression": "license_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "legacy-grow-app_building_created_by_legacy-grow-app_user_id_fk": {
+          "name": "legacy-grow-app_building_created_by_legacy-grow-app_user_id_fk",
+          "tableFrom": "legacy-grow-app_building",
+          "tableTo": "legacy-grow-app_user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "public.legacy-grow-app_account": {
       "name": "legacy-grow-app_account",
@@ -946,163 +898,6 @@
           ]
         }
       },
-      "uniqueConstraints": {}
-    },
-    "public.legacy-grow-app_facility": {
-      "name": "legacy-grow-app_facility",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "facility_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "address": {
-          "name": "address",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "properties": {
-          "name": "properties",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "license_number": {
-          "name": "license_number",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "facility_name_idx": {
-          "name": "facility_name_idx",
-          "columns": [
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "facility_type_idx": {
-          "name": "facility_type_idx",
-          "columns": [
-            {
-              "expression": "type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "facility_status_idx": {
-          "name": "facility_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "facility_license_idx": {
-          "name": "facility_license_idx",
-          "columns": [
-            {
-              "expression": "license_number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "legacy-grow-app_facility_created_by_legacy-grow-app_user_id_fk": {
-          "name": "legacy-grow-app_facility_created_by_legacy-grow-app_user_id_fk",
-          "tableFrom": "legacy-grow-app_facility",
-          "tableTo": "legacy-grow-app_user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.legacy-grow-app_genetic": {
@@ -1927,6 +1722,211 @@
         }
       }
     },
+    "public.legacy-grow-app_room": {
+      "name": "legacy-grow-app_room",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "building_id": {
+          "name": "building_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "room_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "properties": {
+          "name": "properties",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dimensions": {
+          "name": "dimensions",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "room_name_idx": {
+          "name": "room_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "room_type_idx": {
+          "name": "room_type_idx",
+          "columns": [
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "room_building_id_idx": {
+          "name": "room_building_id_idx",
+          "columns": [
+            {
+              "expression": "building_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "room_status_idx": {
+          "name": "room_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "room_parent_id_idx": {
+          "name": "room_parent_id_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "legacy-grow-app_room_building_id_legacy-grow-app_building_id_fk": {
+          "name": "legacy-grow-app_room_building_id_legacy-grow-app_building_id_fk",
+          "tableFrom": "legacy-grow-app_room",
+          "tableTo": "legacy-grow-app_building",
+          "columnsFrom": [
+            "building_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "legacy-grow-app_room_parent_id_legacy-grow-app_room_id_fk": {
+          "name": "legacy-grow-app_room_parent_id_legacy-grow-app_room_id_fk",
+          "tableFrom": "legacy-grow-app_room",
+          "tableTo": "legacy-grow-app_room",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "legacy-grow-app_room_created_by_legacy-grow-app_user_id_fk": {
+          "name": "legacy-grow-app_room_created_by_legacy-grow-app_user_id_fk",
+          "tableFrom": "legacy-grow-app_room",
+          "tableTo": "legacy-grow-app_user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.legacy-grow-app_location": {
       "name": "legacy-grow-app_location",
       "schema": "",
@@ -1938,8 +1938,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "area_id": {
-          "name": "area_id",
+        "room_id": {
+          "name": "room_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -2042,11 +2042,11 @@
           "method": "btree",
           "with": {}
         },
-        "location_area_id_idx": {
-          "name": "location_area_id_idx",
+        "location_room_id_idx": {
+          "name": "location_room_id_idx",
           "columns": [
             {
-              "expression": "area_id",
+              "expression": "room_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2074,12 +2074,12 @@
         }
       },
       "foreignKeys": {
-        "legacy-grow-app_location_area_id_legacy-grow-app_area_id_fk": {
-          "name": "legacy-grow-app_location_area_id_legacy-grow-app_area_id_fk",
+        "legacy-grow-app_location_room_id_legacy-grow-app_room_id_fk": {
+          "name": "legacy-grow-app_location_room_id_legacy-grow-app_room_id_fk",
           "tableFrom": "legacy-grow-app_location",
-          "tableTo": "legacy-grow-app_area",
+          "tableTo": "legacy-grow-app_room",
           "columnsFrom": [
-            "area_id"
+            "room_id"
           ],
           "columnsTo": [
             "id"
@@ -2175,6 +2175,12 @@
           "type": "json",
           "primaryKey": false,
           "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
         },
         "notes": {
           "name": "notes",
@@ -2292,9 +2298,37 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "sensor_location_idx": {
+          "name": "sensor_location_idx",
+          "columns": [
+            {
+              "expression": "location_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
+        "legacy-grow-app_sensor_location_id_legacy-grow-app_location_id_fk": {
+          "name": "legacy-grow-app_sensor_location_id_legacy-grow-app_location_id_fk",
+          "tableFrom": "legacy-grow-app_sensor",
+          "tableTo": "legacy-grow-app_location",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "legacy-grow-app_sensor_created_by_legacy-grow-app_user_id_fk": {
           "name": "legacy-grow-app_sensor_created_by_legacy-grow-app_user_id_fk",
           "tableFrom": "legacy-grow-app_sensor",
@@ -2347,11 +2381,12 @@
           "name": "entity_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "entity_type": {
           "name": "entity_type",
-          "type": "varchar(50)",
+          "type": "task_entity_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -2373,20 +2408,26 @@
           "type": "task_priority",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'medium'"
+          "notNull": true
         },
         "task_status": {
           "name": "task_status",
           "type": "task_status",
           "typeSchema": "public",
           "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
           "notNull": true,
-          "default": "'pending'"
+          "default": "'active'"
         },
         "due_date": {
           "name": "due_date",
-          "type": "date",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -2406,21 +2447,15 @@
           "name": "properties",
           "type": "json",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'{\"recurring\":null,\"checklist\":[],\"instructions\":[],\"requirements\":{\"tools\":[],\"supplies\":[],\"ppe\":[]}}'::json"
         },
         "metadata": {
           "name": "metadata",
           "type": "json",
           "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
+          "notNull": false,
+          "default": "'{\"previousTasks\":[],\"nextTasks\":[],\"estimatedDuration\":null,\"actualDuration\":null,\"location\":null}'::json"
         },
         "created_by": {
           "name": "created_by",
@@ -2444,32 +2479,11 @@
         }
       },
       "indexes": {
-        "task_entity_idx": {
-          "name": "task_entity_idx",
+        "task_title_idx": {
+          "name": "task_title_idx",
           "columns": [
             {
-              "expression": "entity_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "entity_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "task_assigned_to_idx": {
-          "name": "task_assigned_to_idx",
-          "columns": [
-            {
-              "expression": "assigned_to_id",
+              "expression": "title",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2514,7 +2528,43 @@
           "name": "task_status_idx",
           "columns": [
             {
-              "expression": "task_status",
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "task_assigned_to_idx": {
+          "name": "task_assigned_to_idx",
+          "columns": [
+            {
+              "expression": "assigned_to_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "task_entity_idx": {
+          "name": "task_entity_idx",
+          "columns": [
+            {
+              "expression": "entity_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity_type",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2530,36 +2580,6 @@
           "columns": [
             {
               "expression": "due_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "task_created_by_idx": {
-          "name": "task_created_by_idx",
-          "columns": [
-            {
-              "expression": "created_by",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "task_general_status_idx": {
-          "name": "task_general_status_idx",
-          "columns": [
-            {
-              "expression": "status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3259,28 +3279,25 @@
     }
   },
   "enums": {
-    "public.area_type": {
-      "name": "area_type",
-      "schema": "public",
-      "values": [
-        "vegetation",
-        "flowering",
-        "drying",
-        "storage",
-        "processing",
-        "mother",
-        "clone",
-        "quarantine"
-      ]
-    },
     "public.batch_status": {
       "name": "batch_status",
       "schema": "public",
       "values": [
         "active",
         "completed",
+        "pending",
         "cancelled",
         "archived"
+      ]
+    },
+    "public.building_type": {
+      "name": "building_type",
+      "schema": "public",
+      "values": [
+        "indoor",
+        "outdoor",
+        "greenhouse",
+        "hybrid"
       ]
     },
     "public.destroy_reason": {
@@ -3295,16 +3312,6 @@
         "quality",
         "regulatory",
         "other"
-      ]
-    },
-    "public.facility_type": {
-      "name": "facility_type",
-      "schema": "public",
-      "values": [
-        "indoor",
-        "outdoor",
-        "greenhouse",
-        "hybrid"
       ]
     },
     "public.genetic_type": {
@@ -3408,6 +3415,20 @@
         "clone"
       ]
     },
+    "public.room_type": {
+      "name": "room_type",
+      "schema": "public",
+      "values": [
+        "vegetation",
+        "flowering",
+        "drying",
+        "storage",
+        "processing",
+        "mother",
+        "clone",
+        "quarantine"
+      ]
+    },
     "public.sensor_type": {
       "name": "sensor_type",
       "schema": "public",
@@ -3462,6 +3483,20 @@
         "packing",
         "cleaning",
         "inspection"
+      ]
+    },
+    "public.task_entity_type": {
+      "name": "task_entity_type",
+      "schema": "public",
+      "values": [
+        "plant",
+        "batch",
+        "location",
+        "genetics",
+        "sensors",
+        "processing",
+        "harvest",
+        "none"
       ]
     },
     "public.task_priority": {

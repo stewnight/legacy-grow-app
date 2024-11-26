@@ -27,6 +27,7 @@ import {
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { BatchForm } from '../_components/batches-form'
 import { Badge } from '../../../../components/ui/badge'
+import TasksTab from '../../../../components/tabs/tasks'
 
 export default function BatchPage({
   params,
@@ -321,19 +322,7 @@ export default function BatchPage({
           </Card>
         </TabsContent>
 
-        <TabsContent value="tasks">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tasks</CardTitle>
-              <CardDescription>
-                Tasks associated with this batch
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Task list implementation here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <TasksTab entityId={batch.id} entityType="batch" />
       </Tabs>
     </div>
   )
