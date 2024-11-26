@@ -34,6 +34,14 @@ import { Badge } from '../../../../components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { type Task, type TaskWithRelations } from '~/server/db/schema/tasks'
+import { type Location } from '~/server/db/schema/locations'
+import { type Plant } from '~/server/db/schema/plants'
+import { type Batch } from '~/server/db/schema/batches'
+import { type Genetic } from '~/server/db/schema/genetics'
+import { type Sensor } from '~/server/db/schema/sensors'
+import { type Processing } from '~/server/db/schema/processing'
+import { type Harvest } from '~/server/db/schema/harvests'
 
 export default function TaskPage({
   params,
@@ -141,7 +149,7 @@ export default function TaskPage({
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{task.title}</h2>
           <p className="text-muted-foreground">
-            Created by {task.createdBy?.name} on {formatDate(task.createdAt)}
+            Created by {task.createdBy.name} on {formatDate(task.createdAt)}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -213,6 +221,32 @@ export default function TaskPage({
             <p className="text-xs text-muted-foreground">Task type</p>
           </CardContent>
         </Card>
+
+        {task.entityType !== 'none' && task.entityId && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LinkIcon className="h-4 w-4" />
+                Linked Entity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  Type:{' '}
+                  {task.entityType.charAt(0).toUpperCase() +
+                    task.entityType.slice(1)}
+                </p>
+                <Link
+                  href={`/${task.entityType}s/${task.entityId}`}
+                  className="text-sm text-blue-500 hover:underline"
+                >
+                  {getEntityName(task)}
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Tabs defaultValue="details" className="w-full">
@@ -466,4 +500,36 @@ export default function TaskPage({
       </Tabs>
     </div>
   )
+}
+
+// Helper function to get entity name
+function getEntityName(
+  task: TaskWithRelations & {
+    location?: Location
+    plant?: Plant
+    batch?: Batch
+    genetic?: Genetic
+    sensor?: Sensor
+    processing?: Processing
+    harvest?: Harvest
+  }
+) {
+  switch (task.entityType) {
+    case 'location':
+      return task.location?.name
+    case 'plant':
+      return task.plant?.identifier
+    case 'batch':
+      return task.batch?.identifier
+    case 'genetics':
+      return task.genetic?.name
+    case 'sensors':
+      return task.sensor?.name
+    case 'processing':
+      return task.processing?.identifier
+    case 'harvest':
+      return task.harvest?.identifier
+    default:
+      return task.entityId
+  }
 }

@@ -30,9 +30,8 @@ import { useRouter } from 'next/navigation'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type RoomFormValues = z.infer<typeof insertRoomSchema>
-// Removed unused types
 
-interface AreaFormProps {
+interface RoomFormProps {
   mode?: 'create' | 'edit'
   defaultValues?: RouterOutputs['room']['get']
   onSuccess?: (data: RoomFormValues) => void
@@ -42,7 +41,7 @@ export function RoomForm({
   mode = 'create',
   defaultValues,
   onSuccess,
-}: AreaFormProps) {
+}: RoomFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()

@@ -26,6 +26,8 @@ import {
   taskPriorityEnum,
   taskCategoryEnum,
   statusEnum,
+  taskEntityTypeEnum,
+  type TaskEntityType,
 } from '~/server/db/schema/enums'
 import { type inferRouterOutputs } from '@trpc/server'
 import { type AppRouter } from '~/server/api/root'
@@ -34,6 +36,9 @@ import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
+import { cn } from '~/lib/utils'
+import React from 'react'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type TaskFormValues = z.infer<typeof insertTaskSchema>
@@ -43,7 +48,7 @@ interface TaskFormProps {
   defaultValues?: RouterOutputs['task']['get']
   onSuccess?: (data: TaskFormValues) => void
   entityId?: string
-  entityType?: string
+  entityType?: TaskEntityType
 }
 
 export function TaskForm({
@@ -60,20 +65,21 @@ export function TaskForm({
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(insertTaskSchema),
     defaultValues: {
-      title: defaultValues?.title || '',
-      description: defaultValues?.description || '',
-      entityId: entityId || defaultValues?.entityId || '',
-      entityType: entityType || defaultValues?.entityType || '',
-      category: defaultValues?.category || 'maintenance',
-      priority: defaultValues?.priority || 'medium',
-      taskStatus: defaultValues?.taskStatus || 'pending',
-      status: defaultValues?.status || 'active',
-      assignedToId: defaultValues?.assignedToId || undefined,
-      dueDate: defaultValues?.dueDate
-        ? new Date(defaultValues.dueDate)
-        : undefined,
-      properties: defaultValues?.properties || {
-        recurring: undefined,
+      title: defaultValues?.title ?? '',
+      description: defaultValues?.description ?? null,
+      entityId:
+        entityType === 'none'
+          ? null
+          : (entityId ?? defaultValues?.entityId ?? null),
+      entityType: entityType ?? defaultValues?.entityType ?? 'none',
+      category: defaultValues?.category ?? 'maintenance',
+      priority: defaultValues?.priority ?? 'medium',
+      taskStatus: defaultValues?.taskStatus ?? 'pending',
+      status: defaultValues?.status ?? 'active',
+      assignedToId: defaultValues?.assignedToId ?? null,
+      dueDate: defaultValues?.dueDate ? new Date(defaultValues.dueDate) : null,
+      properties: defaultValues?.properties ?? {
+        recurring: null,
         checklist: [],
         instructions: [],
         requirements: {
@@ -82,8 +88,22 @@ export function TaskForm({
           ppe: [],
         },
       },
+      metadata: defaultValues?.metadata ?? {
+        previousTasks: [],
+        nextTasks: [],
+        estimatedDuration: null,
+        actualDuration: null,
+        location: null,
+      },
     },
   })
+
+  React.useEffect(() => {
+    const entityType = form.watch('entityType')
+    if (entityType === 'none') {
+      form.setValue('entityId', null)
+    }
+  }, [form.watch('entityType')])
 
   const { mutate: createTask, isPending: isCreating } =
     api.task.create.useMutation({
@@ -137,7 +157,79 @@ export function TaskForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-1">
+      <form
+        onSubmit={(e) => {
+          console.log('Form Submitted Event')
+          form.handleSubmit(onSubmit, (errors) => {
+            console.log('Form Errors:', errors)
+          })(e)
+        }}
+        className="space-y-4 p-1"
+        noValidate
+      >
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="entityType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Entity Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={!!entityType}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select entity type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {taskEntityTypeEnum.enumValues.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('entityType') && !entityId && (
+            <FormField
+              control={form.control}
+              name="entityId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select {form.watch('entityType')}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value ?? undefined}
+                    disabled={!!entityId}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={`Select ${form.watch('entityType')}`}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <EntitySelector
+                        entityType={form.watch('entityType')}
+                        onSelect={field.onChange}
+                      />
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+
         <FormField
           control={form.control}
           name="title"
@@ -317,3 +409,113 @@ export function TaskForm({
     </Form>
   )
 }
+
+const EntitySelector = React.memo(function EntitySelector({
+  entityType,
+  onSelect,
+}: {
+  entityType: TaskEntityType
+  onSelect: (value: string) => void
+}) {
+  const locationQuery = api.location.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'location' }
+  )
+  const plantQuery = api.plant.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'plant' }
+  )
+  const batchQuery = api.batch.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'batch' }
+  )
+  const geneticQuery = api.genetic.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'genetics' }
+  )
+  const sensorQuery = api.sensor.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'sensors' }
+  )
+  const processingQuery = api.processing.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'processing' }
+  )
+  const harvestQuery = api.harvest.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'harvest' }
+  )
+
+  const queryResult = React.useMemo(() => {
+    switch (entityType) {
+      case 'location':
+        return locationQuery
+      case 'plant':
+        return plantQuery
+      case 'batch':
+        return batchQuery
+      case 'genetics':
+        return geneticQuery
+      case 'sensors':
+        return sensorQuery
+      case 'processing':
+        return processingQuery
+      case 'harvest':
+        return harvestQuery
+      case 'none':
+        return { data: null, isLoading: false }
+      default:
+        return { data: null, isLoading: false }
+    }
+  }, [
+    entityType,
+    locationQuery,
+    plantQuery,
+    batchQuery,
+    geneticQuery,
+    sensorQuery,
+    processingQuery,
+    harvestQuery,
+  ])
+
+  if (queryResult.isLoading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!queryResult.data?.items?.length) {
+    return <SelectItem value="none">No items found</SelectItem>
+  }
+
+  const getDisplayText = (item: any) => {
+    switch (entityType) {
+      case 'location':
+      case 'genetics':
+        return item.name
+      case 'batch':
+        return item.identifier
+      case 'plant':
+        return `${item.identifier || item.id}`
+      case 'sensors':
+        return item.identifier
+      case 'processing':
+      case 'harvest':
+        return item.identifier || item.id
+      default:
+        return item.id
+    }
+  }
+
+  return (
+    <>
+      {queryResult.data.items.map((item: any) => (
+        <SelectItem key={item.id} value={item.id}>
+          {getDisplayText(item)}
+        </SelectItem>
+      ))}
+    </>
+  )
+})

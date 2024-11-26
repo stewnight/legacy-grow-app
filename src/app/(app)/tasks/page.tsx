@@ -7,8 +7,18 @@ import { columns } from './_components/tasks-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
 import { TaskForm } from './_components/tasks-form'
+import {
+  taskEntityTypeEnum,
+  taskStatusEnum,
+  type TaskEntityType,
+  type TaskStatus,
+} from '~/server/db/schema/enums'
 
-export default async function TasksPage() {
+export default async function TasksPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
   const session = await auth()
   if (!session) {
     redirect('/')
@@ -17,7 +27,8 @@ export default async function TasksPage() {
   const { items: tasks } = await api.task.getAll({
     limit: 100,
     filters: {
-      taskStatus: 'pending',
+      taskStatus: (searchParams.status as TaskStatus) || 'pending',
+      entityType: searchParams.entityType as TaskEntityType,
     },
   })
 
@@ -31,7 +42,31 @@ export default async function TasksPage() {
       </div>
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <DataTable columns={columns} data={tasks} filterColumn="title" />
+          {tasks && (
+            <DataTable
+              columns={columns}
+              data={tasks}
+              filterColumn="title"
+              filters={[
+                {
+                  id: 'entityType',
+                  title: 'Entity Type',
+                  options: taskEntityTypeEnum.enumValues.map((type) => ({
+                    label: type.charAt(0).toUpperCase() + type.slice(1),
+                    value: type,
+                  })),
+                },
+                {
+                  id: 'status',
+                  title: 'Status',
+                  options: taskStatusEnum.enumValues.map((status) => ({
+                    label: status.charAt(0).toUpperCase() + status.slice(1),
+                    value: status,
+                  })),
+                },
+              ]}
+            />
+          )}
         </Suspense>
       </div>
     </div>
