@@ -6,7 +6,6 @@ import {
   json,
   uuid,
   text,
-  date,
   integer,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
@@ -54,9 +53,9 @@ export const batches = createTable(
       .references(() => locations.id),
     stage: plantStageEnum('stage').notNull(),
     batchStatus: batchStatusEnum('batch_status').default('active').notNull(),
-    startDate: date('start_date'),
-    expectedEndDate: date('expected_end_date'),
-    actualEndDate: date('actual_end_date'),
+    startDate: timestamp('start_date', { withTimezone: true }),
+    expectedEndDate: timestamp('expected_end_date', { withTimezone: true }),
+    actualEndDate: timestamp('actual_end_date', { withTimezone: true }),
     plantCount: integer('plant_count').default(0),
     properties: json('properties').$type<BatchProperties>(),
     metadata: json('metadata').$type<BatchMetadata>(),

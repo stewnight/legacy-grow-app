@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertPlantSchema } from '~/server/db/schema'
+import { insertPlantSchema, type Plant } from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -37,6 +37,13 @@ import { Textarea } from '@/components/ui/textarea'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type PlantFormValues = z.infer<typeof insertPlantSchema>
+type PlantProperties = {
+  height: number
+  width: number
+  feeding: {
+    schedule: string
+  }
+}
 
 interface PlantFormProps {
   mode?: 'create' | 'edit'
@@ -53,30 +60,25 @@ export function PlantForm({
   const router = useRouter()
   const utils = api.useUtils()
 
+  const createDefaultProperties = (): PlantProperties => ({
+    height: 0,
+    width: 0,
+    feeding: { schedule: 'daily' },
+  })
+
   const form = useForm<PlantFormValues>({
     resolver: zodResolver(insertPlantSchema),
     defaultValues: {
-      identifier: defaultValues?.identifier || '',
-      geneticId: defaultValues?.geneticId || '',
-      locationId: defaultValues?.locationId || '',
-      batchId: defaultValues?.batchId || undefined,
-      motherId: defaultValues?.motherId || undefined,
-      source: defaultValues?.source || 'seed',
-      stage: defaultValues?.stage || 'germination',
-      sex: defaultValues?.sex || 'unknown',
-      health: defaultValues?.health || 'healthy',
-      plantedDate: defaultValues?.plantedDate
-        ? new Date(defaultValues.plantedDate)
-        : new Date(),
-      properties: defaultValues?.properties || {
-        height: 0,
-        width: 0,
-        feeding: {
-          schedule: 'daily',
-        },
-      },
-      notes: defaultValues?.notes || '',
-      status: defaultValues?.status || 'active',
+      identifier: defaultValues?.identifier ?? '',
+      geneticId: defaultValues?.geneticId ?? '',
+      locationId: defaultValues?.locationId ?? '',
+      batchId: defaultValues?.batchId ?? undefined,
+      motherId: defaultValues?.motherId ?? undefined,
+      source: defaultValues?.source ?? plantSourceEnum.enumValues[0],
+      stage: defaultValues?.stage ?? plantStageEnum.enumValues[0],
+      sex: defaultValues?.sex ?? plantSexEnum.enumValues[0],
+      health: defaultValues?.health ?? healthStatusEnum.enumValues[0],
+      plantedDate: defaultValues?.plantedDate ?? undefined,
     },
   })
 
@@ -379,7 +381,10 @@ export function PlantForm({
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Planted Date</FormLabel>
-              <DatePicker date={field.value} onDateChange={field.onChange} />
+              <DatePicker
+                date={field.value ? new Date(field.value) : null}
+                onDateChange={(date) => field.onChange(date ?? null)}
+              />
               <FormMessage />
             </FormItem>
           )}
