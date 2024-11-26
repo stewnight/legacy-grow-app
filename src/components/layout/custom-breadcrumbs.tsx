@@ -11,6 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import React from 'react'
 
 export function CustomBreadcrumbs() {
   const pathname = usePathname()
@@ -40,11 +41,11 @@ export function CustomBreadcrumbs() {
             .replace(/\b\w/g, (char) => char.toUpperCase())
 
           return (
-            <>
+            <React.Fragment key={path}>
               <BreadcrumbSeparator>
                 <ChevronRight className="h-4 w-4" />
               </BreadcrumbSeparator>
-              <BreadcrumbItem key={path}>
+              <BreadcrumbItem>
                 {isLast ? (
                   <BreadcrumbPage>{readableSegment}</BreadcrumbPage>
                 ) : (
@@ -53,7 +54,7 @@ export function CustomBreadcrumbs() {
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-            </>
+            </React.Fragment>
           )
         })}
       </BreadcrumbList>
