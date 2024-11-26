@@ -131,6 +131,17 @@ export const taskCategoryEnum = pgEnum('task_category', [
   'inspection',
 ])
 
+export const taskEntityTypeEnum = pgEnum('task_entity_type', [
+  'plant',
+  'batch',
+  'location',
+  'genetics',
+  'sensors',
+  'processing',
+  'harvest',
+  'none',
+])
+
 // Processing and harvest enums
 export const harvestQualityEnum = pgEnum('harvest_quality', [
   'A',
@@ -206,3 +217,4 @@ export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
 export type BuildingType = (typeof buildingTypeEnum.enumValues)[number]
 export type RoomType = (typeof roomTypeEnum.enumValues)[number]
 export type Status = (typeof statusEnum.enumValues)[number]
+export type TaskEntityType = (typeof taskEntityTypeEnum.enumValues)[number]

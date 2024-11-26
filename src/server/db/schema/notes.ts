@@ -12,6 +12,13 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { noteTypeEnum, statusEnum } from './enums'
 import { users } from './core'
+import { plants } from './plants'
+import { harvests } from './harvests'
+import { locations } from './locations'
+import { batches } from './batches'
+import { tasks } from './tasks'
+import { processing } from './processing'
+import { sensors } from './sensors'
 
 export const notes = createTable(
   'note',
@@ -99,6 +106,41 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
     fields: [notes.createdById],
     references: [users.id],
     relationName: 'noteCreator',
+  }),
+  plant: one(plants, {
+    fields: [notes.entityId],
+    references: [plants.id],
+    relationName: 'plantNotes',
+  }),
+  batch: one(batches, {
+    fields: [notes.entityId],
+    references: [batches.id],
+    relationName: 'batchNotes',
+  }),
+  harvest: one(harvests, {
+    fields: [notes.entityId],
+    references: [harvests.id],
+    relationName: 'harvestNotes',
+  }),
+  location: one(locations, {
+    fields: [notes.entityId],
+    references: [locations.id],
+    relationName: 'locationNotes',
+  }),
+  task: one(tasks, {
+    fields: [notes.entityId],
+    references: [tasks.id],
+    relationName: 'taskNotes',
+  }),
+  processing: one(processing, {
+    fields: [notes.entityId],
+    references: [processing.id],
+    relationName: 'processingNotes',
+  }),
+  sensor: one(sensors, {
+    fields: [notes.entityId],
+    references: [sensors.id],
+    relationName: 'sensorNotes',
   }),
 }))
 

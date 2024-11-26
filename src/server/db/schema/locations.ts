@@ -18,6 +18,7 @@ import { batches } from './batches'
 import { sensors } from './sensors'
 import { harvests } from './harvests'
 import { processing } from './processing'
+import { notes } from './notes'
 
 export const locations = createTable(
   'location',
@@ -85,6 +86,7 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
   tasks: many(tasks, { relationName: 'locationTasks' }),
   harvests: many(harvests, { relationName: 'locationHarvests' }),
   processing: many(processing, { relationName: 'locationProcessing' }),
+  notes: many(notes, { relationName: 'locationNotes' }),
   createdBy: one(users, {
     fields: [locations.createdById],
     references: [users.id],

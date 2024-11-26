@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -15,6 +15,9 @@ import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
 import { users } from './core'
 import { batches } from './batches'
 import { locations } from './locations'
+import { processing } from './processing'
+import { tasks } from './tasks'
+import { notes } from './notes'
 
 export const harvests = createTable(
   'harvest',
@@ -124,6 +127,28 @@ export const harvests = createTable(
     statusIdx: index('harvest_general_status_idx').on(table.status),
   })
 )
+
+// Relations
+export const harvestsRelations = relations(harvests, ({ one, many }) => ({
+  batch: one(batches, {
+    fields: [harvests.batchId],
+    references: [batches.id],
+    relationName: 'batchHarvest',
+  }),
+  location: one(locations, {
+    fields: [harvests.locationId],
+    references: [locations.id],
+    relationName: 'locationHarvests',
+  }),
+  createdBy: one(users, {
+    fields: [harvests.createdById],
+    references: [users.id],
+    relationName: 'harvestCreator',
+  }),
+  processing: many(processing, { relationName: 'harvestProcessing' }),
+  tasks: many(tasks, { relationName: 'harvestTasks' }),
+  notes: many(notes, { relationName: 'harvestNotes' }),
+}))
 
 // Zod Schemas
 export const insertHarvestSchema = createInsertSchema(harvests).omit({

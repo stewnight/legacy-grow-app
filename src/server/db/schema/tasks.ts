@@ -14,9 +14,17 @@ import {
   taskPriorityEnum,
   taskCategoryEnum,
   statusEnum,
+  taskEntityTypeEnum,
 } from './enums'
 import { users } from './core'
 import { notes } from './notes'
+import { locations } from './locations'
+import { plants } from './plants'
+import { batches } from './batches'
+import { genetics } from './genetics'
+import { sensors } from './sensors'
+import { processing } from './processing'
+import { harvests } from './harvests'
 
 export const tasks = createTable(
   'task',
@@ -24,8 +32,8 @@ export const tasks = createTable(
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
-    entityId: uuid('entity_id').notNull(),
-    entityType: varchar('entity_type', { length: 255 }).notNull(),
+    entityId: uuid('entity_id'),
+    entityType: taskEntityTypeEnum('entity_type').notNull(),
     assignedToId: uuid('assigned_to_id').references(() => users.id),
     category: taskCategoryEnum('category').notNull(),
     priority: taskPriorityEnum('priority').notNull(),
@@ -82,6 +90,7 @@ export const tasks = createTable(
     statusIdx: index('task_status_idx').on(table.status),
     assignedToIdx: index('task_assigned_to_idx').on(table.assignedToId),
     entityIdx: index('task_entity_idx').on(table.entityId, table.entityType),
+    dueDateIdx: index('task_due_date_idx').on(table.dueDate),
   })
 )
 
@@ -97,10 +106,49 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     relationName: 'taskCreator',
   }),
   notes: many(notes, { relationName: 'taskNotes' }),
+  location: one(locations, {
+    fields: [tasks.entityId],
+    references: [locations.id],
+    relationName: 'locationTasks',
+  }),
+  plant: one(plants, {
+    fields: [tasks.entityId],
+    references: [plants.id],
+    relationName: 'plantTasks',
+  }),
+  batch: one(batches, {
+    fields: [tasks.entityId],
+    references: [batches.id],
+    relationName: 'batchTasks',
+  }),
+  genetic: one(genetics, {
+    fields: [tasks.entityId],
+    references: [genetics.id],
+    relationName: 'geneticTasks',
+  }),
+  sensor: one(sensors, {
+    fields: [tasks.entityId],
+    references: [sensors.id],
+    relationName: 'sensorTasks',
+  }),
+  processing: one(processing, {
+    fields: [tasks.entityId],
+    references: [processing.id],
+    relationName: 'processingTasks',
+  }),
+  harvest: one(harvests, {
+    fields: [tasks.entityId],
+    references: [harvests.id],
+    relationName: 'harvestTasks',
+  }),
 }))
 
 // Zod Schemas
-export const insertTaskSchema = createInsertSchema(tasks)
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  createdAt: true,
+  updatedAt: true,
+  createdById: true,
+})
 export const selectTaskSchema = createSelectSchema(tasks)
 
 // Types

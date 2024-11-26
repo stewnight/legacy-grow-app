@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   index,
   varchar,
@@ -15,6 +15,8 @@ import { users } from './core'
 import { batches } from './batches'
 import { harvests } from './harvests'
 import { locations } from './locations'
+import { tasks } from './tasks'
+import { notes } from './notes'
 
 export const processing = createTable(
   'processing',
@@ -147,6 +149,32 @@ export const processing = createTable(
     statusIdx: index('processing_general_status_idx').on(table.status),
   })
 )
+
+// Relations
+export const processingRelations = relations(processing, ({ one, many }) => ({
+  harvest: one(harvests, {
+    fields: [processing.harvestId],
+    references: [harvests.id],
+    relationName: 'harvestProcessing',
+  }),
+  batch: one(batches, {
+    fields: [processing.batchId],
+    references: [batches.id],
+    relationName: 'batchProcessing',
+  }),
+  location: one(locations, {
+    fields: [processing.locationId],
+    references: [locations.id],
+    relationName: 'locationProcessing',
+  }),
+  createdBy: one(users, {
+    fields: [processing.createdById],
+    references: [users.id],
+    relationName: 'processingCreator',
+  }),
+  tasks: many(tasks, { relationName: 'processingTasks' }),
+  notes: many(notes, { relationName: 'processingNotes' }),
+}))
 
 // Zod Schemas
 export const insertProcessingSchema = createInsertSchema(processing).omit({

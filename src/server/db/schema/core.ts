@@ -173,8 +173,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdHarvests: many(harvests, { relationName: 'harvestCreator' }),
   createdProcessing: many(processing, { relationName: 'processingCreator' }),
   createdNotes: many(notes, { relationName: 'noteCreator' }),
-  // Assigned entities
-  assignedTasks: many(tasks, { relationName: 'assignedTasks' }),
 }))
 
 /**

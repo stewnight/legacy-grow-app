@@ -23,6 +23,7 @@ import { locations } from './locations'
 import { genetics } from './genetics'
 import { notes } from './notes'
 import { batches } from './batches'
+import { tasks } from './tasks'
 
 export const plants = createTable(
   'plant',
@@ -117,12 +118,13 @@ export const plantsRelations = relations(plants, ({ one, many }) => ({
     relationName: 'motherPlant',
   }),
   children: many(plants, { relationName: 'motherPlant' }),
-  notes: many(notes, { relationName: 'plantNotes' }),
   createdBy: one(users, {
     fields: [plants.createdById],
     references: [users.id],
     relationName: 'plantCreator',
   }),
+  tasks: many(tasks, { relationName: 'plantTasks' }),
+  notes: many(notes, { relationName: 'plantNotes' }),
 }))
 
 // Zod Schemas
