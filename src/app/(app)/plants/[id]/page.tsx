@@ -27,6 +27,7 @@ import {
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { PlantForm } from '../_components/plants-form'
 import { Badge } from '../../../../components/ui/badge'
+import TasksTab from '../../../../components/tabs/tasks'
 
 export default function PlantPage({
   params,
@@ -292,17 +293,7 @@ export default function PlantPage({
           </Card>
         </TabsContent>
 
-        <TabsContent value="tasks">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tasks</CardTitle>
-              <CardDescription>Tasks related to this plant</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Task list implementation here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <TasksTab entityId={plant.id} entityType="plant" />
 
         <TabsContent value="notes">
           <Card>

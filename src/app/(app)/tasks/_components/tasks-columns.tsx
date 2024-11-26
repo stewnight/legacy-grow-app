@@ -50,6 +50,27 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
     },
   },
   {
+    accessorKey: 'entityType',
+    header: 'Entity Type',
+    cell: ({ row }) => {
+      const entityType = row.getValue('entityType') as string
+      return <Badge variant="outline">{entityType}</Badge>
+    },
+  },
+  {
+    accessorKey: 'entityId',
+    header: 'Entity ID',
+    cell: ({ row }) => {
+      const entityId = row.getValue('entityId') as string
+      const entityType = row.getValue('entityType') as string
+      return (
+        <Link href={`/${entityType}s/${entityId}`} className="hover:underline">
+          {entityId}
+        </Link>
+      )
+    },
+  },
+  {
     accessorKey: 'priority',
     header: 'Priority',
     cell: ({ row }) => {

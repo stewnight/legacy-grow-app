@@ -37,7 +37,6 @@ import { useRouter } from 'next/navigation'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
-import { cn } from '~/lib/utils'
 import React from 'react'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
@@ -171,7 +170,7 @@ export function TaskForm({
             )}
           />
 
-          {form.watch('entityType') && !form.watch('entityId') && (
+          {form.watch('entityType') !== 'none' && (
             <FormField
               control={form.control}
               name="entityId"
@@ -350,7 +349,7 @@ export function TaskForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
@@ -373,7 +372,7 @@ export function TaskForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <Button type="submit" disabled={isCreating || isUpdating}>
           {mode === 'create' ? 'Create Task' : 'Update Task'}

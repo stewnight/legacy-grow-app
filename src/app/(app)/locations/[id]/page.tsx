@@ -18,6 +18,7 @@ import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { LocationForm } from '../_components/locations-form'
 import { Badge } from '../../../../components/ui/badge'
+import TasksTab from '../../../../components/tabs/tasks'
 
 export default function LocationPage({
   params,
@@ -165,6 +166,7 @@ export default function LocationPage({
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="environment">Environment</TabsTrigger>
           <TabsTrigger value="sensors">Sensors</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -296,6 +298,10 @@ export default function LocationPage({
               <p>Sensor list implementation here</p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="tasks">
+          <TasksTab entityId={location.id} entityType="location" />
         </TabsContent>
       </Tabs>
     </div>
