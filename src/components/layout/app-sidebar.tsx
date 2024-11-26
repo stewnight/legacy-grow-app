@@ -31,7 +31,6 @@ import {
   SidebarMenuItem,
 } from '~/components/ui/sidebar'
 import type { User } from 'next-auth'
-import { Schema } from 'zod'
 
 const data = {
   navMain: [
@@ -106,8 +105,9 @@ const data = {
     },
     {
       title: 'Schema',
-      url: '/schema',
+      url: 'https://github.com/stewnight/legacy-grow-app/blob/main/SCHEMA.md',
       icon: DatabaseIcon,
+      isExternal: true,
     },
   ],
 }

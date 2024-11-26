@@ -4,468 +4,436 @@
 
 ```mermaid
 classDiagram
-    %% Core Schema
-    class user {
-        id* uuid
-        name varchar
-        email* varchar
-        emailVerified timestamp
-        image varchar
-        role* user_role
-        active boolean
-        permissions json
-        preferences json
-        lastLogin timestamp
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class account {
-        userId* uuid
-        type* varchar
-        provider* varchar
-        providerAccountId* varchar
-        refresh_token text
-        access_token text
-        expires_at integer
-        token_type varchar
-        scope varchar
-        id_token text
-        session_state varchar
-    }
-
-    class session {
-        sessionToken* varchar
-        userId* uuid
-        expires* timestamp
-    }
-
-    class systemLog {
-        id* uuid
-        level* log_level
-        source* system_log_source
-        message* text
-        metadata json
-        createdAt* timestamp
-    }
-
-    %% Facility Schema
-    class facility {
-        id* uuid
-        name* varchar
-        type* varchar
-        address json
-        license json
-        capacity json
-        properties json
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class area {
-        id* uuid
-        name* varchar
-        type* varchar
-        facilityId* uuid
-        parentId uuid
-        dimensions json
-        capacity json
-        environment json
-        status varchar
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class location {
-        id* uuid
-        name* varchar
-        type* location_type
-        areaId* uuid
-        coordinates json
-        properties json
-        capacity integer
-        status varchar
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    %% Cultivation Schema
-    class genetic {
-        id* uuid
-        name* varchar
-        slug* varchar
-        type* genetic_type
-        breeder varchar
-        description text
-        floweringTime integer
-        thcPotential decimal
-        cbdPotential decimal
-        terpeneProfile json
-        growthCharacteristics json
-        lineage json
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt timestamp
-    }
-
-    class batch {
-        id* uuid
-        code* varchar
-        name* varchar
-        geneticId uuid
-        plantCount integer
-        notes text
-        status* batch_status
-        userId* uuid
-        source varchar
-        stage plant_stage
-        plantDate timestamp
-        healthStatus health_status
-        motherId uuid
-        generation integer
-        sex plant_sex
-        phenotype varchar
-        locationId uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class plant {
-        id* uuid
-        code* varchar
-        geneticId uuid
-        batchId uuid
-        source* plant_source
-        stage* plant_stage
-        plantDate date
-        harvestDate date
-        motherId uuid
-        generation integer
-        sex plant_sex
-        phenotype varchar
-        healthStatus* health_status
-        quarantine boolean
-        destroyReason varchar
-        locationId uuid
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt timestamp
-        status* varchar
-    }
-
-    %% Operations Schema
-    class sensor {
-        id* uuid
-        name* varchar
-        type* sensor_type
-        model varchar
-        locationId uuid
-        calibrationDate date
-        calibrationDue date
-        accuracy decimal
-        range json
-        metadata json
-        status varchar
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class sensorReading {
-        id* uuid
-        sensorId* uuid
-        value* decimal
-        unit* varchar
-        quality decimal
-        metadata json
-        timestamp* timestamp
-    }
-
-    class taskTemplate {
-        id* uuid
-        name* varchar
-        category* task_category
-        description text
-        instructions json
-        estimatedDuration integer
-        requiredSkills json
-        checklist json
-        metadata json
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class task {
-        id* uuid
-        templateId uuid
-        assignedToId uuid
-        status* task_status
-        priority* task_priority
-        dueDate timestamp
-        completedAt timestamp
-        notes text
-        checklist json
-        metadata json
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    %% Processing Schema
-    class harvest {
-        id* uuid
-        plantId uuid
-        batchId* varchar
-        date* date
-        wetWeight decimal
-        dryWeight decimal
-        trimWeight decimal
-        wasteWeight decimal
-        location varchar
-        quality harvest_quality
-        notes text
-        labResults json
-        status varchar
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class processing {
-        id* uuid
-        harvestId* uuid
-        type* varchar
-        startDate* timestamp
-        endDate timestamp
-        inputWeight decimal
-        outputWeight decimal
-        yield decimal
-        method varchar
-        equipment json
-        parameters json
-        notes text
-        labResults json
-        status varchar
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class complianceLog {
-        id* uuid
-        type* varchar
-        category* varchar
-        details json
-        attachments json
-        status varchar
-        verifiedById uuid
-        verifiedAt timestamp
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    class Note {
-        id* uuid
-        content* text
-        type* note_type
-        entityType* varchar
-        entityId* uuid
-        parentId uuid
-        metadata json
-        pinned boolean
-        archived boolean
-        createdById* uuid
-        createdAt* timestamp
-        updatedAt* timestamp
-    }
-
-    %% Core Relationships
-    user --> "*" account
-    user --> "*" session
-    user --> "*" plant
-    user --> "*" genetic
-    user --> "*" Note
-    user --> "*" task
-    user --> "*" sensor
-    user --> "*" area
-    user --> "*" harvest
-    user --> "*" processing
-
-    %% Facility Relationships
-    facility --> "*" area
-    area --> "*" location
-    area --> area
-    location --> "*" plant
-    location --> "*" sensor
-
-    %% Cultivation Relationships
-    genetic --> "*" plant
-    genetic --> "*" batch
-    batch --> "*" plant
-    plant --> plant: mother
-    plant --> location
-
-    %% Operations Relationships
-    sensor --> "*" sensorReading
-    taskTemplate --> "*" task
-    task --> user: assignedTo
-
-    %% Processing Relationships
-    harvest --> processing
-    plant --> harvest
-
-    %% Notes Relationships
-    Note --> Note: parent
-    Note --> user: createdBy
-
-    %% Compliance Relationships
-    complianceLog --> user: verifiedBy
+%% Core Schema
+class user {
+id uuid
+name varchar
+email varchar
+emailVerified timestamp
+image varchar
+role user_role
+active boolean
+permissions json
+preferences json
+lastLogin timestamp
+createdAt timestamp
+updatedAt timestamp
+}
+class account {
+id uuid
+userId uuid
+type varchar
+provider varchar
+providerAccountId varchar
+refresh_token text
+access_token text
+expires_at integer
+token_type varchar
+scope varchar
+id_token text
+session_state varchar
+}
+class session {
+sessionToken varchar
+userId uuid
+expires timestamp
+}
+class systemLog {
+id uuid
+level log_level
+source system_log_source
+message text
+metadata json
+createdAt timestamp
+}
+%% Facility Schema
+class building {
+id uuid
+name varchar
+type building_type
+address json
+properties json
+licenseNumber varchar
+description text
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class room {
+id uuid
+buildingId uuid
+parentId uuid
+name varchar
+type room_type
+properties json
+dimensions json
+capacity integer
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class location {
+id uuid
+roomId uuid
+name varchar
+type location_type
+coordinates json
+properties json
+dimensions json
+capacity integer
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+%% Cultivation Schema
+class genetic {
+id uuid
+name varchar
+type genetic_type
+breeder varchar
+description text
+properties json
+growProperties json
+lineage json
+inHouse boolean
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class batch {
+id uuid
+identifier varchar
+geneticId uuid
+locationId uuid
+stage plant_stage
+batchStatus batch_status
+startDate date
+expectedEndDate date
+actualEndDate date
+plantCount integer
+properties json
+metadata json
+notes text
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class plant {
+id uuid
+identifier varchar
+geneticId uuid
+locationId uuid
+batchId uuid
+motherId uuid
+source plant_source
+stage plant_stage
+sex plant_sex
+health health_status
+plantedDate date
+properties json
+metadata json
+notes text
+status varchar
+destroyedAt timestamp
+destroyReason text
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+%% Operations Schema
+class sensor {
+id uuid
+identifier varchar
+type sensor_type
+manufacturer varchar
+model varchar
+serialNumber varchar
+lastCalibration timestamp
+nextCalibration timestamp
+calibrationInterval numeric
+specifications json
+metadata json
+locationId uuid
+notes text
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class sensorReading {
+id uuid
+sensorId uuid
+readingValue numeric
+unit varchar
+timestamp timestamp
+metadata json
+createdAt timestamp
+updatedAt timestamp
+}
+class task {
+id uuid
+title varchar
+description text
+entityId uuid
+entityType task_entity_type
+assignedToId uuid
+category task_category
+priority task_priority
+taskStatus task_status
+status varchar
+dueDate timestamp
+startedAt timestamp
+completedAt timestamp
+properties json
+metadata json
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+%% Processing Schema
+class harvest {
+id uuid
+identifier varchar
+batchId uuid
+locationId uuid
+harvestDate date
+wetWeight numeric
+dryWeight numeric
+trimWeight numeric
+wasteWeight numeric
+quality harvest_quality
+harvestStatus batch_status
+properties json
+labResults json
+metadata json
+notes text
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class processing {
+id uuid
+identifier varchar
+harvestId uuid
+batchId uuid
+locationId uuid
+type varchar
+method varchar
+inputWeight numeric
+outputWeight numeric
+yieldPercentage numeric
+startedAt timestamp
+completedAt timestamp
+duration numeric
+processStatus batch_status
+quality harvest_quality
+properties json
+labResults json
+metadata json
+notes text
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+class Note {
+id uuid
+type note_type
+title varchar
+content text
+entityId uuid
+entityType varchar
+parentId uuid
+properties json
+metadata json
+status varchar
+createdById uuid
+createdAt timestamp
+updatedAt timestamp
+}
+%% Core Relationships
+user --> "" account
+user --> "" session
+user --> "" plant : created
+user --> "" genetic : created
+user --> "" Note : created
+user --> "" task : created
+user --> "" sensor : created
+user --> "" building : created
+user --> "" room : created
+user --> "" location : created
+user --> "" harvest : created
+user --> "" processing : created
+task --> user : assignedTo
+%% Facility Relationships
+building --> "" room
+room --> "" location
+room --> room : parent
+location --> "" plant
+location --> "" sensor
+location --> "" batch
+location --> "" harvest
+location --> "" processing
+%% Cultivation Relationships
+genetic --> "" plant
+genetic --> "" batch
+batch --> "" plant
+plant --> plant : mother
+plant --> location
+%% Operations Relationships
+sensor --> "" sensorReading
+task --> "" Note
+%% Processing Relationships
+harvest --> "" processing
+batch --> "" harvest
+%% Notes Relationships
+Note --> Note : parent
+Note --> user : createdBy
 ```
 
 ## Schema Groups
 
 ### Core Schema
 
-Core system functionality and authentication.
+Core user management and system functionality.
 
-#### User Management
+#### Users and Authentication
 
-- **user**: Central user entity with authentication, permissions, and preferences
-  - Supports role-based access control
-  - Tracks user preferences and activity
-  - Manages system-wide permissions
+- **user**: Core user entity
 
-#### Authentication
+  - Role-based access control
+  - JSON preferences and permissions
+  - Activity tracking
+  - OAuth integration
 
-- **account**: OAuth provider accounts linked to users
-- **session**: Active user sessions
-- **systemLog**: System-wide logging for auditing and monitoring
+- **account**: OAuth account connections
 
-### Facility Management
+  - Multiple provider support
+  - Token management
+  - Provider-specific data
 
-Hierarchical structure for physical space management.
+- **session**: User session management
+  - Token-based authentication
+  - Expiration tracking
 
-#### Facility (Top Level)
+#### System
 
-- **facility**: Physical cultivation site or building
-  - Supports multiple facility types (indoor, outdoor, greenhouse)
-  - Tracks licensing and compliance information
-  - Manages capacity and resource planning
-  - Properties include:
-    - Climate control settings
-    - Security configurations
-    - Utility management
-    - Address with GPS coordinates
+- **systemLog**: System-wide logging
+  - Structured logging levels
+  - Source categorization
+  - JSON metadata support
 
-#### Area (Middle Level)
+### Facility Schema
 
-- **area**: Distinct spaces within facilities
-  - Examples: Veg Room, Flower Room, Mother Room
-  - Supports nested areas for complex layouts
-  - Tracks environmental requirements
-  - Manages:
-    - Physical dimensions
-    - Plant capacity
-    - Environmental controls
-    - Resource allocation
+Physical facility and space management.
 
-#### Location (Bottom Level)
+#### Buildings
 
-- **location**: Specific positions within areas
-  - Precise plant placement tracking
-  - Environmental monitoring points
+- **building**: Physical structures
+  - Building categorization
+  - Address information
+  - License management
+  - Environmental controls
+  - Security features
+
+#### Rooms
+
+- **room**: Spaces within buildings
+  - Hierarchical organization (parent/child)
+  - Environmental specifications
+  - Dimensional tracking
   - Capacity management
-  - Supports:
-    - 3D positioning
-    - Sensor placement
-    - Plant tracking
-    - Resource monitoring
+
+#### Locations
+
+- **location**: Specific positions
+  - Precise coordinate tracking
+  - Equipment placement
+  - Resource allocation
+  - Capacity monitoring
 
 ### Cultivation Schema
 
-Plant and genetic management.
+Plant cultivation and genetics management.
 
 #### Genetics
 
-- **genetic**: Plant strain and breeding information
-  - Tracks genetic lineage
-  - Manages strain characteristics
-  - Records growth patterns
-  - Monitors potency data
+- **genetic**: Strain/variety management
+  - Detailed characteristics
+  - Growth specifications
+  - Lineage tracking
+  - Performance metrics
 
 #### Batches
 
-- **batch**: Groups of plants from same genetic
-  - Tracks growth cycles
-  - Manages plant counts
-  - Records cultivation methods
-  - Monitors batch health
+- **batch**: Group cultivation tracking
+  - Growth stage management
+  - Environmental requirements
+  - Resource allocation
+  - Yield projections
 
 #### Plants
 
 - **plant**: Individual plant tracking
-  - Complete lifecycle management
+  - Lifecycle management
   - Health monitoring
-  - Location tracking
-  - Genetic lineage
+  - Genealogy tracking
+  - Growth metrics
 
 ### Operations Schema
 
 Day-to-day operational management.
 
-#### Environmental Monitoring
+#### Sensors
 
-- **sensor**: Environmental monitoring devices
-  - Tracks sensor calibration
-  - Manages sensor placement
-  - Monitors sensor health
-- **sensorReading**: Environmental data collection
-  - Records measurements
-  - Tracks data quality
-  - Stores metadata
+- **sensor**: Environmental monitoring
 
-#### Task Management
+  - Multiple sensor types
+  - Calibration tracking
+  - Specification management
+  - Maintenance scheduling
 
-- **taskTemplate**: Reusable task definitions
-  - Standard operating procedures
-  - Checklist templates
-  - Resource requirements
-- **task**: Assigned work items
-  - Staff assignments
-  - Progress tracking
-  - Completion verification
+- **sensorReading**: Sensor data collection
+  - Time-series data
+  - Measurement accuracy
+  - Environmental context
+
+#### Tasks
+
+- **task**: Work management
+  - Multi-entity association
+  - Priority and status tracking
+  - Assignment management
+  - Checklist functionality
+  - Scheduling and duration tracking
 
 ### Processing Schema
 
 Post-harvest operations and compliance.
 
-#### Harvest Management
+#### Harvests
 
 - **harvest**: Harvest tracking
   - Weight measurements
-  - Quality assessment
-  - Lab testing results
-  - Location tracking
+  - Quality grading
+  - Lab testing integration
+  - Waste tracking
+  - Yield analysis
 
-#### Processing Operations
+#### Processing
 
 - **processing**: Post-harvest processing
-  - Processing methods
-  - Yield tracking
-  - Equipment usage
+  - Multiple process types
+  - Input/output tracking
+  - Equipment utilization
   - Quality control
-
-#### Compliance
-
-- **complianceLog**: Regulatory compliance
-  - Event documentation
-  - Verification tracking
-  - Attachment management
+  - Lab result integration
 
 ### Notes Schema
 
@@ -474,47 +442,11 @@ Documentation and annotation system.
 #### Notes
 
 - **Note**: Multi-purpose annotation system
-  - Supports multiple content types
-  - Hierarchical organization
+  - Multiple content types
   - Entity association
-  - Rich metadata
-
-## Relationships and Dependencies
-
-### User Relationships
-
-- Users create and manage all major entities
-- Authentication tied to user accounts
-- Task assignments link to users
-- Compliance verification requires user tracking
-
-### Facility Hierarchy
-
-- Facilities contain areas
-- Areas contain locations
-- Areas can have sub-areas
-- Locations hold plants and sensors
-
-### Cultivation Connections
-
-- Genetics link to plants and batches
-- Plants belong to batches
-- Plants track mother plants
-- Plants assigned to locations
-
-### Operational Links
-
-- Sensors placed in locations
-- Tasks linked to templates
-- Tasks assigned to users
-- Readings linked to sensors
-
-### Processing Chain
-
-- Harvests linked to plants
-- Processing linked to harvests
-- Compliance logs track all operations
-- Notes can reference any entity
+  - Hierarchical organization
+  - Property customization
+  - Metadata tracking
 
 ## Best Practices
 
@@ -526,3 +458,41 @@ Documentation and annotation system.
 6. Store structured metadata in JSON fields
 7. Implement proper cascading deletes
 8. Use enum types for constrained values
+9. Implement proper validation at schema level
+10. Maintain consistent naming conventions
+
+## Common Patterns
+
+1. **Tracking Fields**
+
+   - `createdById`, `createdAt`, `updatedAt` on all tables
+   - `status` enum for entity state management
+   - `metadata` JSON for flexible additional data
+
+2. **Location Hierarchy**
+
+   - Building → Room → Location
+   - Support for sub-rooms through parent/child relationships
+
+3. **Entity References**
+
+   - UUID primary keys
+   - Consistent foreign key patterns
+   - Optional parent/child relationships
+
+4. **Property Storage**
+
+   - Structured JSON for flexible properties
+   - Typed metadata fields
+   - Standardized measurement units
+
+5. **Status Management**
+
+   - Entity-specific status enums
+   - Active/inactive flags
+   - Archival support
+
+6. **Measurement Tracking**
+   - Precise numeric fields
+   - Unit specification
+   - Timestamp tracking
