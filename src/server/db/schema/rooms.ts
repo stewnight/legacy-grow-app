@@ -7,6 +7,7 @@ import {
   json,
   uuid,
   AnyPgColumn,
+  decimal,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
@@ -39,6 +40,7 @@ export const rooms = createTable(
       width: number
       height?: number
       unit: 'm' | 'ft'
+      usableSqDimensions?: number
     }>(),
     capacity: integer('capacity').default(0),
     status: statusEnum('status').default('active').notNull(),

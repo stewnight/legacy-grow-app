@@ -12,7 +12,7 @@ import {
 } from '~/components/ui/card'
 import { notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Skeleton } from '~/components/ui/skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import {
   MapPin,
@@ -38,9 +38,8 @@ export default function RoomPage({
     refetchOnWindowFocus: false,
   })
 
-  const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A'
-    return format(new Date(date), 'PP')
+  if (!room && !isLoading) {
+    return notFound()
   }
 
   if (isLoading) {
@@ -72,17 +71,18 @@ export default function RoomPage({
     )
   }
 
-  if (!room) {
-    return notFound()
+  const formatDate = (date: Date | string | null): string => {
+    if (!date) return 'N/A'
+    return format(new Date(date), 'PP')
   }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{room.name}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{room?.name}</h2>
           <p className="text-muted-foreground">
-            {room.building?.name ? (
+            {room?.building?.name ? (
               <>
                 In{' '}
                 <Link
@@ -109,12 +109,12 @@ export default function RoomPage({
             <Box className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{room.capacity ?? 0}</div>
+            <div className="text-2xl font-bold">{room?.capacity ?? 0}</div>
             <p className="text-xs text-muted-foreground">Total capacity</p>
           </CardContent>
         </Card>
 
-        {room.properties?.temperature && (
+        {room?.properties?.temperature && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -124,15 +124,15 @@ export default function RoomPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {room.properties.temperature.min}° -{' '}
-                {room.properties.temperature.max}°
+                {room?.properties?.temperature.min}° -{' '}
+                {room?.properties?.temperature.max}°
               </div>
               <p className="text-xs text-muted-foreground">Target range</p>
             </CardContent>
           </Card>
         )}
 
-        {room.properties?.humidity && (
+        {room?.properties?.humidity && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -142,8 +142,8 @@ export default function RoomPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {room.properties.humidity.min}% - {room.properties.humidity.max}
-                %
+                {room?.properties?.humidity.min}% -{' '}
+                {room?.properties?.humidity.max}%
               </div>
               <p className="text-xs text-muted-foreground">Target range</p>
             </CardContent>
@@ -170,66 +170,89 @@ export default function RoomPage({
                     <dt className="text-sm font-medium text-muted-foreground">
                       Type
                     </dt>
-                    <dd className="text-sm capitalize">{room.type}</dd>
+                    <dd className="text-sm capitalize">{room?.type}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-muted-foreground">
                       Status
                     </dt>
-                    <dd className="text-sm capitalize">{room.status}</dd>
+                    <dd className="text-sm capitalize">{room?.status}</dd>
                   </div>
-                  {room.dimensions && (
-                    <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Dimensions
-                      </dt>
-                      <dd className="text-sm">
-                        {room.dimensions.length} x {room.dimensions.width}
-                        {room.dimensions.height
-                          ? ` x ${room.dimensions.height}`
-                          : ''}{' '}
-                        {room.dimensions.unit}
-                      </dd>
-                    </div>
+                  {room?.dimensions && (
+                    <>
+                      <div>
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Dimensions
+                        </dt>
+                        <dd className="text-sm">
+                          {room?.dimensions.length} x {room?.dimensions.width}
+                          {room?.dimensions.height
+                            ? ` x ${room?.dimensions.height}`
+                            : ''}{' '}
+                          {room?.dimensions.unit}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Total Area
+                        </dt>
+                        <dd className="text-sm">
+                          {room?.dimensions.length * room?.dimensions.width}{' '}
+                          {room?.dimensions.unit}²
+                        </dd>
+                      </div>
+                      {room?.dimensions.usableSqDimensions && (
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">
+                            Usable Area
+                          </dt>
+                          <dd className="text-sm">
+                            {room?.dimensions.usableSqDimensions}{' '}
+                            {room?.dimensions.unit}²
+                          </dd>
+                        </div>
+                      )}
+                    </>
                   )}
                   <div>
                     <dt className="text-sm font-medium text-muted-foreground">
                       Created
                     </dt>
                     <dd className="text-sm">
-                      {formatDate(room.createdAt)} by {room.createdBy?.name}
+                      {formatDate(room?.createdAt ?? null)} by{' '}
+                      {room?.createdBy?.name}
                     </dd>
                   </div>
                 </dl>
               </CardContent>
             </Card>
 
-            {room.properties && (
+            {room?.properties && (
               <Card>
                 <CardHeader>
                   <CardTitle>Environmental Settings</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <dl className="space-y-2">
-                    {room.properties.light && (
+                    {room?.properties.light && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           Lighting
                         </dt>
                         <dd className="text-sm">
-                          {room.properties.light.type} -{' '}
-                          {room.properties.light.intensity}%
+                          {room?.properties.light.type} -{' '}
+                          {room?.properties.light.intensity}%
                         </dd>
                       </div>
                     )}
-                    {room.properties.co2 && (
+                    {room?.properties.co2 && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           CO2 Range
                         </dt>
                         <dd className="text-sm">
-                          {room.properties.co2.min} - {room.properties.co2.max}{' '}
-                          ppm
+                          {room?.properties.co2.min} -{' '}
+                          {room?.properties.co2.max} ppm
                         </dd>
                       </div>
                     )}
@@ -249,9 +272,9 @@ export default function RoomPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {room.children && room.children.length > 0 ? (
+              {room?.children && room?.children.length > 0 ? (
                 <div className="space-y-4">
-                  {room.children.map((child) => (
+                  {room?.children.map((child) => (
                     <div
                       key={child.id}
                       className="flex items-center justify-between border rounded p-4"
