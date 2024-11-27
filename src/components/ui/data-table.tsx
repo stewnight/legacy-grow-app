@@ -71,7 +71,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="w-full">
+    <div className="max-w-full">
       <div className="flex items-center gap-4 py-4">
         <Input
           placeholder="Filter..."
@@ -118,7 +118,7 @@ export function DataTable<TData, TValue>({
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className="text-nowrap">
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -139,7 +139,7 @@ export function DataTable<TData, TValue>({
                     data-state={row.getIsSelected() && 'selected'}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="text-nowrap">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

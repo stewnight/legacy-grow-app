@@ -34,7 +34,7 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
       return (
         <Link
           href={`/tasks/${task.id}`}
-          className="font-medium hover:underline"
+          className="font-medium hover:underline text-nowrap"
         >
           {task.title}
         </Link>
