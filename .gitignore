@@ -20,7 +20,7 @@ next-env.d.ts
 
 # production
 /build
-
+/public/storybook
 # misc
 .DS_Store
 *.pem

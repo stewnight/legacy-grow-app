@@ -17,6 +17,7 @@ import {
   ListCheck,
   Thermometer,
   Wheat,
+  Code2,
 } from 'lucide-react'
 import { NavMain } from '~/components/layout/nav-main'
 import { NavSecondary } from '~/components/layout/nav-secondary'
@@ -97,6 +98,12 @@ const data = {
     },
   ],
   navSecondary: [
+    {
+      title: 'Storybook',
+      url: '/storybook/index.html',
+      icon: Code2,
+      isExternal: true,
+    },
     {
       title: 'Github',
       url: 'https://github.com/stewnight/legacy-grow-app',
