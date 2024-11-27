@@ -1,0 +1,2 @@
+ALTER TABLE "legacy-grow-app_room" ALTER COLUMN "usable_sq_dimensions" SET DATA TYPE numeric;--> statement-breakpoint
+ALTER TABLE "legacy-grow-app_room" ALTER COLUMN "usable_sq_dimensions" DROP DEFAULT;

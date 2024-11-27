@@ -27,6 +27,9 @@ import { type AppRouter } from '~/server/api/root'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
+import React from 'react'
+import { RefreshCw } from 'lucide-react'
+import { type UseFormReturn } from 'react-hook-form'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type RoomFormValues = z.infer<typeof insertRoomSchema>
@@ -65,6 +68,7 @@ export function RoomForm({
         width: 10,
         height: 8,
         unit: 'm',
+        usableSqDimensions: undefined,
       },
     },
   })
@@ -370,6 +374,51 @@ export function RoomForm({
                   <SelectItem value="ft">Feet</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dimensions.usableSqDimensions"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                Usable Sq Dimensions
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4"
+                  onClick={() => {
+                    const length = form.getValues('dimensions.length')
+                    const width = form.getValues('dimensions.width')
+                    const usableSq =
+                      length && width ? Number(length) * Number(width) : null
+                    form.setValue('dimensions.usableSqDimensions', usableSq)
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  value={
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
+                      ? field.value
+                      : ''
+                  }
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
+                  }
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

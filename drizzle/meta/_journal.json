@@ -15,6 +15,27 @@
       "when": 1732611327274,
       "tag": "0001_shocking_mindworm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1732669441762,
+      "tag": "0002_white_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1732672324442,
+      "tag": "0003_unique_gwen_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1732681741847,
+      "tag": "0004_futuristic_talon",
+      "breakpoints": true
     }
   ]
 }

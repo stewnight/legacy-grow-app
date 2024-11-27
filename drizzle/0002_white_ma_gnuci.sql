@@ -1,0 +1,1 @@
+ALTER TABLE "legacy-grow-app_room" ADD COLUMN "usable_sq_dimensions" integer DEFAULT 0;

@@ -1,0 +1,1 @@
+ALTER TABLE "legacy-grow-app_room" DROP COLUMN IF EXISTS "usable_sq_dimensions";
