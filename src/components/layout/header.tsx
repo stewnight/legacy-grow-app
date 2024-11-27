@@ -10,7 +10,6 @@ export default async function Header() {
       <div className="flex w-full items-center gap-4 px-4">
         {session ? <SidebarTrigger className="-ml-1" /> : null}
         <div className="flex flex-col gap-1">
-          {/* <h1 className="text-xl font-bold">Legacy Grow App</h1> */}
           <CustomBreadcrumbs />
         </div>
       </div>

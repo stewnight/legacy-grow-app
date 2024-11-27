@@ -18,7 +18,7 @@ import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { LocationForm } from '../_components/locations-form'
 import { Badge } from '../../../../components/ui/badge'
-import TasksTab from '../../../../components/tabs/tasks'
+import TasksTab from '../../../../components/tasks/tabs'
 
 export default function LocationPage({
   params,

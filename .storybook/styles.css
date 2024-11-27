@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('https://vercel.com/font/geist-sans/Geist-Regular.woff2')
+    format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-geist-sans {
+  font-family: 'Geist Sans', system-ui, sans-serif;
+}

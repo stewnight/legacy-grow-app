@@ -27,7 +27,7 @@ import {
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { PlantForm } from '../_components/plants-form'
 import { Badge } from '../../../../components/ui/badge'
-import TasksTab from '../../../../components/tabs/tasks'
+import TasksTab from '../../../../components/tasks/tabs'
 
 export default function PlantPage({
   params,

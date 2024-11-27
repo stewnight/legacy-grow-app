@@ -101,3 +101,21 @@ pnpm db:push
 # Start the development server
 pnpm dev
 ```
+
+## Storybook
+
+This project uses Storybook for component development and documentation.
+
+To run Storybook locally:
+
+```bash
+pnpm storybook
+```
+
+To build Storybook for deployment:
+
+```bash
+pnpm build-storybook
+```
+
+Visit [Storybook](https://storybook.js.org/) for more information on writing and organizing stories.
