@@ -52,7 +52,7 @@ export function RoomForm({
       capacity: defaultValues?.capacity || 10,
       status: defaultValues?.status || statusEnum.enumValues[0],
       buildingId: defaultValues?.buildingId || '',
-      parentId: defaultValues?.parentId || '',
+      parentId: defaultValues?.parentId || undefined,
       type: defaultValues?.type || undefined,
       properties: defaultValues?.properties || {
         temperature: { min: 65, max: 80 },
@@ -214,8 +214,10 @@ export function RoomForm({
             <FormItem>
               <FormLabel>Lung Room</FormLabel>
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value || undefined}
+                onValueChange={(value) =>
+                  field.onChange(value === 'undefined' ? undefined : value)
+                }
+                defaultValue={field.value || 'undefined'}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -223,7 +225,7 @@ export function RoomForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={'null'}>None</SelectItem>
+                  <SelectItem value={'undefined'}>None</SelectItem>
                   {parentRooms?.items.map((room) => (
                     <SelectItem key={room.id} value={room.id}>
                       {room.name}
