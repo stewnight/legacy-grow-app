@@ -1,6 +1,0 @@
-name,type,fields,description
-Daily_Check,log,"temp,rh,vpd,ec,ph","Daily environmental check"
-Clone_Take,log,"quantity,strain,date","Clone propagation record"
-Feeding_Log,log,"recipe,ec,ph,volume","Nutrient application record"
-IPM_Scout,log,"location,pest_type,severity","Pest monitoring record"
-Harvest_Weight,log,"wet_weight,dry_weight,batch","Harvest weight record"

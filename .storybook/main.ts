@@ -15,7 +15,6 @@ const config: StorybookConfig = {
       nextConfigPath: '../next.config.js',
     },
   },
-  staticDirs: ['../public'],
   docs: {
     autodocs: true,
   },

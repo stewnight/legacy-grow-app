@@ -19,20 +19,30 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
+  // Handle Storybook paths
+  if (request.nextUrl.pathname === '/storybook') {
+    return NextResponse.rewrite(new URL('/storybook/index.html', request.url))
+  }
+
+  if (
+    request.nextUrl.pathname.startsWith('/storybook/') ||
+    request.nextUrl.pathname.startsWith('/sb-')
+  ) {
+    const newPath = request.nextUrl.pathname
+      .replace('/storybook/', '/storybook/')
+      .replace('/sb-', '/storybook/sb-')
+    return NextResponse.rewrite(new URL(newPath, request.url))
+  }
+
   return NextResponse.next()
 }
 
 // Configure which routes should be processed by this middleware
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api/auth/* (authentication routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     '/((?!api/auth|_next/static|_next/image|favicon.svg|public).*)',
+    '/storybook',
+    '/storybook/:path*',
+    '/sb-:path*',
   ],
 }
