@@ -212,14 +212,14 @@ export function RoomForm({
           name="parentId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Parent Room</FormLabel>
+              <FormLabel>Lung Room</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value || undefined}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select parent room" />
+                    <SelectValue placeholder="Select lung room" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

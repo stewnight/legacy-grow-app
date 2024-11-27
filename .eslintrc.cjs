@@ -5,12 +5,7 @@ const config = {
     project: true,
   },
   plugins: ['@typescript-eslint', 'drizzle'],
-  extends: [
-    'next/core-web-vitals',
-    'eslint-config-prettier',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked',
-  ],
+  extends: ['next/core-web-vitals', 'eslint-config-prettier', 'plugin:@typescript-eslint/recommended-type-checked', 'plugin:@typescript-eslint/stylistic-type-checked', 'plugin:storybook/recommended'],
   rules: {
     '@typescript-eslint/array-type': 'off',
     '@typescript-eslint/consistent-type-definitions': 'off',

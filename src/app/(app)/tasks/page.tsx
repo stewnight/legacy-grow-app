@@ -51,7 +51,7 @@ export default async function TasksPage({
   }))
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4  pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Tasks</h2>
         <AppSheet mode="create" entity="task">
