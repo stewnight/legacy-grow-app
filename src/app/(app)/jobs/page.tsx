@@ -14,6 +14,15 @@ import {
   type JobStatus,
 } from '~/server/db/schema/enums'
 import { JobWithRelations } from '../../../server/db/schema'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '../../../components/ui/tabs'
+import { CalendarView } from '../../../components/calendar/calendar-view'
+import { CalendarIcon } from 'lucide-react'
+import { TableIcon } from 'lucide-react'
 
 export default async function JobsPage({
   searchParams,
@@ -59,11 +68,26 @@ export default async function JobsPage({
         </AppSheet>
       </div>
       <div className="h-full">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          {jobs && (
-            <DataTable columns={columns} data={jobs} filterColumn="title" />
-          )}
-        </Suspense>
+        <Tabs defaultValue="table">
+          <TabsList>
+            <TabsTrigger value="table">
+              <TableIcon className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="calendar">
+              <CalendarIcon className="h-4 w-4" />
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="table">
+            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+              {jobs && (
+                <DataTable columns={columns} data={jobs} filterColumn="title" />
+              )}
+            </Suspense>
+          </TabsContent>
+          <TabsContent value="calendar">
+            <CalendarView />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
