@@ -8,7 +8,7 @@ import { locationRouter } from './routers/location'
 import { roomRouter } from './routers/room'
 import { buildingRouter } from './routers/building'
 import { sensorRouter } from './routers/sensor'
-import { taskRouter } from './routers/task'
+import { jobRouter } from './routers/job'
 import { harvestRouter } from './routers/harvest'
 import { processingRouter } from './routers/processing'
 import { userRouter } from './routers/user'
@@ -23,7 +23,7 @@ export const appRouter = createTRPCRouter({
   room: roomRouter,
   building: buildingRouter,
   sensor: sensorRouter,
-  task: taskRouter,
+  job: jobRouter,
   harvest: harvestRouter,
   processing: processingRouter,
   user: userRouter,

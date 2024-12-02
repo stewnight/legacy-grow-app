@@ -1,61 +1,59 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { tasks, insertTaskSchema } from '~/server/db/schema'
+import { jobs, insertJobSchema } from '~/server/db/schema'
 import { eq, desc, like, and, SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import {
-  taskStatusEnum,
-  taskPriorityEnum,
-  taskCategoryEnum,
+  jobStatusEnum,
+  jobPriorityEnum,
+  jobCategoryEnum,
   statusEnum,
-  taskEntityTypeEnum,
-  type TaskEntityType,
+  jobEntityTypeEnum,
+  type JobEntityType,
 } from '~/server/db/schema/enums'
 
 // Schema for filters using the enum directly
-const taskFiltersSchema = z.object({
-  taskStatus: z.enum(taskStatusEnum.enumValues).optional(),
-  entityType: z.enum(taskEntityTypeEnum.enumValues).optional(),
-  priority: z.enum(taskPriorityEnum.enumValues).optional(),
-  category: z.enum(taskCategoryEnum.enumValues).optional(),
+const jobFiltersSchema = z.object({
+  jobStatus: z.enum(jobStatusEnum.enumValues).optional(),
+  entityType: z.enum(jobEntityTypeEnum.enumValues).optional(),
+  priority: z.enum(jobPriorityEnum.enumValues).optional(),
+  category: z.enum(jobCategoryEnum.enumValues).optional(),
   assignedToId: z.string().uuid().optional(),
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
 })
 
-export const taskRouter = createTRPCRouter({
+export const jobRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(10),
         cursor: z.number().nullish(),
-        filters: taskFiltersSchema.optional(),
+        filters: jobFiltersSchema.optional(),
       })
     )
     .query(async ({ ctx, input }) => {
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.taskStatus
-          ? eq(tasks.taskStatus, filters.taskStatus)
-          : undefined,
-        filters?.priority ? eq(tasks.priority, filters.priority) : undefined,
-        filters?.category ? eq(tasks.category, filters.category) : undefined,
+        filters?.jobStatus ? eq(jobs.jobStatus, filters.jobStatus) : undefined,
+        filters?.priority ? eq(jobs.priority, filters.priority) : undefined,
+        filters?.category ? eq(jobs.category, filters.category) : undefined,
         filters?.assignedToId
-          ? eq(tasks.assignedToId, filters.assignedToId)
+          ? eq(jobs.assignedToId, filters.assignedToId)
           : undefined,
-        filters?.status ? eq(tasks.status, filters.status) : undefined,
-        filters?.search ? like(tasks.title, `%${filters.search}%`) : undefined,
+        filters?.status ? eq(jobs.status, filters.status) : undefined,
+        filters?.search ? like(jobs.title, `%${filters.search}%`) : undefined,
         filters?.entityType
-          ? eq(tasks.entityType, filters.entityType)
+          ? eq(jobs.entityType, filters.entityType)
           : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
-      const items = await ctx.db.query.tasks.findMany({
+      const items = await ctx.db.query.jobs.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(tasks.createdAt)],
+        orderBy: [desc(jobs.createdAt)],
         with: {
           assignedTo: {
             columns: {
@@ -85,8 +83,8 @@ export const taskRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
-      const task = await ctx.db.query.tasks.findFirst({
-        where: eq(tasks.id, input),
+      const job = await ctx.db.query.jobs.findFirst({
+        where: eq(jobs.id, input),
         with: {
           assignedTo: {
             columns: {
@@ -113,80 +111,80 @@ export const taskRouter = createTRPCRouter({
         },
       })
 
-      if (!task) {
+      if (!job) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Task not found',
+          message: 'Job not found',
         })
       }
 
-      return task
+      return job
     }),
 
   create: protectedProcedure
-    .input(insertTaskSchema)
+    .input(insertJobSchema)
     .mutation(async ({ ctx, input }) => {
-      const [task] = await ctx.db
-        .insert(tasks)
+      const [job] = await ctx.db
+        .insert(jobs)
         .values({
           ...input,
           createdById: ctx.session.user.id,
           properties: input.properties ?? {},
           metadata: input.metadata ?? {},
-        } as typeof tasks.$inferInsert)
+        } as typeof jobs.$inferInsert)
         .returning()
 
-      if (!task) {
+      if (!job) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create task',
+          message: 'Failed to create job',
         })
       }
 
-      return task
+      return job
     }),
 
   update: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertTaskSchema.partial(),
+        data: insertJobSchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const [task] = await ctx.db
-        .update(tasks)
+      const [job] = await ctx.db
+        .update(jobs)
         .set({
           ...input.data,
           updatedAt: new Date(),
           properties: input.data.properties ?? undefined,
           metadata: input.data.metadata ?? undefined,
-        } as Partial<typeof tasks.$inferInsert>)
-        .where(eq(tasks.id, input.id))
+        } as Partial<typeof jobs.$inferInsert>)
+        .where(eq(jobs.id, input.id))
         .returning()
 
-      if (!task) {
+      if (!job) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Task not found',
+          message: 'Job not found',
         })
       }
 
-      return task
+      return job
     }),
 
   delete: protectedProcedure
     .input(z.string().uuid())
     .mutation(async ({ ctx, input }) => {
       const [deleted] = await ctx.db
-        .delete(tasks)
-        .where(eq(tasks.id, input))
+        .delete(jobs)
+        .where(eq(jobs.id, input))
         .returning()
 
       if (!deleted) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Task not found',
+          message: 'Job not found',
         })
       }
 
