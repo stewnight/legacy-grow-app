@@ -29,11 +29,9 @@ export function AppSheet<T>({
 }: AppSheetProps<T>) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      {trigger ?? (
-        <SheetTrigger asChild>
-          <Button>{mode === 'edit' ? 'Edit' : 'Create'}</Button>
-        </SheetTrigger>
-      )}
+      <SheetTrigger asChild>
+        {trigger ?? <Button>{mode === 'edit' ? 'Edit' : 'Create'}</Button>}
+      </SheetTrigger>
       <SheetContent className="w-full p-0 sm:max-w-2xl max-h-[calc(100vh)]">
         <SheetHeader className="p-4 pb-0">
           <SheetTitle>

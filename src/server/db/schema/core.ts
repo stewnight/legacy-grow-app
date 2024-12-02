@@ -169,6 +169,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdGenetics: many(genetics, { relationName: 'geneticCreator' }),
   createdBatches: many(batches, { relationName: 'batchCreator' }),
   createdJobs: many(jobs, { relationName: 'jobCreator' }),
+  assignedJobs: many(jobs, { relationName: 'jobAssignee' }),
   createdSensors: many(sensors, { relationName: 'sensorCreator' }),
   createdHarvests: many(harvests, { relationName: 'harvestCreator' }),
   createdProcessing: many(processing, { relationName: 'processingCreator' }),
