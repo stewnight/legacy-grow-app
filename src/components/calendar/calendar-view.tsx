@@ -68,8 +68,8 @@ export function CalendarView({
       }
 
       if (mode === 'week') {
-        const start = startOfWeek(currentDate)
-        const end = endOfWeek(currentDate)
+        const start = startOfWeek(currentDate, { weekStartsOn: 1 })
+        const end = endOfWeek(currentDate, { weekStartsOn: 1 })
         return dueDate >= start && dueDate <= end
       }
 
@@ -80,10 +80,18 @@ export function CalendarView({
     }) as JobWithRelations[]
   }, [jobsData, currentDate, mode])
 
+  const weekDays = React.useMemo(() => {
+    const start = startOfWeek(currentDate, { weekStartsOn: 1 })
+    const end = endOfWeek(currentDate, { weekStartsOn: 1 })
+    return eachDayOfInterval({ start, end })
+  }, [currentDate])
+
   const monthDays = React.useMemo(() => {
     const start = startOfMonth(currentDate)
     const end = endOfMonth(currentDate)
-    return eachDayOfInterval({ start, end })
+    const firstDay = startOfWeek(start, { weekStartsOn: 1 })
+    const lastDay = endOfWeek(end, { weekStartsOn: 1 })
+    return eachDayOfInterval({ start: firstDay, end: lastDay })
   }, [currentDate])
 
   return (
@@ -99,7 +107,7 @@ export function CalendarView({
         {mode === 'month' && (
           <div className="min-w-[900px] p-3">
             <div className="grid grid-cols-7 text-muted-foreground">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                 <div
                   key={day}
                   className="h-10 text-sm font-medium text-center p-2 border-b"
@@ -142,6 +150,7 @@ export function CalendarView({
                             key={job.id}
                             job={job as JobWithRelations}
                             onClick={onEventClick}
+                            isMonthView
                           />
                         ))}
                         {dayJobs.length > 2 && (

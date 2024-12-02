@@ -11,9 +11,10 @@ import { api } from '~/trpc/react'
 
 interface JobCardProps {
   job: JobWithRelations
+  isMonthView?: boolean
 }
 
-export function JobCard({ job }: JobCardProps) {
+export function JobCard({ job, isMonthView = false }: JobCardProps) {
   const { data: assignedTo } = api.user.getById.useQuery(
     { id: job.assignedToId ?? '' },
     { enabled: !!job.assignedToId }
@@ -54,15 +55,20 @@ export function JobCard({ job }: JobCardProps) {
           getPriorityColor(job.priority)
         )}
       >
-        <div className="font-medium truncate">{job.title}</div>
+        <div className="font-medium truncate text-[13px]">{job.title}</div>
         <div className="flex flex-wrap gap-1 items-center justify-between mt-1">
-          <Badge variant="outline" className="text-xs">
-            {job.category}
-          </Badge>
-          <Badge variant={getStatusVariant(job.jobStatus)} className="text-xs">
+          {!isMonthView && (
+            <Badge variant="outline" className="text-[10px]">
+              {job.category}
+            </Badge>
+          )}
+          <Badge
+            variant={getStatusVariant(job.jobStatus)}
+            className="text-[10px]"
+          >
             {job.jobStatus}
           </Badge>
-          <Avatar>
+          <Avatar className={cn('h-5 w-5', isMonthView && 'h-4 w-4')}>
             <AvatarImage src={assignedTo?.image ?? ''} />
             <AvatarFallback>{assignedTo?.name?.[0] ?? 'U'}</AvatarFallback>
           </Avatar>
