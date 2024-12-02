@@ -29,7 +29,6 @@ export default async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/sb-')
   ) {
     const newPath = request.nextUrl.pathname
-      .replace('/storybook/', '/storybook/')
       .replace('/sb-', '/storybook/sb-')
     return NextResponse.rewrite(new URL(newPath, request.url))
   }
