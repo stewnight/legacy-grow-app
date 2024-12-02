@@ -3,6 +3,11 @@ import { format, isSameMonth, isToday } from 'date-fns'
 import { cn } from '~/lib/utils'
 import { type JobWithRelations } from '~/server/db/schema'
 import { JobCard } from '../job-card'
+import { AppSheet } from '../../layout/app-sheet'
+import { JobForm } from '../../../app/(app)/jobs/_components/jobs-form'
+import { SheetTrigger } from '../../ui/sheet'
+import { Button } from '../../ui/button'
+import { PlusIcon } from 'lucide-react'
 
 interface MonthViewProps {
   currentDate: Date
@@ -12,12 +17,12 @@ interface MonthViewProps {
 
 export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
   return (
-    <div className="min-w-[900px]">
+    <div>
       <div className="grid grid-cols-7 text-muted-foreground">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
           <div
             key={day}
-            className="h-8 text-xs font-medium text-center p-0.5 border-b"
+            className="text-xs font-medium text-center p-0.5 border-b"
           >
             {day}
           </div>
@@ -36,7 +41,7 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
             <div
               key={date.toISOString()}
               className={cn(
-                'min-h-[8rem] p-2 border-b border-r relative',
+                'min-h-[5rem] p-2 border-b border-r relative',
                 !isSameMonth(date, currentDate) && 'bg-muted/50',
                 isToday(date) && 'bg-accent/5'
               )}
@@ -61,6 +66,17 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
                   )}
                 </div>
               )}
+              <AppSheet
+                mode="create"
+                entity={{ type: 'job' }}
+                trigger={<span className="text-xs">Create</span>}
+              >
+                <JobForm
+                  defaultValues={{
+                    dueDate: date,
+                  }}
+                />
+              </AppSheet>
             </div>
           )
         })}
