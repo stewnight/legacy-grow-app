@@ -72,8 +72,8 @@ const data = {
       icon: Sprout,
     },
     {
-      title: 'Tasks',
-      url: '/tasks',
+      title: 'Jobs',
+      url: '/jobs',
       icon: ListCheck,
     },
     {

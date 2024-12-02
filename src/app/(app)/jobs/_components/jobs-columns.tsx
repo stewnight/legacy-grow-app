@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type TaskWithRelations } from '~/server/db/schema/jobs'
+import { type JobWithRelations } from '~/server/db/schema/jobs'
 import { Badge } from '~/components/ui/badge'
 import {
   MoreHorizontal,
@@ -25,18 +25,18 @@ import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { format } from 'date-fns'
 
-export const columns: ColumnDef<TaskWithRelations>[] = [
+export const columns: ColumnDef<JobWithRelations>[] = [
   {
     accessorKey: 'title',
     header: 'Title',
     cell: ({ row }) => {
-      const task = row.original
+      const job = row.original
       return (
         <Link
-          href={`/tasks/${task.id}`}
+          href={`/jobs/${job.id}`}
           className="font-medium hover:underline text-nowrap"
         >
-          {task.title}
+          {job.title}
         </Link>
       )
     },
@@ -94,11 +94,11 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
     accessorKey: 'assignedTo',
     header: 'Assigned To',
     cell: ({ row }) => {
-      const task = row.original
-      return task.assignedTo ? (
+      const job = row.original
+      return job.assignedTo ? (
         <div className="flex items-center gap-2">
           <User className="h-4 w-4 text-muted-foreground" />
-          {task.assignedTo.name}
+          {job.assignedTo.name}
         </div>
       ) : (
         'Unassigned'
@@ -120,10 +120,10 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
     },
   },
   {
-    accessorKey: 'taskStatus',
+    accessorKey: 'jobStatus',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue('taskStatus') as string
+      const status = row.getValue('jobStatus') as string
       return (
         <div className="flex items-center gap-2">
           {status === 'completed' ? (
@@ -151,18 +151,18 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const task = row.original
+      const job = row.original
       const utils = api.useUtils()
       const { toast } = useToast()
 
-      const { mutate: deleteTask } = api.task.delete.useMutation({
+      const { mutate: deleteJob } = api.job.delete.useMutation({
         onSuccess: () => {
-          toast({ title: 'Task deleted successfully' })
-          void utils.task.getAll.invalidate()
+          toast({ title: 'Job deleted successfully' })
+          void utils.job.getAll.invalidate()
         },
         onError: (error) => {
           toast({
-            title: 'Error deleting task',
+            title: 'Error deleting job',
             description: error.message,
             variant: 'destructive',
           })
@@ -180,14 +180,14 @@ export const columns: ColumnDef<TaskWithRelations>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/tasks/${task.id}`}>View Details</Link>
+              <Link href={`/jobs/${job.id}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 if (
-                  window.confirm('Are you sure you want to delete this task?')
+                  window.confirm('Are you sure you want to delete this job?')
                 ) {
-                  deleteTask(task.id)
+                  deleteJob(job.id)
                 }
               }}
               className="text-red-600"

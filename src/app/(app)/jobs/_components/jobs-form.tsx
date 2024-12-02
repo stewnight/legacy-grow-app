@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertTaskSchema } from '~/server/db/schema'
+import { insertJobSchema } from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -22,12 +22,12 @@ import {
 } from '@/components/ui/select'
 import { type z } from 'zod'
 import {
-  taskStatusEnum,
-  taskPriorityEnum,
-  taskCategoryEnum,
+  jobStatusEnum,
+  jobPriorityEnum,
+  jobCategoryEnum,
   statusEnum,
-  taskEntityTypeEnum,
-  type TaskEntityType,
+  jobEntityTypeEnum,
+  type JobEntityType,
 } from '~/server/db/schema/enums'
 import { type inferRouterOutputs } from '@trpc/server'
 import { type AppRouter } from '~/server/api/root'
@@ -40,31 +40,31 @@ import { Loader2 } from 'lucide-react'
 import React from 'react'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
-type TaskFormValues = z.infer<typeof insertTaskSchema>
+type JobFormValues = z.infer<typeof insertJobSchema>
 
-interface TaskFormProps {
+interface JobFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['task']['get']
-  onSuccess?: (data: TaskFormValues) => void
+  defaultValues?: RouterOutputs['job']['get']
+  onSuccess?: (data: JobFormValues) => void
 }
 
-export function TaskForm({
+export function JobForm({
   mode = 'create',
   defaultValues,
   onSuccess,
-}: TaskFormProps) {
+}: JobFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
 
-  const form = useForm<TaskFormValues>({
-    resolver: zodResolver(insertTaskSchema),
+  const form = useForm<JobFormValues>({
+    resolver: zodResolver(insertJobSchema),
     defaultValues: {
       title: defaultValues?.title || '',
       description: defaultValues?.description || '',
       priority: defaultValues?.priority || 'medium',
       category: defaultValues?.category || undefined,
-      taskStatus: defaultValues?.taskStatus || 'pending',
+      jobStatus: defaultValues?.jobStatus || 'pending',
       dueDate: defaultValues?.dueDate || undefined,
       assignedToId: defaultValues?.assignedToId || undefined,
       entityType: defaultValues?.entityType || 'none',
@@ -73,15 +73,15 @@ export function TaskForm({
     },
   })
 
-  const { mutate: createTask, isPending: isCreating } =
-    api.task.create.useMutation({
+  const { mutate: createJob, isPending: isCreating } =
+    api.job.create.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Task created successfully' })
+        toast({ title: 'Job created successfully' })
         void Promise.all([
-          utils.task.getAll.invalidate(),
-          utils.task.get.invalidate(data.id),
+          utils.job.getAll.invalidate(),
+          utils.job.get.invalidate(data.id),
         ])
-        router.push(`/tasks/${data.id}`)
+        router.push(`/jobs/${data.id}`)
         onSuccess?.(data)
       },
       onError: (error) => {
@@ -93,26 +93,26 @@ export function TaskForm({
       },
     })
 
-  const { mutate: updateTask, isPending: isUpdating } =
-    api.task.update.useMutation({
+  const { mutate: updateJob, isPending: isUpdating } =
+    api.job.update.useMutation({
       onSuccess: (data) => {
-        toast({ title: 'Task updated successfully' })
+        toast({ title: 'Job updated successfully' })
         void Promise.all([
-          utils.task.getAll.invalidate(),
-          utils.task.get.invalidate(data.id),
+          utils.job.getAll.invalidate(),
+          utils.job.get.invalidate(data.id),
         ])
         onSuccess?.(data)
       },
       onError: (error) => {
         toast({
-          title: 'Error updating task',
+          title: 'Error updating job',
           description: error.message,
           variant: 'destructive',
         })
       },
     })
 
-  const onSubmit = async (data: TaskFormValues) => {
+  const onSubmit = async (data: JobFormValues) => {
     // Ensure entityId is null when entityType is 'none'
     const formData = {
       ...data,
@@ -120,9 +120,9 @@ export function TaskForm({
     }
 
     if (mode === 'create') {
-      createTask(formData)
+      createJob(formData)
     } else if (mode === 'edit' && defaultValues?.id) {
-      updateTask({ id: defaultValues.id, data: formData })
+      updateJob({ id: defaultValues.id, data: formData })
     }
   }
 
@@ -158,7 +158,7 @@ export function TaskForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {taskEntityTypeEnum.enumValues.map((type) => (
+                    {jobEntityTypeEnum.enumValues.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </SelectItem>
@@ -232,7 +232,7 @@ export function TaskForm({
 
         <FormField
           control={form.control}
-          name="taskStatus"
+          name="jobStatus"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
@@ -243,7 +243,7 @@ export function TaskForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {taskStatusEnum.enumValues.map((status) => (
+                  {jobStatusEnum.enumValues.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </SelectItem>
@@ -268,7 +268,7 @@ export function TaskForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {taskCategoryEnum.enumValues.map((category) => (
+                  {jobCategoryEnum.enumValues.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category.charAt(0).toUpperCase() + category.slice(1)}
                     </SelectItem>
@@ -293,7 +293,7 @@ export function TaskForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {taskPriorityEnum.enumValues.map((priority) => (
+                  {jobPriorityEnum.enumValues.map((priority) => (
                     <SelectItem key={priority} value={priority}>
                       {priority.charAt(0).toUpperCase() + priority.slice(1)}
                     </SelectItem>
@@ -386,7 +386,7 @@ const EntitySelector = React.memo(function EntitySelector({
   entityType,
   onSelect,
 }: {
-  entityType: TaskEntityType
+  entityType: JobEntityType
   onSelect: (value: string) => void
 }) {
   const locationQuery = api.location.getAll.useQuery(

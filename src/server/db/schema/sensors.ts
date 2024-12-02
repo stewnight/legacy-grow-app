@@ -14,7 +14,7 @@ import { sensorTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { sensorReadings } from './sensorReadings'
 import { locations } from './locations'
-import { tasks } from './jobs'
+import { jobs } from './jobs'
 import { notes } from './notes'
 export const sensors = createTable(
   'sensor',
@@ -109,7 +109,7 @@ export const sensorsRelations = relations(sensors, ({ one, many }) => ({
     references: [users.id],
     relationName: 'sensorCreator',
   }),
-  tasks: many(tasks, { relationName: 'sensorTasks' }),
+  jobs: many(jobs, { relationName: 'sensorJobs' }),
   notes: many(notes, { relationName: 'sensorNotes' }),
 }))
 

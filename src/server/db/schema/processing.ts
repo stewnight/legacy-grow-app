@@ -15,7 +15,7 @@ import { users } from './core'
 import { batches } from './batches'
 import { harvests } from './harvests'
 import { locations } from './locations'
-import { tasks } from './jobs'
+import { jobs } from './jobs'
 import { notes } from './notes'
 
 export const processing = createTable(
@@ -172,7 +172,7 @@ export const processingRelations = relations(processing, ({ one, many }) => ({
     references: [users.id],
     relationName: 'processingCreator',
   }),
-  tasks: many(tasks, { relationName: 'processingTasks' }),
+  jobs: many(jobs, { relationName: 'processingJobs' }),
   notes: many(notes, { relationName: 'processingNotes' }),
 }))
 

@@ -12,12 +12,12 @@ import { Checkbox } from '~/components/ui/checkbox'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { AppSheet } from '../layout/app-sheet'
-import { TaskForm } from '~/app/(app)/tasks/_components/tasks-form'
+import { JobForm } from '~/app/(app)/jobs/_components/jobs-form'
 import { Button } from '../ui/button'
-import { Plus, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useState } from 'react'
 
-interface TasksTabProps {
+interface JobsTabProps {
   entityId: string
   entityType:
     | 'location'
@@ -29,10 +29,10 @@ interface TasksTabProps {
     | 'harvest'
 }
 
-export default function TasksTab({ entityId, entityType }: TasksTabProps) {
+export default function JobsTab({ entityId, entityType }: JobsTabProps) {
   const [showCompleted, setShowCompleted] = useState(false)
 
-  const { data: tasks, isLoading } = api.task.getAll.useQuery({
+  const { data: jobs, isLoading } = api.job.getAll.useQuery({
     filters: {
       entityId: entityId ?? undefined,
       entityType: entityType ?? undefined,
@@ -41,9 +41,9 @@ export default function TasksTab({ entityId, entityType }: TasksTabProps) {
 
   const utils = api.useUtils()
 
-  const { mutate: updateTaskStatus } = api.task.update.useMutation({
+  const { mutate: updateJobStatus } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.task.getAll.invalidate()
+      void utils.job.getAll.invalidate()
     },
   })
 
@@ -52,38 +52,38 @@ export default function TasksTab({ entityId, entityType }: TasksTabProps) {
     return format(new Date(date), 'PP')
   }
 
-  const handleStatusChange = (taskId: string) => {
-    updateTaskStatus({
-      id: taskId,
+  const handleStatusChange = (jobId: string) => {
+    updateJobStatus({
+      id: jobId,
       data: {
-        taskStatus: 'completed',
+        jobStatus: 'completed',
         completedAt: new Date(),
       },
     })
   }
 
-  const activeTasks =
-    tasks?.items.filter(
-      (task) => task.taskStatus !== 'completed' && task.entityId === entityId
+  const activeJobs =
+    jobs?.items.filter(
+      (job) => job.jobStatus !== 'completed' && job.entityId === entityId
     ) || []
-  const completedTasks =
-    tasks?.items.filter(
-      (task) => task.taskStatus === 'completed' && task.entityId === entityId
+  const completedJobs =
+    jobs?.items.filter(
+      (job) => job.jobStatus === 'completed' && job.entityId === entityId
     ) || []
 
   return (
-    <TabsContent value="tasks">
+    <TabsContent value="jobs">
       <div className="space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Active Tasks</CardTitle>
+              <CardTitle>Active Jobs</CardTitle>
               <CardDescription>
-                Tasks related to this {entityType}
+                Jobs related to this {entityType}
               </CardDescription>
             </div>
-            <AppSheet mode="create" entity="task">
-              <TaskForm
+            <AppSheet mode="create" entity="job">
+              <JobForm
                 mode="create"
                 defaultValues={{
                   entityType: entityType ?? 'none',
@@ -95,72 +95,70 @@ export default function TasksTab({ entityId, entityType }: TasksTabProps) {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p>Loading tasks...</p>
-            ) : activeTasks.length > 0 ? (
+              <p>Loading jobs...</p>
+            ) : activeJobs.length > 0 ? (
               <div className="space-y-4">
-                {activeTasks.map((task) => (
+                {activeJobs.map((job) => (
                   <div
-                    key={task.id}
+                    key={job.id}
                     className="flex items-center justify-between border rounded p-4"
                   >
                     <div className="flex items-center gap-4">
                       <Checkbox
-                        checked={task.taskStatus === 'completed'}
-                        onCheckedChange={() => handleStatusChange(task.id)}
-                        disabled={task.taskStatus === 'completed'}
+                        checked={job.jobStatus === 'completed'}
+                        onCheckedChange={() => handleStatusChange(job.id)}
+                        disabled={job.jobStatus === 'completed'}
                       />
                       <div>
                         <Link
-                          href={`/tasks/${task.id}`}
+                          href={`/jobs/${job.id}`}
                           className="font-medium hover:underline"
                         >
-                          {task.title}
+                          {job.title}
                         </Link>
                         <div className="flex gap-2 mt-1">
-                          <Badge variant="outline">{task.category}</Badge>
+                          <Badge variant="outline">{job.category}</Badge>
                           <Badge
                             variant={
-                              task.priority === 'high'
+                              job.priority === 'high'
                                 ? 'destructive'
-                                : task.priority === 'medium'
+                                : job.priority === 'medium'
                                   ? 'default'
                                   : 'secondary'
                             }
                           >
-                            {task.priority}
+                            {job.priority}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Due: {formatDate(task.dueDate)}
+                          Due: {formatDate(job.dueDate)}
                         </p>
                       </div>
                     </div>
                     <Badge
                       variant={
-                        task.taskStatus === 'completed'
-                          ? 'default'
-                          : 'secondary'
+                        job.jobStatus === 'completed' ? 'default' : 'secondary'
                       }
                     >
-                      {task.taskStatus}
+                      {job.jobStatus}
                     </Badge>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">No active tasks found</p>
+              <p className="text-muted-foreground">No active jobs found</p>
             )}
           </CardContent>
         </Card>
 
-        {completedTasks.length > 0 && (
+        {completedJobs.length > 0 && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Completed Tasks</CardTitle>
+                <CardTitle>Completed Jobs</CardTitle>
                 <CardDescription>
-                  {completedTasks.length} completed task
-                  {completedTasks.length !== 1 ? 's' : ''}
+                  {completedJobs.length} completed job
+                  {completedJobs.length !== 1 ? 's' : ''}
                 </CardDescription>
               </div>
               <Button
@@ -178,26 +176,26 @@ export default function TasksTab({ entityId, entityType }: TasksTabProps) {
             {showCompleted && (
               <CardContent>
                 <div className="space-y-2">
-                  {completedTasks.map((task) => (
+                  {completedJobs.map((job) => (
                     <div
-                      key={task.id}
+                      key={job.id}
                       className="flex items-center justify-between py-2 text-sm text-muted-foreground"
                     >
                       <div className="flex items-center gap-2">
                         <Link
-                          href={`/tasks/${task.id}`}
+                          href={`/jobs/${job.id}`}
                           className="hover:underline"
                         >
-                          {task.title}
+                          {job.title}
                         </Link>
                         <span>•</span>
-                        <span>{task.assignedTo?.name || 'Unassigned'}</span>
+                        <span>{job.assignedTo?.name || 'Unassigned'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
-                          {task.category}
+                          {job.category}
                         </Badge>
-                        <span>Completed: {formatDate(task.completedAt)}</span>
+                        <span>Completed: {formatDate(job.completedAt)}</span>
                       </div>
                     </div>
                   ))}

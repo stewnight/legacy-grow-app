@@ -29,12 +29,12 @@ import {
   Link as LinkIcon,
 } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
-import { TaskForm } from '../_components/tasks-form'
+import { JobForm } from '../_components/jobs-form'
 import { Badge } from '../../../../components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { type Task, type TaskWithRelations } from '~/server/db/schema/jobs'
+import { type Job, type JobWithRelations } from '~/server/db/schema/jobs'
 import { type Location } from '~/server/db/schema/locations'
 import { type Plant } from '~/server/db/schema/plants'
 import { type Batch } from '~/server/db/schema/batches'
@@ -43,29 +43,29 @@ import { type Sensor } from '~/server/db/schema/sensors'
 import { type Processing } from '~/server/db/schema/processing'
 import { type Harvest } from '~/server/db/schema/harvests'
 
-export default function TaskPage({
+export default function JobPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const resolvedParams = React.use(params)
 
-  const { data: task, isLoading } = api.task.get.useQuery(resolvedParams.id, {
+  const { data: job, isLoading } = api.job.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
 
   const utils = api.useUtils()
 
-  const { mutate: updateTaskStatus } = api.task.update.useMutation({
+  const { mutate: updateJobStatus } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.task.get.invalidate(resolvedParams.id)
+      void utils.job.get.invalidate(resolvedParams.id)
     },
   })
 
-  const { mutate: updateTaskChecklist } = api.task.update.useMutation({
+  const { mutate: updateJobTasks } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.task.get.invalidate(resolvedParams.id)
+      void utils.job.get.invalidate(resolvedParams.id)
     },
   })
 
@@ -77,34 +77,34 @@ export default function TaskPage({
   const handleStatusChange = (
     newStatus: 'completed' | 'pending' | 'in_progress'
   ) => {
-    if (task) {
-      updateTaskStatus({
-        id: task.id,
+    if (job) {
+      updateJobStatus({
+        id: job.id,
         data: {
-          taskStatus: newStatus,
+          jobStatus: newStatus,
           completedAt: newStatus === 'completed' ? new Date() : null,
         },
       })
     }
   }
 
-  const handleChecklistItemToggle = (index: number) => {
-    if (task?.properties?.checklist) {
-      const checklist = [...task.properties.checklist]
-      const item = checklist[index]
+  const handleTaskToggle = (index: number) => {
+    if (job?.properties?.tasks) {
+      const tasks = [...job.properties.tasks]
+      const item = tasks[index]
       if (item) {
-        checklist[index] = {
+        tasks[index] = {
           ...item,
           completed: !item.completed,
           completedAt: !item.completed ? new Date().toISOString() : null,
         }
 
-        updateTaskChecklist({
-          id: task.id,
+        updateJobTasks({
+          id: job.id,
           data: {
             properties: {
-              ...task.properties,
-              checklist,
+              ...job.properties,
+              tasks,
             },
           },
         })
@@ -139,7 +139,7 @@ export default function TaskPage({
     )
   }
 
-  if (!task) {
+  if (!job) {
     return notFound()
   }
 
@@ -147,13 +147,13 @@ export default function TaskPage({
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{task.title}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{job.title}</h2>
           <p className="text-muted-foreground">
-            Created by {task.createdBy.name} on {formatDate(task.createdAt)}
+            Created by {job.createdBy.name} on {formatDate(job.createdAt)}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {task.taskStatus !== 'completed' && (
+          {job.jobStatus !== 'completed' && (
             <Button
               variant="outline"
               onClick={() => handleStatusChange('completed')}
@@ -163,8 +163,8 @@ export default function TaskPage({
               Mark Complete
             </Button>
           )}
-          <AppSheet mode="edit" entity="task">
-            <TaskForm mode="edit" defaultValues={task} />
+          <AppSheet mode="edit" entity="job">
+            <JobForm mode="edit" defaultValues={job} />
           </AppSheet>
         </div>
       </div>
@@ -173,18 +173,16 @@ export default function TaskPage({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
-            {task.taskStatus === 'completed' ? (
+            {job.jobStatus === 'completed' ? (
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-            ) : task.taskStatus === 'pending' ? (
+            ) : job.jobStatus === 'pending' ? (
               <Clock className="h-4 w-4 text-yellow-500" />
             ) : (
               <AlertCircle className="h-4 w-4 text-blue-500" />
             )}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold capitalize">
-              {task.taskStatus}
-            </div>
+            <div className="text-2xl font-bold capitalize">{job.jobStatus}</div>
             <p className="text-xs text-muted-foreground">Current status</p>
           </CardContent>
         </Card>
@@ -195,8 +193,8 @@ export default function TaskPage({
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatDate(task.dueDate)}</div>
-            <p className="text-xs text-muted-foreground">Task deadline</p>
+            <div className="text-2xl font-bold">{formatDate(job.dueDate)}</div>
+            <p className="text-xs text-muted-foreground">Job deadline</p>
           </CardContent>
         </Card>
 
@@ -206,8 +204,8 @@ export default function TaskPage({
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold capitalize">{task.priority}</div>
-            <p className="text-xs text-muted-foreground">Task priority</p>
+            <div className="text-2xl font-bold capitalize">{job.priority}</div>
+            <p className="text-xs text-muted-foreground">Job priority</p>
           </CardContent>
         </Card>
 
@@ -217,12 +215,12 @@ export default function TaskPage({
             <ListChecks className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold capitalize">{task.category}</div>
-            <p className="text-xs text-muted-foreground">Task type</p>
+            <div className="text-2xl font-bold capitalize">{job.category}</div>
+            <p className="text-xs text-muted-foreground">Job type</p>
           </CardContent>
         </Card>
 
-        {task.entityType !== 'none' && task.entityId && (
+        {job.entityType !== 'none' && job.entityId && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -234,14 +232,14 @@ export default function TaskPage({
               <div className="space-y-2">
                 <p className="text-sm font-medium">
                   Type:{' '}
-                  {task.entityType.charAt(0).toUpperCase() +
-                    task.entityType.slice(1)}
+                  {job.entityType.charAt(0).toUpperCase() +
+                    job.entityType.slice(1)}
                 </p>
                 <Link
-                  href={`/${task.entityType}s/${task.entityId}`}
+                  href={`/${job.entityType}s/${job.entityId}`}
                   className="text-sm text-blue-500 hover:underline"
                 >
-                  {getEntityName(task as TaskWithRelations)}
+                  {getEntityName(job as JobWithRelations)}
                 </Link>
               </div>
             </CardContent>
@@ -253,7 +251,7 @@ export default function TaskPage({
         <ScrollArea className="w-full">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="checklist">Checklist</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="requirements">Requirements</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
@@ -263,7 +261,7 @@ export default function TaskPage({
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Task Details</CardTitle>
+                <CardTitle>Job Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-2">
@@ -271,17 +269,17 @@ export default function TaskPage({
                     <dt className="text-sm font-medium text-muted-foreground">
                       Description
                     </dt>
-                    <dd className="text-sm">{task.description || 'N/A'}</dd>
+                    <dd className="text-sm">{job.description || 'N/A'}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-muted-foreground">
                       Assigned To
                     </dt>
                     <dd className="text-sm">
-                      {task.assignedTo?.name || 'Unassigned'}
+                      {job.assignedTo?.name || 'Unassigned'}
                     </dd>
                   </div>
-                  {task.entityType && task.entityId && (
+                  {job.entityType && job.entityId && (
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         Related To
@@ -289,38 +287,36 @@ export default function TaskPage({
                       <dd className="flex items-center gap-2 text-sm">
                         <LinkIcon className="h-4 w-4" />
                         <Link
-                          href={`/${task.entityType}s/${task.entityId}`}
+                          href={`/${job.entityType}s/${job.entityId}`}
                           className="hover:underline"
                         >
-                          {task.entityType.charAt(0).toUpperCase() +
-                            task.entityType.slice(1)}
+                          {job.entityType.charAt(0).toUpperCase() +
+                            job.entityType.slice(1)}
                         </Link>
                       </dd>
                     </div>
                   )}
-                  {task.startedAt && (
+                  {job.startedAt && (
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         Started
                       </dt>
-                      <dd className="text-sm">{formatDate(task.startedAt)}</dd>
+                      <dd className="text-sm">{formatDate(job.startedAt)}</dd>
                     </div>
                   )}
-                  {task.completedAt && (
+                  {job.completedAt && (
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">
                         Completed
                       </dt>
-                      <dd className="text-sm">
-                        {formatDate(task.completedAt)}
-                      </dd>
+                      <dd className="text-sm">{formatDate(job.completedAt)}</dd>
                     </div>
                   )}
                 </dl>
               </CardContent>
             </Card>
 
-            {task.properties?.recurring && (
+            {job.properties?.recurring && (
               <Card>
                 <CardHeader>
                   <CardTitle>Recurring Schedule</CardTitle>
@@ -332,27 +328,27 @@ export default function TaskPage({
                         Frequency
                       </dt>
                       <dd className="text-sm capitalize">
-                        {task.properties.recurring.frequency}
+                        {job.properties.recurring.frequency}
                       </dd>
                     </div>
-                    {task.properties.recurring.interval && (
+                    {job.properties.recurring.interval && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           Interval
                         </dt>
                         <dd className="text-sm">
-                          Every {task.properties.recurring.interval}{' '}
-                          {task.properties.recurring.frequency}
+                          Every {job.properties.recurring.interval}{' '}
+                          {job.properties.recurring.frequency}
                         </dd>
                       </div>
                     )}
-                    {task.properties.recurring.endDate && (
+                    {job.properties.recurring.endDate && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">
                           End Date
                         </dt>
                         <dd className="text-sm">
-                          {formatDate(task.properties.recurring.endDate)}
+                          {formatDate(job.properties.recurring.endDate)}
                         </dd>
                       </div>
                     )}
@@ -363,17 +359,16 @@ export default function TaskPage({
           </div>
         </TabsContent>
 
-        <TabsContent value="checklist">
+        <TabsContent value="tasks">
           <Card>
             <CardHeader>
-              <CardTitle>Task Checklist</CardTitle>
-              <CardDescription>Steps to complete this task</CardDescription>
+              <CardTitle>Job Tasks</CardTitle>
+              <CardDescription>Steps to complete this job</CardDescription>
             </CardHeader>
             <CardContent>
-              {task.properties?.checklist &&
-              task.properties.checklist.length > 0 ? (
+              {job.properties?.tasks && job.properties.tasks.length > 0 ? (
                 <div className="space-y-4">
-                  {task.properties.checklist.map((item, index) => (
+                  {job.properties.tasks.map((item, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between border rounded p-4"
@@ -381,9 +376,7 @@ export default function TaskPage({
                       <div className="flex items-center gap-4">
                         <Checkbox
                           checked={item.completed}
-                          onCheckedChange={() =>
-                            handleChecklistItemToggle(index)
-                          }
+                          onCheckedChange={() => handleTaskToggle(index)}
                         />
                         <div>
                           <p className="font-medium">{item.item}</p>
@@ -404,7 +397,7 @@ export default function TaskPage({
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No checklist items</p>
+                <p className="text-muted-foreground">No tasks</p>
               )}
             </CardContent>
           </Card>
@@ -412,7 +405,7 @@ export default function TaskPage({
 
         <TabsContent value="requirements">
           <div className="grid gap-4 md:grid-cols-3">
-            {task.properties?.requirements && (
+            {job.properties?.requirements && (
               <>
                 <Card>
                   <CardHeader>
@@ -422,9 +415,9 @@ export default function TaskPage({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {task.properties.requirements.tools?.length ? (
+                    {job.properties.requirements.tools?.length ? (
                       <div className="flex flex-wrap gap-2">
-                        {task.properties.requirements.tools.map((tool) => (
+                        {job.properties.requirements.tools.map((tool) => (
                           <Badge key={tool} variant="secondary">
                             {tool}
                           </Badge>
@@ -444,9 +437,9 @@ export default function TaskPage({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {task.properties.requirements.supplies?.length ? (
+                    {job.properties.requirements.supplies?.length ? (
                       <div className="flex flex-wrap gap-2">
-                        {task.properties.requirements.supplies.map((supply) => (
+                        {job.properties.requirements.supplies.map((supply) => (
                           <Badge key={supply} variant="secondary">
                             {supply}
                           </Badge>
@@ -468,9 +461,9 @@ export default function TaskPage({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {task.properties.requirements.ppe?.length ? (
+                    {job.properties.requirements.ppe?.length ? (
                       <div className="flex flex-wrap gap-2">
-                        {task.properties.requirements.ppe.map((ppe) => (
+                        {job.properties.requirements.ppe.map((ppe) => (
                           <Badge key={ppe} variant="secondary">
                             {ppe}
                           </Badge>
@@ -504,7 +497,7 @@ export default function TaskPage({
 
 // Helper function to get entity name
 function getEntityName(
-  task: TaskWithRelations & {
+  job: JobWithRelations & {
     location?: Location
     plant?: Plant
     batch?: Batch
@@ -514,22 +507,22 @@ function getEntityName(
     harvest?: Harvest
   }
 ) {
-  switch (task.entityType) {
+  switch (job.entityType) {
     case 'location':
-      return task.location?.name
+      return job.location?.name
     case 'plant':
-      return task.plant?.identifier
+      return job.plant?.identifier
     case 'batch':
-      return task.batch?.identifier
+      return job.batch?.identifier
     case 'genetics':
-      return task.genetic?.name
+      return job.genetic?.name
     case 'sensors':
-      return task.sensor?.id
+      return job.sensor?.id
     case 'processing':
-      return task.processing?.identifier
+      return job.processing?.identifier
     case 'harvest':
-      return task.harvest?.identifier
+      return job.harvest?.identifier
     default:
-      return task.entityId
+      return job.entityId
   }
 }

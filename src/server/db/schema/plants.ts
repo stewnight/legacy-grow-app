@@ -22,7 +22,7 @@ import { locations } from './locations'
 import { genetics } from './genetics'
 import { notes } from './notes'
 import { batches } from './batches'
-import { tasks } from './jobs'
+import { jobs } from './jobs'
 
 export const plants = createTable(
   'plant',
@@ -122,7 +122,7 @@ export const plantsRelations = relations(plants, ({ one, many }) => ({
     references: [users.id],
     relationName: 'plantCreator',
   }),
-  tasks: many(tasks, { relationName: 'plantTasks' }),
+  jobs: many(jobs, { relationName: 'plantJobs' }),
   notes: many(notes, { relationName: 'plantNotes' }),
 }))
 

@@ -13,7 +13,7 @@ import { locationTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { rooms } from './rooms'
 import { plants } from './plants'
-import { tasks } from './jobs'
+import { jobs } from './jobs'
 import { batches } from './batches'
 import { sensors } from './sensors'
 import { harvests } from './harvests'
@@ -33,7 +33,7 @@ export const locations = createTable(
       x: number
       y: number
       z?: number
-      unit: 'ft' | 'm'
+      unit: 'm' | 'ft'
     }>(),
     properties: json('properties').$type<{
       temperature?: { min: number; max: number }
@@ -83,7 +83,7 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
   plants: many(plants, { relationName: 'locationPlants' }),
   sensors: many(sensors, { relationName: 'sensorLocation' }),
   batches: many(batches, { relationName: 'locationBatches' }),
-  tasks: many(tasks, { relationName: 'locationTasks' }),
+  jobs: many(jobs, { relationName: 'locationJobs' }),
   harvests: many(harvests, { relationName: 'locationHarvests' }),
   processing: many(processing, { relationName: 'locationProcessing' }),
   notes: many(notes, { relationName: 'locationNotes' }),

@@ -26,8 +26,7 @@ import {
 } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { BatchForm } from '../_components/batches-form'
-import { Badge } from '../../../../components/ui/badge'
-import TasksTab from '../../../../components/tasks/tabs'
+import JobsTab from '../../../../components/jobs/tab'
 
 export default function BatchPage({
   params,
@@ -162,7 +161,7 @@ export default function BatchPage({
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="environment">Environment</TabsTrigger>
           <TabsTrigger value="plants">Plants</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="jobs">Jobs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -322,7 +321,7 @@ export default function BatchPage({
           </Card>
         </TabsContent>
 
-        <TasksTab entityId={batch.id} entityType="batch" />
+        <JobsTab entityId={batch.id} entityType="batch" />
       </Tabs>
     </div>
   )

@@ -3,19 +3,19 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
-import { columns } from './_components/tasks-columns'
+import { columns } from './_components/jobs-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { TaskForm } from './_components/tasks-form'
+import { JobForm } from './_components/jobs-form'
 import {
-  taskEntityTypeEnum,
-  taskStatusEnum,
-  type TaskEntityType,
-  type TaskStatus,
+  jobEntityTypeEnum,
+  statusEnum,
+  type JobEntityType,
+  type JobStatus,
 } from '~/server/db/schema/enums'
-import { TaskWithRelations } from '../../../server/db/schema'
+import { JobWithRelations } from '../../../server/db/schema'
 
-export default async function TasksPage({
+export default async function JobsPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
@@ -27,41 +27,41 @@ export default async function TasksPage({
 
   const params = await Promise.resolve(searchParams)
 
-  const { items: tasksData } = await api.task.getAll({
+  const { items: jobsData } = await api.job.getAll({
     limit: 100,
     filters: {
-      taskStatus: (params.status as TaskStatus) || 'pending',
-      entityType: params.entityType as TaskEntityType,
+      jobStatus: (params.status as JobStatus) || 'pending',
+      entityType: params.entityType as JobEntityType,
     },
   })
 
   // Transform the data to match the expected type
-  const tasks: TaskWithRelations[] = tasksData.map((task) => ({
-    ...task,
-    assignedTo: task.assignedTo
+  const jobs: JobWithRelations[] = jobsData.map((job) => ({
+    ...job,
+    assignedTo: job.assignedTo
       ? {
-          id: task.assignedTo.id,
-          name: task.assignedTo.name || '', // Convert null to empty string
+          id: job.assignedTo.id,
+          name: job.assignedTo.name || '', // Convert null to empty string
         }
       : null,
     createdBy: {
-      id: task.createdBy.id,
-      name: task.createdBy.name || '', // Convert null to empty string
+      id: job.createdBy.id,
+      name: job.createdBy.name || '', // Convert null to empty string
     },
   }))
 
   return (
     <div className="flex-1 space-y-4 p-4  pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Tasks</h2>
-        <AppSheet mode="create" entity="task">
-          <TaskForm mode="create" />
+        <h2 className="text-3xl font-bold tracking-tight">Jobs</h2>
+        <AppSheet mode="create" entity="job">
+          <JobForm mode="create" />
         </AppSheet>
       </div>
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          {tasks && (
-            <DataTable columns={columns} data={tasks} filterColumn="title" />
+          {jobs && (
+            <DataTable columns={columns} data={jobs} filterColumn="title" />
           )}
         </Suspense>
       </div>

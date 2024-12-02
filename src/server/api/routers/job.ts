@@ -16,6 +16,7 @@ import {
 const jobFiltersSchema = z.object({
   jobStatus: z.enum(jobStatusEnum.enumValues).optional(),
   entityType: z.enum(jobEntityTypeEnum.enumValues).optional(),
+  entityId: z.string().uuid().optional(),
   priority: z.enum(jobPriorityEnum.enumValues).optional(),
   category: z.enum(jobCategoryEnum.enumValues).optional(),
   assignedToId: z.string().uuid().optional(),
