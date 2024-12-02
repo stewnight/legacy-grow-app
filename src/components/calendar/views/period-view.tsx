@@ -17,8 +17,22 @@ export function PeriodView({
   jobs,
   currentPeriodIndex,
 }: PeriodViewProps) {
+  // Calculate grid columns based on number of periods
+  const gridCols = React.useMemo(() => {
+    switch (periods.length) {
+      case 1:
+        return 'grid-cols-1'
+      case 3:
+        return 'grid-cols-1 md:grid-cols-3'
+      case 5:
+        return 'grid-cols-1 md:grid-cols-3 xl:grid-cols-5'
+      default:
+        return 'grid-cols-1'
+    }
+  }, [periods.length])
+
   return (
-    <div className="min-w-[900px] grid grid-cols-3 lg:grid-cols-5 gap-4 p-3">
+    <div className={cn('min-w-[900px] grid gap-4 p-3', gridCols)}>
       {periods.map((periodDays: Date[], periodIndex: number) => {
         // Ensure periodDays[0] exists for the header
         const periodStart = periodDays[0]
@@ -48,7 +62,7 @@ export function PeriodView({
           >
             <div
               className={cn(
-                'text-sm font-medium text-center border-b p-2',
+                'text-sm font-medium text-center border-b p-2 sticky top-0 bg-background',
                 isCurrentPeriod ? 'border-accent/20' : 'border-border'
               )}
             >

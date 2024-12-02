@@ -12,12 +12,12 @@ interface MonthViewProps {
 
 export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
   return (
-    <div className="min-w-[900px] p-3">
+    <div className="min-w-[900px]">
       <div className="grid grid-cols-7 text-muted-foreground">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
           <div
             key={day}
-            className="h-10 text-sm font-medium text-center p-2 border-b"
+            className="h-8 text-xs font-medium text-center p-0.5 border-b"
           >
             {day}
           </div>

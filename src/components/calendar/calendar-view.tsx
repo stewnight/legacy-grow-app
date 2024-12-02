@@ -17,6 +17,7 @@ import { CalendarHeader } from './calendar-header'
 import { MonthView } from './views/month-view'
 import { PeriodView } from './views/period-view'
 import { JobWithRelations } from '../../server/db/schema'
+import { useIsMobile, useIsDesktop } from '../../hooks/use-mobile'
 
 export type CalendarViewMode = 'month' | 'week' | 'day'
 
@@ -27,7 +28,16 @@ interface CalendarViewProps {
 export function CalendarView({ initialMode = 'month' }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date())
   const [mode, setMode] = React.useState<CalendarViewMode>(initialMode)
-  const [surroundingPeriods, setSurroundingPeriods] = React.useState<1 | 2>(1)
+
+  const isMobile = useIsMobile()
+  const isDesktop = useIsDesktop()
+
+  // Calculate surrounding periods based on screen size
+  const surroundingPeriods = React.useMemo(() => {
+    if (isDesktop) return 2 // 5 total periods
+    if (!isMobile) return 1 // 3 total periods (tablet)
+    return 0 // 1 period (mobile)
+  }, [isMobile, isDesktop])
 
   const { data: jobsData } = api.job.getAll.useQuery({})
 
@@ -86,23 +96,6 @@ export function CalendarView({ initialMode = 'month' }: CalendarViewProps) {
         mode={mode}
         onModeChange={setMode}
       />
-      {(mode === 'week' || mode === 'day') && (
-        <div className="flex items-center justify-end gap-2 px-2">
-          <span className="text-sm text-muted-foreground">
-            Show surrounding:
-          </span>
-          <select
-            className="text-sm border rounded px-2 py-1"
-            value={surroundingPeriods}
-            onChange={(e) =>
-              setSurroundingPeriods(Number(e.target.value) as 1 | 2)
-            }
-          >
-            <option value={1}>3 {mode}s</option>
-            <option value={2}>5 {mode}s</option>
-          </select>
-        </div>
-      )}
       <ScrollArea className="h-[calc(100vh-12rem)] rounded-md border bg-background">
         {mode === 'month' ? (
           <MonthView
