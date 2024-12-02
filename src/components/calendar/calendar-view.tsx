@@ -23,11 +23,31 @@ export type CalendarViewMode = 'month' | 'week' | 'day'
 
 interface CalendarViewProps {
   initialMode?: CalendarViewMode
+  mode?: CalendarViewMode
+  entityType?:
+    | 'plant'
+    | 'batch'
+    | 'location'
+    | 'genetics'
+    | 'sensors'
+    | 'processing'
+    | 'harvest'
+    | 'none'
+  entityId?: string
+  onEventClick?: (job: JobWithRelations) => void
 }
 
-export function CalendarView({ initialMode = 'month' }: CalendarViewProps) {
+export function CalendarView({
+  initialMode = 'month',
+  mode: initialViewMode,
+  entityType,
+  entityId,
+  onEventClick,
+}: CalendarViewProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date())
-  const [mode, setMode] = React.useState<CalendarViewMode>(initialMode)
+  const [mode, setMode] = React.useState<CalendarViewMode>(
+    initialViewMode ?? initialMode
+  )
 
   const isMobile = useIsMobile()
   const isDesktop = useIsDesktop()
