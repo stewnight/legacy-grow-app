@@ -10,12 +10,12 @@ import {
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import {
-  taskStatusEnum,
-  taskPriorityEnum,
-  taskCategoryEnum,
+  jobStatusEnum,
+  jobPriorityEnum,
+  jobCategoryEnum,
   statusEnum,
-  taskEntityTypeEnum,
-  TaskEntityType,
+  jobEntityTypeEnum,
+  JobEntityType,
 } from './enums'
 import { users } from './core'
 import { Note, notes } from './notes'
@@ -27,18 +27,18 @@ import { Sensor, sensors } from './sensors'
 import { Processing, processing } from './processing'
 import { Harvest, harvests } from './harvests'
 
-export const tasks = createTable(
-  'task',
+export const jobs = createTable(
+  'job',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
     entityId: uuid('entity_id'),
-    entityType: taskEntityTypeEnum('entity_type').notNull(),
+    entityType: jobEntityTypeEnum('entity_type').notNull(),
     assignedToId: uuid('assigned_to_id').references(() => users.id),
-    category: taskCategoryEnum('category').notNull(),
-    priority: taskPriorityEnum('priority').notNull(),
-    taskStatus: taskStatusEnum('task_status').notNull(),
+    category: jobCategoryEnum('category').notNull(),
+    priority: jobPriorityEnum('priority').notNull(),
+    jobStatus: jobStatusEnum('job_status').notNull(),
     status: statusEnum('status').default('active').notNull(),
     dueDate: timestamp('due_date', { withTimezone: true }),
     startedAt: timestamp('started_at', { withTimezone: true }),
@@ -50,7 +50,7 @@ export const tasks = createTable(
           interval: number
           endDate?: string
         } | null
-        checklist: Array<{
+        tasks: Array<{
           item: string
           completed: boolean
           completedAt?: string | null
@@ -64,14 +64,14 @@ export const tasks = createTable(
       }>()
       .default({
         recurring: null,
-        checklist: [],
+        tasks: [],
         instructions: [],
         requirements: { tools: [], supplies: [], ppe: [] },
       }),
     metadata: json('metadata')
       .$type<{
-        previousTasks: string[]
-        nextTasks: string[]
+        previousJobs: string[]
+        nextJobs: string[]
         estimatedDuration: number | null
         actualDuration: number | null
         location: {
@@ -81,8 +81,8 @@ export const tasks = createTable(
         } | null
       }>()
       .default({
-        previousTasks: [],
-        nextTasks: [],
+        previousJobs: [],
+        nextJobs: [],
         estimatedDuration: null,
         actualDuration: null,
         location: null,
@@ -99,72 +99,72 @@ export const tasks = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    titleIdx: index('task_title_idx').on(table.title),
-    categoryIdx: index('task_category_idx').on(table.category),
-    priorityIdx: index('task_priority_idx').on(table.priority),
-    statusIdx: index('task_status_idx').on(table.status),
-    assignedToIdx: index('task_assigned_to_idx').on(table.assignedToId),
-    entityIdx: index('task_entity_idx').on(table.entityId, table.entityType),
-    dueDateIdx: index('task_due_date_idx').on(table.dueDate),
+    titleIdx: index('job_title_idx').on(table.title),
+    categoryIdx: index('job_category_idx').on(table.category),
+    priorityIdx: index('job_priority_idx').on(table.priority),
+    statusIdx: index('job_status_idx').on(table.status),
+    assignedToIdx: index('job_assigned_to_idx').on(table.assignedToId),
+    entityIdx: index('job_entity_idx').on(table.entityId, table.entityType),
+    dueDateIdx: index('job_due_date_idx').on(table.dueDate),
   })
 )
 
-export const tasksRelations = relations(tasks, ({ one, many }) => ({
+export const jobsRelations = relations(jobs, ({ one, many }) => ({
   assignedTo: one(users, {
-    fields: [tasks.assignedToId],
+    fields: [jobs.assignedToId],
     references: [users.id],
-    relationName: 'taskAssignee',
+    relationName: 'jobAssignee',
   }),
   createdBy: one(users, {
-    fields: [tasks.createdById],
+    fields: [jobs.createdById],
     references: [users.id],
-    relationName: 'taskCreator',
+    relationName: 'jobCreator',
   }),
-  notes: many(notes, { relationName: 'taskNotes' }),
+  notes: many(notes, { relationName: 'jobNotes' }),
   location: one(locations, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [locations.id],
-    relationName: 'locationTasks',
+    relationName: 'locationJobs',
   }),
   plant: one(plants, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [plants.id],
-    relationName: 'plantTasks',
+    relationName: 'plantJobs',
   }),
   batch: one(batches, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [batches.id],
-    relationName: 'batchTasks',
+    relationName: 'batchJobs',
   }),
   genetic: one(genetics, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [genetics.id],
-    relationName: 'geneticTasks',
+    relationName: 'geneticJobs',
   }),
   sensor: one(sensors, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [sensors.id],
-    relationName: 'sensorTasks',
+    relationName: 'sensorJobs',
   }),
   processing: one(processing, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [processing.id],
-    relationName: 'processingTasks',
+    relationName: 'processingJobs',
   }),
   harvest: one(harvests, {
-    fields: [tasks.entityId],
+    fields: [jobs.entityId],
     references: [harvests.id],
-    relationName: 'harvestTasks',
+    relationName: 'harvestJobs',
   }),
 }))
 
 // Zod Schemas
-export const insertTaskSchema = createInsertSchema(tasks, {
+export const insertJobSchema = createInsertSchema(jobs, {
   properties: (schema) => schema.properties.optional(),
   metadata: (schema) => schema.metadata.optional(),
   entityId: (schema) =>
     schema.entityId.nullable().superRefine((val, ctx: any) => {
-      const entityType = ctx.data?.entityType as TaskEntityType | undefined
+      const entityType = ctx.data?.entityType as JobEntityType | undefined
 
       if (!entityType) return
 
@@ -193,13 +193,13 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   createdById: true,
 })
 
-export const selectTaskSchema = createSelectSchema(tasks)
+export const selectJobSchema = createSelectSchema(jobs)
 
 // Types
-export type Task = typeof tasks.$inferSelect
-export type NewTask = typeof tasks.$inferInsert
+export type Job = typeof jobs.$inferSelect
+export type NewJob = typeof jobs.$inferInsert
 
-export type TaskWithRelations = Task & {
+export type JobWithRelations = Job & {
   assignedTo?: { id: string; name: string } | null
   createdBy: { id: string; name: string }
   notes?: Note[]

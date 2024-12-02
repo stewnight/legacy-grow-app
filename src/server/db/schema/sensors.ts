@@ -14,7 +14,7 @@ import { sensorTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { sensorReadings } from './sensorReadings'
 import { locations } from './locations'
-import { tasks } from './tasks'
+import { tasks } from './jobs'
 import { notes } from './notes'
 export const sensors = createTable(
   'sensor',

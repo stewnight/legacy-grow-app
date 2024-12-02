@@ -15,7 +15,7 @@ import { users } from './core'
 import { batches } from './batches'
 import { harvests } from './harvests'
 import { locations } from './locations'
-import { tasks } from './tasks'
+import { tasks } from './jobs'
 import { notes } from './notes'
 
 export const processing = createTable(

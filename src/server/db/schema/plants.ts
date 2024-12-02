@@ -22,7 +22,7 @@ import { locations } from './locations'
 import { genetics } from './genetics'
 import { notes } from './notes'
 import { batches } from './batches'
-import { tasks } from './tasks'
+import { tasks } from './jobs'
 
 export const plants = createTable(
   'plant',

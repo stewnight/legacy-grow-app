@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type TaskWithRelations } from '~/server/db/schema/tasks'
+import { type TaskWithRelations } from '~/server/db/schema/jobs'
 import { Badge } from '~/components/ui/badge'
 import {
   MoreHorizontal,

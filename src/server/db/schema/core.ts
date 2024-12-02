@@ -21,7 +21,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { createTable } from '../utils'
 import { logLevelEnum, systemLogSourceEnum, userRoleEnum } from './enums'
-import { tasks } from './tasks'
+import { jobs } from './jobs'
 import { sensors } from './sensors'
 import { harvests, notes, processing } from '.'
 
@@ -156,7 +156,7 @@ export const verificationTokens = createTable(
 /**
  * Core user relations including all created and assigned entities
  * @remarks
- * Users can create multiple entities and be assigned to tasks
+ * Users can create multiple entities and be assigned to jobs
  */
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts, { relationName: 'userAccounts' }),
@@ -168,7 +168,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdPlants: many(plants, { relationName: 'plantCreator' }),
   createdGenetics: many(genetics, { relationName: 'geneticCreator' }),
   createdBatches: many(batches, { relationName: 'batchCreator' }),
-  createdTasks: many(tasks, { relationName: 'taskCreator' }),
+  createdJobs: many(jobs, { relationName: 'jobCreator' }),
   createdSensors: many(sensors, { relationName: 'sensorCreator' }),
   createdHarvests: many(harvests, { relationName: 'harvestCreator' }),
   createdProcessing: many(processing, { relationName: 'processingCreator' }),

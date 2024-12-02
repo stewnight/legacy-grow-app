@@ -12,7 +12,7 @@ export const logLevelEnum = pgEnum('log_level', [
 export const systemLogSourceEnum = pgEnum('system_log_source', [
   'plants',
   'harvests',
-  'tasks',
+  'jobs',
   'system',
   'auth',
   'sensors',
@@ -100,7 +100,7 @@ export const sensorTypeEnum = pgEnum('sensor_type', [
   'airflow',
 ])
 
-export const taskStatusEnum = pgEnum('task_status', [
+export const jobStatusEnum = pgEnum('job_status', [
   'pending',
   'in_progress',
   'completed',
@@ -109,7 +109,7 @@ export const taskStatusEnum = pgEnum('task_status', [
   'deferred',
 ])
 
-export const taskPriorityEnum = pgEnum('task_priority', [
+export const jobPriorityEnum = pgEnum('job_priority', [
   'low',
   'medium',
   'high',
@@ -117,7 +117,7 @@ export const taskPriorityEnum = pgEnum('task_priority', [
   'critical',
 ])
 
-export const taskCategoryEnum = pgEnum('task_category', [
+export const jobCategoryEnum = pgEnum('job_category', [
   'maintenance',
   'transplanting',
   'cloning',
@@ -131,7 +131,7 @@ export const taskCategoryEnum = pgEnum('task_category', [
   'inspection',
 ])
 
-export const taskEntityTypeEnum = pgEnum('task_entity_type', [
+export const jobEntityTypeEnum = pgEnum('job_entity_type', [
   'plant',
   'batch',
   'location',
@@ -208,13 +208,13 @@ export type HealthStatus = (typeof healthStatusEnum.enumValues)[number]
 export type GeneticType = (typeof geneticTypeEnum.enumValues)[number]
 export type LocationType = (typeof locationTypeEnum.enumValues)[number]
 export type SensorType = (typeof sensorTypeEnum.enumValues)[number]
-export type TaskStatus = (typeof taskStatusEnum.enumValues)[number]
-export type TaskPriority = (typeof taskPriorityEnum.enumValues)[number]
-export type TaskCategory = (typeof taskCategoryEnum.enumValues)[number]
+export type JobStatus = (typeof jobStatusEnum.enumValues)[number]
+export type JobPriority = (typeof jobPriorityEnum.enumValues)[number]
+export type JobCategory = (typeof jobCategoryEnum.enumValues)[number]
 export type HarvestQuality = (typeof harvestQualityEnum.enumValues)[number]
 export type NoteType = (typeof noteTypeEnum.enumValues)[number]
 export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
 export type BuildingType = (typeof buildingTypeEnum.enumValues)[number]
 export type RoomType = (typeof roomTypeEnum.enumValues)[number]
 export type Status = (typeof statusEnum.enumValues)[number]
-export type TaskEntityType = (typeof taskEntityTypeEnum.enumValues)[number]
+export type JobEntityType = (typeof jobEntityTypeEnum.enumValues)[number]

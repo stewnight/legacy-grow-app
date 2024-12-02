@@ -16,7 +16,7 @@ import { plants } from './plants'
 import { harvests } from './harvests'
 import { locations } from './locations'
 import { batches } from './batches'
-import { tasks } from './tasks'
+import { jobs } from './jobs'
 import { processing } from './processing'
 import { sensors } from './sensors'
 
@@ -127,10 +127,10 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
     references: [locations.id],
     relationName: 'locationNotes',
   }),
-  task: one(tasks, {
+  job: one(jobs, {
     fields: [notes.entityId],
-    references: [tasks.id],
-    relationName: 'taskNotes',
+    references: [jobs.id],
+    relationName: 'jobNotes',
   }),
   processing: one(processing, {
     fields: [notes.entityId],
