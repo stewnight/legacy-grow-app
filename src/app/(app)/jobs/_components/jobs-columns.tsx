@@ -9,7 +9,16 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { AppSheet } from '~/components/layout/app-sheet'
 import { JobForm } from './jobs-form'
 import { Button } from '~/components/ui/button'
-import { CalendarIcon, Columns2, User, Clock, Tag, Box } from 'lucide-react'
+import {
+  CalendarIcon,
+  Columns2,
+  User,
+  Clock,
+  Tag,
+  Box,
+  PencilIcon,
+  EyeIcon,
+} from 'lucide-react'
 import { Calendar } from '~/components/ui/calendar'
 import {
   Popover,
@@ -212,9 +221,24 @@ export const columns: ColumnDef<JobWithRelations>[] = [
     id: 'actions',
     cell: ({ row }) => {
       return (
-        <AppSheet mode="edit" entity="job">
-          <JobForm mode="edit" defaultValues={row.original} />
-        </AppSheet>
+        <div className="flex justify-end">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/jobs/${row.original.id}`}>
+              <EyeIcon className="h-3 w-3" />
+            </Link>
+          </Button>
+          <AppSheet
+            mode="edit"
+            entity="job"
+            trigger={
+              <Button variant="ghost" size="icon">
+                <PencilIcon className="h-3 w-3" />
+              </Button>
+            }
+          >
+            <JobForm mode="edit" defaultValues={row.original} />
+          </AppSheet>
+        </div>
       )
     },
   },

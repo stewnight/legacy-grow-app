@@ -140,7 +140,7 @@ export function InstructionsManager({
       </div>
 
       <ScrollArea className="h-[200px] rounded-md border p-2">
-        {value.length > 0 ? (
+        {value && value.length > 0 ? (
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

@@ -45,6 +45,7 @@ import { InstructionsManager } from './instructions-manager'
 import { RequirementsManager } from './requirements-manager'
 import { type JobWithRelations } from '~/server/db/schema'
 import { type TRPCClientErrorLike } from '@trpc/client'
+import { type jobPropertiesSchema } from '~/server/db/schema/jobs'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type JobFormValues = z.infer<typeof insertJobSchema>
@@ -54,27 +55,23 @@ interface JobFormProps {
   defaultValues?: JobWithRelations
 }
 
-type JobProperties = {
-  recurring: {
-    frequency: string
-    interval: number
-    endDate?: string
-  } | null
-  tasks: Array<{
-    item: string
-    completed: boolean
-    completedAt?: string | null
-    estimatedMinutes?: number | null
-    actualMinutes?: number | null
-    startedAt?: string | null
-  }>
-  instructions: string[]
-  requirements: {
-    tools: string[]
-    supplies: string[]
-    ppe: string[]
-  }
-}
+type JobProperties = z.infer<typeof jobPropertiesSchema>
+
+const defaultProperties = {
+  recurring: null,
+  tasks: [
+    {
+      item: '',
+      completed: false,
+      completedAt: null,
+      estimatedMinutes: null,
+      actualMinutes: null,
+      startedAt: null,
+    },
+  ],
+  instructions: [''],
+  requirements: { tools: [], supplies: [], ppe: [] },
+} satisfies JobProperties
 
 type JobMetadata = {
   previousJobs?: string[]
@@ -112,13 +109,8 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       entityType: defaultValues?.entityType || 'none',
       entityId: defaultValues?.entityId || undefined,
       status: defaultValues?.status || 'active',
-      properties: (defaultValues?.properties as JobProperties) || {
-        recurring: null,
-        tasks: [],
-        instructions: [],
-        requirements: { tools: [], supplies: [], ppe: [] },
-      },
-      metadata: (defaultValues?.metadata as JobMetadata) || {
+      properties: defaultValues?.properties || defaultProperties,
+      metadata: defaultValues?.metadata || {
         previousJobs: [],
         nextJobs: [],
         estimatedDuration: null,
