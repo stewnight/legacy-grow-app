@@ -2,7 +2,7 @@ import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc'
 import { geneticRouter } from './routers/genetic'
 import { batchRouter } from './routers/batch'
 import { plantRouter } from './routers/plant'
-import { notesRouter } from './routers/notes'
+import { noteRouter } from './routers/note'
 import { mediaRouter } from './routers/media'
 import { locationRouter } from './routers/location'
 import { roomRouter } from './routers/room'
@@ -17,7 +17,7 @@ export const appRouter = createTRPCRouter({
   genetic: geneticRouter,
   batch: batchRouter,
   plant: plantRouter,
-  notes: notesRouter,
+  note: noteRouter,
   media: mediaRouter,
   location: locationRouter,
   room: roomRouter,

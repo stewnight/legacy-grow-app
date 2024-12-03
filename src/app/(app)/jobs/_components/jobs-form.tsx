@@ -38,6 +38,12 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import React from 'react'
+import { TaskManager } from './task-manager'
+import { RecurringSettings } from './recurring-settings'
+import { InstructionsManager } from './instructions-manager'
+import { RequirementsManager } from './requirements-manager'
+import { type Job } from '~/server/db/schema/jobs'
+import { type RouterOutputs } from '~/trpc/shared'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type JobFormValues = z.infer<typeof insertJobSchema>
@@ -70,6 +76,12 @@ export function JobForm({
       entityType: defaultValues?.entityType || 'none',
       entityId: defaultValues?.entityId || undefined,
       status: defaultValues?.status || 'active',
+      properties: defaultValues?.properties || {
+        recurring: null,
+        tasks: [],
+        instructions: [],
+        requirements: { tools: [], supplies: [], ppe: [] },
+      },
     },
   })
 
@@ -117,6 +129,10 @@ export function JobForm({
     const formData = {
       ...data,
       entityId: data.entityType === 'none' ? null : data.entityId,
+      properties: {
+        ...data.properties,
+        tasks: data.properties?.tasks || [],
+      },
     }
 
     if (mode === 'create') {
@@ -132,12 +148,7 @@ export function JobForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={(e) => {
-          console.log('Form Submitted Event')
-          form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors)
-          })(e)
-        }}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 p-1"
         noValidate
       >
@@ -349,30 +360,263 @@ export function JobForm({
           )}
         />
 
-        {/* <FormField
+        <FormField
           control={form.control}
-          name="status"
+          name="properties.tasks"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {statusEnum.enumValues.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Tasks</FormLabel>
+              <FormControl>
+                <TaskManager
+                  tasks={field.value || []}
+                  onChange={(tasks) => {
+                    form.setValue('properties.tasks', tasks, {
+                      shouldValidate: true,
+                    })
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
-        /> */}
+        />
+
+        <FormField
+          control={form.control}
+          name="properties.recurring"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <RecurringSettings
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="properties.instructions"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Instructions</FormLabel>
+              <FormControl>
+                <InstructionsManager
+                  value={field.value || []}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="properties.requirements"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Requirements</FormLabel>
+              <FormControl>
+                <RequirementsManager
+                  value={field.value || { tools: [], supplies: [], ppe: [] }}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="space-y-4 rounded-lg border p-4">
+          <h3 className="text-lg font-medium">Additional Information</h3>
+
+          <FormField
+            control={form.control}
+            name="metadata.estimatedDuration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estimated Duration (minutes)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value || ''}
+                    onChange={(e) =>
+                      field.onChange(e.target.valueAsNumber || null)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {mode === 'edit' && (
+            <FormField
+              control={form.control}
+              name="metadata.actualDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Actual Duration (minutes)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) =>
+                        field.onChange(e.target.valueAsNumber || null)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name="metadata.location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location Details</FormLabel>
+                <div className="grid gap-2">
+                  <FormControl>
+                    <Input
+                      placeholder="Location Name"
+                      value={field.value?.name || ''}
+                      onChange={(e) =>
+                        field.onChange({
+                          ...field.value,
+                          name: e.target.value,
+                          type: field.value?.type || 'custom',
+                          id: field.value?.id || crypto.randomUUID(),
+                        })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <Input
+                      placeholder="Location Type"
+                      value={field.value?.type || ''}
+                      onChange={(e) =>
+                        field.onChange({
+                          ...field.value,
+                          type: e.target.value,
+                        })
+                      }
+                    />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="metadata.previousJobs"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Previous Jobs</FormLabel>
+                <FormControl>
+                  <div className="space-y-2">
+                    {field.value?.map((jobId, index) => (
+                      <div key={jobId} className="flex items-center gap-2">
+                        <Input
+                          value={jobId}
+                          onChange={(e) => {
+                            const newJobs = [...(field.value || [])]
+                            newJobs[index] = e.target.value
+                            field.onChange(newJobs)
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const newJobs = field.value?.filter(
+                              (_, i) => i !== index
+                            )
+                            field.onChange(newJobs)
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        field.onChange([...(field.value || []), ''])
+                      }}
+                    >
+                      Add Previous Job
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="metadata.nextJobs"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Next Jobs</FormLabel>
+                <FormControl>
+                  <div className="space-y-2">
+                    {field.value?.map((jobId, index) => (
+                      <div key={jobId} className="flex items-center gap-2">
+                        <Input
+                          value={jobId}
+                          onChange={(e) => {
+                            const newJobs = [...(field.value || [])]
+                            newJobs[index] = e.target.value
+                            field.onChange(newJobs)
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const newJobs = field.value?.filter(
+                              (_, i) => i !== index
+                            )
+                            field.onChange(newJobs)
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        field.onChange([...(field.value || []), ''])
+                      }}
+                    >
+                      Add Next Job
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Button type="submit" disabled={isCreating || isUpdating}>
           {mode === 'create' ? 'Create Task' : 'Update Task'}
