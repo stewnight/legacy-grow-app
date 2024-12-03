@@ -3,46 +3,30 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
-import { columns } from './_components/jobs-columns'
+import { columns, JobsTableFilters } from './_components/jobs-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
 import { JobForm } from './_components/jobs-form'
-import {
-  type JobStatus,
-  type JobPriority,
-  type JobEntityType,
-} from '~/server/db/schema/enums'
-import { type JobWithRelations } from '../../../server/db/schema'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '../../../components/ui/tabs'
-import { CalendarView } from '../../../components/calendar/calendar-view'
+import { type JobWithRelations } from '~/server/db/schema'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { CalendarView } from '~/components/calendar/calendar-view'
 import { CalendarIcon, TableIcon } from 'lucide-react'
-import { JobsFilters } from './_components/jobs-filters'
+import { type User } from 'next-auth'
 
-export default async function JobsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+type UserWithImage = {
+  id: string
+  name: string | null
+  image: string | null
+}
+
+export default async function JobsPage() {
   const session = await auth()
   if (!session) {
     redirect('/')
   }
 
-  const params = await Promise.resolve(searchParams)
-
   const { items: jobsData } = await api.job.getAll({
     limit: 100,
-    filters: {
-      jobStatus: params.status as JobStatus,
-      entityType: params.entityType as JobEntityType,
-      priority: params.priority as JobPriority,
-      assignedToId: params.assignedToId as string,
-    },
   })
 
   const jobs: JobWithRelations[] = jobsData.map((job) => ({
@@ -51,11 +35,13 @@ export default async function JobsPage({
       ? {
           id: job.assignedTo.id,
           name: job.assignedTo.name || '',
+          image: (job.assignedTo as UserWithImage).image || '',
         }
       : null,
     createdBy: {
       id: job.createdBy.id,
       name: job.createdBy.name || '',
+      image: (job.createdBy as UserWithImage).image || '',
     },
   }))
 
@@ -67,7 +53,6 @@ export default async function JobsPage({
           <JobForm mode="create" />
         </AppSheet>
       </div>
-      <JobsFilters userId={session.user.id} />
       <div className="h-full">
         <Tabs defaultValue="table">
           <TabsList>
@@ -82,9 +67,19 @@ export default async function JobsPage({
           </TabsList>
           <TabsContent value="table">
             <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-              {jobs && (
-                <DataTable columns={columns} data={jobs} filterColumn="title" />
-              )}
+              <div className="space-y-4">
+                {jobs && (
+                  <DataTable
+                    columns={columns}
+                    data={jobs}
+                    filterColumn="title"
+                    enableSorting
+                    enableFiltering
+                    enableColumnFilters
+                    filters={<JobsTableFilters />}
+                  />
+                )}
+              </div>
             </Suspense>
           </TabsContent>
           <TabsContent value="calendar">

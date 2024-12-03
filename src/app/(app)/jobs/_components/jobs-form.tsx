@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -42,63 +43,105 @@ import { TaskManager } from './task-manager'
 import { RecurringSettings } from './recurring-settings'
 import { InstructionsManager } from './instructions-manager'
 import { RequirementsManager } from './requirements-manager'
-import { type Job } from '~/server/db/schema/jobs'
-import { type RouterOutputs } from '~/trpc/shared'
+import { type JobWithRelations } from '~/server/db/schema'
+import { type TRPCClientErrorLike } from '@trpc/client'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type JobFormValues = z.infer<typeof insertJobSchema>
 
 interface JobFormProps {
-  mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['job']['get']
-  onSuccess?: (data: JobFormValues) => void
+  mode: 'create' | 'edit'
+  defaultValues?: JobWithRelations
 }
 
-export function JobForm({
-  mode = 'create',
-  defaultValues,
-  onSuccess,
-}: JobFormProps) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const utils = api.useUtils()
+type JobProperties = {
+  recurring: {
+    frequency: string
+    interval: number
+    endDate?: string
+  } | null
+  tasks: Array<{
+    item: string
+    completed: boolean
+    completedAt?: string | null
+    estimatedMinutes?: number | null
+    actualMinutes?: number | null
+    startedAt?: string | null
+  }>
+  instructions: string[]
+  requirements: {
+    tools: string[]
+    supplies: string[]
+    ppe: string[]
+  }
+}
 
+type JobMetadata = {
+  previousJobs?: string[]
+  nextJobs?: string[]
+  estimatedDuration?: number | null
+  actualDuration?: number | null
+  location?: {
+    id: string
+    type: string
+    name: string
+  } | null
+  device?: string
+  updatedAt?: string
+}
+
+type Task = {
+  item: string
+  completed: boolean
+  completedAt?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: string | null
+}
+
+export function JobForm({ mode, defaultValues }: JobFormProps) {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(insertJobSchema),
     defaultValues: {
       title: defaultValues?.title || '',
       description: defaultValues?.description || '',
-      priority: defaultValues?.priority || 'medium',
-      category: defaultValues?.category || undefined,
+      priority: defaultValues?.priority || 'low',
       jobStatus: defaultValues?.jobStatus || 'pending',
       dueDate: defaultValues?.dueDate || undefined,
       assignedToId: defaultValues?.assignedToId || undefined,
       entityType: defaultValues?.entityType || 'none',
       entityId: defaultValues?.entityId || undefined,
       status: defaultValues?.status || 'active',
-      properties: defaultValues?.properties || {
+      properties: (defaultValues?.properties as JobProperties) || {
         recurring: null,
         tasks: [],
         instructions: [],
         requirements: { tools: [], supplies: [], ppe: [] },
       },
+      metadata: (defaultValues?.metadata as JobMetadata) || {
+        previousJobs: [],
+        nextJobs: [],
+        estimatedDuration: null,
+        actualDuration: null,
+        location: null,
+      },
     },
   })
 
+  const utils = api.useUtils()
+  const { toast } = useToast()
+
   const { mutate: createJob, isPending: isCreating } =
     api.job.create.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Job created successfully' })
-        void Promise.all([
-          utils.job.getAll.invalidate(),
-          utils.job.get.invalidate(data.id),
-        ])
-        router.push(`/jobs/${data.id}`)
-        onSuccess?.(data)
-      },
-      onError: (error) => {
+      onSuccess: async () => {
         toast({
-          title: 'Error creating task',
+          title: 'Job created successfully',
+        })
+        await utils.job.invalidate()
+      },
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
+        toast({
+          title: 'Error creating job',
           description: error.message,
           variant: 'destructive',
         })
@@ -107,15 +150,13 @@ export function JobForm({
 
   const { mutate: updateJob, isPending: isUpdating } =
     api.job.update.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Job updated successfully' })
-        void Promise.all([
-          utils.job.getAll.invalidate(),
-          utils.job.get.invalidate(data.id),
-        ])
-        onSuccess?.(data)
+      onSuccess: async () => {
+        toast({
+          title: 'Job updated successfully',
+        })
+        await utils.job.invalidate()
       },
-      onError: (error) => {
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
         toast({
           title: 'Error updating job',
           description: error.message,
@@ -125,20 +166,40 @@ export function JobForm({
     })
 
   const onSubmit = async (data: JobFormValues) => {
-    // Ensure entityId is null when entityType is 'none'
-    const formData = {
-      ...data,
-      entityId: data.entityType === 'none' ? null : data.entityId,
-      properties: {
-        ...data.properties,
-        tasks: data.properties?.tasks || [],
-      },
-    }
+    try {
+      const formData = {
+        ...data,
+        entityId: data.entityType === 'none' ? null : data.entityId,
+        properties: {
+          ...(data.properties as JobProperties),
+          tasks: (data.properties as JobProperties)?.tasks || [],
+        },
+        metadata: {
+          ...(data.metadata as JobMetadata),
+          device: 'web',
+          updatedAt: new Date().toISOString(),
+        },
+      }
 
-    if (mode === 'create') {
-      createJob(formData)
-    } else if (mode === 'edit' && defaultValues?.id) {
-      updateJob({ id: defaultValues.id, data: formData })
+      if (mode === 'create') {
+        createJob(formData)
+      } else if (defaultValues?.id) {
+        updateJob({ id: defaultValues.id, data: formData })
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: 'Error submitting form',
+          description: error.message,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Error submitting form',
+          description: 'An unexpected error occurred',
+          variant: 'destructive',
+        })
+      }
     }
   }
 
@@ -159,6 +220,10 @@ export function JobForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Entity Type</FormLabel>
+                <FormDescription>
+                  The entity type is the type of entity that this job is related
+                  to.
+                </FormDescription>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -368,7 +433,7 @@ export function JobForm({
               <FormLabel>Tasks</FormLabel>
               <FormControl>
                 <TaskManager
-                  tasks={field.value || []}
+                  tasks={(field.value || []) as Task[]}
                   onChange={(tasks) => {
                     form.setValue('properties.tasks', tasks, {
                       shouldValidate: true,
@@ -386,9 +451,10 @@ export function JobForm({
           name="properties.recurring"
           render={({ field }) => (
             <FormItem>
+              <FormLabel>Recurring Settings</FormLabel>
               <FormControl>
                 <RecurringSettings
-                  value={field.value}
+                  value={field.value as JobProperties['recurring']}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -405,7 +471,7 @@ export function JobForm({
               <FormLabel>Instructions</FormLabel>
               <FormControl>
                 <InstructionsManager
-                  value={field.value || []}
+                  value={field.value as JobProperties['instructions']}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -422,7 +488,13 @@ export function JobForm({
               <FormLabel>Requirements</FormLabel>
               <FormControl>
                 <RequirementsManager
-                  value={field.value || { tools: [], supplies: [], ppe: [] }}
+                  value={
+                    (field.value as JobProperties['requirements']) || {
+                      tools: [],
+                      supplies: [],
+                      ppe: [],
+                    }
+                  }
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -431,195 +503,21 @@ export function JobForm({
           )}
         />
 
-        <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Additional Information</h3>
-
-          <FormField
-            control={form.control}
-            name="metadata.estimatedDuration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estimated Duration (minutes)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    value={field.value || ''}
-                    onChange={(e) =>
-                      field.onChange(e.target.valueAsNumber || null)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {mode === 'edit' && (
-            <FormField
-              control={form.control}
-              name="metadata.actualDuration"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Actual Duration (minutes)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(e) =>
-                        field.onChange(e.target.valueAsNumber || null)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Button
+          type="submit"
+          disabled={isCreating || isUpdating}
+          className="w-full"
+        >
+          {isCreating || isUpdating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {mode === 'create' ? 'Creating...' : 'Updating...'}
+            </>
+          ) : mode === 'create' ? (
+            'Create Job'
+          ) : (
+            'Update Job'
           )}
-
-          <FormField
-            control={form.control}
-            name="metadata.location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location Details</FormLabel>
-                <div className="grid gap-2">
-                  <FormControl>
-                    <Input
-                      placeholder="Location Name"
-                      value={field.value?.name || ''}
-                      onChange={(e) =>
-                        field.onChange({
-                          ...field.value,
-                          name: e.target.value,
-                          type: field.value?.type || 'custom',
-                          id: field.value?.id || crypto.randomUUID(),
-                        })
-                      }
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <Input
-                      placeholder="Location Type"
-                      value={field.value?.type || ''}
-                      onChange={(e) =>
-                        field.onChange({
-                          ...field.value,
-                          type: e.target.value,
-                        })
-                      }
-                    />
-                  </FormControl>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="metadata.previousJobs"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Previous Jobs</FormLabel>
-                <FormControl>
-                  <div className="space-y-2">
-                    {field.value?.map((jobId, index) => (
-                      <div key={jobId} className="flex items-center gap-2">
-                        <Input
-                          value={jobId}
-                          onChange={(e) => {
-                            const newJobs = [...(field.value || [])]
-                            newJobs[index] = e.target.value
-                            field.onChange(newJobs)
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const newJobs = field.value?.filter(
-                              (_, i) => i !== index
-                            )
-                            field.onChange(newJobs)
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange([...(field.value || []), ''])
-                      }}
-                    >
-                      Add Previous Job
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="metadata.nextJobs"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Next Jobs</FormLabel>
-                <FormControl>
-                  <div className="space-y-2">
-                    {field.value?.map((jobId, index) => (
-                      <div key={jobId} className="flex items-center gap-2">
-                        <Input
-                          value={jobId}
-                          onChange={(e) => {
-                            const newJobs = [...(field.value || [])]
-                            newJobs[index] = e.target.value
-                            field.onChange(newJobs)
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const newJobs = field.value?.filter(
-                              (_, i) => i !== index
-                            )
-                            field.onChange(newJobs)
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange([...(field.value || []), ''])
-                      }}
-                    >
-                      Add Next Job
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <Button type="submit" disabled={isCreating || isUpdating}>
-          {mode === 'create' ? 'Create Task' : 'Update Task'}
         </Button>
       </form>
     </Form>

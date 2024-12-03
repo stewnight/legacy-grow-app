@@ -200,3 +200,68 @@ When writing code or answering questions:
   - Use transactions for related operations
   - Consider mobile and offline scenarios
   - Optimize query patterns
+
+## Type Safety Guidelines
+
+### Schema and Type Patterns
+
+1. Use Drizzle's built-in type inference:
+
+   ```typescript
+   // Table types
+   type TableType = typeof table.$inferSelect
+   type NewTableType = typeof table.$inferInsert
+
+   // Schema types
+   type SchemaType = z.infer<typeof insertSchema>
+   ```
+
+2. JSON field typing:
+
+   ```typescript
+   json('field')
+     .$type<{
+       // Type definition here
+     }>()
+     .default({
+       // Default values here
+     })
+   ```
+
+3. Form mutations:
+
+   ```typescript
+   // Create mutation
+   createMutation(formData)
+
+   // Update mutation
+   updateMutation({
+     id: entityId,
+     data: formData,
+   })
+   ```
+
+4. Loading states:
+
+   ```typescript
+   const { mutate, isPending } = api.entity.action.useMutation()
+   ```
+
+5. Consistent metadata handling:
+   ```typescript
+   metadata: {
+     device: 'web',
+     updatedAt: new Date().toISOString(),
+     // Entity-specific metadata
+   }
+   ```
+
+### Type Safety Best Practices
+
+1. Never create standalone type files - use schema types
+2. Use Zod for runtime validation
+3. Use proper type inference from Drizzle
+4. Handle JSON serialization consistently
+5. Follow the mutation patterns for create/update
+6. Use loading states for better UX
+7. Keep metadata structure consistent across entities
