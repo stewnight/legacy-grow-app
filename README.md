@@ -1,90 +1,109 @@
 # Legacy Grow App
 
-A modern cannabis cultivation management system built with Next.js 15, focusing on essential growing operations, compliance tracking, and mobile-first usability.
+A modern cannabis cultivation management system built with Next.js 15, focusing on type-safe operations, compliance tracking, and mobile-first usability.
 
 ## Tech Stack
 
 - **Next.js 15** with App Router for modern server-side rendering
 - **NextAuth.js 5** for Discord-based authentication
 - **Drizzle ORM** with PostgreSQL for type-safe database interactions
+  - Strong type inference with `$inferInsert` and `$inferSelect`
+  - Standardized metadata handling
+  - Consistent audit fields
 - **tRPC** for type-safe APIs and simplified backend/frontend communication
+  - Protected procedures with session handling
+  - Standardized error handling
+  - Type-safe mutations
 - **Tanstack React Query** for efficient data fetching and optimistic updates
-- **Shadcn UI components** with **Tailwind CSS** for responsive design and styling
+  - Automatic cache invalidation
+  - Optimistic updates for better UX
+- **Shadcn UI components** with **Tailwind CSS** for responsive design
 
 ## Current State
 
 ### Completed Features
 
 - [x] User authentication with Discord
-- [x] Initial schema design and integration using Drizzle ORM
-- [o] Basic CRUD scaffolding for:
-  - [x] Facilities
-  - [x] Areas
-  - [x] Locations
-  - [x] Genetic strains
-  - [x] Batches
-  - [x] Plants
-  - [x] Tasks
-  - [x] Notes
-  - [x] Sensors
-  - [x] Processing
-  - [x] Harvests
-- [x] Mobile-first responsive layout
-- [x] Reusable UI components (forms, tables, and navigation)
+- [x] Enhanced type safety across the stack
+  - Drizzle ORM type inference
+  - tRPC procedure validation
+  - Zod schema validation
+- [x] Core entity management
+  - Facilities and Areas
+  - Plants and Batches
+  - Notes with metadata
+  - Jobs and Tasks
+- [x] Enhanced note system
+  - Rich metadata support
+  - Entity relationships
+  - File attachments
+  - Creator tracking
 
-### In Progress Features
+### In Progress
 
-- [x] Schema consistency and standardization (pending metadata alignment, field naming, cascading relationships, etc.)
-- [x] Router integration for CRUD operations with tRPC
-- [x] Complete CRUD operations for:
-  - Plant updates and deletions
-  - Genetic strain updates and deletions
-  - Batch updates and deletions
-- [ ] Enhanced note system:
-  - Media upload support
-  - Better timeline visualization
-- [ ] Offline-first capabilities:
-  - React Query caching
-  - Service Worker integration
-  - PWA configuration
+- [ ] Type Safety Enhancements
+  - Standardized metadata interfaces
+  - Consistent type assertions
+  - Enhanced error handling
+- [ ] Data Management
+  - Transaction support
+  - Batch operations
+  - History tracking
+- [ ] UI/UX Improvements
+  - Mobile responsiveness
+  - Offline capabilities
+  - Performance optimization
 
-### MVP Roadmap
+## Development Roadmap
 
-#### Phase 1: Core Functionality Completion
+### Phase 1: Type Safety and Consistency (Current)
 
-- [ ] Finalize schemas with consistent relationships and field structures
-- [ ] Align all routers with finalized schemas
-- [ ] Create mobile-friendly forms for CRUD operations
-- [ ] Set up offline functionality (React Query + Service Worker)
+- [ ] Standardize type patterns
+  - Metadata interfaces
+  - Entity references
+  - Audit fields
+- [ ] Enhance error handling
+  - Structured error types
+  - Error recovery
+  - Validation feedback
+- [ ] Improve data validation
+  - Input schemas
+  - Runtime checks
+  - Type assertions
 
-#### Phase 2: Enhanced Operations
+### Phase 2: Data Management
 
-- [ ] Develop Plant Dashboard:
-  - Active plant overview
-  - Growth stage tracking
-  - Health status monitoring
-- [ ] Implement Batch Management:
-  - Batch creation and grouping
-  - Batch timeline visualization
-- [ ] Add Daily Operations Tracking:
-  - Task scheduling
-  - Growth stage transitions
-  - Environmental logging
+- [ ] Transaction support
+  - Multi-entity operations
+  - Rollback handling
+  - Conflict resolution
+- [ ] Batch operations
+  - Bulk updates
+  - Mass assignments
+  - Group actions
+- [ ] History tracking
+  - Change logs
+  - Audit trails
+  - Version control
 
-#### Phase 3: Compliance and Reporting
+### Phase 3: Mobile and Offline
 
-- [ ] Automated compliance logging
-- [ ] Comprehensive plant and batch history tracking
-- [ ] Export and reporting tools
-- [ ] Image and media-based documentation
+- [ ] Offline capabilities
+  - Service workers
+  - Local storage
+  - Sync management
+- [ ] Mobile optimization
+  - Touch interfaces
+  - Responsive layouts
+  - Native features
 
 ## Development
 
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
-- Cloudflare R2 or compatible S3 storage
+- PostgreSQL 14+
+- pnpm package manager
 
 ### Getting Started
 
@@ -92,30 +111,43 @@ A modern cannabis cultivation management system built with Next.js 15, focusing 
 # Install dependencies
 pnpm install
 
-# Set up environment variables
+# Set up environment
 cp .env.example .env
 
 # Push database schema
 pnpm db:push
 
-# Start the development server
+# Start development
 pnpm dev
 ```
 
-## Storybook
+### Type Safety Guidelines
 
-This project uses Storybook for component development and documentation.
+Follow these patterns for type-safe development:
 
-To run Storybook locally:
+```typescript
+// Schema types
+type TableType = typeof tableSchema;
+type TableInsert = typeof tableSchema.$inferInsert;
+type TableSelect = typeof tableSchema.$inferSelect;
 
-```bash
-pnpm storybook
+// Mutations
+.insert(data as typeof table.$inferInsert)
+.update().set(data as typeof table.$inferInsert)
+
+// Validation
+const inputSchema = z.object({
+  data: tableSchema.$inferInsert.omit(['id', 'createdAt'])
+});
 ```
 
-To build Storybook for deployment:
+## Contributing
 
-```bash
-pnpm build-storybook
-```
+1. Follow type safety guidelines
+2. Maintain consistent patterns
+3. Write clear documentation
+4. Add appropriate tests
 
-Visit [Storybook](https://storybook.js.org/) for more information on writing and organizing stories.
+## License
+
+MIT
