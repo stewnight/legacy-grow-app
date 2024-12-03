@@ -16,9 +16,6 @@ export default async function BatchesPage() {
 
   const { items: batches } = await api.batch.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
   })
 
   return (

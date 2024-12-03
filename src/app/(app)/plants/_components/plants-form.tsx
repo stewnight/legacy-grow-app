@@ -85,22 +85,18 @@ export function PlantForm({
   // Fetch related data
   const { data: genetics } = api.genetic.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   const { data: locations } = api.location.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   const { data: batches } = api.batch.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   const { data: mothers } = api.plant.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   const { mutate: createPlant, isPending: isCreating } =

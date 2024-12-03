@@ -16,9 +16,6 @@ export default async function BuildingsPage() {
 
   const { items: buildings } = await api.building.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
   })
 
   return (

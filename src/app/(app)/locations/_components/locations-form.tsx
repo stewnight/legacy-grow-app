@@ -130,7 +130,6 @@ export function LocationForm({
 
   const { data: rooms } = api.room.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   return (

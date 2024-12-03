@@ -16,9 +16,6 @@ export default async function PlantsPage() {
 
   const { items: plants } = await api.plant.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
   })
 
   return (

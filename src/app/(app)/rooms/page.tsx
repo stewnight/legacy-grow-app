@@ -16,9 +16,6 @@ export default async function RoomsPage() {
 
   const { items: rooms } = await api.room.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
   })
 
   return (
