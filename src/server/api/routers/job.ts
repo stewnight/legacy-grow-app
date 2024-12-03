@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { jobs, insertJobSchema } from '~/server/db/schema'
-import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { eq, desc, like, and, SQL, asc, sql } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import {
   jobStatusEnum,
@@ -22,6 +22,13 @@ const jobFiltersSchema = z.object({
   assignedToId: z.string().uuid().optional(),
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
+  dueDateFrom: z.string().datetime().optional(),
+  dueDateTo: z.string().datetime().optional(),
+})
+
+const sortSchema = z.object({
+  field: z.enum(['priority', 'dueDate', 'jobStatus', 'createdAt']),
+  direction: z.enum(['asc', 'desc']),
 })
 
 export const jobRouter = createTRPCRouter({
@@ -31,10 +38,11 @@ export const jobRouter = createTRPCRouter({
         limit: z.number().min(1).max(100).default(10),
         cursor: z.number().nullish(),
         filters: jobFiltersSchema.optional(),
+        sort: sortSchema.optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { limit, cursor, filters } = input
+      const { limit, cursor, filters, sort } = input
 
       const conditions = [
         filters?.jobStatus ? eq(jobs.jobStatus, filters.jobStatus) : undefined,
@@ -48,13 +56,54 @@ export const jobRouter = createTRPCRouter({
         filters?.entityType
           ? eq(jobs.entityType, filters.entityType)
           : undefined,
+        filters?.dueDateFrom
+          ? sql`${jobs.dueDate} >= ${filters.dueDateFrom}`
+          : undefined,
+        filters?.dueDateTo
+          ? sql`${jobs.dueDate} <= ${filters.dueDateTo}`
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
+
+      let orderBy: SQL[] = [desc(jobs.createdAt)]
+      if (sort) {
+        switch (sort.field) {
+          case 'priority':
+            orderBy = [
+              sort.direction === 'asc'
+                ? asc(jobs.priority)
+                : desc(jobs.priority),
+              desc(jobs.createdAt),
+            ]
+            break
+          case 'dueDate':
+            orderBy = [
+              sort.direction === 'asc' ? asc(jobs.dueDate) : desc(jobs.dueDate),
+              desc(jobs.createdAt),
+            ]
+            break
+          case 'jobStatus':
+            orderBy = [
+              sort.direction === 'asc'
+                ? asc(jobs.jobStatus)
+                : desc(jobs.jobStatus),
+              desc(jobs.createdAt),
+            ]
+            break
+          case 'createdAt':
+            orderBy = [
+              sort.direction === 'asc'
+                ? asc(jobs.createdAt)
+                : desc(jobs.createdAt),
+            ]
+            break
+        }
+      }
 
       const items = await ctx.db.query.jobs.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
         offset: cursor || 0,
-        orderBy: [desc(jobs.createdAt)],
+        orderBy,
         with: {
           assignedTo: {
             columns: {
