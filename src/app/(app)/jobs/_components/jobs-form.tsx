@@ -38,6 +38,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import React from 'react'
+import { TaskManager } from './task-manager'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type JobFormValues = z.infer<typeof insertJobSchema>
@@ -70,6 +71,12 @@ export function JobForm({
       entityType: defaultValues?.entityType || 'none',
       entityId: defaultValues?.entityId || undefined,
       status: defaultValues?.status || 'active',
+      properties: defaultValues?.properties || {
+        recurring: null,
+        tasks: [],
+        instructions: [],
+        requirements: { tools: [], supplies: [], ppe: [] },
+      },
     },
   })
 
@@ -117,6 +124,10 @@ export function JobForm({
     const formData = {
       ...data,
       entityId: data.entityType === 'none' ? null : data.entityId,
+      properties: {
+        ...data.properties,
+        tasks: data.properties?.tasks || [],
+      },
     }
 
     if (mode === 'create') {
@@ -132,12 +143,7 @@ export function JobForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={(e) => {
-          console.log('Form Submitted Event')
-          form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors)
-          })(e)
-        }}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 p-1"
         noValidate
       >
@@ -349,30 +355,26 @@ export function JobForm({
           )}
         />
 
-        {/* <FormField
+        <FormField
           control={form.control}
-          name="status"
+          name="properties.tasks"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {statusEnum.enumValues.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Tasks</FormLabel>
+              <FormControl>
+                <TaskManager
+                  tasks={field.value || []}
+                  onChange={(tasks) => {
+                    form.setValue('properties.tasks', tasks, {
+                      shouldValidate: true,
+                    })
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
-        /> */}
+        />
 
         <Button type="submit" disabled={isCreating || isUpdating}>
           {mode === 'create' ? 'Create Task' : 'Update Task'}

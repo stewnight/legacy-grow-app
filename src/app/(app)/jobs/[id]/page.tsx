@@ -27,6 +27,8 @@ import {
   Package,
   HardHat,
   Link as LinkIcon,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { JobForm } from '../_components/jobs-form'
@@ -42,6 +44,7 @@ import { type Genetic } from '~/server/db/schema/genetics'
 import { type Sensor } from '~/server/db/schema/sensors'
 import { type Processing } from '~/server/db/schema/processing'
 import { type Harvest } from '~/server/db/schema/harvests'
+import { TaskManager } from '../_components/task-manager'
 
 export default function JobPage({
   params,
@@ -111,6 +114,8 @@ export default function JobPage({
       }
     }
   }
+
+  const [showTaskManager, setShowTaskManager] = React.useState(false)
 
   if (isLoading) {
     return (
@@ -362,43 +367,166 @@ export default function JobPage({
         <TabsContent value="tasks">
           <Card>
             <CardHeader>
-              <CardTitle>Job Tasks</CardTitle>
-              <CardDescription>Steps to complete this job</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {job.properties?.tasks && job.properties.tasks.length > 0 ? (
-                <div className="space-y-4">
-                  {job.properties.tasks.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between border rounded p-4"
-                    >
-                      <div className="flex items-center gap-4">
-                        <Checkbox
-                          checked={item.completed}
-                          onCheckedChange={() => handleTaskToggle(index)}
-                        />
-                        <div>
-                          <p className="font-medium">{item.item}</p>
-                          {item.completedAt && (
-                            <p className="text-sm text-muted-foreground">
-                              Completed: {formatDate(item.completedAt)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <Badge
-                        variant={item.completed ? 'default' : 'secondary'}
-                        className="capitalize"
-                      >
-                        {item.completed ? 'Done' : 'Pending'}
-                      </Badge>
-                    </div>
-                  ))}
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Job Tasks</CardTitle>
+                  <CardDescription>Steps to complete this job</CardDescription>
                 </div>
-              ) : (
-                <p className="text-muted-foreground">No tasks</p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTaskManager(!showTaskManager)}
+                  >
+                    {showTaskManager ? (
+                      <>
+                        <ChevronUp className="mr-2 h-4 w-4" />
+                        Hide Manager
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="mr-2 h-4 w-4" />
+                        Manage Tasks
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (job.properties?.tasks) {
+                        const updatedTasks = job.properties.tasks.map(
+                          (task) => ({
+                            ...task,
+                            completed: true,
+                            completedAt: task.completed
+                              ? task.completedAt
+                              : new Date().toISOString(),
+                          })
+                        )
+                        updateJobTasks({
+                          id: job.id,
+                          data: {
+                            properties: {
+                              ...job.properties,
+                              tasks: updatedTasks,
+                            },
+                          },
+                        })
+                      }
+                    }}
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Complete All
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (job.properties?.tasks) {
+                        const updatedTasks = job.properties.tasks.map(
+                          (task) => ({
+                            ...task,
+                            completed: false,
+                            completedAt: null,
+                          })
+                        )
+                        updateJobTasks({
+                          id: job.id,
+                          data: {
+                            properties: {
+                              ...job.properties,
+                              tasks: updatedTasks,
+                            },
+                          },
+                        })
+                      }
+                    }}
+                  >
+                    Reset All
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {showTaskManager && (
+                <div className="rounded-lg border bg-card p-4">
+                  <TaskManager
+                    tasks={job.properties?.tasks || []}
+                    onChange={(tasks) => {
+                      updateJobTasks({
+                        id: job.id,
+                        data: {
+                          properties: {
+                            ...job.properties,
+                            tasks,
+                          },
+                        },
+                      })
+                    }}
+                  />
+                </div>
               )}
+
+              <div className="space-y-4">
+                {job.properties?.tasks && job.properties.tasks.length > 0 ? (
+                  <div className="space-y-2">
+                    {job.properties.tasks.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg border bg-card p-4 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <Checkbox
+                            checked={item.completed}
+                            onCheckedChange={() => handleTaskToggle(index)}
+                          />
+                          <div>
+                            <p
+                              className={`font-medium ${item.completed ? 'line-through text-muted-foreground' : ''}`}
+                            >
+                              {item.item}
+                            </p>
+                            <div className="flex gap-2 items-center text-sm text-muted-foreground mt-1">
+                              {item.completed ? (
+                                <>
+                                  <CheckCircle2 className="h-3 w-3 text-green-500" />
+                                  <span>
+                                    Completed{' '}
+                                    {formatDate(item.completedAt || '')}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="h-3 w-3" />
+                                  <span>Pending</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={item.completed ? 'default' : 'secondary'}
+                          className={`capitalize ${item.completed ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' : ''}`}
+                        >
+                          {item.completed ? 'Done' : 'Pending'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                    <p>No tasks added yet</p>
+                    <Button
+                      variant="link"
+                      onClick={() => setShowTaskManager(true)}
+                      className="mt-2"
+                    >
+                      Add your first task
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

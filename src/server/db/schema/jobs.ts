@@ -26,6 +26,30 @@ import { Genetic, genetics } from './genetics'
 import { Sensor, sensors } from './sensors'
 import { Processing, processing } from './processing'
 import { Harvest, harvests } from './harvests'
+import { z } from 'zod'
+
+const taskSchema = z.object({
+  item: z.string(),
+  completed: z.boolean(),
+  completedAt: z.string().nullable().optional(),
+})
+
+export const jobPropertiesSchema = z.object({
+  recurring: z
+    .object({
+      frequency: z.string(),
+      interval: z.number(),
+      endDate: z.string().optional(),
+    })
+    .nullable(),
+  tasks: z.array(taskSchema),
+  instructions: z.array(z.string()),
+  requirements: z.object({
+    tools: z.array(z.string()),
+    supplies: z.array(z.string()),
+    ppe: z.array(z.string()),
+  }),
+})
 
 export const jobs = createTable(
   'job',
@@ -44,24 +68,7 @@ export const jobs = createTable(
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     properties: json('properties')
-      .$type<{
-        recurring: {
-          frequency: string
-          interval: number
-          endDate?: string
-        } | null
-        tasks: Array<{
-          item: string
-          completed: boolean
-          completedAt?: string | null
-        }>
-        instructions: string[]
-        requirements: {
-          tools: string[]
-          supplies: string[]
-          ppe: string[]
-        }
-      }>()
+      .$type<z.infer<typeof jobPropertiesSchema>>()
       .default({
         recurring: null,
         tasks: [],
