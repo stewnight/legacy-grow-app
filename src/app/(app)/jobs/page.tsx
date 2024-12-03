@@ -10,7 +10,8 @@ import { JobForm } from './_components/jobs-form'
 import { type JobWithRelations } from '~/server/db/schema'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { CalendarView } from '~/components/calendar/calendar-view'
-import { CalendarIcon, TableIcon } from 'lucide-react'
+import { GanttView } from '~/components/gantt/gantt-view'
+import { CalendarIcon, TableIcon, GanttChartIcon } from 'lucide-react'
 import { type User } from 'next-auth'
 
 type UserWithImage = {
@@ -64,6 +65,10 @@ export default async function JobsPage() {
               <CalendarIcon className="h-4 w-4" />
               <span>Calendar</span>
             </TabsTrigger>
+            <TabsTrigger value="gantt" className="flex items-center gap-2">
+              <GanttChartIcon className="h-4 w-4" />
+              <span>Timeline</span>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="table">
             <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
@@ -84,6 +89,9 @@ export default async function JobsPage() {
           </TabsContent>
           <TabsContent value="calendar">
             <CalendarView jobs={jobs} />
+          </TabsContent>
+          <TabsContent value="gantt">
+            <GanttView jobs={jobs} />
           </TabsContent>
         </Tabs>
       </div>
