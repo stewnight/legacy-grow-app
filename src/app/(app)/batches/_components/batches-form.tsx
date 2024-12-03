@@ -112,12 +112,10 @@ export function BatchForm({
   // Fetch related data
   const { data: genetics } = api.genetic.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   const { data: locations } = api.location.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
   })
 
   return (

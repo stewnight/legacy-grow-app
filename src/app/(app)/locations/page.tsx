@@ -16,9 +16,6 @@ export default async function LocationsPage() {
 
   const { items: locations } = await api.location.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
   })
 
   return (

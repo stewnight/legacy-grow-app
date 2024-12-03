@@ -16,9 +16,6 @@ export default async function GeneticsPage() {
 
   const { items: genetics } = await api.genetic.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
   })
 
   return (
