@@ -24,6 +24,7 @@ export type CalendarViewMode = 'month' | 'week' | 'day'
 interface CalendarViewProps {
   initialMode?: CalendarViewMode
   mode?: CalendarViewMode
+  jobs?: JobWithRelations[]
   entityType?:
     | 'plant'
     | 'batch'
@@ -34,7 +35,6 @@ interface CalendarViewProps {
     | 'harvest'
     | 'none'
   entityId?: string
-  onEventClick?: (job: JobWithRelations) => void
 }
 
 export function CalendarView({
@@ -42,7 +42,7 @@ export function CalendarView({
   mode: initialViewMode,
   entityType,
   entityId,
-  onEventClick,
+  jobs,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date())
   const [mode, setMode] = React.useState<CalendarViewMode>(
@@ -58,8 +58,6 @@ export function CalendarView({
     if (!isMobile) return 1 // 3 total periods (tablet)
     return 0 // 1 period (mobile)
   }, [isMobile, isDesktop])
-
-  const { data: jobsData } = api.job.getAll.useQuery({})
 
   const getSurroundingDays = React.useCallback(() => {
     const periods = []
@@ -86,9 +84,9 @@ export function CalendarView({
   }, [currentDate])
 
   const filteredJobs = React.useMemo(() => {
-    if (!jobsData?.items) return []
+    if (!jobs) return []
 
-    return jobsData.items.filter((job) => {
+    return jobs.filter((job) => {
       if (!job.dueDate) return false
       const dueDate = new Date(job.dueDate)
 
@@ -106,7 +104,7 @@ export function CalendarView({
         (day) => format(dueDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
       )
     })
-  }, [jobsData, currentDate, mode, getSurroundingDays])
+  }, [jobs, currentDate, mode, getSurroundingDays])
 
   return (
     <div className="space-y-4">
