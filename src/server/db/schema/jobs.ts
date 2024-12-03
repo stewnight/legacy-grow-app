@@ -32,6 +32,9 @@ const taskSchema = z.object({
   item: z.string(),
   completed: z.boolean(),
   completedAt: z.string().nullable().optional(),
+  estimatedMinutes: z.number().nullable().optional(),
+  actualMinutes: z.number().nullable().optional(),
+  startedAt: z.string().nullable().optional(),
 })
 
 export const jobPropertiesSchema = z.object({
@@ -127,7 +130,9 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
     references: [users.id],
     relationName: 'jobCreator',
   }),
-  notes: many(notes, { relationName: 'jobNotes' }),
+  notes: many(notes, {
+    relationName: 'jobNotes',
+  }),
   location: one(locations, {
     fields: [jobs.entityId],
     references: [locations.id],
@@ -209,7 +214,7 @@ export type NewJob = typeof jobs.$inferInsert
 export type JobWithRelations = Job & {
   assignedTo?: { id: string; name: string } | null
   createdBy: { id: string; name: string }
-  notes?: Note[]
+  note?: Note[]
   location?: Location | undefined
   plant?: Plant | undefined
   batch?: Batch | undefined

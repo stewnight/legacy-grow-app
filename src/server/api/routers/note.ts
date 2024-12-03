@@ -61,6 +61,34 @@ export const noteRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
+  getAllForJob: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const note = await ctx.db.query.notes.findMany({
+        where: eq(notes.entityId, input),
+        with: {
+          parent: true,
+          children: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      })
+
+      if (!note) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Notes not found',
+        })
+      }
+
+      return note
+    }),
+
   get: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
@@ -90,25 +118,14 @@ export const noteRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertNoteSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertNoteSchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input
-
       const [note] = await ctx.db
         .insert(notes)
         .values({
-          ...rest,
-          properties: properties as typeof notes.$inferInsert.properties,
-          metadata: metadata as typeof notes.$inferInsert.metadata,
+          ...input,
           createdById: ctx.session.user.id,
-        })
+        } as typeof notes.$inferInsert)
         .returning()
 
       if (!note) {
@@ -125,25 +142,16 @@ export const noteRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertNoteSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertNoteSchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, ...rest } = input.data
-
       const [note] = await ctx.db
         .update(notes)
         .set({
-          ...rest,
-          properties: properties as typeof notes.$inferInsert.properties,
-          metadata: metadata as typeof notes.$inferInsert.metadata,
+          ...input.data,
           updatedAt: new Date(),
-        })
+        } as typeof notes.$inferInsert)
         .where(eq(notes.id, input.id))
         .returning()
 
