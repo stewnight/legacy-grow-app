@@ -110,13 +110,11 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
 
   const { data: buildings } = api.building.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
-  });
+  })
 
   const { data: parentRooms } = api.room.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
-  });
+  })
 
   return (
     <Form {...form}>

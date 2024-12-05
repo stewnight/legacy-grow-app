@@ -16,10 +16,7 @@ export default async function RoomsPage() {
 
   const { items: rooms } = await api.room.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
-  });
+  })
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

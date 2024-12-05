@@ -16,10 +16,7 @@ export default async function PlantsPage() {
 
   const { items: plants } = await api.plant.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
-  });
+  })
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

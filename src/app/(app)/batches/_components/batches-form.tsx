@@ -100,13 +100,10 @@ export function BatchForm({ mode = 'create', defaultValues, onSuccess }: BatchFo
   // Fetch related data
   const { data: genetics } = api.genetic.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
-  });
+  })
 
   const { data: locations } = api.location.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
-  });
 
   return (
     <Form {...form}>

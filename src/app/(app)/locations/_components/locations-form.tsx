@@ -124,8 +124,7 @@ export function LocationForm({ mode = 'create', defaultValues, onSuccess }: Loca
 
   const { data: rooms } = api.room.getAll.useQuery({
     limit: 100,
-    filters: { status: 'active' },
-  });
+  })
 
   return (
     <Form {...form}>

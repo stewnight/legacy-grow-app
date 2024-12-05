@@ -16,10 +16,7 @@ export default async function BuildingsPage() {
 
   const { items: buildings } = await api.building.getAll({
     limit: 100,
-    filters: {
-      status: 'active',
-    },
-  });
+  })
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
