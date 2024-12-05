@@ -1,28 +1,20 @@
-import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  text,
-  AnyPgColumn,
-} from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { createTable } from '../utils'
+import { relations, sql } from 'drizzle-orm';
+import { index, varchar, timestamp, json, uuid, text, AnyPgColumn } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTable } from '../utils';
 import {
   plantSourceEnum,
   plantStageEnum,
   plantSexEnum,
   healthStatusEnum,
   statusEnum,
-} from './enums'
-import { users } from './core'
-import { locations } from './locations'
-import { genetics } from './genetics'
-import { notes } from './notes'
-import { batches } from './batches'
-import { jobs } from './jobs'
+} from './enums';
+import { users } from './core';
+import { locations } from './locations';
+import { genetics } from './genetics';
+import { notes } from './notes';
+import { batches } from './batches';
+import { jobs } from './jobs';
 
 export const plants = createTable(
   'plant',
@@ -43,28 +35,28 @@ export const plants = createTable(
     health: healthStatusEnum('health').default('healthy').notNull(),
     plantedDate: timestamp('planted_date', { withTimezone: true }).notNull(),
     properties: json('properties').$type<{
-      height?: number
-      width?: number
-      notes?: string
+      height?: number;
+      width?: number;
+      notes?: string;
       feeding?: {
-        schedule: string
-        lastFed?: string
-        nextFeed?: string
-      }
+        schedule: string;
+        lastFed?: string;
+        nextFeed?: string;
+      };
       training?: {
-        method: string
-        lastTrained?: string
-        nextTraining?: string
-      }
+        method: string;
+        lastTrained?: string;
+        nextTraining?: string;
+      };
     }>(), // Environmental properties
     metadata: json('metadata').$type<{
-      generation?: number
-      clonedFrom?: string
+      generation?: number;
+      clonedFrom?: string;
       germination?: {
-        date: string
-        method: string
-        medium: string
-      }
+        date: string;
+        method: string;
+        medium: string;
+      };
     }>(), // Metadata
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
@@ -73,9 +65,7 @@ export const plants = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -92,7 +82,7 @@ export const plants = createTable(
     statusIdx: index('plant_status_idx').on(table.status),
     plantedDateIdx: index('plant_planted_date_idx').on(table.plantedDate),
   })
-)
+);
 
 // ================== RELATIONS ==================
 export const plantsRelations = relations(plants, ({ one, many }) => ({
@@ -124,16 +114,16 @@ export const plantsRelations = relations(plants, ({ one, many }) => ({
   }),
   jobs: many(jobs, { relationName: 'plantJobs' }),
   notes: many(notes, { relationName: 'plantNotes' }),
-}))
+}));
 
 // Zod Schemas
 export const insertPlantSchema = createInsertSchema(plants).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-})
-export const selectPlantSchema = createSelectSchema(plants)
+});
+export const selectPlantSchema = createSelectSchema(plants);
 
 // Types
-export type Plant = typeof plants.$inferSelect
-export type NewPlant = typeof plants.$inferInsert
+export type Plant = typeof plants.$inferSelect;
+export type NewPlant = typeof plants.$inferInsert;

@@ -1,29 +1,24 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Image from 'next/image'
-import { Volume2, FileText } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
-import { type Note } from '~/server/db/schema/notes'
+import { useState } from 'react';
+import Image from 'next/image';
+import { Volume2, FileText } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog';
+import { type Note } from '~/server/db/schema/notes';
 
 interface MediaPreviewProps {
-  note: Note
-  className?: string
+  note: Note;
+  className?: string;
 }
 
 export function MediaPreview({ note, className }: MediaPreviewProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   // Early return if no metadata or URL
-  if (!note.metadata?.url) return null
+  if (!note.metadata?.url) return null;
 
   // Safely access the URL
-  const mediaUrl = note.metadata.url
+  const mediaUrl = note.metadata.url;
 
   const renderPreview = () => {
     switch (note.type) {
@@ -39,14 +34,14 @@ export function MediaPreview({ note, className }: MediaPreviewProps) {
               unoptimized // For external URLs
             />
           </div>
-        )
+        );
       case 'voice':
         return (
           <div className="flex items-center gap-2 rounded-md border p-4">
             <Volume2 className="h-4 w-4" />
             <audio controls src={mediaUrl} className="w-full" />
           </div>
-        )
+        );
       case 'file':
         return (
           <a
@@ -58,11 +53,11 @@ export function MediaPreview({ note, className }: MediaPreviewProps) {
             <FileText className="h-4 w-4" />
             <span className="flex-1 truncate">{note.content}</span>
           </a>
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <>
@@ -87,5 +82,5 @@ export function MediaPreview({ note, className }: MediaPreviewProps) {
         </Dialog>
       )}
     </>
-  )
+  );
 }

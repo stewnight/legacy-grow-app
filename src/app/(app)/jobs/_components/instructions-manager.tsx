@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, X, GripVertical } from 'lucide-react'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Plus, X, GripVertical } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -12,43 +12,38 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core'
+} from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { cn } from '~/lib/utils'
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { cn } from '~/lib/utils';
 
 interface InstructionsManagerProps {
-  value: string[]
-  onChange: (value: string[]) => void
+  value: string[];
+  onChange: (value: string[]) => void;
 }
 
 interface SortableItemProps {
-  id: string
-  index: number
-  instruction: string
-  onRemove: () => void
+  id: string;
+  index: number;
+  instruction: string;
+  onRemove: () => void;
 }
 
 function SortableItem({ id, instruction, index, onRemove }: SortableItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  }
+  };
 
   return (
     <div
@@ -73,51 +68,48 @@ function SortableItem({ id, instruction, index, onRemove }: SortableItemProps) {
         <X className="h-4 w-4" />
       </Button>
     </div>
-  )
+  );
 }
 
-export function InstructionsManager({
-  value,
-  onChange,
-}: InstructionsManagerProps) {
-  const [newInstruction, setNewInstruction] = useState('')
+export function InstructionsManager({ value, onChange }: InstructionsManagerProps) {
+  const [newInstruction, setNewInstruction] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
-  )
+  );
 
   const addInstruction = () => {
     if (newInstruction.trim()) {
-      onChange([...value, newInstruction.trim()])
-      setNewInstruction('')
+      onChange([...value, newInstruction.trim()]);
+      setNewInstruction('');
     }
-  }
+  };
 
   const removeInstruction = (index: number) => {
-    const updatedInstructions = value.filter((_, i) => i !== index)
-    onChange(updatedInstructions)
-  }
+    const updatedInstructions = value.filter((_, i) => i !== index);
+    onChange(updatedInstructions);
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      e.preventDefault()
-      addInstruction()
+      e.preventDefault();
+      addInstruction();
     }
-  }
+  };
 
   const handleDragEnd = (event: any) => {
-    const { active, over } = event
+    const { active, over } = event;
 
     if (active.id !== over.id) {
-      const oldIndex = value.findIndex((item) => `item-${item}` === active.id)
-      const newIndex = value.findIndex((item) => `item-${item}` === over.id)
+      const oldIndex = value.findIndex((item) => `item-${item}` === active.id);
+      const newIndex = value.findIndex((item) => `item-${item}` === over.id);
 
-      onChange(arrayMove(value, oldIndex, newIndex))
+      onChange(arrayMove(value, oldIndex, newIndex));
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -170,5 +162,5 @@ export function InstructionsManager({
         )}
       </ScrollArea>
     </div>
-  )
+  );
 }

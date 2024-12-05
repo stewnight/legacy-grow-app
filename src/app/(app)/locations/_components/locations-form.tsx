@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { insertLocationSchema } from '~/server/db/schema'
-import { Button } from '@/components/ui/button'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertLocationSchema } from '~/server/db/schema';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,67 +11,63 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { type z } from 'zod'
-import { locationTypeEnum } from '~/server/db/schema/enums'
-import { type inferRouterOutputs } from '@trpc/server'
-import { type AppRouter } from '~/server/api/root'
-import { api } from '~/trpc/react'
-import { useToast } from '~/hooks/use-toast'
-import { useRouter } from 'next/navigation'
+} from '@/components/ui/select';
+import { type z } from 'zod';
+import { locationTypeEnum } from '~/server/db/schema/enums';
+import { type inferRouterOutputs } from '@trpc/server';
+import { type AppRouter } from '~/server/api/root';
+import { api } from '~/trpc/react';
+import { useToast } from '~/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
-type RouterOutputs = inferRouterOutputs<AppRouter>
-type LocationFormValues = z.infer<typeof insertLocationSchema>
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type LocationFormValues = z.infer<typeof insertLocationSchema>;
 type LocationDimensions = {
-  length: number
-  width: number
-  height: number
-  unit: 'm' | 'ft'
-}
+  length: number;
+  width: number;
+  height: number;
+  unit: 'm' | 'ft';
+};
 
 type LocationProperties = {
-  temperature: { min: number; max: number }
-  humidity: { min: number; max: number }
-  light: { type: string; intensity: number }
-  co2: { min: number; max: number }
-}
+  temperature: { min: number; max: number };
+  humidity: { min: number; max: number };
+  light: { type: string; intensity: number };
+  co2: { min: number; max: number };
+};
 
 interface LocationFormProps {
-  mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['location']['get']
-  onSuccess?: (data: LocationFormValues) => void
+  mode?: 'create' | 'edit';
+  defaultValues?: RouterOutputs['location']['get'];
+  onSuccess?: (data: LocationFormValues) => void;
 }
 
-export function LocationForm({
-  mode = 'create',
-  defaultValues,
-  onSuccess,
-}: LocationFormProps) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const utils = api.useUtils()
+export function LocationForm({ mode = 'create', defaultValues, onSuccess }: LocationFormProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+  const utils = api.useUtils();
 
   const createDefaultProperties = (): LocationProperties => ({
     temperature: { min: 15, max: 30 },
     humidity: { min: 40, max: 60 },
     light: { type: 'LED', intensity: 100 },
     co2: { min: 400, max: 1500 },
-  })
+  });
 
   const createDefaultDimensions = (): LocationDimensions => ({
     length: 10,
     width: 10,
     height: 8,
     unit: 'm',
-  })
+  });
 
   const form = useForm<LocationFormValues>({
     resolver: zodResolver(insertLocationSchema),
@@ -79,67 +75,65 @@ export function LocationForm({
       name: defaultValues?.name ?? '',
       type: defaultValues?.type ?? locationTypeEnum.enumValues[0],
     },
-  })
+  });
 
-  const { mutate: createLocation, isPending: isCreating } =
-    api.location.create.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Location created successfully' })
-        void Promise.all([
-          utils.location.getAll.invalidate(),
-          utils.location.get.invalidate(data.id),
-        ])
-        router.push(`/locations/${data.id}`)
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error creating location',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: createLocation, isPending: isCreating } = api.location.create.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Location created successfully' });
+      void Promise.all([
+        utils.location.getAll.invalidate(),
+        utils.location.get.invalidate(data.id),
+      ]);
+      router.push(`/locations/${data.id}`);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error creating location',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const { mutate: updateLocation, isPending: isUpdating } =
-    api.location.update.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Location updated successfully' })
-        void Promise.all([
-          utils.location.getAll.invalidate(),
-          utils.location.get.invalidate(data.id),
-        ])
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error updating location',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: updateLocation, isPending: isUpdating } = api.location.update.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Location updated successfully' });
+      void Promise.all([
+        utils.location.getAll.invalidate(),
+        utils.location.get.invalidate(data.id),
+      ]);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error updating location',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
   function onSubmit(values: LocationFormValues) {
     if (mode === 'create') {
-      createLocation(values)
+      createLocation(values);
     } else if (defaultValues?.id) {
-      updateLocation({ id: defaultValues.id, data: values })
+      updateLocation({ id: defaultValues.id, data: values });
     }
   }
 
   const { data: rooms } = api.room.getAll.useQuery({
     limit: 100,
     filters: { status: 'active' },
-  })
+  });
 
   return (
     <Form {...form}>
       <form
         onSubmit={(e) => {
           form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors)
-          })(e)
+            console.log('Form Errors:', errors);
+          })(e);
         }}
         className="space-y-4 p-1"
         noValidate
@@ -376,10 +370,7 @@ export function LocationForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Unit</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value?.toString()}
-                >
+                <Select onValueChange={field.onChange} value={field.value?.toString()}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select unit" />
@@ -446,5 +437,5 @@ export function LocationForm({
         </Button>
       </form>
     </Form>
-  )
+  );
 }

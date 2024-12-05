@@ -1,21 +1,13 @@
-import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  text,
-  numeric,
-} from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { createTable } from '../utils'
-import { sensorTypeEnum, statusEnum } from './enums'
-import { users } from './core'
-import { sensorReadings } from './sensorReadings'
-import { locations } from './locations'
-import { jobs } from './jobs'
-import { notes } from './notes'
+import { relations, sql } from 'drizzle-orm';
+import { index, varchar, timestamp, json, uuid, text, numeric } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTable } from '../utils';
+import { sensorTypeEnum, statusEnum } from './enums';
+import { users } from './core';
+import { sensorReadings } from './sensorReadings';
+import { locations } from './locations';
+import { jobs } from './jobs';
+import { notes } from './notes';
 export const sensors = createTable(
   'sensor',
   {
@@ -33,40 +25,40 @@ export const sensors = createTable(
     }),
     specifications: json('specifications').$type<{
       range: {
-        min: number
-        max: number
-        unit: string
-      }
+        min: number;
+        max: number;
+        unit: string;
+      };
       accuracy: {
-        value: number
-        unit: string
-      }
+        value: number;
+        unit: string;
+      };
       resolution: {
-        value: number
-        unit: string
-      }
+        value: number;
+        unit: string;
+      };
       responseTime?: {
-        value: number
-        unit: string
-      }
+        value: number;
+        unit: string;
+      };
       powerRequirements?: {
-        voltage: number
-        current: number
-        type: 'AC' | 'DC'
-      }
+        voltage: number;
+        current: number;
+        type: 'AC' | 'DC';
+      };
     }>(),
     metadata: json('metadata').$type<{
       installation: {
-        date: string
-        by: string
-        notes?: string
-      }
+        date: string;
+        by: string;
+        notes?: string;
+      };
       maintenance?: Array<{
-        date: string
-        type: string
-        description: string
-        performedBy: string
-      }>
+        date: string;
+        type: string;
+        description: string;
+        performedBy: string;
+      }>;
     }>(),
     locationId: uuid('location_id')
       .notNull()
@@ -76,9 +68,7 @@ export const sensors = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -95,7 +85,7 @@ export const sensors = createTable(
     ),
     locationIdx: index('sensor_location_idx').on(table.locationId),
   })
-)
+);
 
 export const sensorsRelations = relations(sensors, ({ one, many }) => ({
   location: one(locations, {
@@ -111,16 +101,16 @@ export const sensorsRelations = relations(sensors, ({ one, many }) => ({
   }),
   jobs: many(jobs, { relationName: 'sensorJobs' }),
   notes: many(notes, { relationName: 'sensorNotes' }),
-}))
+}));
 
 // Zod Schemas
 export const insertSensorSchema = createInsertSchema(sensors).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-})
-export const selectSensorSchema = createSelectSchema(sensors)
+});
+export const selectSensorSchema = createSelectSchema(sensors);
 
 // Types
-export type Sensor = typeof sensors.$inferSelect
-export type NewSensor = typeof sensors.$inferInsert
+export type Sensor = typeof sensors.$inferSelect;
+export type NewSensor = typeof sensors.$inferInsert;

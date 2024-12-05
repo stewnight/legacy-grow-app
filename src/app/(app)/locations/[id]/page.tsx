@@ -1,48 +1,35 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { api } from '~/trpc/react'
-import { format } from 'date-fns'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '~/components/ui/card'
-import { notFound } from 'next/navigation'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Skeleton } from '~/components/ui/skeleton'
-import Link from 'next/link'
-import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
-import { LocationForm } from '../_components/locations-form'
-import { Badge } from '../../../../components/ui/badge'
-import JobsTab from '../../../../components/jobs/tab'
+import * as React from 'react';
+import { api } from '~/trpc/react';
+import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
+import { notFound } from 'next/navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Skeleton } from '~/components/ui/skeleton';
+import Link from 'next/link';
+import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react';
+import { AppSheet } from '../../../../components/layout/app-sheet';
+import { LocationForm } from '../_components/locations-form';
+import { Badge } from '../../../../components/ui/badge';
+import JobsTab from '../../../../components/jobs/tab';
 
-export default function LocationPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const resolvedParams = React.use(params)
+export default function LocationPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
 
-  const { data: location, isLoading } = api.location.get.useQuery(
-    resolvedParams.id,
-    {
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-    }
-  )
+  const { data: location, isLoading } = api.location.get.useQuery(resolvedParams.id, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A'
-    return format(new Date(date), 'PP')
-  }
+    if (!date) return 'N/A';
+    return format(new Date(date), 'PP');
+  };
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <Skeleton className="h-8 w-48" />
@@ -64,15 +51,15 @@ export default function LocationPage({
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   if (!location) {
-    return notFound()
+    return notFound();
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{location.name}</h2>
@@ -80,10 +67,7 @@ export default function LocationPage({
             {location.room?.name ? (
               <>
                 In{' '}
-                <Link
-                  href={`/rooms/${location.room.id}`}
-                  className="hover:underline"
-                >
+                <Link href={`/rooms/${location.room.id}`} className="hover:underline">
                   {location.room.name}
                 </Link>
               </>
@@ -118,9 +102,7 @@ export default function LocationPage({
             <CardContent>
               <div className="text-2xl font-bold">
                 {location.dimensions.length} x {location.dimensions.width}
-                {location.dimensions.height
-                  ? ` x ${location.dimensions.height}`
-                  : ''}{' '}
+                {location.dimensions.height ? ` x ${location.dimensions.height}` : ''}{' '}
                 {location.dimensions.unit}
               </div>
               <p className="text-xs text-muted-foreground">L x W x H</p>
@@ -136,8 +118,7 @@ export default function LocationPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {location.properties.temperature.min}°C -{' '}
-                {location.properties.temperature.max}°C
+                {location.properties.temperature.min}°C - {location.properties.temperature.max}°C
               </div>
               <p className="text-xs text-muted-foreground">Target range</p>
             </CardContent>
@@ -152,8 +133,7 @@ export default function LocationPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {location.properties.humidity.min}% -{' '}
-                {location.properties.humidity.max}%
+                {location.properties.humidity.min}% - {location.properties.humidity.max}%
               </div>
               <p className="text-xs text-muted-foreground">Target range</p>
             </CardContent>
@@ -178,24 +158,17 @@ export default function LocationPage({
               <CardContent>
                 <dl className="space-y-2">
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Type
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Type</dt>
                     <dd className="text-sm capitalize">{location.type}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Status
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Status</dt>
                     <dd className="text-sm capitalize">{location.status}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Created
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Created</dt>
                     <dd className="text-sm">
-                      {formatDate(location.createdAt)} by{' '}
-                      {location.createdBy?.name}
+                      {formatDate(location.createdAt)} by {location.createdBy?.name}
                     </dd>
                   </div>
                 </dl>
@@ -210,22 +183,15 @@ export default function LocationPage({
                 <CardContent>
                   <dl className="space-y-2">
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Dimensions
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Dimensions</dt>
                       <dd className="text-sm">
-                        {location.dimensions.length} x{' '}
-                        {location.dimensions.width}
-                        {location.dimensions.height
-                          ? ` x ${location.dimensions.height}`
-                          : ''}{' '}
+                        {location.dimensions.length} x {location.dimensions.width}
+                        {location.dimensions.height ? ` x ${location.dimensions.height}` : ''}{' '}
                         {location.dimensions.unit}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Capacity
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Capacity</dt>
                       <dd className="text-sm">{location.capacity} units</dd>
                     </div>
                   </dl>
@@ -256,31 +222,24 @@ export default function LocationPage({
                   )}
                   {location.properties.humidity && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Humidity Range
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Humidity Range</dt>
                       <dd className="text-sm">
-                        {location.properties.humidity.min}% -{' '}
-                        {location.properties.humidity.max}%
+                        {location.properties.humidity.min}% - {location.properties.humidity.max}%
                       </dd>
                     </div>
                   )}
                   {location.properties.light && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Lighting
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Lighting</dt>
                       <dd className="text-sm">
-                        {location.properties.light.type} -{' '}
-                        {location.properties.light.intensity}% intensity
+                        {location.properties.light.type} - {location.properties.light.intensity}%
+                        intensity
                       </dd>
                     </div>
                   )}
                 </dl>
               ) : (
-                <p className="text-muted-foreground">
-                  No environmental settings configured.
-                </p>
+                <p className="text-muted-foreground">No environmental settings configured.</p>
               )}
             </CardContent>
           </Card>
@@ -290,9 +249,7 @@ export default function LocationPage({
           <Card>
             <CardHeader>
               <CardTitle>Sensors</CardTitle>
-              <CardDescription>
-                Monitoring devices in this location
-              </CardDescription>
+              <CardDescription>Monitoring devices in this location</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Sensor list implementation here</p>
@@ -305,5 +262,5 @@ export default function LocationPage({
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

@@ -17,4 +17,4 @@ export const authConfig = {
       expires: '2025-01-01',
     }),
   },
-}
+};

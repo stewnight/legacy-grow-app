@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { Avatar, AvatarImage, AvatarFallback } from './avatar'
+import type { Meta, StoryObj } from '@storybook/react';
+import { Avatar, AvatarImage, AvatarFallback } from './avatar';
 
 const meta = {
   title: 'UI/Avatar',
@@ -8,10 +8,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Avatar>
+} satisfies Meta<typeof Avatar>;
 
-export default meta
-type Story = StoryObj<typeof Avatar>
+export default meta;
+type Story = StoryObj<typeof Avatar>;
 
 export const WithImage: Story = {
   args: {
@@ -22,7 +22,7 @@ export const WithImage: Story = {
       </>
     ),
   },
-}
+};
 
 export const WithFallback: Story = {
   args: {
@@ -33,4 +33,4 @@ export const WithFallback: Story = {
       </>
     ),
   },
-}
+};

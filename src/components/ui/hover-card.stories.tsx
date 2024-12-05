@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card'
-import { Avatar, AvatarFallback, AvatarImage } from './avatar'
-import { Button } from './button'
-import { CalendarDays } from 'lucide-react'
+import type { Meta, StoryObj } from '@storybook/react';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
+import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { Button } from './button';
+import { CalendarDays } from 'lucide-react';
 
 const meta = {
   title: 'UI/HoverCard',
@@ -11,10 +11,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof HoverCard>
+} satisfies Meta<typeof HoverCard>;
 
-export default meta
-type Story = StoryObj<typeof HoverCard>
+export default meta;
+type Story = StoryObj<typeof HoverCard>;
 
 export const Default: Story = {
   args: {
@@ -31,14 +31,10 @@ export const Default: Story = {
             </Avatar>
             <div className="space-y-1">
               <h4 className="text-sm font-semibold">@nextjs</h4>
-              <p className="text-sm">
-                The React Framework – created and maintained by @vercel.
-              </p>
+              <p className="text-sm">The React Framework – created and maintained by @vercel.</p>
               <div className="flex items-center pt-2">
                 <CalendarDays className="mr-2 h-4 w-4 opacity-70" />
-                <span className="text-xs text-muted-foreground">
-                  Joined December 2021
-                </span>
+                <span className="text-xs text-muted-foreground">Joined December 2021</span>
               </div>
             </div>
           </div>
@@ -46,7 +42,7 @@ export const Default: Story = {
       </>
     ),
   },
-}
+};
 
 export const WithCustomContent: Story = {
   args: {
@@ -59,8 +55,7 @@ export const WithCustomContent: Story = {
           <div className="space-y-2">
             <h4 className="text-sm font-semibold">Product Details</h4>
             <p className="text-sm text-muted-foreground">
-              This is a detailed description that appears when hovering over the
-              trigger element.
+              This is a detailed description that appears when hovering over the trigger element.
             </p>
             <div className="flex items-center justify-between border-t pt-2">
               <span className="text-xs">Price: $99.99</span>
@@ -71,4 +66,4 @@ export const WithCustomContent: Story = {
       </>
     ),
   },
-}
+};

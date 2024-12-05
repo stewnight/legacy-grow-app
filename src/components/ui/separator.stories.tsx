@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { Separator } from './separator'
+import type { Meta, StoryObj } from '@storybook/react';
+import { Separator } from './separator';
 
 const meta = {
   title: 'UI/Separator',
@@ -8,10 +8,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Separator>
+} satisfies Meta<typeof Separator>;
 
-export default meta
-type Story = StoryObj<typeof Separator>
+export default meta;
+type Story = StoryObj<typeof Separator>;
 
 export const Horizontal: Story = {
   args: {
@@ -22,13 +22,11 @@ export const Horizontal: Story = {
       <div className="w-[300px] space-y-1">
         <div className="text-sm font-medium">Radix Primitives</div>
         <Story />
-        <div className="text-sm text-muted-foreground">
-          An open-source UI component library.
-        </div>
+        <div className="text-sm text-muted-foreground">An open-source UI component library.</div>
       </div>
     ),
   ],
-}
+};
 
 export const Vertical: Story = {
   args: {
@@ -46,4 +44,4 @@ export const Vertical: Story = {
       </div>
     ),
   ],
-}
+};

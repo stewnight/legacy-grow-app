@@ -1,48 +1,35 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { api } from '~/trpc/react'
-import { format } from 'date-fns'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '~/components/ui/card'
-import { notFound } from 'next/navigation'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Skeleton } from '~/components/ui/skeleton'
-import Link from 'next/link'
-import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
-import { BuildingsForm } from '../_components/buildings-form'
-import { Badge } from '../../../../components/ui/badge'
-import { RoomForm } from '../../rooms/_components/rooms-form'
+import * as React from 'react';
+import { api } from '~/trpc/react';
+import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
+import { notFound } from 'next/navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Skeleton } from '~/components/ui/skeleton';
+import Link from 'next/link';
+import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react';
+import { AppSheet } from '../../../../components/layout/app-sheet';
+import { BuildingsForm } from '../_components/buildings-form';
+import { Badge } from '../../../../components/ui/badge';
+import { RoomForm } from '../../rooms/_components/rooms-form';
 
-export default function BuildingPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const resolvedParams = React.use(params)
+export default function BuildingPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
 
-  const { data: building, isLoading } = api.building.get.useQuery(
-    resolvedParams.id,
-    {
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-    }
-  )
+  const { data: building, isLoading } = api.building.get.useQuery(resolvedParams.id, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A'
-    return format(new Date(date), 'PP')
-  }
+    if (!date) return 'N/A';
+    return format(new Date(date), 'PP');
+  };
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <Skeleton className="h-8 w-48" />
@@ -65,21 +52,20 @@ export default function BuildingPage({
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   if (!building) {
-    return notFound()
+    return notFound();
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{building.name}</h2>
           <p className="text-muted-foreground">
-            {building.type.charAt(0).toUpperCase() + building.type.slice(1)}{' '}
-            Facility
+            {building.type.charAt(0).toUpperCase() + building.type.slice(1)} Facility
           </p>
         </div>
         <AppSheet mode="edit" entity="building">
@@ -94,9 +80,7 @@ export default function BuildingPage({
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {building.address?.city || 'N/A'}
-            </div>
+            <div className="text-2xl font-bold">{building.address?.city || 'N/A'}</div>
             <p className="text-xs text-muted-foreground">
               {building.address?.country || 'No location set'}
             </p>
@@ -106,9 +90,7 @@ export default function BuildingPage({
         {building.properties?.climate && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Climate Control
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Climate Control</CardTitle>
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -131,20 +113,12 @@ export default function BuildingPage({
             <CardContent>
               <div className="space-y-2">
                 <Badge
-                  variant={
-                    building.properties.security.accessControl
-                      ? 'default'
-                      : 'secondary'
-                  }
+                  variant={building.properties.security.accessControl ? 'default' : 'secondary'}
                 >
                   Access Control
                 </Badge>
                 <Badge
-                  variant={
-                    building.properties.security.cameraSystem
-                      ? 'default'
-                      : 'secondary'
-                  }
+                  variant={building.properties.security.cameraSystem ? 'default' : 'secondary'}
                 >
                   Camera System
                 </Badge>
@@ -156,9 +130,7 @@ export default function BuildingPage({
         {building.properties?.power && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Power System
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Power System</CardTitle>
               <Zap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -166,9 +138,7 @@ export default function BuildingPage({
                 {building.properties.power.mainSource}
               </div>
               <p className="text-xs text-muted-foreground">
-                {building.properties.power.backup
-                  ? 'Backup Available'
-                  : 'No Backup'}
+                {building.properties.power.backup ? 'Backup Available' : 'No Backup'}
               </p>
             </CardContent>
           </Card>
@@ -191,32 +161,23 @@ export default function BuildingPage({
               <CardContent>
                 <dl className="space-y-2">
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Type
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Type</dt>
                     <dd className="text-sm capitalize">{building.type}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Status
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Status</dt>
                     <dd className="text-sm capitalize">{building.status}</dd>
                   </div>
                   {building.licenseNumber && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        License Number
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">License Number</dt>
                       <dd className="text-sm">{building.licenseNumber}</dd>
                     </div>
                   )}
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Created
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Created</dt>
                     <dd className="text-sm">
-                      {formatDate(building.createdAt)} by{' '}
-                      {building.createdBy?.name}
+                      {formatDate(building.createdAt)} by {building.createdBy?.name}
                     </dd>
                   </div>
                 </dl>
@@ -231,36 +192,26 @@ export default function BuildingPage({
                 <CardContent>
                   <dl className="space-y-2">
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Street Address
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Street Address</dt>
                       <dd className="text-sm">{building.address.street}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        City, State
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">City, State</dt>
                       <dd className="text-sm">
                         {building.address.city}, {building.address.state}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Country
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Country</dt>
                       <dd className="text-sm">{building.address.country}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Postal Code
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Postal Code</dt>
                       <dd className="text-sm">{building.address.postalCode}</dd>
                     </div>
                     {building.address.coordinates && (
                       <div>
-                        <dt className="text-sm font-medium text-muted-foreground">
-                          Coordinates
-                        </dt>
+                        <dt className="text-sm font-medium text-muted-foreground">Coordinates</dt>
                         <dd className="text-sm">
                           {building.address.coordinates.latitude},{' '}
                           {building.address.coordinates.longitude}
@@ -311,18 +262,13 @@ export default function BuildingPage({
                   {building.rooms.map((room) => (
                     <div
                       key={room.id}
-                      className="flex items-center justify-between border rounded p-4"
+                      className="flex items-center justify-between rounded border p-4"
                     >
                       <div>
-                        <Link
-                          href={`/rooms/${room.id}`}
-                          className="font-medium hover:underline"
-                        >
+                        <Link href={`/rooms/${room.id}`} className="font-medium hover:underline">
                           {room.name}
                         </Link>
-                        <p className="text-sm text-muted-foreground">
-                          {room.type}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{room.type}</p>
                       </div>
                       <Badge variant="secondary">{room.status}</Badge>
                     </div>
@@ -346,14 +292,12 @@ export default function BuildingPage({
                   <p>{building.description}</p>
                 </div>
               ) : (
-                <p className="text-muted-foreground">
-                  No additional details available.
-                </p>
+                <p className="text-muted-foreground">No additional details available.</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

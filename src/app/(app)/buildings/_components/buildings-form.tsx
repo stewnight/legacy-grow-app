@@ -1,12 +1,8 @@
-'use client'
+'use client';
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  insertBuildingSchema,
-  buildingTypeEnum,
-  statusEnum,
-} from '~/server/db/schema'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertBuildingSchema, buildingTypeEnum, statusEnum } from '~/server/db/schema';
 import {
   Form,
   FormField,
@@ -14,42 +10,38 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '~/components/ui/form'
-import { useToast } from '~/hooks/use-toast'
-import { useRouter } from 'next/navigation'
-import { Input } from '~/components/ui/input'
-import { Button } from '~/components/ui/button'
-import { api } from '~/trpc/react'
-import { type z } from 'zod'
-import { type AppRouter } from '~/server/api/root'
-import { inferRouterOutputs } from '@trpc/server'
+} from '~/components/ui/form';
+import { useToast } from '~/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { Input } from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
+import { api } from '~/trpc/react';
+import { type z } from 'zod';
+import { type AppRouter } from '~/server/api/root';
+import { inferRouterOutputs } from '@trpc/server';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../../components/ui/select'
+} from '../../../../components/ui/select';
 
-type RouterOutputs = inferRouterOutputs<AppRouter>
-type BuildingFormValues = z.infer<typeof insertBuildingSchema>
-type BuildingProperties = z.infer<typeof insertBuildingSchema.shape.properties>
-type BuildingAddress = z.infer<typeof insertBuildingSchema.shape.address>
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type BuildingFormValues = z.infer<typeof insertBuildingSchema>;
+type BuildingProperties = z.infer<typeof insertBuildingSchema.shape.properties>;
+type BuildingAddress = z.infer<typeof insertBuildingSchema.shape.address>;
 
 interface BuildingFormProps {
-  mode: 'create' | 'edit'
-  defaultValues?: RouterOutputs['building']['get']
-  onSuccess?: (data: BuildingFormValues) => void
+  mode: 'create' | 'edit';
+  defaultValues?: RouterOutputs['building']['get'];
+  onSuccess?: (data: BuildingFormValues) => void;
 }
 
-export function BuildingsForm({
-  mode = 'create',
-  defaultValues,
-  onSuccess,
-}: BuildingFormProps) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const utils = api.useUtils()
+export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: BuildingFormProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+  const utils = api.useUtils();
 
   const defaultProperties: BuildingProperties = defaultValues?.properties ?? {
     climate: {
@@ -64,7 +56,7 @@ export function BuildingsForm({
       mainSource: '',
       backup: false,
     },
-  }
+  };
 
   const defaultAddress: BuildingAddress = defaultValues?.address ?? {
     street: '',
@@ -76,7 +68,7 @@ export function BuildingsForm({
       latitude: 0,
       longitude: 0,
     },
-  }
+  };
 
   const form = useForm<BuildingFormValues>({
     resolver: zodResolver(insertBuildingSchema),
@@ -87,52 +79,50 @@ export function BuildingsForm({
       address: defaultAddress,
       properties: defaultProperties,
     },
-  })
+  });
 
-  const { mutate: createBuilding, isPending: isCreating } =
-    api.building.create.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Building created successfully' })
-        void Promise.all([
-          utils.building.getAll.invalidate(),
-          utils.building.get.invalidate(data.id),
-        ])
-        router.push(`/buildings/${data.id}`)
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error creating building',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: createBuilding, isPending: isCreating } = api.building.create.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Building created successfully' });
+      void Promise.all([
+        utils.building.getAll.invalidate(),
+        utils.building.get.invalidate(data.id),
+      ]);
+      router.push(`/buildings/${data.id}`);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error creating building',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const { mutate: updateBuilding, isPending: isUpdating } =
-    api.building.update.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Building updated successfully' })
-        void Promise.all([
-          utils.building.getAll.invalidate(),
-          utils.building.get.invalidate(data.id),
-        ])
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error updating building',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: updateBuilding, isPending: isUpdating } = api.building.update.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Building updated successfully' });
+      void Promise.all([
+        utils.building.getAll.invalidate(),
+        utils.building.get.invalidate(data.id),
+      ]);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error updating building',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
   async function onSubmit(values: BuildingFormValues) {
     if (mode === 'create') {
-      createBuilding(values)
+      createBuilding(values);
     } else if (defaultValues?.id) {
-      updateBuilding({ id: defaultValues.id, data: values })
+      updateBuilding({ id: defaultValues.id, data: values });
     }
   }
 
@@ -141,8 +131,8 @@ export function BuildingsForm({
       <form
         onSubmit={(e) => {
           form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors)
-          })(e)
+            console.log('Form Errors:', errors);
+          })(e);
         }}
         className="space-y-4 p-1"
         noValidate
@@ -178,10 +168,7 @@ export function BuildingsForm({
             <FormItem>
               <FormLabel>Type</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -211,8 +198,7 @@ export function BuildingsForm({
                   <Input
                     {...field}
                     value={
-                      typeof field.value === 'string' ||
-                      typeof field.value === 'number'
+                      typeof field.value === 'string' || typeof field.value === 'number'
                         ? field.value
                         : ''
                     }
@@ -234,8 +220,7 @@ export function BuildingsForm({
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' ||
-                        typeof field.value === 'number'
+                        typeof field.value === 'string' || typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -256,8 +241,7 @@ export function BuildingsForm({
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' ||
-                        typeof field.value === 'number'
+                        typeof field.value === 'string' || typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -280,8 +264,7 @@ export function BuildingsForm({
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' ||
-                        typeof field.value === 'number'
+                        typeof field.value === 'string' || typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -302,8 +285,7 @@ export function BuildingsForm({
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' ||
-                        typeof field.value === 'number'
+                        typeof field.value === 'string' || typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -328,13 +310,9 @@ export function BuildingsForm({
                       step="any"
                       {...field}
                       value={
-                        typeof field.value === 'number'
-                          ? field.value
-                          : Number(field.value) || 0
+                        typeof field.value === 'number' ? field.value : Number(field.value) || 0
                       }
-                      onChange={(e) =>
-                        field.onChange(Number(e.target.value) || 0)
-                      }
+                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -354,13 +332,9 @@ export function BuildingsForm({
                       step="any"
                       {...field}
                       value={
-                        typeof field.value === 'number'
-                          ? field.value
-                          : Number(field.value) || 0
+                        typeof field.value === 'number' ? field.value : Number(field.value) || 0
                       }
-                      onChange={(e) =>
-                        field.onChange(Number(e.target.value) || 0)
-                      }
+                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -382,10 +356,7 @@ export function BuildingsForm({
               <FormItem>
                 <FormLabel>Control Type</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value as string}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value as string}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select control type" />
                     </SelectTrigger>
@@ -541,5 +512,5 @@ export function BuildingsForm({
         </Button>
       </form>
     </Form>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { sql, relations } from 'drizzle-orm'
+import { sql, relations } from 'drizzle-orm';
 import {
   index,
   integer,
@@ -8,13 +8,13 @@ import {
   uuid,
   AnyPgColumn,
   decimal,
-} from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { createTable } from '../utils'
-import { roomTypeEnum, statusEnum } from './enums'
-import { users } from './core'
-import { buildings } from './buildings'
-import { locations } from './locations'
+} from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTable } from '../utils';
+import { roomTypeEnum, statusEnum } from './enums';
+import { users } from './core';
+import { buildings } from './buildings';
+import { locations } from './locations';
 
 // ================== ROOMS ==================
 export const rooms = createTable(
@@ -30,26 +30,24 @@ export const rooms = createTable(
     name: varchar('name', { length: 255 }).notNull(),
     type: roomTypeEnum('type').notNull(),
     properties: json('properties').$type<{
-      temperature?: { min: number; max: number }
-      humidity?: { min: number; max: number }
-      light?: { type: string; intensity: number }
-      co2?: { min: number; max: number }
+      temperature?: { min: number; max: number };
+      humidity?: { min: number; max: number };
+      light?: { type: string; intensity: number };
+      co2?: { min: number; max: number };
     }>(),
     dimensions: json('dimensions').$type<{
-      length: number
-      width: number
-      height?: number
-      unit: 'm' | 'ft'
-      usableSqDimensions?: number
+      length: number;
+      width: number;
+      height?: number;
+      unit: 'm' | 'ft';
+      usableSqDimensions?: number;
     }>(),
     capacity: integer('capacity').default(0),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -62,7 +60,7 @@ export const rooms = createTable(
     statusIdx: index('room_status_idx').on(table.status),
     parentIdIdx: index('room_parent_id_idx').on(table.parentId),
   })
-)
+);
 
 // ================== RELATIONS ==================
 export const roomsRelations = relations(rooms, ({ one, many }) => ({
@@ -83,7 +81,7 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
     references: [users.id],
     relationName: 'roomCreator',
   }),
-}))
+}));
 
 // ================== SCHEMAS ==================
 export const insertRoomSchema = createInsertSchema(rooms).omit({
@@ -91,10 +89,10 @@ export const insertRoomSchema = createInsertSchema(rooms).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-})
+});
 
-export const selectRoomSchema = createSelectSchema(rooms)
+export const selectRoomSchema = createSelectSchema(rooms);
 
 // ================== TYPES ==================
-export type Room = typeof rooms.$inferSelect
-export type NewRoom = typeof rooms.$inferInsert
+export type Room = typeof rooms.$inferSelect;
+export type NewRoom = typeof rooms.$inferInsert;

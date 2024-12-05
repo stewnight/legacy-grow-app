@@ -1,42 +1,34 @@
-import { sql, relations } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  text,
-  integer,
-} from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { createTable } from '../utils'
-import { batchStatusEnum, plantStageEnum, statusEnum } from './enums'
-import { users } from './core'
-import { genetics } from './genetics'
-import { locations } from './locations'
+import { sql, relations } from 'drizzle-orm';
+import { index, varchar, timestamp, json, uuid, text, integer } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTable } from '../utils';
+import { batchStatusEnum, plantStageEnum, statusEnum } from './enums';
+import { users } from './core';
+import { genetics } from './genetics';
+import { locations } from './locations';
 
 export interface BatchProperties {
-  source?: 'seed' | 'clone' | 'tissue_culture'
-  medium?: string
-  container?: string
+  source?: 'seed' | 'clone' | 'tissue_culture';
+  medium?: string;
+  container?: string;
   nutrients?: Array<{
-    name: string
-    schedule?: string
-    amount?: string
-  }>
+    name: string;
+    schedule?: string;
+    amount?: string;
+  }>;
   environment?: {
-    temperature?: { min: number; max: number }
-    humidity?: { min: number; max: number }
-    light?: { hours: number; intensity?: number }
-  }
+    temperature?: { min: number; max: number };
+    humidity?: { min: number; max: number };
+    light?: { hours: number; intensity?: number };
+  };
 }
 
 export interface BatchMetadata {
-  motherBatch?: string
-  generation?: number
-  phenotype?: string
-  selectionCriteria?: string[]
-  targetYield?: number
+  motherBatch?: string;
+  generation?: number;
+  phenotype?: string;
+  selectionCriteria?: string[];
+  targetYield?: number;
 }
 
 // Create table
@@ -64,9 +56,7 @@ export const batches = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -81,7 +71,7 @@ export const batches = createTable(
     startDateIdx: index('batch_start_date_idx').on(table.startDate),
     statusIdx: index('batch_general_status_idx').on(table.status),
   })
-)
+);
 
 export const batchesRelations = relations(batches, ({ one }) => ({
   genetic: one(genetics, {
@@ -99,7 +89,7 @@ export const batchesRelations = relations(batches, ({ one }) => ({
     references: [users.id],
     relationName: 'batchCreator',
   }),
-}))
+}));
 
 // Zod Schemas
 export const insertBatchSchema = createInsertSchema(batches).omit({
@@ -109,9 +99,9 @@ export const insertBatchSchema = createInsertSchema(batches).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-})
-export const selectBatchSchema = createSelectSchema(batches)
+});
+export const selectBatchSchema = createSelectSchema(batches);
 
 // Types
-export type Batch = typeof batches.$inferSelect
-export type NewBatch = typeof batches.$inferInsert
+export type Batch = typeof batches.$inferSelect;
+export type NewBatch = typeof batches.$inferInsert;

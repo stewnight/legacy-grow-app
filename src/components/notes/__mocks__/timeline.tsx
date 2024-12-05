@@ -1,8 +1,8 @@
-import React from 'react'
+import React from 'react';
 
 interface TimelineProps {
-  entityType: string
-  entityId: number
+  entityType: string;
+  entityId: number;
 }
 
 export function Timeline({ entityType, entityId }: TimelineProps) {
@@ -22,5 +22,5 @@ export function Timeline({ entityType, entityId }: TimelineProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

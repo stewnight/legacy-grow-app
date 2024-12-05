@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,9 +6,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './dropdown-menu'
-import { Button } from './button'
-import { User, Settings, LogOut } from 'lucide-react'
+} from './dropdown-menu';
+import { Button } from './button';
+import { User, Settings, LogOut } from 'lucide-react';
 
 const meta = {
   title: 'UI/DropdownMenu',
@@ -17,10 +17,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof DropdownMenu>
+} satisfies Meta<typeof DropdownMenu>;
 
-export default meta
-type Story = StoryObj<typeof DropdownMenu>
+export default meta;
+type Story = StoryObj<typeof DropdownMenu>;
 
 export const Default: Story = {
   args: {
@@ -49,4 +49,4 @@ export const Default: Story = {
       </>
     ),
   },
-}
+};

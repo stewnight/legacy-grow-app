@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { insertBatchSchema } from '~/server/db/schema'
-import { Button } from '@/components/ui/button'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertBatchSchema } from '~/server/db/schema';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,43 +11,39 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { type z } from 'zod'
-import { plantStageEnum, batchStatusEnum } from '~/server/db/schema/enums'
-import { type inferRouterOutputs } from '@trpc/server'
-import { type AppRouter } from '~/server/api/root'
-import { api } from '~/trpc/react'
-import { useToast } from '~/hooks/use-toast'
-import { useRouter } from 'next/navigation'
-import { Textarea } from '@/components/ui/textarea'
-import { DatePicker } from '@/components/ui/date-picker'
-import { format } from 'date-fns'
+} from '@/components/ui/select';
+import { type z } from 'zod';
+import { plantStageEnum, batchStatusEnum } from '~/server/db/schema/enums';
+import { type inferRouterOutputs } from '@trpc/server';
+import { type AppRouter } from '~/server/api/root';
+import { api } from '~/trpc/react';
+import { useToast } from '~/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/ui/date-picker';
+import { format } from 'date-fns';
 
-type RouterOutputs = inferRouterOutputs<AppRouter>
-type BatchFormValues = z.infer<typeof insertBatchSchema>
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type BatchFormValues = z.infer<typeof insertBatchSchema>;
 
 interface BatchFormProps {
-  mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['batch']['get']
-  onSuccess?: (data: BatchFormValues) => void
+  mode?: 'create' | 'edit';
+  defaultValues?: RouterOutputs['batch']['get'];
+  onSuccess?: (data: BatchFormValues) => void;
 }
 
-export function BatchForm({
-  mode = 'create',
-  defaultValues,
-  onSuccess,
-}: BatchFormProps) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const utils = api.useUtils()
+export function BatchForm({ mode = 'create', defaultValues, onSuccess }: BatchFormProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+  const utils = api.useUtils();
 
   const form = useForm<BatchFormValues>({
     resolver: zodResolver(insertBatchSchema),
@@ -60,52 +56,44 @@ export function BatchForm({
       startDate: defaultValues?.startDate || new Date(),
       plantCount: defaultValues?.plantCount || 0,
     },
-  })
+  });
 
-  const { mutate: createBatch, isPending: isCreating } =
-    api.batch.create.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Batch created successfully' })
-        void Promise.all([
-          utils.batch.getAll.invalidate(),
-          utils.batch.get.invalidate(data.id),
-        ])
-        router.push(`/batches/${data.id}`)
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error creating batch',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: createBatch, isPending: isCreating } = api.batch.create.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Batch created successfully' });
+      void Promise.all([utils.batch.getAll.invalidate(), utils.batch.get.invalidate(data.id)]);
+      router.push(`/batches/${data.id}`);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error creating batch',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const { mutate: updateBatch, isPending: isUpdating } =
-    api.batch.update.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Batch updated successfully' })
-        void Promise.all([
-          utils.batch.getAll.invalidate(),
-          utils.batch.get.invalidate(data.id),
-        ])
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error updating batch',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: updateBatch, isPending: isUpdating } = api.batch.update.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Batch updated successfully' });
+      void Promise.all([utils.batch.getAll.invalidate(), utils.batch.get.invalidate(data.id)]);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error updating batch',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
   function onSubmit(values: BatchFormValues) {
     if (mode === 'create') {
-      createBatch(values)
+      createBatch(values);
     } else if (defaultValues?.id) {
-      updateBatch({ id: defaultValues.id, data: values })
+      updateBatch({ id: defaultValues.id, data: values });
     }
   }
 
@@ -113,12 +101,12 @@ export function BatchForm({
   const { data: genetics } = api.genetic.getAll.useQuery({
     limit: 100,
     filters: { status: 'active' },
-  })
+  });
 
   const { data: locations } = api.location.getAll.useQuery({
     limit: 100,
     filters: { status: 'active' },
-  })
+  });
 
   return (
     <Form {...form}>
@@ -273,5 +261,5 @@ export function BatchForm({
         </Button>
       </form>
     </Form>
-  )
+  );
 }
