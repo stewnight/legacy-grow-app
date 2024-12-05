@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,8 +6,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from './breadcrumb'
-import { Home, ChevronRight } from 'lucide-react'
+} from './breadcrumb';
+import { Home, ChevronRight } from 'lucide-react';
 
 const meta = {
   title: 'UI/Breadcrumb',
@@ -16,10 +16,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Breadcrumb>
+} satisfies Meta<typeof Breadcrumb>;
 
-export default meta
-type Story = StoryObj<typeof Breadcrumb>
+export default meta;
+type Story = StoryObj<typeof Breadcrumb>;
 
 export const Default: Story = {
   args: {
@@ -39,7 +39,7 @@ export const Default: Story = {
       </BreadcrumbList>
     ),
   },
-}
+};
 
 export const WithIcons: Story = {
   args: {
@@ -65,4 +65,4 @@ export const WithIcons: Story = {
       </BreadcrumbList>
     ),
   },
-}
+};

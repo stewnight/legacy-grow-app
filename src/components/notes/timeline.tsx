@@ -1,68 +1,56 @@
-'use client'
+'use client';
 
-import { api } from '~/trpc/react'
-import { NoteCard } from './note-card'
-import { useInView } from 'react-intersection-observer'
-import { useEffect } from 'react'
-import { Loader2 } from 'lucide-react'
-import { type Note } from '~/server/db/schema/notes'
-import { ScrollArea } from '~/components/ui/scroll-area'
-import { Alert, AlertDescription } from '~/components/ui/alert'
-import { CreateNoteForm } from './create-note-form'
+import { api } from '~/trpc/react';
+import { NoteCard } from './note-card';
+import { useInView } from 'react-intersection-observer';
+import { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { type Note } from '~/server/db/schema/notes';
+import { ScrollArea } from '~/components/ui/scroll-area';
+import { Alert, AlertDescription } from '~/components/ui/alert';
+import { CreateNoteForm } from './create-note-form';
 
 interface TimelineProps {
-  entityType: string
-  entityId: number
-  onReply?: (noteId: number) => void
-  onEdit?: (note: Note) => void
-  onDelete?: (noteId: number) => void
+  entityType: string;
+  entityId: number;
+  onReply?: (noteId: number) => void;
+  onEdit?: (note: Note) => void;
+  onDelete?: (noteId: number) => void;
 }
 
-export function Timeline({
-  entityType,
-  entityId,
-  onReply,
-  onEdit,
-  onDelete,
-}: TimelineProps) {
-  const { ref, inView } = useInView()
+export function Timeline({ entityType, entityId, onReply, onEdit, onDelete }: TimelineProps) {
+  const { ref, inView } = useInView();
 
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    error,
-  } = api.notes.list.useInfiniteQuery(
-    {
-      entityType,
-      entityId,
-      limit: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnWindowFocus: false,
-      enabled: true,
-    }
-  )
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
+    api.notes.list.useInfiniteQuery(
+      {
+        entityType,
+        entityId,
+        limit: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        refetchOnWindowFocus: false,
+        enabled: true,
+      }
+    );
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage()
+      void fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (error) {
     return (
       <Alert variant="destructive">
         <AlertDescription>Failed to load notes</AlertDescription>
       </Alert>
-    )
+    );
   }
 
-  const notes = data?.pages.flatMap((page) => page.items) ?? []
-  const isEmpty = !isLoading && notes.length === 0
+  const notes = data?.pages.flatMap((page) => page.items) ?? [];
+  const isEmpty = !isLoading && notes.length === 0;
 
   return (
     <div className="space-y-4">
@@ -96,5 +84,5 @@ export function Timeline({
         </div>
       </ScrollArea>
     </div>
-  )
+  );
 }

@@ -1,19 +1,11 @@
-import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  text,
-  boolean,
-} from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { createTable } from '../utils'
-import { geneticTypeEnum, statusEnum } from './enums'
-import { users } from './core'
-import { batches } from './batches'
-import { plants } from './plants'
+import { relations, sql } from 'drizzle-orm';
+import { index, varchar, timestamp, json, uuid, text, boolean } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTable } from '../utils';
+import { geneticTypeEnum, statusEnum } from './enums';
+import { users } from './core';
+import { batches } from './batches';
+import { plants } from './plants';
 
 // ================== GENETICS ==================
 export const genetics = createTable(
@@ -25,59 +17,57 @@ export const genetics = createTable(
     breeder: varchar('breeder', { length: 255 }),
     description: text('description'),
     properties: json('properties').$type<{
-      effects?: string[]
-      flavors?: string[]
+      effects?: string[];
+      flavors?: string[];
       thc?: {
-        min?: number
-        max?: number
-      }
+        min?: number;
+        max?: number;
+      };
       cbd?: {
-        min?: number
-        max?: number
-      }
+        min?: number;
+        max?: number;
+      };
       terpenes?: Array<{
-        name: string
-        percentage?: number
-      }>
+        name: string;
+        percentage?: number;
+      }>;
     }>(),
     growProperties: json('grow_properties').$type<{
       floweringTime?: {
-        min: number
-        max: number
-        unit: 'days' | 'weeks'
-      }
+        min: number;
+        max: number;
+        unit: 'days' | 'weeks';
+      };
       height?: {
-        min: number
-        max: number
-        unit: 'cm' | 'inches'
-      }
+        min: number;
+        max: number;
+        unit: 'cm' | 'inches';
+      };
       yield?: {
-        min: number
-        max: number
-        unit: 'g' | 'oz' | 'kg'
-      }
-      difficulty?: 'easy' | 'medium' | 'hard'
-      environment?: 'indoor' | 'outdoor' | 'both'
+        min: number;
+        max: number;
+        unit: 'g' | 'oz' | 'kg';
+      };
+      difficulty?: 'easy' | 'medium' | 'hard';
+      environment?: 'indoor' | 'outdoor' | 'both';
     }>(),
     lineage: json('lineage').$type<{
-      mother?: string
-      father?: string
-      generation?: number
-      hybridRatio?: string
+      mother?: string;
+      father?: string;
+      generation?: number;
+      hybridRatio?: string;
       parents?: Array<{
-        name: string
-        type: string
-        role: 'mother' | 'father'
-      }>
+        name: string;
+        type: string;
+        role: 'mother' | 'father';
+      }>;
     }>(),
     inHouse: boolean('in_house').default(false),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -90,7 +80,7 @@ export const genetics = createTable(
     statusIdx: index('genetic_status_idx').on(table.status),
     inHouseIdx: index('genetic_in_house_idx').on(table.inHouse),
   })
-)
+);
 
 // ================== RELATIONS ==================
 
@@ -106,7 +96,7 @@ export const geneticsRelations = relations(genetics, ({ one, many }) => ({
     references: [users.id],
     relationName: 'geneticCreator',
   }),
-}))
+}));
 
 // ================== ZOD SCHEMAS ==================
 export const insertGeneticSchema = createInsertSchema(genetics, {
@@ -120,9 +110,9 @@ export const insertGeneticSchema = createInsertSchema(genetics, {
   createdAt: true,
   updatedAt: true,
   createdById: true,
-})
-export const selectGeneticSchema = createSelectSchema(genetics)
+});
+export const selectGeneticSchema = createSelectSchema(genetics);
 
 // ================== TYPES ==================
-export type Genetic = typeof genetics.$inferSelect
-export type NewGenetic = typeof genetics.$inferInsert
+export type Genetic = typeof genetics.$inferSelect;
+export type NewGenetic = typeof genetics.$inferInsert;

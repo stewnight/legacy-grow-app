@@ -1,5 +1,5 @@
-import type { StorybookConfig } from '@storybook/nextjs'
-import path from 'path'
+import type { StorybookConfig } from '@storybook/nextjs';
+import path from 'path';
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -20,7 +20,7 @@ const config: StorybookConfig = {
   },
   webpackFinal: async (config) => {
     if (!config.resolve) {
-      config.resolve = {}
+      config.resolve = {};
     }
 
     // Add path aliases
@@ -30,13 +30,10 @@ const config: StorybookConfig = {
       '@': path.resolve(__dirname, '../src'),
       // Mock modules
       'geist/font/sans': path.resolve(__dirname, '../src/__mocks__/geist.ts'),
-      '@/server/auth/config': path.resolve(
-        __dirname,
-        '../src/__mocks__/auth.ts'
-      ),
+      '@/server/auth/config': path.resolve(__dirname, '../src/__mocks__/auth.ts'),
       '@/server/db': path.resolve(__dirname, '../src/__mocks__/db.ts'),
       '@/env': path.resolve(__dirname, '../src/__mocks__/env.ts'),
-    }
+    };
 
     // Exclude server-side modules
     config.resolve.fallback = {
@@ -46,10 +43,10 @@ const config: StorybookConfig = {
       perf_hooks: false,
       pg: false,
       postgres: false,
-    }
+    };
 
-    return config
+    return config;
   },
-}
+};
 
-export default config
+export default config;

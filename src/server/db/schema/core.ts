@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm';
 import {
   index,
   integer,
@@ -9,21 +9,21 @@ import {
   boolean,
   json,
   uuid,
-} from 'drizzle-orm/pg-core'
-import { buildings } from './buildings'
-import { rooms } from './rooms'
-import { locations } from './locations'
-import { plants } from './plants'
-import { genetics } from './genetics'
-import { batches } from './batches'
-import { type AdapterAccount } from 'next-auth/adapters'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+} from 'drizzle-orm/pg-core';
+import { buildings } from './buildings';
+import { rooms } from './rooms';
+import { locations } from './locations';
+import { plants } from './plants';
+import { genetics } from './genetics';
+import { batches } from './batches';
+import { type AdapterAccount } from 'next-auth/adapters';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
-import { createTable } from '../utils'
-import { logLevelEnum, systemLogSourceEnum, userRoleEnum } from './enums'
-import { jobs } from './jobs'
-import { sensors } from './sensors'
-import { harvests, notes, processing } from '.'
+import { createTable } from '../utils';
+import { logLevelEnum, systemLogSourceEnum, userRoleEnum } from './enums';
+import { jobs } from './jobs';
+import { sensors } from './sensors';
+import { harvests, notes, processing } from '.';
 
 // ================== SYSTEM LOGS ==================
 export const systemLogs = createTable(
@@ -34,29 +34,27 @@ export const systemLogs = createTable(
     source: systemLogSourceEnum('source').notNull(),
     message: text('message').notNull(),
     metadata: json('metadata').$type<Record<string, unknown>>(),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     levelIdx: index('system_log_level_idx').on(table.level),
     sourceIdx: index('system_log_source_idx').on(table.source),
     createdAtIdx: index('system_log_created_at_idx').on(table.createdAt),
   })
-)
+);
 
 // ================== USERS & AUTH ==================
 export type UserPreferences = {
-  theme?: 'light' | 'dark' | 'system'
+  theme?: 'light' | 'dark' | 'system';
   notifications?: {
-    email?: boolean
-    push?: boolean
-    inApp?: boolean
-  }
-  units?: 'metric' | 'imperial'
-  language?: string
-  timezone?: string
-}
+    email?: boolean;
+    push?: boolean;
+    inApp?: boolean;
+  };
+  units?: 'metric' | 'imperial';
+  language?: string;
+  timezone?: string;
+};
 
 export const users = createTable(
   'user',
@@ -74,9 +72,7 @@ export const users = createTable(
     permissions: json('permissions').$type<string[]>().default([]),
     preferences: json('preferences').$type<UserPreferences>().default({}),
     lastLogin: timestamp('last_login', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -87,7 +83,7 @@ export const users = createTable(
     roleIdx: index('user_role_idx').on(table.role),
     activeIdx: index('user_active_idx').on(table.active),
   })
-)
+);
 
 export const accounts = createTable(
   'account',
@@ -95,9 +91,7 @@ export const accounts = createTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    type: varchar('type', { length: 255 })
-      .$type<AdapterAccount['type']>()
-      .notNull(),
+    type: varchar('type', { length: 255 }).$type<AdapterAccount['type']>().notNull(),
     provider: varchar('provider', { length: 255 }).notNull(),
     providerAccountId: varchar('provider_account_id', {
       length: 255,
@@ -116,14 +110,12 @@ export const accounts = createTable(
     }),
     userIdIdx: index('account_user_id_idx').on(table.userId),
   })
-)
+);
 
 export const sessions = createTable(
   'session',
   {
-    sessionToken: varchar('session_token', { length: 255 })
-      .notNull()
-      .primaryKey(),
+    sessionToken: varchar('session_token', { length: 255 }).notNull().primaryKey(),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
@@ -135,7 +127,7 @@ export const sessions = createTable(
   (table) => ({
     userIdIdx: index('session_user_id_idx').on(table.userId),
   })
-)
+);
 
 export const verificationTokens = createTable(
   'verification_token',
@@ -151,7 +143,7 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [table.identifier, table.token] }),
     expiresIdx: index('verification_token_expires_idx').on(table.expires),
   })
-)
+);
 
 /**
  * Core user relations including all created and assigned entities
@@ -174,7 +166,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdHarvests: many(harvests, { relationName: 'harvestCreator' }),
   createdProcessing: many(processing, { relationName: 'processingCreator' }),
   createdNotes: many(notes, { relationName: 'noteCreator' }),
-}))
+}));
 
 /**
  * Authentication relations for NextAuth.js
@@ -185,7 +177,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
     references: [users.id],
     relationName: 'userAccounts',
   }),
-}))
+}));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
@@ -193,15 +185,15 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
     references: [users.id],
     relationName: 'userSessions',
   }),
-}))
+}));
 
 // Zod Schemas
-export const insertUserSchema = createInsertSchema(users)
-export const selectUserSchema = createSelectSchema(users)
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createSelectSchema(users);
 
 // Types
-export type User = typeof users.$inferSelect
-export type NewUser = typeof users.$inferInsert
-export type Account = typeof accounts.$inferSelect
-export type Session = typeof sessions.$inferSelect
-export type VerificationToken = typeof verificationTokens.$inferSelect
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type Account = typeof accounts.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type VerificationToken = typeof verificationTokens.$inferSelect;

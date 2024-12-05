@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { insertGeneticSchema } from '~/server/db/schema'
-import { Button } from '@/components/ui/button'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertGeneticSchema } from '~/server/db/schema';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,41 +11,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useToast } from '~/hooks/use-toast'
-import { useRouter } from 'next/navigation'
-import { type z } from 'zod'
-import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'
-import { type inferRouterOutputs } from '@trpc/server'
-import { type AppRouter } from '~/server/api/root'
-import { Checkbox } from '@/components/ui/checkbox'
-import { api } from '../../../../trpc/react'
+} from '@/components/ui/select';
+import { useToast } from '~/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { type z } from 'zod';
+import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums';
+import { type inferRouterOutputs } from '@trpc/server';
+import { type AppRouter } from '~/server/api/root';
+import { Checkbox } from '@/components/ui/checkbox';
+import { api } from '../../../../trpc/react';
 
-type RouterOutputs = inferRouterOutputs<AppRouter>
-type GeneticFormValues = z.infer<typeof insertGeneticSchema>
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type GeneticFormValues = z.infer<typeof insertGeneticSchema>;
 
 interface GeneticFormProps {
-  mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['genetic']['get']
-  onSuccess?: (data: GeneticFormValues) => void
+  mode?: 'create' | 'edit';
+  defaultValues?: RouterOutputs['genetic']['get'];
+  onSuccess?: (data: GeneticFormValues) => void;
 }
 
-export function GeneticForm({
-  mode = 'create',
-  defaultValues,
-  onSuccess,
-}: GeneticFormProps) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const utils = api.useUtils()
+export function GeneticForm({ mode = 'create', defaultValues, onSuccess }: GeneticFormProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+  const utils = api.useUtils();
   const form = useForm<GeneticFormValues>({
     resolver: zodResolver(insertGeneticSchema),
     defaultValues: {
@@ -56,52 +52,44 @@ export function GeneticForm({
       inHouse: defaultValues?.inHouse || false,
       status: defaultValues?.status || 'active',
     },
-  })
+  });
 
-  const { mutate: createGenetic, isPending: isCreating } =
-    api.genetic.create.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Genetic created successfully' })
-        void Promise.all([
-          utils.genetic.getAll.invalidate(),
-          utils.genetic.get.invalidate(data.id),
-        ])
-        router.push(`/genetics/${data.id}`)
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error creating genetic',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: createGenetic, isPending: isCreating } = api.genetic.create.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Genetic created successfully' });
+      void Promise.all([utils.genetic.getAll.invalidate(), utils.genetic.get.invalidate(data.id)]);
+      router.push(`/genetics/${data.id}`);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error creating genetic',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const { mutate: updateGenetic, isPending: isUpdating } =
-    api.genetic.update.useMutation({
-      onSuccess: (data) => {
-        toast({ title: 'Genetic updated successfully' })
-        void Promise.all([
-          utils.genetic.getAll.invalidate(),
-          utils.genetic.get.invalidate(data.id),
-        ])
-        onSuccess?.(data)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error updating genetic',
-          description: error.message,
-          variant: 'destructive',
-        })
-      },
-    })
+  const { mutate: updateGenetic, isPending: isUpdating } = api.genetic.update.useMutation({
+    onSuccess: (data) => {
+      toast({ title: 'Genetic updated successfully' });
+      void Promise.all([utils.genetic.getAll.invalidate(), utils.genetic.get.invalidate(data.id)]);
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error updating genetic',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
   function onSubmit(values: GeneticFormValues) {
     if (mode === 'create') {
-      createGenetic(values)
+      createGenetic(values);
     } else if (defaultValues?.id) {
-      updateGenetic({ id: defaultValues.id, data: values })
+      updateGenetic({ id: defaultValues.id, data: values });
     }
   }
 
@@ -109,10 +97,10 @@ export function GeneticForm({
     <Form {...form}>
       <form
         onSubmit={(e) => {
-          console.log('Form Submitted Event')
+          console.log('Form Submitted Event');
           form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors)
-          })(e)
+            console.log('Form Errors:', errors);
+          })(e);
         }}
         className="space-y-4 p-1"
         noValidate
@@ -190,10 +178,7 @@ export function GeneticForm({
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
               <FormControl>
-                <Checkbox
-                  checked={field.value || false}
-                  onCheckedChange={field.onChange}
-                />
+                <Checkbox checked={field.value || false} onCheckedChange={field.onChange} />
               </FormControl>
               <FormLabel>In House</FormLabel>
               <FormMessage />
@@ -231,5 +216,5 @@ export function GeneticForm({
         </Button>
       </form>
     </Form>
-  )
+  );
 }

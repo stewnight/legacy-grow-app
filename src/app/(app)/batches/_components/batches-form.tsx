@@ -30,12 +30,13 @@ import { useRouter } from 'next/navigation'
 import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/date-picker'
 import { format } from 'date-fns'
+import { type TRPCClientErrorLike } from '@trpc/client'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type BatchFormValues = z.infer<typeof insertBatchSchema>
 
 interface BatchFormProps {
-  mode?: 'create' | 'edit'
+  mode: 'create' | 'edit'
   defaultValues?: RouterOutputs['batch']['get']
   onSuccess?: (data: BatchFormValues) => void
 }
@@ -48,6 +49,14 @@ export function BatchForm({
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
+
+  const { data: genetics } = api.genetic.getAll.useQuery({
+    limit: 100,
+  })
+
+  const { data: locations } = api.location.getAll.useQuery({
+    limit: 100,
+  })
 
   const form = useForm<BatchFormValues>({
     resolver: zodResolver(insertBatchSchema),
@@ -64,16 +73,16 @@ export function BatchForm({
 
   const { mutate: createBatch, isPending: isCreating } =
     api.batch.create.useMutation({
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         toast({ title: 'Batch created successfully' })
-        void Promise.all([
+        await Promise.all([
           utils.batch.getAll.invalidate(),
           utils.batch.get.invalidate(data.id),
         ])
         router.push(`/batches/${data.id}`)
         onSuccess?.(data)
       },
-      onError: (error) => {
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
         toast({
           title: 'Error creating batch',
           description: error.message,
@@ -84,15 +93,15 @@ export function BatchForm({
 
   const { mutate: updateBatch, isPending: isUpdating } =
     api.batch.update.useMutation({
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         toast({ title: 'Batch updated successfully' })
-        void Promise.all([
+        await Promise.all([
           utils.batch.getAll.invalidate(),
           utils.batch.get.invalidate(data.id),
         ])
         onSuccess?.(data)
       },
-      onError: (error) => {
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
         toast({
           title: 'Error updating batch',
           description: error.message,
@@ -101,26 +110,28 @@ export function BatchForm({
       },
     })
 
-  function onSubmit(values: BatchFormValues) {
-    if (mode === 'create') {
-      createBatch(values)
-    } else if (defaultValues?.id) {
-      updateBatch({ id: defaultValues.id, data: values })
+  const onSubmit = async (values: BatchFormValues) => {
+    try {
+      if (mode === 'create') {
+        await createBatch(values)
+      } else if (defaultValues?.id) {
+        await updateBatch({ id: defaultValues.id, data: values })
+      }
+    } catch (error) {
+      console.error('Form submission error:', error)
     }
   }
 
-  // Fetch related data
-  const { data: genetics } = api.genetic.getAll.useQuery({
-    limit: 100,
-  })
-
-  const { data: locations } = api.location.getAll.useQuery({
-    limit: 100,
-  })
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-1">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          void form.handleSubmit(onSubmit)(e)
+        }}
+        className="space-y-4 p-1"
+        noValidate
+      >
         <FormField
           control={form.control}
           name="identifier"

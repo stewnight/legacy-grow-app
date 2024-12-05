@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react';
 import {
   Table,
   TableBody,
@@ -7,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './table'
-import { Badge } from './badge'
+} from './table';
+import { Badge } from './badge';
 
 const meta = {
   title: 'UI/Table',
@@ -17,10 +17,10 @@ const meta = {
     layout: 'padded',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Table>
+} satisfies Meta<typeof Table>;
 
-export default meta
-type Story = StoryObj<typeof Table>
+export default meta;
+type Story = StoryObj<typeof Table>;
 
 const invoices = [
   {
@@ -41,7 +41,7 @@ const invoices = [
     totalAmount: '$350.00',
     paymentMethod: 'Bank Transfer',
   },
-]
+];
 
 export const Default: Story = {
   args: {
@@ -74,16 +74,14 @@ export const Default: Story = {
                 </Badge>
               </TableCell>
               <TableCell>{invoice.paymentMethod}</TableCell>
-              <TableCell className="text-right">
-                {invoice.totalAmount}
-              </TableCell>
+              <TableCell className="text-right">{invoice.totalAmount}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </>
     ),
   },
-}
+};
 
 export const WithoutCaption: Story = {
   args: {
@@ -118,4 +116,4 @@ export const WithoutCaption: Story = {
       </>
     ),
   },
-}
+};

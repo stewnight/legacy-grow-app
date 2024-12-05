@@ -1,27 +1,21 @@
-'use client'
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '~/components/ui/button'
-import { Textarea } from '~/components/ui/textarea'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '~/components/ui/form'
-import { api } from '~/trpc/react'
-import { useSession } from 'next-auth/react'
-import { createOptimisticNote } from '~/lib/optimistic-update'
-import { useToast } from '~/hooks/use-toast'
-import { Mic, Send, X } from 'lucide-react'
-import { cn } from '~/lib/utils'
-import { MediaUploader } from './media-uploader'
-import { useState } from 'react'
-import Image from 'next/image'
-import { Alert, AlertDescription } from '~/components/ui/alert'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Button } from '~/components/ui/button';
+import { Textarea } from '~/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '~/components/ui/form';
+import { api } from '~/trpc/react';
+import { useSession } from 'next-auth/react';
+import { createOptimisticNote } from '~/lib/optimistic-update';
+import { useToast } from '~/hooks/use-toast';
+import { Mic, Send, X } from 'lucide-react';
+import { cn } from '~/lib/utils';
+import { MediaUploader } from './media-uploader';
+import { useState } from 'react';
+import Image from 'next/image';
+import { Alert, AlertDescription } from '~/components/ui/alert';
 
 const createNoteSchema = z.object({
   content: z.string().min(1, 'Note content is required'),
@@ -43,14 +37,14 @@ const createNoteSchema = z.object({
     })
     .nullable()
     .optional(),
-})
+});
 
 interface CreateNoteFormProps {
-  entityType: string
-  entityId: number
-  parentId?: number
-  onSuccess?: () => void
-  className?: string
+  entityType: string;
+  entityId: number;
+  parentId?: number;
+  onSuccess?: () => void;
+  className?: string;
 }
 
 export function CreateNoteForm({
@@ -60,17 +54,17 @@ export function CreateNoteForm({
   onSuccess,
   className,
 }: CreateNoteFormProps) {
-  const { data: session, status } = useSession()
-  const utils = api.useUtils()
-  const { toast } = useToast()
-  const [isRecording, setIsRecording] = useState(false)
-  const [mediaUrl, setMediaUrl] = useState<string | null>(null)
+  const { data: session, status } = useSession();
+  const utils = api.useUtils();
+  const { toast } = useToast();
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [mediaMetadata, setMediaMetadata] = useState<{
-    width?: number
-    height?: number
-    size?: number
-    type?: string
-  } | null>(null)
+    width?: number;
+    height?: number;
+    size?: number;
+    type?: string;
+  } | null>(null);
 
   const form = useForm<z.infer<typeof createNoteSchema>>({
     resolver: zodResolver(createNoteSchema),
@@ -81,18 +75,18 @@ export function CreateNoteForm({
       entityId,
       parentId,
     },
-  })
+  });
 
   const createMutation = api.notes.create.useMutation({
     onMutate: async (newNote) => {
-      if (!session?.user) throw new Error('Not authenticated')
+      if (!session?.user) throw new Error('Not authenticated');
 
-      await utils.notes.list.cancel({ entityType, entityId, limit: 50 })
+      await utils.notes.list.cancel({ entityType, entityId, limit: 50 });
       const previousData = utils.notes.list.getData({
         entityType,
         entityId,
         limit: 50,
-      })
+      });
 
       const createdBy = {
         id: session.user.id,
@@ -106,48 +100,45 @@ export function CreateNoteForm({
         preferences: null,
         lastLogin: null,
         createdAt: new Date(),
-      }
+      };
 
       const optimisticNote = {
         ...createOptimisticNote(newNote, createdBy),
         createdBy,
-      }
+      };
 
       utils.notes.list.setData({ entityType, entityId, limit: 50 }, (old) => {
-        if (!old) return { items: [], nextCursor: null }
+        if (!old) return { items: [], nextCursor: null };
         return {
           items: [optimisticNote, ...old.items],
           nextCursor: old.nextCursor,
-        }
-      })
+        };
+      });
 
-      return { previousData }
+      return { previousData };
     },
     onError: (err, newNote, context) => {
-      utils.notes.list.setData(
-        { entityType, entityId, limit: 50 },
-        context?.previousData
-      )
+      utils.notes.list.setData({ entityType, entityId, limit: 50 }, context?.previousData);
       toast({
         title: 'Failed to create note',
         description: 'Please try again',
         variant: 'destructive',
-      })
+      });
     },
     onSuccess: () => {
-      form.reset()
-      setMediaUrl(null)
-      setMediaMetadata(null)
+      form.reset();
+      setMediaUrl(null);
+      setMediaMetadata(null);
       toast({
         title: 'Note created',
         description: 'Your note has been added successfully',
-      })
-      onSuccess?.()
+      });
+      onSuccess?.();
     },
     onSettled: () => {
-      void utils.notes.list.invalidate({ entityType, entityId, limit: 50 })
+      void utils.notes.list.invalidate({ entityType, entityId, limit: 50 });
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof createNoteSchema>) {
     if (!session?.user) {
@@ -155,12 +146,12 @@ export function CreateNoteForm({
         title: 'Authentication required',
         description: 'Please sign in to create notes',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    const noteContent = mediaUrl ?? values.content
-    if (!noteContent.trim()) return
+    const noteContent = mediaUrl ?? values.content;
+    if (!noteContent.trim()) return;
 
     try {
       await createMutation.mutateAsync({
@@ -180,9 +171,9 @@ export function CreateNoteForm({
               mimeType: mediaMetadata.type,
             }
           : undefined,
-      })
+      });
     } catch (error) {
-      console.error('Failed to create note:', error)
+      console.error('Failed to create note:', error);
     }
   }
 
@@ -191,7 +182,7 @@ export function CreateNoteForm({
       <div className="flex justify-center p-4">
         <span className="text-sm text-muted-foreground">Loading...</span>
       </div>
-    )
+    );
   }
 
   if (status === 'unauthenticated') {
@@ -199,7 +190,7 @@ export function CreateNoteForm({
       <Alert>
         <AlertDescription>Please sign in to create notes</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   const handleUploadError = (error: Error) => {
@@ -207,15 +198,12 @@ export function CreateNoteForm({
       title: 'Upload failed',
       description: error.message,
       variant: 'destructive',
-    })
-  }
+    });
+  };
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('space-y-4', className)}
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-4', className)}>
         <div className="relative">
           <FormField
             control={form.control}
@@ -230,16 +218,16 @@ export function CreateNoteForm({
                         alt="Upload preview"
                         width={300}
                         height={300}
-                        className="max-h-[200px] w-full object-cover rounded-md"
+                        className="max-h-[200px] w-full rounded-md object-cover"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute top-2 right-2"
+                        className="absolute right-2 top-2"
                         onClick={() => {
-                          setMediaUrl(null)
-                          setMediaMetadata(null)
+                          setMediaUrl(null);
+                          setMediaMetadata(null);
                         }}
                       >
                         <X className="h-4 w-4" />
@@ -261,11 +249,11 @@ export function CreateNoteForm({
           <div className="absolute bottom-3 right-3 flex items-center gap-2">
             <MediaUploader
               onUpload={(file) => {
-                console.log('uploading file', file)
+                console.log('uploading file', file);
               }}
               onUploadComplete={(url, metadata) => {
-                setMediaUrl(url)
-                setMediaMetadata(metadata)
+                setMediaUrl(url);
+                setMediaMetadata(metadata);
               }}
               onUploadError={handleUploadError}
             />
@@ -279,17 +267,14 @@ export function CreateNoteForm({
             </Button>
             <Button
               type="submit"
-              disabled={
-                (!form.getValues('content') && !mediaUrl) ||
-                createMutation.isPending
-              }
+              disabled={(!form.getValues('content') && !mediaUrl) || createMutation.isPending}
             >
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="mr-2 h-4 w-4" />
               Send
             </Button>
           </div>
         </div>
       </form>
     </Form>
-  )
+  );
 }

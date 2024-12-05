@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { Textarea } from './textarea'
-import { Label } from './label'
+import type { Meta, StoryObj } from '@storybook/react';
+import { Textarea } from './textarea';
+import { Label } from './label';
 
 const meta = {
   title: 'UI/Textarea',
@@ -9,16 +9,16 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Textarea>
+} satisfies Meta<typeof Textarea>;
 
-export default meta
-type Story = StoryObj<typeof Textarea>
+export default meta;
+type Story = StoryObj<typeof Textarea>;
 
 export const Default: Story = {
   args: {
     placeholder: 'Type your message here.',
   },
-}
+};
 
 export const WithLabel: Story = {
   render: () => (
@@ -27,18 +27,18 @@ export const WithLabel: Story = {
       <Textarea placeholder="Type your message here." id="message" />
     </div>
   ),
-}
+};
 
 export const Disabled: Story = {
   args: {
     disabled: true,
     placeholder: 'Disabled textarea',
   },
-}
+};
 
 export const WithRows: Story = {
   args: {
     placeholder: 'Type your message here.',
     rows: 10,
   },
-}
+};

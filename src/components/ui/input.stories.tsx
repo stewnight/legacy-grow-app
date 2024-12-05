@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { Input } from './input'
-import { Label } from './label'
+import type { Meta, StoryObj } from '@storybook/react';
+import { Input } from './input';
+import { Label } from './label';
 
 const meta = {
   title: 'UI/Input',
@@ -9,16 +9,16 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Input>
+} satisfies Meta<typeof Input>;
 
-export default meta
-type Story = StoryObj<typeof Input>
+export default meta;
+type Story = StoryObj<typeof Input>;
 
 export const Default: Story = {
   args: {
     placeholder: 'Enter text...',
   },
-}
+};
 
 export const WithLabel: Story = {
   render: () => (
@@ -27,14 +27,14 @@ export const WithLabel: Story = {
       <Input type="email" id="email" placeholder="Email" />
     </div>
   ),
-}
+};
 
 export const Disabled: Story = {
   args: {
     disabled: true,
     placeholder: 'Disabled input',
   },
-}
+};
 
 export const WithIcon: Story = {
   render: () => (
@@ -55,4 +55,4 @@ export const WithIcon: Story = {
       </svg>
     </div>
   ),
-}
+};

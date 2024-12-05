@@ -1,24 +1,17 @@
-import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  integer,
-} from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { createTable } from '../utils'
-import { locationTypeEnum, statusEnum } from './enums'
-import { users } from './core'
-import { rooms } from './rooms'
-import { plants } from './plants'
-import { jobs } from './jobs'
-import { batches } from './batches'
-import { sensors } from './sensors'
-import { harvests } from './harvests'
-import { processing } from './processing'
-import { notes } from './notes'
+import { relations, sql } from 'drizzle-orm';
+import { index, varchar, timestamp, json, uuid, integer } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { createTable } from '../utils';
+import { locationTypeEnum, statusEnum } from './enums';
+import { users } from './core';
+import { rooms } from './rooms';
+import { plants } from './plants';
+import { jobs } from './jobs';
+import { batches } from './batches';
+import { sensors } from './sensors';
+import { harvests } from './harvests';
+import { processing } from './processing';
+import { notes } from './notes';
 
 export const locations = createTable(
   'location',
@@ -30,38 +23,36 @@ export const locations = createTable(
     name: varchar('name', { length: 255 }).notNull(),
     type: locationTypeEnum('type').notNull(),
     coordinates: json('coordinates').$type<{
-      x: number
-      y: number
-      z?: number
-      unit: 'm' | 'ft'
+      x: number;
+      y: number;
+      z?: number;
+      unit: 'm' | 'ft';
     }>(),
     properties: json('properties').$type<{
-      temperature?: { min: number; max: number }
-      humidity?: { min: number; max: number }
+      temperature?: { min: number; max: number };
+      humidity?: { min: number; max: number };
       light?: {
-        type: string
-        intensity: number
-        height?: number
-      }
+        type: string;
+        intensity: number;
+        height?: number;
+      };
       irrigation?: {
-        type: string
-        schedule?: string
-      }
+        type: string;
+        schedule?: string;
+      };
     }>(),
     dimensions: json('dimensions').$type<{
-      length: number
-      width: number
-      height?: number
-      unit: 'ft' | 'm'
+      length: number;
+      width: number;
+      height?: number;
+      unit: 'ft' | 'm';
     }>(),
     capacity: integer('capacity').default(0),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -73,7 +64,7 @@ export const locations = createTable(
     roomIdIdx: index('location_room_id_idx').on(table.roomId),
     statusIdx: index('location_status_idx').on(table.status),
   })
-)
+);
 export const locationsRelations = relations(locations, ({ one, many }) => ({
   room: one(rooms, {
     fields: [locations.roomId],
@@ -92,7 +83,7 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
     references: [users.id],
     relationName: 'locationCreator',
   }),
-}))
+}));
 
 // Zod Schemas
 export const insertLocationSchema = createInsertSchema(locations).omit({
@@ -100,9 +91,9 @@ export const insertLocationSchema = createInsertSchema(locations).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-})
-export const selectLocationSchema = createSelectSchema(locations)
+});
+export const selectLocationSchema = createSelectSchema(locations);
 
 // Types
-export type Location = typeof locations.$inferSelect
-export type NewLocation = typeof locations.$inferInsert
+export type Location = typeof locations.$inferSelect;
+export type NewLocation = typeof locations.$inferInsert;

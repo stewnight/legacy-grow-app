@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { RadioGroup, RadioGroupItem } from './radio-group'
-import { Label } from './label'
+import type { Meta, StoryObj } from '@storybook/react';
+import { RadioGroup, RadioGroupItem } from './radio-group';
+import { Label } from './label';
 
 const meta = {
   title: 'UI/RadioGroup',
@@ -9,10 +9,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof RadioGroup>
+} satisfies Meta<typeof RadioGroup>;
 
-export default meta
-type Story = StoryObj<typeof RadioGroup>
+export default meta;
+type Story = StoryObj<typeof RadioGroup>;
 
 export const Default: Story = {
   render: () => (
@@ -27,7 +27,7 @@ export const Default: Story = {
       </div>
     </RadioGroup>
   ),
-}
+};
 
 export const WithDescription: Story = {
   render: () => (
@@ -37,24 +37,20 @@ export const WithDescription: Story = {
           <RadioGroupItem value="card" id="card" />
           <div className="grid gap-1.5">
             <Label htmlFor="card">Card Payment</Label>
-            <p className="text-sm text-muted-foreground">
-              Pay with your credit or debit card.
-            </p>
+            <p className="text-sm text-muted-foreground">Pay with your credit or debit card.</p>
           </div>
         </div>
         <div className="flex items-center space-x-3 space-y-0">
           <RadioGroupItem value="paypal" id="paypal" />
           <div className="grid gap-1.5">
             <Label htmlFor="paypal">PayPal</Label>
-            <p className="text-sm text-muted-foreground">
-              Pay with your PayPal account.
-            </p>
+            <p className="text-sm text-muted-foreground">Pay with your PayPal account.</p>
           </div>
         </div>
       </div>
     </RadioGroup>
   ),
-}
+};
 
 export const Disabled: Story = {
   render: () => (
@@ -73,4 +69,4 @@ export const Disabled: Story = {
       </div>
     </RadioGroup>
   ),
-}
+};

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 const data = [
   {
@@ -33,7 +33,7 @@ const data = [
     plants: 36,
     harvests: 14,
   },
-]
+];
 
 export function Overview() {
   return (
@@ -53,17 +53,9 @@ export function Overview() {
           axisLine={false}
           tickFormatter={(value) => `${value}`}
         />
-        <Bar
-          dataKey="plants"
-          fill="hsl(var(--chart-1))"
-          radius={[4, 4, 0, 0]}
-        />
-        <Bar
-          dataKey="harvests"
-          fill="hsl(var(--chart-2))"
-          radius={[4, 4, 0, 0]}
-        />
+        <Bar dataKey="plants" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="harvests" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
-  )
+  );
 }

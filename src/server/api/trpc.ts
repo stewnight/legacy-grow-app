@@ -4,25 +4,25 @@
  * 2. You want to create a new middleware or type of procedure (see Part 3).
  */
 
-import { initTRPC, TRPCError } from '@trpc/server'
-import superjson from 'superjson'
-import { ZodError } from 'zod'
+import { initTRPC, TRPCError } from '@trpc/server';
+import superjson from 'superjson';
+import { ZodError } from 'zod';
 
-import { auth } from '~/server/auth'
-import { db } from '~/server/db'
+import { auth } from '~/server/auth';
+import { db } from '~/server/db';
 
 /**
  * 1. CONTEXT
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await auth()
+  const session = await auth();
 
   return {
     db,
     session,
     ...opts,
-  }
-}
+  };
+};
 
 /**
  * 2. INITIALIZATION
@@ -34,47 +34,44 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
-    }
+    };
   },
-})
+});
 
-export const createCallerFactory = t.createCallerFactory
-export const createTRPCRouter = t.router
+export const createCallerFactory = t.createCallerFactory;
+export const createTRPCRouter = t.router;
 
 /**
  * Middleware for timing procedure execution
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
-  const start = Date.now()
+  const start = Date.now();
 
-  const result = await next()
+  const result = await next();
 
-  const end = Date.now()
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`)
+  const end = Date.now();
+  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
 
-  return result
-})
+  return result;
+});
 
 /**
  * Public (unauthenticated) procedure
  */
-export const publicProcedure = t.procedure.use(timingMiddleware)
+export const publicProcedure = t.procedure.use(timingMiddleware);
 
 /**
  * Protected (authenticated) procedure
  */
-export const protectedProcedure = t.procedure
-  .use(timingMiddleware)
-  .use(async ({ ctx, next }) => {
-    if (!ctx.session || !ctx.session.user) {
-      throw new TRPCError({ code: 'UNAUTHORIZED' })
-    }
-    return next({
-      ctx: {
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    })
-  })
+export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  return next({
+    ctx: {
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});

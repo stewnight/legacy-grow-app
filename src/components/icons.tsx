@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Leaf,
@@ -16,22 +16,12 @@ import {
   Combine,
   GitBranch,
   Flower as FlowerIcon,
-} from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/components/ui/tooltip'
-import type {
-  HealthStatus,
-  PlantSex,
-  PlantStage,
-  PlantSource,
-} from '../server/db/schema/enums'
+} from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
+import type { HealthStatus, PlantSex, PlantStage, PlantSource } from '../server/db/schema/enums';
 
 interface StatusIconProps {
-  className?: string
+  className?: string;
 }
 
 export function HealthStatusIcon({
@@ -44,7 +34,7 @@ export function HealthStatusIcon({
     pest: <Bug className={className} />,
     nutrient: <Droplets className={className} />,
     dead: <Skull className={className} />,
-  } as const
+  } as const;
 
   return (
     <TooltipProvider>
@@ -55,19 +45,16 @@ export function HealthStatusIcon({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
-export function PlantSexIcon({
-  sex,
-  className,
-}: { sex: PlantSex } & StatusIconProps) {
+export function PlantSexIcon({ sex, className }: { sex: PlantSex } & StatusIconProps) {
   const icon = {
     male: <CircleMinus className={className} />,
     female: <CircleDot className={className} />,
     hermaphrodite: <Combine className={className} />,
     unknown: <HelpCircle className={className} />,
-  } as const
+  } as const;
 
   return (
     <TooltipProvider>
@@ -78,19 +65,16 @@ export function PlantSexIcon({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
-export function PlantStageIcon({
-  stage,
-  className,
-}: { stage: PlantStage } & StatusIconProps) {
+export function PlantStageIcon({ stage, className }: { stage: PlantStage } & StatusIconProps) {
   const icon = {
     seedling: <Sprout className={className} />,
     vegetative: <Leaf className={className} />,
     flowering: <FlowerIcon className={className} />,
     harvested: <Package className={className} />,
-  } as const
+  } as const;
 
   return (
     <TooltipProvider>
@@ -101,18 +85,15 @@ export function PlantStageIcon({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
-export function PlantSourceIcon({
-  source,
-  className,
-}: { source: PlantSource } & StatusIconProps) {
+export function PlantSourceIcon({ source, className }: { source: PlantSource } & StatusIconProps) {
   const icon = {
     seed: <Sprout className={className} />,
     clone: <GitBranch className={className} />,
     mother: <Flower2 className={className} />,
-  } as const
+  } as const;
 
   return (
     <TooltipProvider>
@@ -123,7 +104,7 @@ export function PlantSourceIcon({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
 export function QuarantineIcon({
@@ -141,5 +122,5 @@ export function QuarantineIcon({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }

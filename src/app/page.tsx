@@ -1,15 +1,15 @@
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { auth } from '~/server/auth'
-import { HydrateClient } from '~/trpc/server'
-import { Button } from '~/components/ui/button'
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { auth } from '~/server/auth';
+import { HydrateClient } from '~/trpc/server';
+import { Button } from '~/components/ui/button';
 
 export default async function Home() {
-  const session = await auth()
+  const session = await auth();
 
   // Redirect authenticated users to dashboard
   if (session) {
-    redirect('/dashboard')
+    redirect('/dashboard');
   }
 
   return (
@@ -24,25 +24,21 @@ export default async function Home() {
             Modern Cannabis Cultivation Management
           </h1>
           <p className="max-w-[600px] text-gray-500 md:text-xl">
-            A comprehensive system for tracking plants, monitoring growth
-            stages, and managing your entire cultivation operation with ease.
+            A comprehensive system for tracking plants, monitoring growth stages, and managing your
+            entire cultivation operation with ease.
           </p>
           <div className="flex gap-4">
             <Link href="/api/auth/signin">
               <Button size="lg">Get Started</Button>
             </Link>
-            <Link
-              href="https://github.com/stewnight/legacy-grow-app"
-              target="_blank"
-            >
+            <Link href="https://github.com/stewnight/legacy-grow-app" target="_blank">
               <Button variant="outline" size="lg">
                 View on GitHub
               </Button>
             </Link>
           </div>
           <p className="text-sm text-gray-500">
-            ⚠️ This is a development preview. All data is temporary and may be
-            reset periodically.
+            ⚠️ This is a development preview. All data is temporary and may be reset periodically.
           </p>
         </div>
       </div>
@@ -52,30 +48,24 @@ export default async function Home() {
         <div className="container mx-auto px-4 py-16">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg border bg-white p-6">
-              <h3 className="mb-2 text-lg font-semibold">
-                Complete Lifecycle Tracking
-              </h3>
+              <h3 className="mb-2 text-lg font-semibold">Complete Lifecycle Tracking</h3>
               <p className="text-gray-500">
-                Monitor your plants from seed to harvest with genetic strain
-                management, location tracking, and detailed logging.
+                Monitor your plants from seed to harvest with genetic strain management, location
+                tracking, and detailed logging.
               </p>
             </div>
             <div className="rounded-lg border bg-white p-6">
-              <h3 className="mb-2 text-lg font-semibold">
-                Mobile-First Design
-              </h3>
+              <h3 className="mb-2 text-lg font-semibold">Mobile-First Design</h3>
               <p className="text-gray-500">
-                Built for cultivators on the move with offline support, quick
-                actions, and camera integration for plant photos.
+                Built for cultivators on the move with offline support, quick actions, and camera
+                integration for plant photos.
               </p>
             </div>
             <div className="rounded-lg border bg-white p-6">
-              <h3 className="mb-2 text-lg font-semibold">
-                Compliance & Reporting
-              </h3>
+              <h3 className="mb-2 text-lg font-semibold">Compliance & Reporting</h3>
               <p className="text-gray-500">
-                Stay compliant with comprehensive logging, task management, and
-                detailed reporting capabilities.
+                Stay compliant with comprehensive logging, task management, and detailed reporting
+                capabilities.
               </p>
             </div>
           </div>
@@ -85,13 +75,9 @@ export default async function Home() {
       {/* Roadmap Section */}
       <div className="border-t">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="mb-8 text-center text-3xl font-bold">
-            Current Development Phase
-          </h2>
+          <h2 className="mb-8 text-center text-3xl font-bold">Current Development Phase</h2>
           <div className="mx-auto max-w-2xl rounded-lg border bg-white p-6">
-            <h3 className="mb-4 text-lg font-semibold">
-              Phase 1: Basic Plant Logging
-            </h3>
+            <h3 className="mb-4 text-lg font-semibold">Phase 1: Basic Plant Logging</h3>
             <ul className="list-inside list-disc space-y-2 text-gray-500">
               <li>Plant creation and basic details entry</li>
               <li>Growth stage tracking (seedling, vegetative, flowering)</li>
@@ -104,5 +90,5 @@ export default async function Home() {
         </div>
       </div>
     </HydrateClient>
-  )
+  );
 }

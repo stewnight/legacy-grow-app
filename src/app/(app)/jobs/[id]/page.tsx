@@ -1,19 +1,13 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { api } from '~/trpc/react'
-import { format } from 'date-fns'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '~/components/ui/card'
-import { notFound } from 'next/navigation'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Skeleton } from '~/components/ui/skeleton'
-import Link from 'next/link'
+import * as React from 'react';
+import { api } from '~/trpc/react';
+import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
+import { notFound } from 'next/navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Skeleton } from '~/components/ui/skeleton';
+import Link from 'next/link';
 import {
   Calendar,
   Clock,
@@ -31,25 +25,25 @@ import {
   ChevronUp,
   PlayCircle,
   GripVertical,
-} from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
-import { JobForm } from '../_components/jobs-form'
-import { Badge } from '../../../../components/ui/badge'
-import { Button } from '~/components/ui/button'
-import { Checkbox } from '~/components/ui/checkbox'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { type Job, type JobWithRelations } from '~/server/db/schema/jobs'
-import { type Location } from '~/server/db/schema/locations'
-import { type Plant } from '~/server/db/schema/plants'
-import { type Batch } from '~/server/db/schema/batches'
-import { type Genetic } from '~/server/db/schema/genetics'
-import { type Sensor } from '~/server/db/schema/sensors'
-import { type Processing } from '~/server/db/schema/processing'
-import { type Harvest } from '~/server/db/schema/harvests'
-import { TaskManager } from '../_components/task-manager'
-import { RecurringSettings } from '../_components/recurring-settings'
-import { InstructionsManager } from '../_components/instructions-manager'
-import { RequirementsManager } from '../_components/requirements-manager'
+} from 'lucide-react';
+import { AppSheet } from '../../../../components/layout/app-sheet';
+import { JobForm } from '../_components/jobs-form';
+import { Badge } from '../../../../components/ui/badge';
+import { Button } from '~/components/ui/button';
+import { Checkbox } from '~/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { type Job, type JobWithRelations } from '~/server/db/schema/jobs';
+import { type Location } from '~/server/db/schema/locations';
+import { type Plant } from '~/server/db/schema/plants';
+import { type Batch } from '~/server/db/schema/batches';
+import { type Genetic } from '~/server/db/schema/genetics';
+import { type Sensor } from '~/server/db/schema/sensors';
+import { type Processing } from '~/server/db/schema/processing';
+import { type Harvest } from '~/server/db/schema/harvests';
+import { TaskManager } from '../_components/task-manager';
+import { RecurringSettings } from '../_components/recurring-settings';
+import { InstructionsManager } from '../_components/instructions-manager';
+import { RequirementsManager } from '../_components/requirements-manager';
 import {
   DndContext,
   closestCenter,
@@ -57,60 +51,49 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core'
+} from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { cn } from '../../../../lib/utils'
-import { NotesManager } from '../_components/notes-manager'
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { cn } from '../../../../lib/utils';
+import { NotesManager } from '../_components/notes-manager';
 
 interface SortableTaskItemProps {
-  id: string
+  id: string;
   task: {
-    item: string
-    completed: boolean
-    completedAt?: string | null
-    estimatedMinutes?: number | null
-    actualMinutes?: number | null
-    startedAt?: string | null
-  }
-  onToggle: () => void
-  onStart: () => void
-  onComplete: () => void
+    item: string;
+    completed: boolean;
+    completedAt?: string | null;
+    estimatedMinutes?: number | null;
+    actualMinutes?: number | null;
+    startedAt?: string | null;
+  };
+  onToggle: () => void;
+  onStart: () => void;
+  onComplete: () => void;
 }
 
-function SortableTaskItem({
-  id,
-  task,
-  onToggle,
-  onStart,
-  onComplete,
-}: SortableTaskItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id })
+function SortableTaskItem({ id, task, onToggle, onStart, onComplete }: SortableTaskItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  }
+  };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center justify-between rounded-lg border bg-card p-4 hover:bg-muted/50 transition-colors',
+        'flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50',
         isDragging && 'opacity-50'
       )}
     >
@@ -125,7 +108,7 @@ function SortableTaskItem({
         <Checkbox checked={task.completed} onCheckedChange={onToggle} />
         <div className="space-y-1">
           <p
-            className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+            className={`font-medium ${task.completed ? 'text-muted-foreground line-through' : ''}`}
           >
             {task.item}
           </p>
@@ -145,16 +128,12 @@ function SortableTaskItem({
             {task.completed ? (
               <div className="flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3 text-green-500" />
-                <span>
-                  Completed {format(new Date(task.completedAt || ''), 'PPpp')}
-                </span>
+                <span>Completed {format(new Date(task.completedAt || ''), 'PPpp')}</span>
               </div>
             ) : task.startedAt ? (
               <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-blue-500 animate-pulse" />
-                <span>
-                  Started {format(new Date(task.startedAt || ''), 'PPpp')}
-                </span>
+                <Clock className="h-3 w-3 animate-pulse text-blue-500" />
+                <span>Started {format(new Date(task.startedAt || ''), 'PPpp')}</span>
               </div>
             ) : (
               <div className="flex items-center gap-1">
@@ -184,46 +163,42 @@ function SortableTaskItem({
         </Badge>
       </div>
     </div>
-  )
+  );
 }
 
-export default function JobPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const resolvedParams = React.use(params)
+export default function JobPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
 
-  const pointerSensor = useSensor(PointerSensor)
+  const pointerSensor = useSensor(PointerSensor);
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
-  })
-  const sensors = useSensors(pointerSensor, keyboardSensor)
+  });
+  const sensors = useSensors(pointerSensor, keyboardSensor);
 
   const { data: job, isLoading } = api.job.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  })
+  });
 
-  const utils = api.useUtils()
-  const [showTaskManager, setShowTaskManager] = React.useState(false)
+  const utils = api.useUtils();
+  const [showTaskManager, setShowTaskManager] = React.useState(false);
 
   const { mutate: updateJobStatus } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.job.get.invalidate(resolvedParams.id)
+      void utils.job.get.invalidate(resolvedParams.id);
     },
-  })
+  });
 
   const { mutate: updateJobTasks } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.job.get.invalidate(resolvedParams.id)
+      void utils.job.get.invalidate(resolvedParams.id);
     },
-  })
+  });
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A'
-    return format(new Date(date), 'PP')
-  }
+    if (!date) return 'N/A';
+    return format(new Date(date), 'PP');
+  };
 
   const handleStatusChange = React.useCallback(
     (newStatus: 'completed' | 'pending' | 'in_progress') => {
@@ -234,23 +209,23 @@ export default function JobPage({
             jobStatus: newStatus,
             completedAt: newStatus === 'completed' ? new Date() : null,
           },
-        })
+        });
       }
     },
     [job, updateJobStatus]
-  )
+  );
 
   const handleTaskToggle = React.useCallback(
     (index: number) => {
       if (job?.properties?.tasks) {
-        const tasks = [...job.properties.tasks]
-        const item = tasks[index]
+        const tasks = [...job.properties.tasks];
+        const item = tasks[index];
         if (item) {
           tasks[index] = {
             ...item,
             completed: !item.completed,
             completedAt: !item.completed ? new Date().toISOString() : null,
-          }
+          };
 
           updateJobTasks({
             id: job.id,
@@ -260,23 +235,23 @@ export default function JobPage({
                 tasks,
               },
             },
-          })
+          });
         }
       }
     },
     [job, updateJobTasks]
-  )
+  );
 
   const handleTaskStart = React.useCallback(
     (index: number) => {
       if (job?.properties?.tasks) {
-        const tasks = [...job.properties.tasks]
-        const item = tasks[index]
+        const tasks = [...job.properties.tasks];
+        const item = tasks[index];
         if (item) {
           tasks[index] = {
             ...item,
             startedAt: new Date().toISOString(),
-          }
+          };
 
           updateJobTasks({
             id: job.id,
@@ -286,31 +261,29 @@ export default function JobPage({
                 tasks,
               },
             },
-          })
+          });
         }
       }
     },
     [job, updateJobTasks]
-  )
+  );
 
   const handleTaskComplete = React.useCallback(
     (index: number) => {
       if (job?.properties?.tasks) {
-        const tasks = [...job.properties.tasks]
-        const item = tasks[index]
+        const tasks = [...job.properties.tasks];
+        const item = tasks[index];
         if (item) {
-          const now = new Date()
-          const startTime = item.startedAt ? new Date(item.startedAt) : now
-          const actualMinutes = Math.round(
-            (now.getTime() - startTime.getTime()) / 60000
-          )
+          const now = new Date();
+          const startTime = item.startedAt ? new Date(item.startedAt) : now;
+          const actualMinutes = Math.round((now.getTime() - startTime.getTime()) / 60000);
 
           tasks[index] = {
             ...item,
             completed: true,
             completedAt: now.toISOString(),
             actualMinutes: actualMinutes,
-          }
+          };
 
           updateJobTasks({
             id: job.id,
@@ -320,16 +293,16 @@ export default function JobPage({
                 tasks,
               },
             },
-          })
+          });
         }
       }
     },
     [job, updateJobTasks]
-  )
+  );
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="h-8 w-48 animate-pulse rounded-md bg-muted" />
@@ -338,15 +311,15 @@ export default function JobPage({
           <div className="h-10 w-10 animate-pulse rounded-md bg-muted" />
         </div>
       </div>
-    )
+    );
   }
 
   if (!job) {
-    return notFound()
+    return notFound();
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">{job.title}</h2>
@@ -433,9 +406,7 @@ export default function JobPage({
             <CardContent>
               <div className="space-y-2">
                 <p className="text-sm font-medium">
-                  Type:{' '}
-                  {job.entityType.charAt(0).toUpperCase() +
-                    job.entityType.slice(1)}
+                  Type: {job.entityType.charAt(0).toUpperCase() + job.entityType.slice(1)}
                 </p>
                 <Link
                   href={`/${job.entityType}s/${job.entityId}`}
@@ -468,49 +439,36 @@ export default function JobPage({
               <CardContent>
                 <dl className="space-y-2">
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Description
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Description</dt>
                     <dd className="text-sm">{job.description || 'N/A'}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Assigned To
-                    </dt>
-                    <dd className="text-sm">
-                      {job.assignedTo?.name || 'Unassigned'}
-                    </dd>
+                    <dt className="text-sm font-medium text-muted-foreground">Assigned To</dt>
+                    <dd className="text-sm">{job.assignedTo?.name || 'Unassigned'}</dd>
                   </div>
                   {job.entityType && job.entityId && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Related To
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Related To</dt>
                       <dd className="flex items-center gap-2 text-sm">
                         <LinkIcon className="h-4 w-4" />
                         <Link
                           href={`/${job.entityType}s/${job.entityId}`}
                           className="hover:underline"
                         >
-                          {job.entityType.charAt(0).toUpperCase() +
-                            job.entityType.slice(1)}
+                          {job.entityType.charAt(0).toUpperCase() + job.entityType.slice(1)}
                         </Link>
                       </dd>
                     </div>
                   )}
                   {job.startedAt && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Started
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Started</dt>
                       <dd className="text-sm">{formatDate(job.startedAt)}</dd>
                     </div>
                   )}
                   {job.completedAt && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Completed
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Completed</dt>
                       <dd className="text-sm">{formatDate(job.completedAt)}</dd>
                     </div>
                   )}
@@ -535,9 +493,7 @@ export default function JobPage({
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Actual Duration
-                    </dt>
+                    <dt className="text-sm font-medium text-muted-foreground">Actual Duration</dt>
                     <dd className="text-sm">
                       {job.metadata?.actualDuration
                         ? formatDuration(job.metadata.actualDuration)
@@ -557,48 +513,42 @@ export default function JobPage({
                       </dd>
                     </div>
                   )}
-                  {job.metadata?.previousJobs &&
-                    job.metadata.previousJobs.length > 0 && (
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">
-                          Previous Jobs
-                        </dt>
-                        <dd className="text-sm">
-                          <div className="flex flex-wrap gap-2">
-                            {job.metadata.previousJobs.map((jobId) => (
-                              <Link
-                                key={jobId}
-                                href={`/jobs/${jobId}`}
-                                className="rounded-full bg-secondary px-2 py-1 text-xs hover:bg-secondary/80"
-                              >
-                                {jobId}
-                              </Link>
-                            ))}
-                          </div>
-                        </dd>
-                      </div>
-                    )}
-                  {job.metadata?.nextJobs &&
-                    job.metadata.nextJobs.length > 0 && (
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">
-                          Next Jobs
-                        </dt>
-                        <dd className="text-sm">
-                          <div className="flex flex-wrap gap-2">
-                            {job.metadata.nextJobs.map((jobId) => (
-                              <Link
-                                key={jobId}
-                                href={`/jobs/${jobId}`}
-                                className="rounded-full bg-secondary px-2 py-1 text-xs hover:bg-secondary/80"
-                              >
-                                {jobId}
-                              </Link>
-                            ))}
-                          </div>
-                        </dd>
-                      </div>
-                    )}
+                  {job.metadata?.previousJobs && job.metadata.previousJobs.length > 0 && (
+                    <div>
+                      <dt className="text-sm font-medium text-muted-foreground">Previous Jobs</dt>
+                      <dd className="text-sm">
+                        <div className="flex flex-wrap gap-2">
+                          {job.metadata.previousJobs.map((jobId) => (
+                            <Link
+                              key={jobId}
+                              href={`/jobs/${jobId}`}
+                              className="rounded-full bg-secondary px-2 py-1 text-xs hover:bg-secondary/80"
+                            >
+                              {jobId}
+                            </Link>
+                          ))}
+                        </div>
+                      </dd>
+                    </div>
+                  )}
+                  {job.metadata?.nextJobs && job.metadata.nextJobs.length > 0 && (
+                    <div>
+                      <dt className="text-sm font-medium text-muted-foreground">Next Jobs</dt>
+                      <dd className="text-sm">
+                        <div className="flex flex-wrap gap-2">
+                          {job.metadata.nextJobs.map((jobId) => (
+                            <Link
+                              key={jobId}
+                              href={`/jobs/${jobId}`}
+                              className="rounded-full bg-secondary px-2 py-1 text-xs hover:bg-secondary/80"
+                            >
+                              {jobId}
+                            </Link>
+                          ))}
+                        </div>
+                      </dd>
+                    </div>
+                  )}
                 </dl>
               </CardContent>
             </Card>
@@ -611,9 +561,7 @@ export default function JobPage({
                 <CardContent>
                   <dl className="space-y-2">
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">
-                        Frequency
-                      </dt>
+                      <dt className="text-sm font-medium text-muted-foreground">Frequency</dt>
                       <dd className="text-sm capitalize">
                         {job.properties.recurring.frequency} (Every{' '}
                         {job.properties.recurring.interval}{' '}
@@ -622,12 +570,8 @@ export default function JobPage({
                     </div>
                     {job.properties.recurring.endDate && (
                       <div>
-                        <dt className="text-sm font-medium text-muted-foreground">
-                          End Date
-                        </dt>
-                        <dd className="text-sm">
-                          {formatDate(job.properties.recurring.endDate)}
-                        </dd>
+                        <dt className="text-sm font-medium text-muted-foreground">End Date</dt>
+                        <dd className="text-sm">{formatDate(job.properties.recurring.endDate)}</dd>
                       </div>
                     )}
                   </dl>
@@ -668,15 +612,11 @@ export default function JobPage({
                     size="sm"
                     onClick={() => {
                       if (job.properties?.tasks) {
-                        const updatedTasks = job.properties.tasks.map(
-                          (task) => ({
-                            ...task,
-                            completed: true,
-                            completedAt: task.completed
-                              ? task.completedAt
-                              : new Date().toISOString(),
-                          })
-                        )
+                        const updatedTasks = job.properties.tasks.map((task) => ({
+                          ...task,
+                          completed: true,
+                          completedAt: task.completed ? task.completedAt : new Date().toISOString(),
+                        }));
                         updateJobTasks({
                           id: job.id,
                           data: {
@@ -687,7 +627,7 @@ export default function JobPage({
                               })
                             ),
                           },
-                        })
+                        });
                       }
                     }}
                   >
@@ -699,13 +639,11 @@ export default function JobPage({
                     size="sm"
                     onClick={() => {
                       if (job.properties?.tasks) {
-                        const updatedTasks = job.properties.tasks.map(
-                          (task) => ({
-                            ...task,
-                            completed: false,
-                            completedAt: null,
-                          })
-                        )
+                        const updatedTasks = job.properties.tasks.map((task) => ({
+                          ...task,
+                          completed: false,
+                          completedAt: null,
+                        }));
                         updateJobTasks({
                           id: job.id,
                           data: {
@@ -714,7 +652,7 @@ export default function JobPage({
                               tasks: updatedTasks,
                             },
                           },
-                        })
+                        });
                       }
                     }}
                   >
@@ -737,7 +675,7 @@ export default function JobPage({
                             tasks,
                           },
                         },
-                      })
+                      });
                     }}
                   />
                 </div>
@@ -749,20 +687,16 @@ export default function JobPage({
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={(event) => {
-                      const { active, over } = event
+                      const { active, over } = event;
                       if (over && active.id !== over.id) {
                         const oldIndex = job.properties!.tasks.findIndex(
                           (task) => `task-${task.item}` === active.id
-                        )
+                        );
                         const newIndex = job.properties!.tasks.findIndex(
                           (task) => `task-${task.item}` === over.id
-                        )
+                        );
 
-                        const updatedTasks = arrayMove(
-                          job.properties!.tasks,
-                          oldIndex,
-                          newIndex
-                        )
+                        const updatedTasks = arrayMove(job.properties!.tasks, oldIndex, newIndex);
 
                         updateJobTasks({
                           id: job.id,
@@ -772,14 +706,12 @@ export default function JobPage({
                               tasks: updatedTasks,
                             },
                           },
-                        })
+                        });
                       }
                     }}
                   >
                     <SortableContext
-                      items={job.properties.tasks.map(
-                        (task) => `task-${task.item}`
-                      )}
+                      items={job.properties.tasks.map((task) => `task-${task.item}`)}
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-2">
@@ -817,9 +749,7 @@ export default function JobPage({
           <Card>
             <CardHeader>
               <CardTitle>Job Requirements</CardTitle>
-              <CardDescription>
-                Tools, supplies, and PPE needed for this job
-              </CardDescription>
+              <CardDescription>Tools, supplies, and PPE needed for this job</CardDescription>
             </CardHeader>
             <CardContent>
               <RequirementsManager
@@ -839,7 +769,7 @@ export default function JobPage({
                         requirements,
                       },
                     },
-                  })
+                  });
                 }}
               />
             </CardContent>
@@ -850,9 +780,7 @@ export default function JobPage({
           <Card>
             <CardHeader>
               <CardTitle>Notes</CardTitle>
-              <CardDescription>
-                Add notes and comments to this job
-              </CardDescription>
+              <CardDescription>Add notes and comments to this job</CardDescription>
             </CardHeader>
             <CardContent>
               <NotesManager jobId={job.id} notes={job.notes ?? []} />
@@ -864,9 +792,7 @@ export default function JobPage({
           <Card>
             <CardHeader>
               <CardTitle>Job Instructions</CardTitle>
-              <CardDescription>
-                Step-by-step instructions for completing this job
-              </CardDescription>
+              <CardDescription>Step-by-step instructions for completing this job</CardDescription>
             </CardHeader>
             <CardContent>
               <InstructionsManager
@@ -880,7 +806,7 @@ export default function JobPage({
                         instructions,
                       },
                     },
-                  })
+                  });
                 }}
               />
             </CardContent>
@@ -888,44 +814,44 @@ export default function JobPage({
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
 // Helper function to get entity name
 function getEntityName(
   job: JobWithRelations & {
-    location?: Location
-    plant?: Plant
-    batch?: Batch
-    genetic?: Genetic
-    sensor?: Sensor
-    processing?: Processing
-    harvest?: Harvest
+    location?: Location;
+    plant?: Plant;
+    batch?: Batch;
+    genetic?: Genetic;
+    sensor?: Sensor;
+    processing?: Processing;
+    harvest?: Harvest;
   }
 ) {
   switch (job.entityType) {
     case 'location':
-      return job.location?.name
+      return job.location?.name;
     case 'plant':
-      return job.plant?.identifier
+      return job.plant?.identifier;
     case 'batch':
-      return job.batch?.identifier
+      return job.batch?.identifier;
     case 'genetics':
-      return job.genetic?.name
+      return job.genetic?.name;
     case 'sensors':
-      return job.sensor?.id
+      return job.sensor?.id;
     case 'processing':
-      return job.processing?.identifier
+      return job.processing?.identifier;
     case 'harvest':
-      return job.harvest?.identifier
+      return job.harvest?.identifier;
     default:
-      return job.entityId
+      return job.entityId;
   }
 }
 
 const formatDuration = (minutes: number | null | undefined) => {
-  if (!minutes) return null
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
-}
+  if (!minutes) return null;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+};

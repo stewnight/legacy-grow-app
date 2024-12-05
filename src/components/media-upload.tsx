@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Upload, X } from 'lucide-react'
-import { Button } from './ui/button'
-import { Progress } from './ui/progress'
-import { api } from '~/trpc/react'
-import { useToast } from '~/hooks/use-toast'
-import Image from 'next/image'
+import { useState } from 'react';
+import { Upload, X } from 'lucide-react';
+import { Button } from './ui/button';
+import { Progress } from './ui/progress';
+import { api } from '~/trpc/react';
+import { useToast } from '~/hooks/use-toast';
+import Image from 'next/image';
 
 interface MediaUploadProps {
-  onUploadComplete: (url: string) => void
-  maxSize?: number // in MB
-  accept?: string
-  className?: string
+  onUploadComplete: (url: string) => void;
+  maxSize?: number; // in MB
+  accept?: string;
+  className?: string;
 }
 
 type PresignedPostFields = Record<string, string>;
@@ -23,16 +23,16 @@ export function MediaUpload({
   accept = 'image/*',
   className,
 }: MediaUploadProps) {
-  const [file, setFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
-  const [progress, setProgress] = useState(0)
-  const { toast } = useToast()
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const { toast } = useToast();
 
-  const { mutateAsync: getUploadUrl } = api.media.getUploadUrl.useMutation()
+  const { mutateAsync: getUploadUrl } = api.media.getUploadUrl.useMutation();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (!selectedFile) return
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
 
     // Validate file size
     if (selectedFile.size > maxSize * 1024 * 1024) {
@@ -40,71 +40,71 @@ export function MediaUpload({
         title: 'File too large',
         description: `File size must be less than ${maxSize}MB`,
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setFile(selectedFile)
+    setFile(selectedFile);
 
     // Create preview for images
     if (selectedFile.type.startsWith('image/')) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setPreview(reader.result as string)
-      }
-      reader.readAsDataURL(selectedFile)
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(selectedFile);
     }
-  }
+  };
 
   const handleUpload = async () => {
-    if (!file) return
+    if (!file) return;
 
     try {
       // Get presigned URL
       const { uploadUrl, publicUrl } = await getUploadUrl({
         filename: file.name,
         contentType: file.type,
-      })
+      });
 
       // Upload file with progress tracking
-      const xhr = new XMLHttpRequest()
+      const xhr = new XMLHttpRequest();
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
-          const percentComplete = (event.loaded / event.total) * 100
-          setProgress(percentComplete)
+          const percentComplete = (event.loaded / event.total) * 100;
+          setProgress(percentComplete);
         }
-      }
+      };
 
       xhr.onload = () => {
         if (xhr.status === 200 || xhr.status === 204) {
-          onUploadComplete(publicUrl)
-          setFile(null)
-          setPreview(null)
-          setProgress(0)
+          onUploadComplete(publicUrl);
+          setFile(null);
+          setPreview(null);
+          setProgress(0);
         } else {
-          throw new Error('Upload failed')
+          throw new Error('Upload failed');
         }
-      }
+      };
 
       xhr.onerror = () => {
-        throw new Error('Upload failed')
-      }
+        throw new Error('Upload failed');
+      };
 
       // Create FormData and append file
-      const formData = new FormData()
-      formData.append('file', file)
+      const formData = new FormData();
+      formData.append('file', file);
 
-      xhr.open('PUT', uploadUrl, true)
-      xhr.setRequestHeader('Content-Type', file.type)
-      xhr.send(formData)
+      xhr.open('PUT', uploadUrl, true);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(formData);
     } catch (error) {
       toast({
         title: 'Upload failed',
         description: 'There was an error uploading your file.',
         variant: 'destructive',
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className={className}>
@@ -131,38 +131,30 @@ export function MediaUpload({
         <div className="space-y-4">
           {preview && (
             <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-              <Image
-                src={preview}
-                alt="Preview"
-                fill
-                className="object-cover"
-              />
+              <Image src={preview} alt="Preview" fill className="object-cover" />
             </div>
           )}
-          
+
           <div className="flex items-center gap-4">
             <Progress value={progress} className="flex-1" />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => {
-                setFile(null)
-                setPreview(null)
-                setProgress(0)
+                setFile(null);
+                setPreview(null);
+                setProgress(0);
               }}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
 
-          <Button
-            onClick={handleUpload}
-            disabled={progress > 0 && progress < 100}
-          >
+          <Button onClick={handleUpload} disabled={progress > 0 && progress < 100}>
             Upload
           </Button>
         </div>
       )}
     </div>
-  )
-} 
+  );
+}

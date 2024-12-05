@@ -3,4 +3,4 @@ export const GeistSans = {
   style: {
     fontFamily: 'Geist Sans',
   },
-}
+};
