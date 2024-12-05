@@ -41,18 +41,39 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
             <div
               key={date.toISOString()}
               className={cn(
-                'min-h-[5rem] p-2 border-b border-r relative',
+                'min-h-[5rem] p-2 border-b border-r relative group',
                 !isSameMonth(date, currentDate) && 'bg-muted/50',
                 isToday(date) && 'bg-accent/5'
               )}
             >
               <div
                 className={cn(
-                  'text-sm font-medium text-right mb-1',
+                  'text-sm font-medium text-right mb-1 flex items-center justify-between',
                   !isSameMonth(date, currentDate) && 'text-muted-foreground'
                 )}
               >
                 {format(date, 'd')}
+                <AppSheet
+                  mode="create"
+                  entity="job"
+                  trigger={
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-xs text-muted-foreground cursor-pointer opacity-0 group-hover:opacity-100 p-0 h-auto"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                    </Button>
+                  }
+                >
+                  <JobForm
+                    defaultValues={{
+                      dueDate: date,
+                      entityType: 'none',
+                      entityId: null,
+                    }}
+                  />
+                </AppSheet>
               </div>
               {dayJobs.length > 0 && (
                 <div className="space-y-1">
@@ -66,17 +87,6 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
                   )}
                 </div>
               )}
-              <AppSheet
-                mode="create"
-                entity={{ type: 'job' }}
-                trigger={<span className="text-xs">Create</span>}
-              >
-                <JobForm
-                  defaultValues={{
-                    dueDate: date,
-                  }}
-                />
-              </AppSheet>
             </div>
           )
         })}

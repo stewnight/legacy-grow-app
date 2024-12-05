@@ -2,7 +2,11 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertJobSchema } from '~/server/db/schema'
+import {
+  insertJobSchema,
+  type jobPropertiesSchema,
+  type taskSchema,
+} from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -45,10 +49,12 @@ import { InstructionsManager } from './instructions-manager'
 import { RequirementsManager } from './requirements-manager'
 import { type JobWithRelations } from '~/server/db/schema'
 import { type TRPCClientErrorLike } from '@trpc/client'
-import { type jobPropertiesSchema } from '~/server/db/schema/jobs'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
-type JobFormValues = z.infer<typeof insertJobSchema>
+type JobFormValues = z.infer<typeof insertJobSchema> & {
+  properties: JobProperties
+  metadata: JobMetadata
+}
 
 interface JobFormProps {
   mode: 'create' | 'edit'
@@ -56,6 +62,19 @@ interface JobFormProps {
 }
 
 type JobProperties = z.infer<typeof jobPropertiesSchema>
+type Task = z.infer<typeof taskSchema>
+
+interface JobMetadata {
+  previousJobs: string[]
+  nextJobs: string[]
+  estimatedDuration: number | null
+  actualDuration: number | null
+  location: {
+    id: string
+    type: string
+    name: string
+  } | null
+}
 
 const defaultProperties = {
   recurring: null,
@@ -73,29 +92,6 @@ const defaultProperties = {
   requirements: { tools: [], supplies: [], ppe: [] },
 } satisfies JobProperties
 
-type JobMetadata = {
-  previousJobs?: string[]
-  nextJobs?: string[]
-  estimatedDuration?: number | null
-  actualDuration?: number | null
-  location?: {
-    id: string
-    type: string
-    name: string
-  } | null
-  device?: string
-  updatedAt?: string
-}
-
-type Task = {
-  item: string
-  completed: boolean
-  completedAt?: string | null
-  estimatedMinutes?: number | null
-  actualMinutes?: number | null
-  startedAt?: string | null
-}
-
 export function JobForm({ mode, defaultValues }: JobFormProps) {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(insertJobSchema),
@@ -109,13 +105,28 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       entityType: defaultValues?.entityType || 'none',
       entityId: defaultValues?.entityId || undefined,
       status: defaultValues?.status || 'active',
-      properties: defaultValues?.properties || defaultProperties,
-      metadata: defaultValues?.metadata || {
-        previousJobs: [],
-        nextJobs: [],
-        estimatedDuration: null,
-        actualDuration: null,
-        location: null,
+      category: defaultValues?.category || 'maintenance',
+      properties: {
+        recurring:
+          (defaultValues?.properties as JobProperties)?.recurring || null,
+        tasks: (defaultValues?.properties as JobProperties)?.tasks || [],
+        instructions:
+          (defaultValues?.properties as JobProperties)?.instructions || [],
+        requirements: (defaultValues?.properties as JobProperties)
+          ?.requirements || {
+          tools: [],
+          supplies: [],
+          ppe: [],
+        },
+      },
+      metadata: {
+        ...((defaultValues?.metadata as JobMetadata) || {
+          previousJobs: [],
+          nextJobs: [],
+          estimatedDuration: null,
+          actualDuration: null,
+          location: null,
+        }),
       },
     },
   })
@@ -163,8 +174,14 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
         ...data,
         entityId: data.entityType === 'none' ? null : data.entityId,
         properties: {
-          ...(data.properties as JobProperties),
-          tasks: (data.properties as JobProperties)?.tasks || [],
+          recurring: (data.properties as JobProperties).recurring || null,
+          tasks: (data.properties as JobProperties).tasks || [],
+          instructions: (data.properties as JobProperties).instructions || [],
+          requirements: (data.properties as JobProperties).requirements || {
+            tools: [],
+            supplies: [],
+            ppe: [],
+          },
         },
         metadata: {
           ...(data.metadata as JobMetadata),
@@ -174,24 +191,12 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       }
 
       if (mode === 'create') {
-        createJob(formData)
+        await createJob(formData)
       } else if (defaultValues?.id) {
-        updateJob({ id: defaultValues.id, data: formData })
+        await updateJob({ id: defaultValues.id, data: formData })
       }
     } catch (error) {
-      if (error instanceof Error) {
-        toast({
-          title: 'Error submitting form',
-          description: error.message,
-          variant: 'destructive',
-        })
-      } else {
-        toast({
-          title: 'Error submitting form',
-          description: 'An unexpected error occurred',
-          variant: 'destructive',
-        })
-      }
+      console.error('Form submission error:', error)
     }
   }
 
@@ -201,7 +206,43 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={(e) => {
+          e.preventDefault()
+          form.handleSubmit(async (data: JobFormValues) => {
+            try {
+              const formData = {
+                ...data,
+                entityId: data.entityType === 'none' ? null : data.entityId,
+                properties: {
+                  recurring:
+                    (data.properties as JobProperties).recurring || null,
+                  tasks: (data.properties as JobProperties).tasks || [],
+                  instructions:
+                    (data.properties as JobProperties).instructions || [],
+                  requirements: (data.properties as JobProperties)
+                    .requirements || {
+                    tools: [],
+                    supplies: [],
+                    ppe: [],
+                  },
+                },
+                metadata: {
+                  ...(data.metadata as JobMetadata),
+                  device: 'web',
+                  updatedAt: new Date().toISOString(),
+                },
+              }
+
+              if (mode === 'create') {
+                await createJob(formData)
+              } else if (defaultValues?.id) {
+                await updateJob({ id: defaultValues.id, data: formData })
+              }
+            } catch (error) {
+              console.error('Form submission error:', error)
+            }
+          })(e)
+        }}
         className="space-y-4 p-1"
         noValidate
       >
@@ -446,7 +487,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Recurring Settings</FormLabel>
               <FormControl>
                 <RecurringSettings
-                  value={field.value as JobProperties['recurring']}
+                  value={(field.value as JobProperties['recurring']) || null}
                   onChange={field.onChange}
                 />
               </FormControl>

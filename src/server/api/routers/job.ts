@@ -109,12 +109,14 @@ export const jobRouter = createTRPCRouter({
             columns: {
               id: true,
               name: true,
+              image: true,
             },
           },
           createdBy: {
             columns: {
               id: true,
               name: true,
+              image: true,
             },
           },
           notes: true,
@@ -141,6 +143,7 @@ export const jobRouter = createTRPCRouter({
               id: true,
               name: true,
               email: true,
+              image: true,
             },
           },
           createdBy: {
@@ -148,6 +151,7 @@ export const jobRouter = createTRPCRouter({
               id: true,
               name: true,
               email: true,
+              image: true,
             },
           },
           notes: true,

@@ -4,13 +4,12 @@ import * as React from 'react'
 import {
   format,
   isSameMonth,
-  isToday,
+  isToday as isDateToday,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
   addMonths,
-  addWeeks,
-  addQuarters,
+  subMonths,
   formatDistanceToNow,
   differenceInDays,
   isSameDay,
@@ -19,21 +18,9 @@ import {
 import { cn } from '~/lib/utils'
 import { type JobWithRelations } from '~/server/db/schema'
 import { Badge } from '../ui/badge'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  Clock,
-  Users,
-  ListChecks,
-} from 'lucide-react'
+import { Calendar, Clock, Users, ListChecks, GripVertical } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '../ui/button'
-import {
-  DndContext,
-  DragEndEvent,
-  useDraggable,
-  useDroppable,
-} from '@dnd-kit/core'
 import { ScrollArea, ScrollBar } from '../ui/scroll-area'
 import { api } from '~/trpc/react'
 import {
@@ -44,18 +31,22 @@ import {
 } from '../ui/tooltip'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Progress } from '../ui/progress'
-import Link from 'next/link'
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '../ui/resizable'
+import { AppSheet } from '../layout/app-sheet'
+import { JobForm } from '../../app/(app)/jobs/_components/jobs-form'
 
-type ZoomLevel = 'day' | 'week' | 'month' | 'quarter'
+const PAST_MONTHS = 1 // Show 1 month in the past
+const FUTURE_MONTHS = 6 // Show 6 months in the future
+const CELL_WIDTH = 40 // Width of each day cell in pixels
+const ROW_HEIGHT = 44 // Height of each row in pixels
 
-interface GanttViewProps {
-  jobs: JobWithRelations[]
-}
-
-export function GanttView({ jobs }: GanttViewProps) {
-  const [currentDate, setCurrentDate] = React.useState(new Date())
+export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
+  const timelineRef = React.useRef<HTMLDivElement>(null)
   const [sortedJobs, setSortedJobs] = React.useState<JobWithRelations[]>([])
-  const [zoomLevel, setZoomLevel] = React.useState<ZoomLevel>('month')
   const updateJobMutation = api.job.update.useMutation()
 
   // Sort jobs by due date and dependencies
@@ -67,485 +58,286 @@ export function GanttView({ jobs }: GanttViewProps) {
     setSortedJobs(sorted)
   }, [jobs])
 
-  // Calculate the days based on zoom level
+  // Calculate the days for the timeline
   const periods = React.useMemo(() => {
-    const start = startOfMonth(currentDate)
-    let end
-    switch (zoomLevel) {
-      case 'day':
-        end = addWeeks(start, 2)
-        break
-      case 'week':
-        end = addMonths(start, 1)
-        break
-      case 'month':
-        end = endOfMonth(start)
-        break
-      case 'quarter':
-        end = addQuarters(start, 1)
-        break
-    }
+    const today = new Date()
+    const start = subMonths(startOfMonth(today), PAST_MONTHS)
+    const end = addMonths(endOfMonth(today), FUTURE_MONTHS)
     return eachDayOfInterval({ start, end })
-  }, [currentDate, zoomLevel])
+  }, [])
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over) return
-
-    const jobId = active.id as string
-    const date = over.id as string
-    const job = jobs.find((j) => j.id === jobId)
-
-    if (job) {
-      updateJobMutation.mutate({
-        id: jobId,
-        data: {
-          dueDate: new Date(date),
-        },
-      })
+  // Center on today's date on initial render
+  React.useEffect(() => {
+    const scrollToToday = () => {
+      if (timelineRef.current) {
+        const todayIndex = periods.findIndex((date) => isDateToday(date))
+        if (todayIndex !== -1) {
+          const container = timelineRef.current.querySelector(
+            '[data-radix-scroll-area-viewport]'
+          ) as HTMLElement
+          if (container) {
+            const scrollPosition =
+              todayIndex * CELL_WIDTH - container.clientWidth / 2
+            container.scrollLeft = scrollPosition
+          }
+        }
+      }
     }
-  }
 
-  const nextPeriod = () => {
-    setCurrentDate((prev) => {
-      const next = new Date(prev)
-      switch (zoomLevel) {
-        case 'day':
-          next.setDate(next.getDate() + 14)
-          break
-        case 'week':
-          next.setMonth(next.getMonth() + 1)
-          break
-        case 'month':
-          next.setMonth(next.getMonth() + 1)
-          break
-        case 'quarter':
-          next.setMonth(next.getMonth() + 3)
-          break
-      }
-      return next
-    })
-  }
+    // Try immediately
+    scrollToToday()
+    // And also after a short delay to ensure DOM is ready
+    const timer = setTimeout(scrollToToday, 100)
+    return () => clearTimeout(timer)
+  }, [periods])
 
-  const previousPeriod = () => {
-    setCurrentDate((prev) => {
-      const next = new Date(prev)
-      switch (zoomLevel) {
-        case 'day':
-          next.setDate(next.getDate() - 14)
-          break
-        case 'week':
-          next.setMonth(next.getMonth() - 1)
-          break
-        case 'month':
-          next.setMonth(next.getMonth() - 1)
-          break
-        case 'quarter':
-          next.setMonth(next.getMonth() - 3)
-          break
+  const jumpToToday = () => {
+    if (timelineRef.current) {
+      const todayIndex = periods.findIndex((date) => isDateToday(date))
+      if (todayIndex !== -1) {
+        const container = timelineRef.current.querySelector(
+          '[data-radix-scroll-area-viewport]'
+        ) as HTMLElement
+        if (container) {
+          const scrollPosition =
+            todayIndex * CELL_WIDTH - container.clientWidth / 2
+          container.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth',
+          })
+        }
       }
-      return next
-    })
+    }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-500/10 text-green-500'
+        return 'bg-green-500 text-green-500/10'
       case 'in_progress':
-        return 'bg-blue-500/10 text-blue-500'
+        return 'bg-blue-500 text-blue-500/10'
       case 'blocked':
-        return 'bg-destructive/10 text-destructive'
+        return 'bg-yellow-500 text-yellow-500/10'
+      case 'cancelled':
+        return 'bg-destructive text-destructive/10'
+      case 'deferred':
+        return 'bg-violet-500 text-violet-500/10'
       default:
-        return 'bg-secondary/10 text-secondary-foreground'
+        return 'bg-secondary text-secondary-foreground'
     }
   }
 
   const calculateProgress = (job: JobWithRelations) => {
     if (!job.properties?.tasks?.length) return 0
-    const completedTasks = job.properties.tasks.filter((task) => task.completed)
+    const completedTasks = job.properties.tasks.filter(
+      (task) => task?.completed
+    )
     return (completedTasks.length / job.properties.tasks.length) * 100
   }
 
-  const renderDependencyLines = (job: JobWithRelations) => {
-    if (!job.metadata?.previousJobs?.length) return null
-
-    return job.metadata.previousJobs.map((prevJobId) => {
-      const prevJob = jobs.find((j) => j.id === prevJobId)
-      if (!prevJob || !prevJob.dueDate || !job.dueDate) return null
-
-      const startDate = new Date(prevJob.dueDate)
-      const endDate = new Date(job.dueDate)
-
-      return (
-        <svg
-          key={`${prevJobId}-${job.id}`}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none"
-          style={{ zIndex: 1 }}
-        >
-          <path
-            d={`M ${startDate} 50% L ${endDate} 50%`}
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeDasharray="4"
-            className="text-muted-foreground/50"
-          />
-        </svg>
-      )
-    })
-  }
-
-  const timelineWidth = `${periods.length * 40}px`
-
-  const getJobDuration = (job: JobWithRelations) => {
-    if (!job.dueDate || !job.startedAt) return null
-    return differenceInDays(new Date(job.dueDate), new Date(job.startedAt))
-  }
-
-  const getCompletedTaskCount = (job: JobWithRelations) => {
-    if (!job.properties?.tasks) return { completed: 0, total: 0 }
-    const completed = job.properties.tasks.filter(
-      (task) => task.completed
-    ).length
-    return { completed, total: job.properties.tasks.length }
-  }
-
-  const getTimeStatus = (job: JobWithRelations) => {
-    if (!job.dueDate) return null
-    const dueDate = new Date(job.dueDate)
-    const today = new Date()
-
-    if (job.jobStatus === 'completed') return 'Completed'
-    if (dueDate < today) return 'Overdue'
-    if (differenceInDays(dueDate, today) <= 7) return 'Due soon'
-    return 'On track'
-  }
-
-  const renderJobTooltip = (job: JobWithRelations) => {
-    const taskCount = getCompletedTaskCount(job)
-    const timeStatus = getTimeStatus(job)
-    const duration = getJobDuration(job)
-
-    return (
-      <div className="space-y-2 p-2 max-w-xs">
-        <div className="font-medium">{job.title}</div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              <span>
-                Due{' '}
-                {formatDistanceToNow(new Date(job.dueDate || ''), {
-                  addSuffix: true,
-                })}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{duration ? `${duration} days` : 'No duration set'}</span>
-            </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <ListChecks className="h-3 w-3" />
-              <span>
-                {taskCount.completed}/{taskCount.total} tasks
-              </span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <Badge
-              variant="secondary"
-              className={cn(
-                'text-xs w-full justify-center',
-                timeStatus === 'Overdue' &&
-                  'bg-destructive/10 text-destructive',
-                timeStatus === 'Due soon' && 'bg-yellow-500/10 text-yellow-500',
-                timeStatus === 'Completed' && 'bg-green-500/10 text-green-500',
-                timeStatus === 'On track' && 'bg-blue-500/10 text-blue-500'
-              )}
-            >
-              {timeStatus}
-            </Badge>
-            <Progress
-              value={calculateProgress(job)}
-              className="h-1.5"
-              indicatorClassName={cn(
-                job.jobStatus === 'completed' && 'bg-green-500',
-                job.jobStatus === 'in_progress' && 'bg-blue-500'
-              )}
-            />
-            {job.assignedTo && (
-              <div className="flex items-center gap-1 justify-end">
-                <span className="text-xs text-muted-foreground">
-                  Assigned to
-                </span>
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={job.assignedTo.image || ''} />
-                  <AvatarFallback>
-                    {job.assignedTo.name?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-          </div>
-        </div>
-        {job.properties?.requirements && (
-          <div className="text-xs text-muted-foreground pt-1 border-t">
-            <div className="flex flex-wrap gap-1">
-              {job.properties.requirements.tools.map((tool) => (
-                <Badge key={tool} variant="outline" className="text-[10px]">
-                  {tool}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  const getTaskPosition = (date: Date | null | undefined, periods: Date[]) => {
-    if (!date) return null
-    const taskDate = new Date(date)
-    const dayIndex = periods.findIndex((day) => isSameDay(day, taskDate))
-    if (dayIndex === -1) return null
-    return dayIndex * 40 // 40px is our column width
-  }
-
-  const getTaskWidth = (
-    job: JobWithRelations,
-    taskPosition: number | null,
-    periods: Date[]
-  ) => {
-    if (!job.dueDate || taskPosition === null) return 8 // Default width for non-overdue tasks
-
-    const dueDate = new Date(job.dueDate)
-    const today = new Date()
-
-    // If the job is not overdue or is completed, return standard width
-    if (job.jobStatus === 'completed' || !isAfter(today, dueDate)) {
-      return 8
-    }
-
-    // For overdue tasks, calculate width from due date to today
-    const todayIndex = periods.findIndex((day) => isSameDay(day, today))
-    if (todayIndex === -1) return 8
-
-    const taskIndex = taskPosition / 40 // Convert position back to index
-    const width = (todayIndex - taskIndex + 1) * 40 // +1 to include the due date
-    return Math.max(width, 8) // Ensure minimum width
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={previousPeriod}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-lg font-semibold">
-            {format(currentDate, 'MMMM yyyy')}
-          </h3>
-          <Button variant="outline" size="icon" onClick={nextPeriod}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel('day')}
-            className={cn(zoomLevel === 'day' && 'bg-accent')}
-          >
-            Day
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel('week')}
-            className={cn(zoomLevel === 'week' && 'bg-accent')}
-          >
-            Week
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel('month')}
-            className={cn(zoomLevel === 'month' && 'bg-accent')}
-          >
-            Month
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel('quarter')}
-            className={cn(zoomLevel === 'quarter' && 'bg-accent')}
-          >
-            Quarter
-          </Button>
-        </div>
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-2 p-2 border-b">
+        <Button
+          variant="outline"
+          onClick={jumpToToday}
+          size="sm"
+          className="h-7"
+        >
+          Today
+        </Button>
       </div>
 
-      <div className="rounded-md border">
-        <ScrollArea className="w-full">
-          <div className="grid grid-cols-[250px_1fr]">
-            {/* Fixed left column headers */}
-            <div className="sticky left-0 z-10 bg-background p-2 font-medium text-muted-foreground border-r">
-              <div className="flex items-center justify-between">
-                <span>Job Title</span>
-                <span className="text-xs">({sortedJobs.length})</span>
-              </div>
-            </div>
-
-            {/* Scrollable date headers */}
-            <div
-              className="inline-flex border-l min-w-full"
-              style={{ width: timelineWidth }}
-            >
-              {periods.map((day) => (
-                <div
-                  key={day.toISOString()}
-                  className={cn(
-                    'w-10 text-center text-sm py-2 font-medium border-r shrink-0',
-                    isToday(day) && 'bg-accent/5',
-                    !isSameMonth(day, currentDate) && 'text-muted-foreground'
-                  )}
-                >
-                  {format(
-                    day,
-                    zoomLevel === 'day'
-                      ? 'd'
-                      : zoomLevel === 'week'
-                        ? 'w'
-                        : zoomLevel === 'month'
-                          ? 'd'
-                          : 'MMM'
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DndContext onDragEnd={handleDragEnd}>
-            <div className="divide-y">
-              {sortedJobs.map((job) => {
-                const taskPosition = getTaskPosition(job.dueDate, periods)
-                const taskWidth = getTaskWidth(job, taskPosition, periods)
-                const isJobOverdue = getTimeStatus(job) === 'Overdue'
-
-                return (
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+            <div className="h-full border-r">
+              <div className="h-8" /> {/* Spacer for month label */}
+              <div className="h-8 border-b" /> {/* Spacer for date numbers */}
+              <ScrollArea className="h-[calc(100%-64px)]">
+                {sortedJobs.map((job) => (
                   <div
                     key={job.id}
-                    className="grid grid-cols-[250px_1fr] hover:bg-muted/50"
+                    className="flex items-center px-4 border-b hover:bg-muted/50"
+                    style={{ height: ROW_HEIGHT }}
                   >
-                    {/* Fixed left column content */}
-                    <div className="sticky left-0 z-10 bg-background p-2 border-r">
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium truncate">
-                          <Link href={`/jobs/${job.id}`}>{job.title}</Link>
-                        </div>
-                        {job.assignedTo && (
-                          <Avatar className="h-5 w-5">
-                            <AvatarImage src={job.assignedTo.image || ''} />
-                            <AvatarFallback>
-                              {job.assignedTo.name?.[0] || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">
+                        <Link href={`/jobs/${job.id}`}>{job.title}</Link>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            'text-xs capitalize',
-                            getStatusColor(job.jobStatus)
-                          )}
-                        >
-                          {job.jobStatus}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {job.priority}
-                        </Badge>
-                        {getTimeStatus(job) === 'Overdue' && (
-                          <Badge variant="destructive" className="text-xs">
-                            Overdue
-                          </Badge>
-                        )}
+                      <div className="text-xs text-muted-foreground truncate">
+                        {job.description}
                       </div>
                     </div>
-
-                    {/* Scrollable timeline content */}
-                    <div className="relative group min-h-[4rem]">
-                      <div
-                        className="inline-flex relative border-l min-w-full"
-                        style={{ width: timelineWidth }}
-                      >
-                        {periods.map((day) => (
-                          <div
-                            key={day.toISOString()}
-                            className={cn(
-                              'w-10 border-r h-full shrink-0',
-                              isToday(day) && 'bg-accent/5',
-                              !isSameMonth(day, currentDate) && 'bg-muted/50'
-                            )}
-                          />
-                        ))}
-                        {taskPosition !== null && job.dueDate && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <div
-                                  className={cn(
-                                    'absolute top-1/2 -translate-y-1/2 h-4 rounded-full transition-all cursor-move group-hover:h-6',
-                                    isJobOverdue
-                                      ? 'bg-destructive/10'
-                                      : getStatusColor(job.jobStatus)
-                                  )}
-                                  style={{
-                                    left: `${taskPosition}px`,
-                                    width: `${taskWidth}px`,
-                                  }}
-                                >
-                                  <div
-                                    className={cn(
-                                      'h-full rounded-full',
-                                      isJobOverdue && 'bg-destructive/20'
-                                    )}
-                                    style={{
-                                      width: `${calculateProgress(job)}%`,
-                                      background: !isJobOverdue
-                                        ? job.jobStatus === 'completed'
-                                          ? 'rgb(34 197 94 / 0.2)'
-                                          : 'rgb(59 130 246 / 0.2)'
-                                        : undefined,
-                                    }}
-                                  />
-                                  {isJobOverdue && (
-                                    <div
-                                      className="absolute inset-0 bg-destructive/10"
-                                      style={{
-                                        backgroundImage:
-                                          'repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 10px)',
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {renderJobTooltip(job)}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                        {renderDependencyLines(job)}
-                      </div>
-                    </div>
+                    {job.assignedTo && (
+                      <Avatar className="h-6 w-6 flex-shrink-0 ml-2">
+                        <AvatarImage
+                          src={job.assignedTo.image || ''}
+                          alt={job.assignedTo.name || ''}
+                        />
+                        <AvatarFallback>
+                          {job.assignedTo.name?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
                   </div>
-                )
-              })}
+                ))}
+              </ScrollArea>
             </div>
-          </DndContext>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          <ResizablePanel defaultSize={75}>
+            <ScrollArea className="h-full" ref={timelineRef}>
+              <div className="relative">
+                {/* Month labels */}
+                <div className="sticky top-0 z-20 h-8 flex min-w-max bg-background">
+                  {periods.map((date, index) => {
+                    const isFirstDayOfMonth = date.getDate() === 1
+                    return (
+                      <div
+                        key={date.toISOString()}
+                        className="flex-none"
+                        style={{ width: CELL_WIDTH }}
+                      >
+                        {isFirstDayOfMonth && (
+                          <div className="absolute top-2 font-medium">
+                            {format(date, 'MMMM yyyy')}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Day numbers */}
+                <div className="sticky top-8 z-20 flex min-w-max border-y bg-background">
+                  {periods.map((date) => (
+                    <div
+                      key={date.toISOString()}
+                      className={cn(
+                        'flex-none border-r h-8 flex items-center justify-center text-sm',
+                        isDateToday(date) && 'bg-orange-500/10'
+                      )}
+                      style={{ width: CELL_WIDTH }}
+                    >
+                      {date.getDate()}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tasks grid */}
+                <div className="relative min-w-max">
+                  {/* Today indicator */}
+                  {periods.some((date) => isDateToday(date)) && (
+                    <div
+                      className="absolute top-0 bottom-0 w-px bg-orange-500"
+                      style={{
+                        left: `${
+                          periods.findIndex((date) => isDateToday(date)) *
+                            CELL_WIDTH +
+                          CELL_WIDTH / 2
+                        }px`,
+                      }}
+                    />
+                  )}
+
+                  {/* Task rows */}
+                  {sortedJobs.map((job) => (
+                    <div
+                      key={job.id}
+                      className="flex border-b hover:bg-muted/50"
+                      style={{ height: ROW_HEIGHT }}
+                    >
+                      {periods.map((date) => (
+                        <div
+                          key={date.toISOString()}
+                          className="flex-none border-r relative"
+                          style={{ width: CELL_WIDTH }}
+                        >
+                          {job.dueDate &&
+                            isSameDay(date, new Date(job.dueDate)) && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                      className={cn(
+                                        'absolute inset-2 rounded-full max-h-6',
+                                        getStatusColor(job.jobStatus)
+                                      )}
+                                    >
+                                      <Progress
+                                        value={calculateProgress(job)}
+                                        className="rounded-full h-full opacity-10"
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="w-72 p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <Link
+                                        href={`/jobs/${job.id}`}
+                                        className="text-sm font-medium hover:underline"
+                                      >
+                                        {job.title}
+                                      </Link>
+                                      <AppSheet
+                                        mode="edit"
+                                        entity="job"
+                                        trigger={
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-7"
+                                          >
+                                            Edit
+                                          </Button>
+                                        }
+                                      >
+                                        <JobForm
+                                          mode="edit"
+                                          defaultValues={job}
+                                        />
+                                      </AppSheet>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      {job.assignedTo && (
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                          <Avatar className="h-5 w-5">
+                                            <AvatarImage
+                                              src={job.assignedTo.image || ''}
+                                              alt={job.assignedTo.name || ''}
+                                            />
+                                            <AvatarFallback>
+                                              {job.assignedTo.name?.[0] || 'U'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <span>{job.assignedTo.name}</span>
+                                        </div>
+                                      )}
+                                      <div className="text-xs text-muted-foreground">
+                                        Due{' '}
+                                        {format(new Date(job.dueDate), 'PP')}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        Progress:{' '}
+                                        {Math.round(calculateProgress(job))}%
+                                      </div>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   )

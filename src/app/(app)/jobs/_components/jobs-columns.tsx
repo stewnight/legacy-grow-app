@@ -284,7 +284,7 @@ export function JobsTableFilters({ table }: JobsTableFiltersProps) {
   }, [table])
 
   return (
-    <div className="flex flex-1 items-center space-x-2">
+    <div className="flex flex-1 items-center space-x-2 max-w-full overflow-x-auto">
       <DataTableFacetedFilter
         column={table.getColumn('priority')}
         title="Priority"

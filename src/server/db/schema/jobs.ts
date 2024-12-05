@@ -30,29 +30,46 @@ import { z } from 'zod'
 
 const taskSchema = z.object({
   item: z.string(),
-  completed: z.boolean(),
+  completed: z.boolean().default(false),
   completedAt: z.string().nullable().optional(),
   estimatedMinutes: z.number().nullable().optional(),
   actualMinutes: z.number().nullable().optional(),
   startedAt: z.string().nullable().optional(),
 })
 
-export const jobPropertiesSchema = z.object({
-  recurring: z
-    .object({
-      frequency: z.string(),
-      interval: z.number(),
-      endDate: z.string().optional(),
-    })
-    .nullable(),
-  tasks: z.array(taskSchema),
-  instructions: z.array(z.string()),
-  requirements: z.object({
-    tools: z.array(z.string()),
-    supplies: z.array(z.string()),
-    ppe: z.array(z.string()),
-  }),
-})
+const recurringSchema = z
+  .object({
+    frequency: z.string(),
+    interval: z.number(),
+    endDate: z.string().optional(),
+  })
+  .nullable()
+
+const requirementsSchema = z
+  .object({
+    tools: z.array(z.string()).default([]),
+    supplies: z.array(z.string()).default([]),
+    ppe: z.array(z.string()).default([]),
+  })
+  .default({
+    tools: [],
+    supplies: [],
+    ppe: [],
+  })
+
+export const jobPropertiesSchema = z
+  .object({
+    recurring: recurringSchema.optional().default(null),
+    tasks: z.array(taskSchema).default([]),
+    instructions: z.array(z.string()).default([]),
+    requirements: requirementsSchema,
+  })
+  .default({
+    recurring: null,
+    tasks: [],
+    instructions: [],
+    requirements: { tools: [], supplies: [], ppe: [] },
+  })
 
 export const jobs = createTable(
   'job',
@@ -174,30 +191,17 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
 export const insertJobSchema = createInsertSchema(jobs, {
   properties: (schema) => schema.properties.optional(),
   metadata: (schema) => schema.metadata.optional(),
-  entityId: (schema) =>
-    schema.entityId.nullable().superRefine((val, ctx: any) => {
-      const entityType = ctx.data?.entityType as JobEntityType | undefined
-
-      if (!entityType) return
-
-      if (entityType === 'none' && val !== null) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Entity ID must be null when entity type is none',
-          path: ['entityId'],
-        })
-        return
-      }
-
-      if (entityType !== 'none' && !val) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Entity ID is required when entity type is not none',
-          path: ['entityId'],
-        })
-        return
-      }
-    }),
+  description: (schema) => schema.description.optional(),
+  entityId: (schema) => schema.entityId.optional(),
+  entityType: (schema) => schema.entityType.default('none'),
+  assignedToId: (schema) => schema.assignedToId.optional(),
+  category: (schema) => schema.category.default('maintenance'),
+  priority: (schema) => schema.priority.default('low'),
+  jobStatus: (schema) => schema.jobStatus.default('pending'),
+  status: (schema) => schema.status.default('active'),
+  dueDate: (schema) => schema.dueDate.optional(),
+  startedAt: (schema) => schema.startedAt.optional(),
+  completedAt: (schema) => schema.completedAt.optional(),
 }).omit({
   id: true,
   createdAt: true,
@@ -212,7 +216,7 @@ export type Job = typeof jobs.$inferSelect
 export type NewJob = typeof jobs.$inferInsert
 
 export type JobWithRelations = Job & {
-  assignedTo?: { id: string; name: string } | null
+  assignedTo?: { id: string; name: string; image: string } | null
   createdBy: { id: string; name: string }
   note?: Note[]
   location?: Location | undefined
@@ -223,3 +227,5 @@ export type JobWithRelations = Job & {
   processing?: Processing | undefined
   harvest?: Harvest | undefined
 }
+
+export { taskSchema }
