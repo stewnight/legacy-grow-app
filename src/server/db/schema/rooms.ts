@@ -15,6 +15,7 @@ import { roomTypeEnum, statusEnum } from './enums'
 import { users } from './core'
 import { buildings } from './buildings'
 import { locations } from './locations'
+import { equipment } from './equipment'
 
 // ================== ROOMS ==================
 export const rooms = createTable(
@@ -47,7 +48,9 @@ export const rooms = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -76,6 +79,7 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
   }),
   children: many(rooms, { relationName: 'parentRoom' }),
   locations: many(locations, { relationName: 'roomLocations' }),
+  equipment: many(equipment, { relationName: 'roomEquipment' }),
   createdBy: one(users, {
     fields: [rooms.createdById],
     references: [users.id],

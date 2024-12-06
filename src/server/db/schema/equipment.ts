@@ -17,9 +17,9 @@ import {
 } from './enums'
 import { users } from './core'
 import { rooms } from './rooms'
-import { Sensor, sensors } from './sensors'
+import { sensors } from './sensors'
 import { locations } from './locations'
-import { Note, notes } from './notes'
+import { notes } from './notes'
 
 // ================== EQUIPMENT ==================
 export const equipment = createTable(
@@ -45,6 +45,7 @@ export const equipment = createTable(
     nextMaintenanceDate: timestamp('next_maintenance_date', {
       withTimezone: true,
     }),
+    roomId: uuid('room_id').references(() => rooms.id),
     locationId: uuid('location_id').references(() => locations.id),
     specifications: json('specifications').$type<{
       power?: {
@@ -99,131 +100,31 @@ export const equipment = createTable(
     nextMaintenanceIdx: index('equipment_next_maintenance_idx').on(
       table.nextMaintenanceDate
     ),
+    roomIdx: index('equipment_room_idx').on(table.roomId),
     locationIdx: index('equipment_location_idx').on(table.locationId),
-  })
-)
-
-// ================== EQUIPMENT ROOM ASSIGNMENTS ==================
-export const equipmentRoomAssignments = createTable(
-  'equipment_room_assignment',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    equipmentId: uuid('equipment_id')
-      .notNull()
-      .references(() => equipment.id, { onDelete: 'cascade' }),
-    roomId: uuid('room_id')
-      .notNull()
-      .references(() => rooms.id, { onDelete: 'cascade' }),
-    assignedAt: timestamp('assigned_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    assignedById: uuid('assigned_by')
-      .notNull()
-      .references(() => users.id),
-    notes: varchar('notes', { length: 1000 }),
-  },
-  (table) => ({
-    equipmentRoomIdx: index('equipment_room_idx').on(
-      table.equipmentId,
-      table.roomId
-    ),
-  })
-)
-
-// ================== MAINTENANCE RECORDS ==================
-export const maintenanceRecords = createTable(
-  'maintenance_record',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    equipmentId: uuid('equipment_id')
-      .notNull()
-      .references(() => equipment.id, { onDelete: 'cascade' }),
-    maintenanceDate: timestamp('maintenance_date', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    type: varchar('type', { length: 255 }).notNull(),
-    description: varchar('description', { length: 1000 }),
-    cost: decimal('cost', { precision: 10, scale: 2 }),
-    performedById: uuid('performed_by')
-      .notNull()
-      .references(() => users.id),
-    nextMaintenanceDate: timestamp('next_maintenance_date', {
-      withTimezone: true,
-    }),
-    status: varchar('status', { length: 50 }).default('completed'),
-    parts: json('parts').$type<
-      Array<{
-        name: string
-        quantity: number
-        cost?: number
-      }>
-    >(),
-    metadata: json('metadata').$type<{
-      [key: string]: string | undefined
-    }>(),
-  },
-  (table) => ({
-    maintenanceRecordIdx: index('maintenance_record_date_idx').on(
-      table.equipmentId,
-      table.maintenanceDate
-    ),
   })
 )
 
 // ================== RELATIONS ==================
 export const equipmentRelations = relations(equipment, ({ one, many }) => ({
-  roomAssignments: many(equipmentRoomAssignments),
-  maintenanceRecords: many(maintenanceRecords),
+  room: one(rooms, {
+    fields: [equipment.roomId],
+    references: [rooms.id],
+    relationName: 'roomEquipment',
+  }),
+  location: one(locations, {
+    fields: [equipment.locationId],
+    references: [locations.id],
+    relationName: 'locationEquipment',
+  }),
   createdBy: one(users, {
     fields: [equipment.createdById],
     references: [users.id],
     relationName: 'equipmentCreator',
   }),
   sensors: many(sensors, { relationName: 'equipmentSensors' }),
-  location: one(locations, {
-    fields: [equipment.locationId],
-    references: [locations.id],
-    relationName: 'equipmentLocation',
-  }),
   notes: many(notes, { relationName: 'equipmentNotes' }),
 }))
-
-export const equipmentRoomAssignmentsRelations = relations(
-  equipmentRoomAssignments,
-  ({ one }) => ({
-    equipment: one(equipment, {
-      fields: [equipmentRoomAssignments.equipmentId],
-      references: [equipment.id],
-      relationName: 'equipmentAssignment',
-    }),
-    room: one(rooms, {
-      fields: [equipmentRoomAssignments.roomId],
-      references: [rooms.id],
-      relationName: 'roomEquipment',
-    }),
-    assignedBy: one(users, {
-      fields: [equipmentRoomAssignments.assignedById],
-      references: [users.id],
-      relationName: 'equipmentAssigner',
-    }),
-  })
-)
-
-export const maintenanceRecordsRelations = relations(
-  maintenanceRecords,
-  ({ one }) => ({
-    equipment: one(equipment, {
-      fields: [maintenanceRecords.equipmentId],
-      references: [equipment.id],
-      relationName: 'equipmentMaintenance',
-    }),
-    performedBy: one(users, {
-      fields: [maintenanceRecords.performedById],
-      references: [users.id],
-      relationName: 'maintenancePerformer',
-    }),
-  })
-)
 
 // ================== SCHEMAS ==================
 export const insertEquipmentSchema = createInsertSchema(equipment, {
@@ -238,40 +139,6 @@ export const insertEquipmentSchema = createInsertSchema(equipment, {
 
 export const selectEquipmentSchema = createSelectSchema(equipment)
 
-export const insertMaintenanceRecordSchema = createInsertSchema(
-  maintenanceRecords
-).omit({
-  id: true,
-})
-
-export const selectMaintenanceRecordSchema =
-  createSelectSchema(maintenanceRecords)
-
-export const insertEquipmentRoomAssignmentSchema = createInsertSchema(
-  equipmentRoomAssignments
-).omit({
-  id: true,
-  assignedAt: true,
-})
-
-export const selectEquipmentRoomAssignmentSchema = createSelectSchema(
-  equipmentRoomAssignments
-)
-
 // ================== TYPES ==================
 export type Equipment = typeof equipment.$inferSelect
 export type NewEquipment = typeof equipment.$inferInsert
-export type MaintenanceRecord = typeof maintenanceRecords.$inferSelect
-export type NewMaintenanceRecord = typeof maintenanceRecords.$inferInsert
-export type EquipmentRoomAssignment =
-  typeof equipmentRoomAssignments.$inferSelect
-export type NewEquipmentRoomAssignment =
-  typeof equipmentRoomAssignments.$inferInsert
-export type EquipmentWithRelations = Equipment & {
-  createdBy: { id: string; name: string }
-  location?: Location | undefined
-  notes?: Note[]
-  sensors?: Sensor[]
-  roomAssignments?: EquipmentRoomAssignment[]
-  maintenanceRecords?: MaintenanceRecord[]
-}
