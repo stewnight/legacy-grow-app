@@ -8,6 +8,9 @@ import {
   equipmentStatusEnum,
 } from '~/server/db/schema/enums'
 import { maintenanceRecords } from '~/server/db/schema/equipment'
+import { rooms } from '~/server/db/schema/rooms'
+import { sensors } from '~/server/db/schema/sensors'
+import { users } from '~/server/db/schema/users'
 
 // Schema for filters
 const equipmentFiltersSchema = z.object({
@@ -196,5 +199,24 @@ export const equipmentRouter = createTRPCRouter({
       }
 
       return { success: true }
+    }),
+
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.db.query.equipment.findFirst({
+        where: eq(equipment.id, input.id),
+        with: {
+          createdBy: true,
+          roomAssignments: {
+            with: {
+              room: true,
+            },
+          },
+          sensors: true,
+        },
+      })
+
+      return result
     }),
 })
