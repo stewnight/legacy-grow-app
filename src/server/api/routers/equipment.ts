@@ -101,6 +101,58 @@ export const equipmentRouter = createTRPCRouter({
     })
   }),
 
+  create: protectedProcedure
+    .input(insertEquipmentSchema)
+    .mutation(async ({ ctx, input }) => {
+      const [item] = await ctx.db
+        .insert(equipment)
+        .values({
+          ...input,
+          createdById: ctx.session.user.id,
+          metadata: input.metadata || {},
+          specifications: input.specifications || {},
+        } as typeof equipment.$inferInsert)
+        .returning()
+
+      if (!item) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create equipment',
+        })
+      }
+
+      return item
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        data: insertEquipmentSchema,
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [updated] = await ctx.db
+        .update(equipment)
+        .set({
+          ...input.data,
+          updatedAt: new Date(),
+          metadata: input.data.metadata || {},
+          specifications: input.data.specifications || {},
+        } as typeof equipment.$inferInsert)
+        .where(eq(equipment.id, input.id))
+        .returning()
+
+      if (!updated) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Equipment not found',
+        })
+      }
+
+      return updated
+    }),
+
   assignRoom: protectedProcedure
     .input(
       z.object({

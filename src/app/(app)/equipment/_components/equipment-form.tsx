@@ -31,6 +31,7 @@ import {
   equipmentStatusEnum,
   maintenanceFrequencyEnum,
 } from '~/server/db/schema/enums'
+import { api } from '~/trpc/react'
 
 type FormData = z.infer<typeof insertEquipmentSchema>
 
@@ -45,6 +46,11 @@ export function EquipmentForm({
   initialData,
   onSuccess,
 }: EquipmentFormProps) {
+  // Get available rooms
+  const { data: rooms } = api.room.getAll.useQuery({
+    limit: 100,
+  })
+
   // Transform dates for API submission
   const transformData = (data: FormData): FormData => {
     const transformedData = { ...data }
@@ -113,7 +119,8 @@ export function EquipmentForm({
         lastMaintenanceDate: parsedInitialData?.lastMaintenanceDate ?? null,
         nextMaintenanceDate:
           parsedInitialData?.nextMaintenanceDate ?? addDays(startOfToday(), 30),
-        locationId: parsedInitialData?.locationId,
+        roomId: parsedInitialData?.roomId ?? null,
+        locationId: parsedInitialData?.locationId ?? null,
         notes: parsedInitialData?.notes ?? '',
         metadata: parsedInitialData?.metadata ?? {},
         specifications: parsedInitialData?.specifications ?? {},
@@ -175,6 +182,40 @@ export function EquipmentForm({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="roomId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Room</FormLabel>
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === 'null' ? null : value)
+                  }
+                  defaultValue={field.value ?? 'null'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select room" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="null">None</SelectItem>
+                    {rooms?.items.map((room) => (
+                      <SelectItem key={room.id} value={room.id}>
+                        {room.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Assign this equipment to a room
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -222,25 +263,6 @@ export function EquipmentForm({
                 <FormControl>
                   <Input
                     placeholder="Serial number"
-                    {...field}
-                    value={field.value ?? ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Equipment notes"
-                    className="resize-none"
                     {...field}
                     value={field.value ?? ''}
                   />
@@ -303,9 +325,6 @@ export function EquipmentForm({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    How often this equipment needs maintenance
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -320,7 +339,7 @@ export function EquipmentForm({
                 <FormItem className="flex flex-col">
                   <FormLabel>Purchase Date</FormLabel>
                   <DatePicker
-                    date={field.value}
+                    date={field.value ? new Date(field.value) : undefined}
                     onDateChange={field.onChange}
                   />
                   <FormMessage />
@@ -335,7 +354,7 @@ export function EquipmentForm({
                 <FormItem className="flex flex-col">
                   <FormLabel>Warranty Expiration</FormLabel>
                   <DatePicker
-                    date={field.value}
+                    date={field.value ? new Date(field.value) : undefined}
                     onDateChange={field.onChange}
                   />
                   <FormMessage />
@@ -350,9 +369,9 @@ export function EquipmentForm({
               name="lastMaintenanceDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Last Maintenance Date</FormLabel>
+                  <FormLabel>Last Maintenance</FormLabel>
                   <DatePicker
-                    date={field.value}
+                    date={field.value ? new Date(field.value) : undefined}
                     onDateChange={field.onChange}
                   />
                   <FormMessage />
@@ -365,9 +384,9 @@ export function EquipmentForm({
               name="nextMaintenanceDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Next Maintenance Date</FormLabel>
+                  <FormLabel>Next Maintenance</FormLabel>
                   <DatePicker
-                    date={field.value}
+                    date={field.value ? new Date(field.value) : undefined}
                     onDateChange={field.onChange}
                   />
                   <FormMessage />
@@ -375,6 +394,25 @@ export function EquipmentForm({
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Equipment notes"
+                    className="resize-none"
+                    {...field}
+                    value={field.value ?? ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </>
       )}
     </BaseForm>

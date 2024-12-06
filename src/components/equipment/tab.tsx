@@ -13,8 +13,23 @@ import Link from 'next/link'
 import { AppSheet } from '../layout/app-sheet'
 import { EquipmentForm } from '~/app/(app)/equipment/_components/equipment-form'
 import { Button } from '../ui/button'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, PlusIcon } from 'lucide-react'
 import { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '~/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 
 interface EquipmentTabProps {
   entityId: string
@@ -26,6 +41,9 @@ export default function EquipmentTab({
   entityType,
 }: EquipmentTabProps) {
   const [showInactive, setShowInactive] = useState(false)
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(
+    null
+  )
 
   const { data: equipment, isLoading } = api.equipment.getAll.useQuery({
     filters: {
@@ -33,17 +51,22 @@ export default function EquipmentTab({
     },
   })
 
+  const { data: allEquipment } = api.equipment.getAll.useQuery({})
+
   const utils = api.useUtils()
 
   const { mutate: assignRoom } = api.equipment.assignRoom.useMutation({
     onSuccess: () => {
       void utils.equipment.getAll.invalidate()
+      void utils.equipment.getUnassigned.invalidate()
+      setSelectedEquipmentId(null)
     },
   })
 
   const { mutate: unassignRoom } = api.equipment.unassignRoom.useMutation({
     onSuccess: () => {
       void utils.equipment.getAll.invalidate()
+      void utils.equipment.getUnassigned.invalidate()
     },
   })
 
@@ -67,6 +90,12 @@ export default function EquipmentTab({
     return new Date(date) < new Date()
   }
 
+  const handleAssign = () => {
+    if (selectedEquipmentId) {
+      assignRoom({ equipmentId: selectedEquipmentId, roomId: entityId })
+    }
+  }
+
   return (
     <TabsContent value="equipment">
       <div className="space-y-6">
@@ -76,23 +105,87 @@ export default function EquipmentTab({
               <CardTitle>Active Equipment</CardTitle>
               <CardDescription>Equipment in this {entityType}</CardDescription>
             </div>
-            <AppSheet mode="create" entity="equipment">
-              <Button variant="outline" size="sm">
-                Add Equipment
-              </Button>
-              <EquipmentForm
-                mode="create"
-                defaultValues={{
-                  name: '',
-                  type: 'sensor',
-                  status: 'active',
-                  maintenanceFrequency: 'monthly',
-                  roomId: entityType === 'room' ? entityId : undefined,
-                  metadata: {},
-                  specifications: {},
-                }}
-              />
-            </AppSheet>
+            <div className="flex gap-2">
+              {entityType === 'room' && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      Assign Equipment
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Assign Equipment</DialogTitle>
+                      <DialogDescription>
+                        Select equipment to assign to this room. Equipment
+                        already assigned to other rooms will be relocated.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <Select
+                        value={selectedEquipmentId ?? undefined}
+                        onValueChange={setSelectedEquipmentId}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select equipment" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allEquipment?.items.map((item) => (
+                            <SelectItem
+                              key={item.id}
+                              value={item.id}
+                              className="flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>
+                                  {item.name} ({item.type})
+                                </span>
+                                {item.roomId && (
+                                  <Badge variant="secondary" className="ml-2">
+                                    {item.roomId === entityId
+                                      ? 'Current Room'
+                                      : 'Assigned'}
+                                  </Badge>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="flex justify-between">
+                        <DialogTrigger asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogTrigger>
+                        <Button
+                          onClick={handleAssign}
+                          disabled={!selectedEquipmentId}
+                        >
+                          Assign to Room
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+              <AppSheet mode="create" entity="equipment">
+                <Button variant="outline" size="sm">
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Add New
+                </Button>
+                <EquipmentForm
+                  mode="create"
+                  initialData={{
+                    name: '',
+                    type: 'sensor',
+                    status: 'active',
+                    maintenanceFrequency: 'monthly',
+                    roomId: entityType === 'room' ? entityId : null,
+                    metadata: {},
+                    specifications: {},
+                  }}
+                />
+              </AppSheet>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -158,7 +251,7 @@ export default function EquipmentTab({
                         <Button variant="outline" size="sm">
                           Edit
                         </Button>
-                        <EquipmentForm mode="edit" defaultValues={item} />
+                        <EquipmentForm mode="edit" initialData={item} />
                       </AppSheet>
                     </div>
                   </div>
