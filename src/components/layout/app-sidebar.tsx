@@ -18,6 +18,7 @@ import {
   Thermometer,
   Wheat,
   Code2,
+  ToyBrickIcon,
 } from 'lucide-react'
 import { NavMain } from '~/components/layout/nav-main'
 import { NavSecondary } from '~/components/layout/nav-secondary'
@@ -80,6 +81,11 @@ const data = {
       title: 'Notes',
       url: '/notes',
       icon: FileText,
+    },
+    {
+      title: 'Equipment',
+      url: '/equipment',
+      icon: ToyBrickIcon,
     },
     {
       title: 'Sensors',

@@ -2,7 +2,11 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertJobSchema, type jobPropertiesSchema, type taskSchema } from '~/server/db/schema'
+import {
+  insertJobSchema,
+  type jobPropertiesSchema,
+  type taskSchema,
+} from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -72,22 +76,6 @@ interface JobMetadata {
   } | null
 }
 
-const defaultProperties = {
-  recurring: null,
-  tasks: [
-    {
-      item: '',
-      completed: false,
-      completedAt: null,
-      estimatedMinutes: null,
-      actualMinutes: null,
-      startedAt: null,
-    },
-  ],
-  instructions: [''],
-  requirements: { tools: [], supplies: [], ppe: [] },
-} satisfies JobProperties
-
 export function JobForm({ mode, defaultValues }: JobFormProps) {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(insertJobSchema),
@@ -103,61 +91,66 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       status: defaultValues?.status || 'active',
       category: defaultValues?.category || 'maintenance',
       properties: {
-        recurring: (defaultValues?.properties as JobProperties)?.recurring || null,
+        recurring:
+          (defaultValues?.properties as JobProperties)?.recurring || null,
         tasks: (defaultValues?.properties as JobProperties)?.tasks || [],
-        instructions: (defaultValues?.properties as JobProperties)?.instructions || [],
-        requirements: (defaultValues?.properties as JobProperties)?.requirements || {
+        instructions:
+          (defaultValues?.properties as JobProperties)?.instructions || [],
+        requirements: (defaultValues?.properties as JobProperties)
+          ?.requirements || {
           tools: [],
           supplies: [],
           ppe: [],
         },
-      },
+      } satisfies JobProperties,
       metadata: {
-        ...((defaultValues?.metadata as JobMetadata) || {
-          previousJobs: [],
-          nextJobs: [],
-          estimatedDuration: null,
-          actualDuration: null,
-          location: null,
-        }),
+        previousJobs: [],
+        nextJobs: [],
+        estimatedDuration: null,
+        actualDuration: null,
+        location: null,
       },
     },
   })
 
   const utils = api.useUtils()
   const { toast } = useToast()
+  const router = useRouter()
 
-  const { mutate: createJob, isPending: isCreating } = api.job.create.useMutation({
-    onSuccess: async () => {
-      toast({
-        title: 'Job created successfully',
-      })
-      await utils.job.invalidate()
-    },
-    onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      toast({
-        title: 'Error creating job',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createJob, isPending: isCreating } =
+    api.job.create.useMutation({
+      onSuccess: async () => {
+        toast({
+          title: 'Job created successfully',
+        })
+        await utils.job.invalidate()
+        router.push('/jobs')
+      },
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
+        toast({
+          title: 'Error creating job',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updateJob, isPending: isUpdating } = api.job.update.useMutation({
-    onSuccess: async () => {
-      toast({
-        title: 'Job updated successfully',
-      })
-      await utils.job.invalidate()
-    },
-    onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      toast({
-        title: 'Error updating job',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updateJob, isPending: isUpdating } =
+    api.job.update.useMutation({
+      onSuccess: async () => {
+        toast({
+          title: 'Job updated successfully',
+        })
+        await utils.job.invalidate()
+      },
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
+        toast({
+          title: 'Error updating job',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   const onSubmit = async (data: JobFormValues) => {
     try {
@@ -182,12 +175,16 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       }
 
       if (mode === 'create') {
-        await createJob(formData)
+        createJob(formData)
       } else if (defaultValues?.id) {
-        await updateJob({ id: defaultValues.id, data: formData })
+        updateJob({ id: defaultValues.id, data: formData })
       }
     } catch (error) {
-      console.error('Form submission error:', error)
+      toast({
+        title: 'Error submitting form',
+        description: error as string,
+        variant: 'destructive',
+      })
     }
   }
 
@@ -205,10 +202,13 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
                 ...data,
                 entityId: data.entityType === 'none' ? null : data.entityId,
                 properties: {
-                  recurring: (data.properties as JobProperties).recurring || null,
+                  recurring:
+                    (data.properties as JobProperties).recurring || null,
                   tasks: (data.properties as JobProperties).tasks || [],
-                  instructions: (data.properties as JobProperties).instructions || [],
-                  requirements: (data.properties as JobProperties).requirements || {
+                  instructions:
+                    (data.properties as JobProperties).instructions || [],
+                  requirements: (data.properties as JobProperties)
+                    .requirements || {
                     tools: [],
                     supplies: [],
                     ppe: [],
@@ -222,9 +222,9 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               }
 
               if (mode === 'create') {
-                await createJob(formData)
+                createJob(formData)
               } else if (defaultValues?.id) {
-                await updateJob({ id: defaultValues.id, data: formData })
+                updateJob({ id: defaultValues.id, data: formData })
               }
             } catch (error) {
               console.error('Form submission error:', error)
@@ -242,9 +242,13 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormItem>
                 <FormLabel>Entity Type</FormLabel>
                 <FormDescription>
-                  The entity type is the type of entity that this job is related to.
+                  The entity type is the type of entity that this job is related
+                  to.
                 </FormDescription>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select entity type" />
@@ -270,10 +274,15 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Select {form.watch('entityType')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value ?? undefined}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={`Select ${form.watch('entityType')}`} />
+                        <SelectValue
+                          placeholder={`Select ${form.watch('entityType')}`}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -399,7 +408,10 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Assign To</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? undefined}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select assignee" />
@@ -512,7 +524,11 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isCreating || isUpdating} className="w-full">
+        <Button
+          type="submit"
+          disabled={isCreating || isUpdating}
+          className="w-full"
+        >
           {isCreating || isUpdating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -540,8 +556,14 @@ const EntitySelector = React.memo(function EntitySelector({
     { limit: 50 },
     { enabled: entityType === 'location' }
   )
-  const plantQuery = api.plant.getAll.useQuery({ limit: 50 }, { enabled: entityType === 'plant' })
-  const batchQuery = api.batch.getAll.useQuery({ limit: 50 }, { enabled: entityType === 'batch' })
+  const plantQuery = api.plant.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'plant' }
+  )
+  const batchQuery = api.batch.getAll.useQuery(
+    { limit: 50 },
+    { enabled: entityType === 'batch' }
+  )
   const geneticQuery = api.genetic.getAll.useQuery(
     { limit: 50 },
     { enabled: entityType === 'genetics' }

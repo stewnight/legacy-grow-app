@@ -141,6 +141,113 @@ const inputSchema = z.object({
 });
 ```
 
+### Form Patterns
+
+Our forms follow these standardized patterns for consistency and type safety:
+
+```typescript
+// 1. Type Definitions
+type FormData = z.infer<typeof insertEntitySchema>
+interface EntityFormProps {
+  mode: 'create' | 'edit'
+  initialData?: Entity
+  onSuccess?: (data: FormData) => void
+}
+
+// 2. Form Setup
+const form = useForm<FormData>({
+  resolver: zodResolver(insertEntitySchema),
+  defaultValues: {
+    // Use nullish coalescing for all defaults
+    field: initialData?.field ?? defaultValue,
+  },
+})
+
+// 3. Mutation Pattern
+const { mutate, isLoading } = api.entity.create.useMutation({
+  onSuccess: (data) => {
+    toast({ title: 'Success message' })
+    void utils.entity.invalidate()
+    onSuccess?.(data)
+  },
+})
+
+// 4. Date Handling
+// Store as Date objects in form state
+purchaseDate: initialData?.purchaseDate ? new Date(initialData.purchaseDate) : undefined,
+// Format when submitting
+const formattedData = {
+  ...data,
+  purchaseDate: data.purchaseDate ? format(data.purchaseDate, 'yyyy-MM-dd') : undefined,
+}
+
+// 5. Complex Properties
+// Use satisfies for type checking
+properties: {
+  ...defaultProperties,
+} satisfies EntityProperties,
+
+// 6. Conditional Rendering
+{form.watch('fieldName') === 'value' && (
+  <FormField>...</FormField>
+)}
+
+// 7. Loading States
+<Button disabled={isLoading}>
+  {isLoading ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      {mode === 'create' ? 'Creating...' : 'Updating...'}
+    </>
+  ) : (
+    'Submit'
+  )}
+</Button>
+```
+
+#### Form Guidelines
+
+1. **Type Safety**
+
+   - Use schema inference for form types
+   - Leverage zod for validation
+   - Use satisfies for complex properties
+
+2. **State Management**
+
+   - Store dates as Date objects
+   - Format data only when submitting
+   - Use nullish coalescing for defaults
+
+3. **Performance**
+
+   - Memoize complex sub-components
+   - Use conditional rendering
+   - Leverage React.memo for lists
+
+4. **User Experience**
+
+   - Show loading states
+   - Provide clear feedback
+   - Handle errors gracefully
+
+5. **Data Flow**
+
+   - Use onSuccess callbacks
+   - Properly invalidate queries
+   - Handle optimistic updates
+
+6. **Validation**
+
+   - Use schema validation
+   - Show clear error messages
+   - Validate on submit
+
+7. **Accessibility**
+   - Use proper ARIA labels
+   - Handle keyboard navigation
+   - Provide clear feedback
+
 ## Contributing
 
 1. Follow type safety guidelines

@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type plants } from '~/server/db/schema'
+import { Plant, type plants } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
 import { MoreHorizontal, Leaf, MapPin, Calendar, Activity } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -16,6 +16,8 @@ import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { format } from 'date-fns'
+import { AppSheet } from '../../../../components/layout/app-sheet'
+import { PlantForm } from './plants-form'
 
 // Define the type including relations
 type PlantWithRelations = typeof plants.$inferSelect & {
@@ -44,7 +46,10 @@ export const columns: ColumnDef<PlantWithRelations>[] = [
     cell: ({ row }) => {
       const plant = row.original
       return (
-        <Link href={`/plants/${plant.id}`} className="font-medium hover:underline">
+        <Link
+          href={`/plants/${plant.id}`}
+          className="font-medium hover:underline"
+        >
           {plant.identifier}
         </Link>
       )
@@ -58,7 +63,10 @@ export const columns: ColumnDef<PlantWithRelations>[] = [
       return plant.genetic ? (
         <div className="flex items-center gap-2">
           <Leaf className="h-4 w-4 text-muted-foreground" />
-          <Link href={`/genetics/${plant.genetic.id}`} className="hover:underline">
+          <Link
+            href={`/genetics/${plant.genetic.id}`}
+            className="hover:underline"
+          >
             {plant.genetic.name}
           </Link>
         </div>
@@ -75,7 +83,10 @@ export const columns: ColumnDef<PlantWithRelations>[] = [
       return plant.location ? (
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-muted-foreground" />
-          <Link href={`/locations/${plant.location.id}`} className="hover:underline">
+          <Link
+            href={`/locations/${plant.location.id}`}
+            className="hover:underline"
+          >
             {plant.location.name}
           </Link>
         </div>
@@ -176,9 +187,14 @@ export const columns: ColumnDef<PlantWithRelations>[] = [
             <DropdownMenuItem asChild>
               <Link href={`/plants/${plant.id}`}>View Details</Link>
             </DropdownMenuItem>
+            <AppSheet mode="edit">
+              <PlantForm mode="edit" defaultValues={plant as Plant} />
+            </AppSheet>
             <DropdownMenuItem
               onClick={() => {
-                if (window.confirm('Are you sure you want to delete this plant?')) {
+                if (
+                  window.confirm('Are you sure you want to delete this plant?')
+                ) {
                   deletePlant(plant.id)
                 }
               }}

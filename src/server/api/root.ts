@@ -12,6 +12,7 @@ import { jobRouter } from './routers/job'
 import { harvestRouter } from './routers/harvest'
 import { processingRouter } from './routers/processing'
 import { userRouter } from './routers/user'
+import { equipmentRouter } from './routers/equipment'
 
 export const appRouter = createTRPCRouter({
   genetic: geneticRouter,
@@ -27,6 +28,7 @@ export const appRouter = createTRPCRouter({
   harvest: harvestRouter,
   processing: processingRouter,
   user: userRouter,
+  equipment: equipmentRouter,
 })
 
 export type AppRouter = typeof appRouter
