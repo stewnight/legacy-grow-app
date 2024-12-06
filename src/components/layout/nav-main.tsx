@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import { type LucideIcon } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { type LucideIcon } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -10,22 +10,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '~/components/ui/sidebar';
-import { cn } from '~/lib/utils';
+} from '~/components/ui/sidebar'
+import { cn } from '~/lib/utils'
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string;
-    url: string;
-    icon: LucideIcon;
-    isActive?: boolean;
-  }[];
+    title: string
+    url: string
+    icon: LucideIcon
+    isActive?: boolean
+  }[]
 }) {
-  const pathname = usePathname();
-  const { state } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const pathname = usePathname()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   return (
     <SidebarGroup>
@@ -57,5 +57,5 @@ export function NavMain({
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  );
+  )
 }

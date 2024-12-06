@@ -1,33 +1,33 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { format } from 'date-fns';
-import { type RouterOutputs } from '~/trpc/shared';
-import { Button } from '~/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '~/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
+import { useState } from 'react'
+import { format } from 'date-fns'
+import { type RouterOutputs } from '~/trpc/shared'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader } from '~/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
-import { MoreVertical, Reply, Pencil, Trash2 } from 'lucide-react';
-import { cn } from '~/lib/utils';
-import { MediaPreview } from './media-preview';
+} from '~/components/ui/dropdown-menu'
+import { MoreVertical, Reply, Pencil, Trash2 } from 'lucide-react'
+import { cn } from '~/lib/utils'
+import { MediaPreview } from './media-preview'
 
-type NoteWithUser = RouterOutputs['notes']['list']['items'][number];
+type NoteWithUser = RouterOutputs['notes']['list']['items'][number]
 
 interface NoteCardProps {
-  note: NoteWithUser;
-  onReply?: (noteId: number) => void;
-  onEdit?: (note: NoteWithUser) => void;
-  onDelete?: (noteId: number) => void;
-  className?: string;
+  note: NoteWithUser
+  onReply?: (noteId: number) => void
+  onEdit?: (note: NoteWithUser) => void
+  onDelete?: (noteId: number) => void
+  className?: string
 }
 
 export function NoteCard({ note, onReply, onEdit, onDelete, className }: NoteCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
 
   return (
     <Card className={cn('', className)}>
@@ -59,8 +59,8 @@ export function NoteCard({ note, onReply, onEdit, onDelete, className }: NoteCar
                   {onEdit && (
                     <DropdownMenuItem
                       onClick={() => {
-                        setIsEditing(true);
-                        onEdit(note);
+                        setIsEditing(true)
+                        onEdit(note)
                       }}
                     >
                       <Pencil className="mr-2 h-4 w-4" />
@@ -92,5 +92,5 @@ export function NoteCard({ note, onReply, onEdit, onDelete, className }: NoteCar
         </CardFooter>
       )}
     </Card>
-  );
+  )
 }

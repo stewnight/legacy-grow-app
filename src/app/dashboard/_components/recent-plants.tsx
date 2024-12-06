@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   Table,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '~/components/ui/table';
+} from '~/components/ui/table'
 
 const recentPlants = [
   {
@@ -31,7 +31,7 @@ const recentPlants = [
     health: 'Attention Needed',
     age: '3 days',
   },
-];
+]
 
 export function RecentPlants() {
   return (
@@ -55,5 +55,5 @@ export function RecentPlants() {
         ))}
       </TableBody>
     </Table>
-  );
+  )
 }

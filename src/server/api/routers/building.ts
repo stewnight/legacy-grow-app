@@ -1,20 +1,20 @@
 // src/server/api/routers/  .ts
-import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../trpc';
-import { buildings, insertBuildingSchema } from '~/server/db/schema';
-import { eq, desc, like, and, SQL } from 'drizzle-orm';
-import { TRPCError } from '@trpc/server';
-import { buildingTypeEnum, statusEnum } from '~/server/db/schema/enums';
+import { z } from 'zod'
+import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { buildings, insertBuildingSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
+import { buildingTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
-type BuildingProperties = typeof buildings.$inferInsert.properties;
-type BuildingAddress = typeof buildings.$inferInsert.address;
+type BuildingProperties = typeof buildings.$inferInsert.properties
+type BuildingAddress = typeof buildings.$inferInsert.address
 
 // Schema for filters
 const buildingFiltersSchema = z.object({
   type: z.enum(buildingTypeEnum.enumValues).optional(),
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
-});
+})
 
 export const buildingRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -26,13 +26,13 @@ export const buildingRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const { limit, cursor, filters } = input;
+      const { limit, cursor, filters } = input
 
       const conditions = [
         filters?.type ? eq(buildings.type, filters.type) : undefined,
         filters?.status ? eq(buildings.status, filters.status) : undefined,
         filters?.search ? like(buildings.name, `%${filters.search}%`) : undefined,
-      ].filter((condition): condition is SQL => condition !== undefined);
+      ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.buildings.findMany({
         where: conditions.length ? and(...conditions) : undefined,
@@ -49,15 +49,15 @@ export const buildingRouter = createTRPCRouter({
             },
           },
         },
-      });
+      })
 
-      let nextCursor: typeof cursor | undefined = undefined;
+      let nextCursor: typeof cursor | undefined = undefined
       if (items.length > limit) {
-        items.pop();
-        nextCursor = cursor ? cursor + limit : limit;
+        items.pop()
+        nextCursor = cursor ? cursor + limit : limit
       }
 
-      return { items, nextCursor };
+      return { items, nextCursor }
     }),
 
   get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
@@ -77,16 +77,16 @@ export const buildingRouter = createTRPCRouter({
           },
         },
       },
-    });
+    })
 
     if (!building) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Facility not found',
-      });
+      })
     }
 
-    return building;
+    return building
   }),
 
   create: protectedProcedure.input(insertBuildingSchema).mutation(async ({ ctx, input }) => {
@@ -95,18 +95,18 @@ export const buildingRouter = createTRPCRouter({
       createdById: ctx.session.user.id,
       properties: input.properties as BuildingProperties,
       address: input.address as BuildingAddress,
-    };
+    }
 
-    const [building] = await ctx.db.insert(buildings).values(insertData).returning();
+    const [building] = await ctx.db.insert(buildings).values(insertData).returning()
 
     if (!building) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to create facility',
-      });
+      })
     }
 
-    return building;
+    return building
   }),
 
   update: protectedProcedure
@@ -122,34 +122,34 @@ export const buildingRouter = createTRPCRouter({
         updatedAt: new Date(),
         properties: input.data.properties as typeof buildings.$inferInsert.properties,
         address: input.data.address as typeof buildings.$inferInsert.address,
-      };
+      }
 
       const [building] = await ctx.db
         .update(buildings)
         .set(updateData)
         .where(eq(buildings.id, input.id))
-        .returning();
+        .returning()
 
       if (!building) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Building not found',
-        });
+        })
       }
 
-      return building;
+      return building
     }),
 
   delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(buildings).where(eq(buildings.id, input)).returning();
+    const [deleted] = await ctx.db.delete(buildings).where(eq(buildings.id, input)).returning()
 
     if (!deleted) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Building not found',
-      });
+      })
     }
 
-    return { success: true };
+    return { success: true }
   }),
-});
+})

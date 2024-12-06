@@ -1,4 +1,4 @@
-import { Button } from '~/components/ui/button';
+import { Button } from '~/components/ui/button'
 import {
   Sheet,
   SheetContent,
@@ -7,16 +7,16 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '~/components/ui/sheet';
-import { ScrollArea } from '~/components/ui/scroll-area';
+} from '~/components/ui/sheet'
+import { ScrollArea } from '~/components/ui/scroll-area'
 
 interface AppSheetProps<T> {
-  mode: 'create' | 'edit';
-  entity?: T;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  trigger?: React.ReactNode;
-  children: React.ReactNode;
+  mode: 'create' | 'edit'
+  entity?: T
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: React.ReactNode
+  children: React.ReactNode
 }
 
 export function AppSheet<T>({
@@ -45,5 +45,5 @@ export function AppSheet<T>({
         <SheetFooter className="px-4 pb-12"></SheetFooter>
       </SheetContent>
     </Sheet>
-  );
+  )
 }

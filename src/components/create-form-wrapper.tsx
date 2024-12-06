@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import { useSession } from 'next-auth/react';
-import { Alert, AlertDescription } from '~/components/ui/alert';
-import { Skeleton } from '~/components/ui/skeleton';
+import { useSession } from 'next-auth/react'
+import { Alert, AlertDescription } from '~/components/ui/alert'
+import { Skeleton } from '~/components/ui/skeleton'
 
 interface CreateFormWrapperProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export function CreateFormWrapper({ children }: CreateFormWrapperProps) {
-  const { status } = useSession();
+  const { status } = useSession()
 
   if (status === 'loading') {
-    return <Skeleton className="h-[400px] w-full" />;
+    return <Skeleton className="h-[400px] w-full" />
   }
 
   if (status === 'unauthenticated') {
@@ -20,8 +20,8 @@ export function CreateFormWrapper({ children }: CreateFormWrapperProps) {
       <Alert>
         <AlertDescription>Please sign in to access this feature</AlertDescription>
       </Alert>
-    );
+    )
   }
 
-  return <>{children}</>;
+  return <>{children}</>
 }

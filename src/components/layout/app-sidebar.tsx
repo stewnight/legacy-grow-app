@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 import {
   Github,
   Command,
@@ -18,10 +18,10 @@ import {
   Thermometer,
   Wheat,
   Code2,
-} from 'lucide-react';
-import { NavMain } from '~/components/layout/nav-main';
-import { NavSecondary } from '~/components/layout/nav-secondary';
-import { NavUser } from '~/components/layout/nav-user';
+} from 'lucide-react'
+import { NavMain } from '~/components/layout/nav-main'
+import { NavSecondary } from '~/components/layout/nav-secondary'
+import { NavUser } from '~/components/layout/nav-user'
 import {
   Sidebar,
   SidebarContent,
@@ -30,8 +30,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '~/components/ui/sidebar';
-import type { User } from 'next-auth';
+} from '~/components/ui/sidebar'
+import type { User } from 'next-auth'
 
 const data = {
   navMain: [
@@ -117,13 +117,13 @@ const data = {
       isExternal: true,
     },
   ],
-};
+}
 
 export function AppSidebar({
   user,
   ...props
 }: { user: User | null | undefined } & React.ComponentProps<typeof Sidebar>) {
-  if (!user) return null;
+  if (!user) return null
 
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
@@ -152,5 +152,5 @@ export function AppSidebar({
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible';
-import { Button } from './button';
-import { ChevronsUpDown } from 'lucide-react';
+import type { Meta, StoryObj } from '@storybook/react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible'
+import { Button } from './button'
+import { ChevronsUpDown } from 'lucide-react'
 
 const meta = {
   title: 'UI/Collapsible',
@@ -10,10 +10,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Collapsible>;
+} satisfies Meta<typeof Collapsible>
 
-export default meta;
-type Story = StoryObj<typeof Collapsible>;
+export default meta
+type Story = StoryObj<typeof Collapsible>
 
 export const Default: Story = {
   args: {
@@ -32,7 +32,7 @@ export const Default: Story = {
       </>
     ),
   },
-};
+}
 
 export const WithCustomTrigger: Story = {
   args: {
@@ -56,4 +56,4 @@ export const WithCustomTrigger: Story = {
       </>
     ),
   },
-};
+}

@@ -5,4 +5,4 @@ export const db = {
     commit: async () => {},
     rollback: async () => {},
   }),
-};
+}

@@ -1,18 +1,18 @@
-import * as React from 'react';
-import { format, isSameMonth, isToday } from 'date-fns';
-import { cn } from '~/lib/utils';
-import { type JobWithRelations } from '~/server/db/schema';
-import { JobCard } from '../job-card';
-import { AppSheet } from '../../layout/app-sheet';
-import { JobForm } from '../../../app/(app)/jobs/_components/jobs-form';
-import { SheetTrigger } from '../../ui/sheet';
-import { Button } from '../../ui/button';
-import { PlusIcon } from 'lucide-react';
+import * as React from 'react'
+import { format, isSameMonth, isToday } from 'date-fns'
+import { cn } from '~/lib/utils'
+import { type JobWithRelations } from '~/server/db/schema'
+import { JobCard } from '../job-card'
+import { AppSheet } from '../../layout/app-sheet'
+import { JobForm } from '../../../app/(app)/jobs/_components/jobs-form'
+import { SheetTrigger } from '../../ui/sheet'
+import { Button } from '../../ui/button'
+import { PlusIcon } from 'lucide-react'
 
 interface MonthViewProps {
-  currentDate: Date;
-  days: Date[];
-  jobs: JobWithRelations[];
+  currentDate: Date
+  days: Date[]
+  jobs: JobWithRelations[]
 }
 
 export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
@@ -31,7 +31,7 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
             (job) =>
               job.dueDate &&
               format(new Date(job.dueDate), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-          );
+          )
 
           return (
             <div
@@ -84,9 +84,9 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
                 </div>
               )}
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }

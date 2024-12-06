@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { Button } from './button';
-import { CalendarDays } from 'lucide-react';
+import type { Meta, StoryObj } from '@storybook/react'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card'
+import { Avatar, AvatarFallback, AvatarImage } from './avatar'
+import { Button } from './button'
+import { CalendarDays } from 'lucide-react'
 
 const meta = {
   title: 'UI/HoverCard',
@@ -11,10 +11,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof HoverCard>;
+} satisfies Meta<typeof HoverCard>
 
-export default meta;
-type Story = StoryObj<typeof HoverCard>;
+export default meta
+type Story = StoryObj<typeof HoverCard>
 
 export const Default: Story = {
   args: {
@@ -42,7 +42,7 @@ export const Default: Story = {
       </>
     ),
   },
-};
+}
 
 export const WithCustomContent: Story = {
   args: {
@@ -66,4 +66,4 @@ export const WithCustomContent: Story = {
       </>
     ),
   },
-};
+}

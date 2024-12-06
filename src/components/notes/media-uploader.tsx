@@ -1,72 +1,72 @@
-'use client';
+'use client'
 
-import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { generateStorageKey } from '~/lib/storage';
-import { api } from '~/trpc/react';
-import { Progress } from '~/components/ui/progress';
-import { X } from 'lucide-react';
-import { Button } from '~/components/ui/button';
+import { useCallback, useState } from 'react'
+import { useDropzone } from 'react-dropzone'
+import { generateStorageKey } from '~/lib/storage'
+import { api } from '~/trpc/react'
+import { Progress } from '~/components/ui/progress'
+import { X } from 'lucide-react'
+import { Button } from '~/components/ui/button'
 
 interface MediaUploaderProps {
-  onUpload: (file: File) => Promise<void> | void;
-  onUploadComplete: (url: string, metadata: any) => void;
-  onUploadError: (error: Error) => void;
+  onUpload: (file: File) => Promise<void> | void
+  onUploadComplete: (url: string, metadata: any) => void
+  onUploadError: (error: Error) => void
 }
 
 export function MediaUploader({ onUpload, onUploadComplete, onUploadError }: MediaUploaderProps) {
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
 
-  const getPresignedUrl = api.media.getUploadUrl.useMutation();
+  const getPresignedUrl = api.media.getUploadUrl.useMutation()
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (!file) return;
+      const file = acceptedFiles[0]
+      if (!file) return
 
       try {
-        setIsUploading(true);
-        const key = generateStorageKey(file);
+        setIsUploading(true)
+        const key = generateStorageKey(file)
         const { uploadUrl, publicUrl } = await getPresignedUrl.mutateAsync({
           filename: key,
           contentType: file.type,
-        });
+        })
 
-        const xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest()
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
-            const progress = (event.loaded / event.total) * 100;
-            setUploadProgress(progress);
+            const progress = (event.loaded / event.total) * 100
+            setUploadProgress(progress)
           }
-        });
+        })
 
         xhr.upload.addEventListener('load', () => {
           onUploadComplete(publicUrl, {
             mimeType: file.type,
             size: file.size,
             filename: file.name,
-          });
-          setIsUploading(false);
-          setUploadProgress(0);
-        });
+          })
+          setIsUploading(false)
+          setUploadProgress(0)
+        })
 
         xhr.upload.addEventListener('error', () => {
-          onUploadError(new Error('Upload failed'));
-          setIsUploading(false);
-          setUploadProgress(0);
-        });
+          onUploadError(new Error('Upload failed'))
+          setIsUploading(false)
+          setUploadProgress(0)
+        })
 
-        xhr.open('PUT', uploadUrl);
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.send(file);
+        xhr.open('PUT', uploadUrl)
+        xhr.setRequestHeader('Content-Type', file.type)
+        xhr.send(file)
       } catch (error) {
-        onUploadError(error instanceof Error ? error : new Error('Upload failed'));
-        setIsUploading(false);
+        onUploadError(error instanceof Error ? error : new Error('Upload failed'))
+        setIsUploading(false)
       }
     },
     [getPresignedUrl, onUploadComplete, onUploadError]
-  );
+  )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -76,7 +76,7 @@ export function MediaUploader({ onUpload, onUploadComplete, onUploadError }: Med
     },
     maxSize: 10 * 1024 * 1024, // 10MB
     multiple: false,
-  });
+  })
 
   return (
     <div
@@ -104,5 +104,5 @@ export function MediaUploader({ onUpload, onUploadComplete, onUploadError }: Med
         </p>
       )}
     </div>
-  );
+  )
 }

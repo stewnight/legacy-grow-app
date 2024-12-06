@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { api } from '~/trpc/react';
-import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
-import { notFound } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import Link from 'next/link';
-import { MapPin, Box, Thermometer, Droplets, Lightbulb, Wind } from 'lucide-react';
-import { AppSheet } from '../../../../components/layout/app-sheet';
-import { RoomForm } from '../_components/rooms-form';
-import { Badge } from '../../../../components/ui/badge';
+import * as React from 'react'
+import { api } from '~/trpc/react'
+import { format } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import { notFound } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { Skeleton } from '@/components/ui/skeleton'
+import Link from 'next/link'
+import { MapPin, Box, Thermometer, Droplets, Lightbulb, Wind } from 'lucide-react'
+import { AppSheet } from '../../../../components/layout/app-sheet'
+import { RoomForm } from '../_components/rooms-form'
+import { Badge } from '../../../../components/ui/badge'
 
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = React.use(params);
+  const resolvedParams = React.use(params)
 
   const { data: room, isLoading } = api.room.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  });
+  })
 
   if (!room && !isLoading) {
-    return notFound();
+    return notFound()
   }
 
   if (isLoading) {
@@ -51,13 +51,13 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A';
-    return format(new Date(date), 'PP');
-  };
+    if (!date) return 'N/A'
+    return format(new Date(date), 'PP')
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
@@ -259,5 +259,5 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

@@ -1,30 +1,30 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { api } from '~/trpc/react';
-import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
-import { notFound } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Skeleton } from '~/components/ui/skeleton';
-import Link from 'next/link';
-import { Leaf, MapPin, Calendar, Users, Sprout, Thermometer, Droplets, Timer } from 'lucide-react';
-import { AppSheet } from '../../../../components/layout/app-sheet';
-import { BatchForm } from '../_components/batches-form';
-import JobsTab from '../../../../components/jobs/tab';
+import * as React from 'react'
+import { api } from '~/trpc/react'
+import { format } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import { notFound } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { Skeleton } from '~/components/ui/skeleton'
+import Link from 'next/link'
+import { Leaf, MapPin, Calendar, Users, Sprout, Thermometer, Droplets, Timer } from 'lucide-react'
+import { AppSheet } from '../../../../components/layout/app-sheet'
+import { BatchForm } from '../_components/batches-form'
+import JobsTab from '../../../../components/jobs/tab'
 
 export default function BatchPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = React.use(params);
+  const resolvedParams = React.use(params)
 
   const { data: batch, isLoading } = api.batch.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  });
+  })
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A';
-    return format(new Date(date), 'PP');
-  };
+    if (!date) return 'N/A'
+    return format(new Date(date), 'PP')
+  }
 
   if (isLoading) {
     return (
@@ -50,11 +50,11 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   if (!batch) {
-    return notFound();
+    return notFound()
   }
 
   return (
@@ -267,5 +267,5 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
         <JobsTab entityId={batch.id} entityType="batch" />
       </Tabs>
     </div>
-  );
+  )
 }

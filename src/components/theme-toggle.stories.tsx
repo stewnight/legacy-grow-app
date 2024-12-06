@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react'
 
-import { ThemeToggle } from './theme-toggle';
+import { ThemeToggle } from './theme-toggle'
 
 const meta = {
   component: ThemeToggle,
-} satisfies Meta<typeof ThemeToggle>;
+} satisfies Meta<typeof ThemeToggle>
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}

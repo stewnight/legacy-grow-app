@@ -1,9 +1,9 @@
-import { SidebarTrigger } from '../ui/sidebar';
-import { auth } from '~/server/auth';
-import { CustomBreadcrumbs } from '../layout/custom-breadcrumbs';
+import { SidebarTrigger } from '../ui/sidebar'
+import { auth } from '~/server/auth'
+import { CustomBreadcrumbs } from '../layout/custom-breadcrumbs'
 
 export default async function Header() {
-  const session = await auth();
+  const session = await auth()
 
   return (
     <header className="flex h-16 shrink-0 items-center border-b">
@@ -14,5 +14,5 @@ export default async function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }

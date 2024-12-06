@@ -1,59 +1,59 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { api } from '~/trpc/react';
-import { useToast } from '~/hooks/use-toast';
-import { format } from 'date-fns';
-import { type Note } from '~/server/db/schema/notes';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2 } from 'lucide-react';
+import * as React from 'react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { api } from '~/trpc/react'
+import { useToast } from '~/hooks/use-toast'
+import { format } from 'date-fns'
+import { type Note } from '~/server/db/schema/notes'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Loader2 } from 'lucide-react'
 
 interface NotesManagerProps {
-  jobId: string;
-  notes?: Note[];
+  jobId: string
+  notes?: Note[]
 }
 
 export function NotesManager({ jobId, notes: initialNotes }: NotesManagerProps) {
-  const [content, setContent] = React.useState('');
-  const { toast } = useToast();
-  const utils = api.useUtils();
+  const [content, setContent] = React.useState('')
+  const { toast } = useToast()
+  const utils = api.useUtils()
 
-  const { data: notes, isLoading } = api.note.getAllForJob.useQuery(jobId);
+  const { data: notes, isLoading } = api.note.getAllForJob.useQuery(jobId)
 
   const { mutate: createNote, isPending: isCreating } = api.note.create.useMutation({
     onSuccess: () => {
-      setContent('');
-      toast({ title: 'Note added successfully' });
-      void utils.note.getAllForJob.invalidate(jobId);
+      setContent('')
+      toast({ title: 'Note added successfully' })
+      void utils.note.getAllForJob.invalidate(jobId)
     },
     onError: (error) => {
       toast({
         title: 'Error adding note',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
+    e.preventDefault()
+    if (!content.trim()) return
 
     createNote({
       content,
       entityId: jobId,
       entityType: 'job',
-    });
-  };
+    })
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
@@ -104,5 +104,5 @@ export function NotesManager({ jobId, notes: initialNotes }: NotesManagerProps) 
         )}
       </div>
     </div>
-  );
+  )
 }

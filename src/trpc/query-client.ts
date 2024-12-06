@@ -1,8 +1,8 @@
-import { QueryClient } from '@tanstack/react-query';
-import { persistQueryClient } from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import SuperJSON from 'superjson';
-import { TRPCError } from '@trpc/server';
+import { QueryClient } from '@tanstack/react-query'
+import { persistQueryClient } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
+import SuperJSON from 'superjson'
+import { TRPCError } from '@trpc/server'
 
 export const createQueryClient = () => {
   const client = new QueryClient({
@@ -15,9 +15,9 @@ export const createQueryClient = () => {
           if (error instanceof TRPCError) {
             return (
               !['NOT_FOUND', 'UNAUTHORIZED', 'FORBIDDEN'].includes(error.code) && failureCount < 3
-            );
+            )
           }
-          return failureCount < 3;
+          return failureCount < 3
         },
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
@@ -26,7 +26,7 @@ export const createQueryClient = () => {
         retry: false,
       },
     },
-  });
+  })
 
   if (typeof window !== 'undefined') {
     const persister = createSyncStoragePersister({
@@ -34,7 +34,7 @@ export const createQueryClient = () => {
       serialize: SuperJSON.stringify,
       deserialize: SuperJSON.parse,
       throttleTime: 2000,
-    });
+    })
 
     void persistQueryClient({
       queryClient: client,
@@ -43,11 +43,11 @@ export const createQueryClient = () => {
       buster: process.env.NEXT_PUBLIC_VERSION ?? '1.0.0',
       dehydrateOptions: {
         shouldDehydrateQuery: (query) => {
-          return !query.state.error;
+          return !query.state.error
         },
       },
-    });
+    })
   }
 
-  return client;
-};
+  return client
+}

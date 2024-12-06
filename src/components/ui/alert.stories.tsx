@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Alert, AlertDescription, AlertTitle } from './alert';
-import { Terminal } from 'lucide-react';
+import type { Meta, StoryObj } from '@storybook/react'
+import { Alert, AlertDescription, AlertTitle } from './alert'
+import { Terminal } from 'lucide-react'
 
 const meta = {
   title: 'UI/Alert',
@@ -9,10 +9,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Alert>;
+} satisfies Meta<typeof Alert>
 
-export default meta;
-type Story = StoryObj<typeof Alert>;
+export default meta
+type Story = StoryObj<typeof Alert>
 
 export const Default: Story = {
   args: {
@@ -24,7 +24,7 @@ export const Default: Story = {
       </>
     ),
   },
-};
+}
 
 export const WithoutIcon: Story = {
   args: {
@@ -35,4 +35,4 @@ export const WithoutIcon: Story = {
       </>
     ),
   },
-};
+}

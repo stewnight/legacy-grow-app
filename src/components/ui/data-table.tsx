@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -11,8 +11,8 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
-} from '@tanstack/react-table';
-import { Input } from '~/components/ui/input';
+} from '@tanstack/react-table'
+import { Input } from '~/components/ui/input'
 import {
   Table,
   TableBody,
@@ -20,16 +20,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '~/components/ui/table';
+} from '~/components/ui/table'
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  filterColumn?: string;
-  enableSorting?: boolean;
-  enableFiltering?: boolean;
-  enableColumnFilters?: boolean;
-  filters?: React.ReactNode;
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+  filterColumn?: string
+  enableSorting?: boolean
+  enableFiltering?: boolean
+  enableColumnFilters?: boolean
+  filters?: React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
@@ -41,9 +41,9 @@ export function DataTable<TData, TValue>({
   enableColumnFilters = false,
   filters,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
 
   const table = useReactTable({
     data,
@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
     enableSorting,
     enableFilters: enableFiltering,
     enableColumnFilters,
-  });
+  })
 
   return (
     <div>
@@ -93,7 +93,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
-                  );
+                  )
                 })}
               </TableRow>
             ))}
@@ -120,5 +120,5 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
     </div>
-  );
+  )
 }

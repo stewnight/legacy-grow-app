@@ -1,7 +1,7 @@
-import { relations, sql } from 'drizzle-orm';
-import { index, varchar, timestamp, json, uuid, text } from 'drizzle-orm/pg-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { createTable } from '../utils';
+import { relations, sql } from 'drizzle-orm'
+import { index, varchar, timestamp, json, uuid, text } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { createTable } from '../utils'
 import {
   jobStatusEnum,
   jobPriorityEnum,
@@ -9,17 +9,17 @@ import {
   statusEnum,
   jobEntityTypeEnum,
   JobEntityType,
-} from './enums';
-import { users } from './core';
-import { Note, notes } from './notes';
-import { Location, locations } from './locations';
-import { Plant, plants } from './plants';
-import { Batch, batches } from './batches';
-import { Genetic, genetics } from './genetics';
-import { Sensor, sensors } from './sensors';
-import { Processing, processing } from './processing';
-import { Harvest, harvests } from './harvests';
-import { z } from 'zod';
+} from './enums'
+import { users } from './core'
+import { Note, notes } from './notes'
+import { Location, locations } from './locations'
+import { Plant, plants } from './plants'
+import { Batch, batches } from './batches'
+import { Genetic, genetics } from './genetics'
+import { Sensor, sensors } from './sensors'
+import { Processing, processing } from './processing'
+import { Harvest, harvests } from './harvests'
+import { z } from 'zod'
 
 const taskSchema = z.object({
   item: z.string(),
@@ -28,7 +28,7 @@ const taskSchema = z.object({
   estimatedMinutes: z.number().nullable().optional(),
   actualMinutes: z.number().nullable().optional(),
   startedAt: z.string().nullable().optional(),
-});
+})
 
 const recurringSchema = z
   .object({
@@ -36,7 +36,7 @@ const recurringSchema = z
     interval: z.number(),
     endDate: z.string().optional(),
   })
-  .nullable();
+  .nullable()
 
 const requirementsSchema = z
   .object({
@@ -48,7 +48,7 @@ const requirementsSchema = z
     tools: [],
     supplies: [],
     ppe: [],
-  });
+  })
 
 export const jobPropertiesSchema = z
   .object({
@@ -62,7 +62,7 @@ export const jobPropertiesSchema = z
     tasks: [],
     instructions: [],
     requirements: { tools: [], supplies: [], ppe: [] },
-  });
+  })
 
 export const jobs = createTable(
   'job',
@@ -90,15 +90,15 @@ export const jobs = createTable(
       }),
     metadata: json('metadata')
       .$type<{
-        previousJobs: string[];
-        nextJobs: string[];
-        estimatedDuration: number | null;
-        actualDuration: number | null;
+        previousJobs: string[]
+        nextJobs: string[]
+        estimatedDuration: number | null
+        actualDuration: number | null
         location: {
-          id: string;
-          type: string;
-          name: string;
-        } | null;
+          id: string
+          type: string
+          name: string
+        } | null
       }>()
       .default({
         previousJobs: [],
@@ -125,7 +125,7 @@ export const jobs = createTable(
     entityIdx: index('job_entity_idx').on(table.entityId, table.entityType),
     dueDateIdx: index('job_due_date_idx').on(table.dueDate),
   })
-);
+)
 
 export const jobsRelations = relations(jobs, ({ one, many }) => ({
   assignedTo: one(users, {
@@ -176,7 +176,7 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
     references: [harvests.id],
     relationName: 'harvestJobs',
   }),
-}));
+}))
 
 // Zod Schemas
 export const insertJobSchema = createInsertSchema(jobs, {
@@ -198,25 +198,25 @@ export const insertJobSchema = createInsertSchema(jobs, {
   createdAt: true,
   updatedAt: true,
   createdById: true,
-});
+})
 
-export const selectJobSchema = createSelectSchema(jobs);
+export const selectJobSchema = createSelectSchema(jobs)
 
 // Types
-export type Job = typeof jobs.$inferSelect;
-export type NewJob = typeof jobs.$inferInsert;
+export type Job = typeof jobs.$inferSelect
+export type NewJob = typeof jobs.$inferInsert
 
 export type JobWithRelations = Job & {
-  assignedTo?: { id: string; name: string; image: string } | null;
-  createdBy: { id: string; name: string };
-  note?: Note[];
-  location?: Location | undefined;
-  plant?: Plant | undefined;
-  batch?: Batch | undefined;
-  genetic?: Genetic | undefined;
-  sensor?: Sensor | undefined;
-  processing?: Processing | undefined;
-  harvest?: Harvest | undefined;
-};
+  assignedTo?: { id: string; name: string; image: string } | null
+  createdBy: { id: string; name: string }
+  note?: Note[]
+  location?: Location | undefined
+  plant?: Plant | undefined
+  batch?: Batch | undefined
+  genetic?: Genetic | undefined
+  sensor?: Sensor | undefined
+  processing?: Processing | undefined
+  harvest?: Harvest | undefined
+}
 
-export { taskSchema };
+export { taskSchema }

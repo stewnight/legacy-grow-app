@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 
 const data = [
   { name: 'Indica', value: 35 },
   { name: 'Sativa', value: 25 },
   { name: 'Hybrid', value: 40 },
-];
+]
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'];
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']
 
 export function StrainDistribution() {
   return (
@@ -29,5 +29,5 @@ export function StrainDistribution() {
         </Pie>
       </PieChart>
     </ResponsiveContainer>
-  );
+  )
 }

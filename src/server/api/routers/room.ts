@@ -1,13 +1,13 @@
-import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../trpc';
-import { rooms, insertRoomSchema } from '~/server/db/schema';
-import { eq, desc, like, and, SQL } from 'drizzle-orm';
-import { TRPCError } from '@trpc/server';
-import { roomTypeEnum, statusEnum } from '~/server/db/schema/enums';
+import { z } from 'zod'
+import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { rooms, insertRoomSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
+import { roomTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
 // Define the type for the JSON fields based on your schema
-type RoomProperties = typeof rooms.$inferInsert.properties;
-type RoomDimensions = typeof rooms.$inferInsert.dimensions;
+type RoomProperties = typeof rooms.$inferInsert.properties
+type RoomDimensions = typeof rooms.$inferInsert.dimensions
 
 // Schema for filters
 const roomFiltersSchema = z.object({
@@ -16,7 +16,7 @@ const roomFiltersSchema = z.object({
   search: z.string().optional(),
   buildingId: z.string().uuid().optional(),
   parentId: z.string().uuid().optional(),
-});
+})
 
 export const roomRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -28,7 +28,7 @@ export const roomRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const { limit, cursor, filters } = input;
+      const { limit, cursor, filters } = input
 
       const conditions = [
         filters?.type ? eq(rooms.type, filters.type) : undefined,
@@ -36,7 +36,7 @@ export const roomRouter = createTRPCRouter({
         filters?.search ? like(rooms.name, `%${filters.search}%`) : undefined,
         filters?.buildingId ? eq(rooms.buildingId, filters.buildingId) : undefined,
         filters?.parentId ? eq(rooms.parentId, filters.parentId) : undefined,
-      ].filter((condition): condition is SQL => condition !== undefined);
+      ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.rooms.findMany({
         where: conditions.length ? and(...conditions) : undefined,
@@ -55,15 +55,15 @@ export const roomRouter = createTRPCRouter({
             },
           },
         },
-      });
+      })
 
-      let nextCursor: typeof cursor | undefined = undefined;
+      let nextCursor: typeof cursor | undefined = undefined
       if (items.length > limit) {
-        items.pop();
-        nextCursor = cursor ? cursor + limit : limit;
+        items.pop()
+        nextCursor = cursor ? cursor + limit : limit
       }
 
-      return { items, nextCursor };
+      return { items, nextCursor }
     }),
 
   get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
@@ -81,16 +81,16 @@ export const roomRouter = createTRPCRouter({
           },
         },
       },
-    });
+    })
 
     if (!room) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Room not found',
-      });
+      })
     }
 
-    return room;
+    return room
   }),
 
   create: protectedProcedure.input(insertRoomSchema).mutation(async ({ ctx, input }) => {
@@ -99,18 +99,18 @@ export const roomRouter = createTRPCRouter({
       createdById: ctx.session.user.id,
       properties: input.properties as RoomProperties,
       dimensions: input.dimensions as RoomDimensions,
-    };
+    }
 
-    const [room] = await ctx.db.insert(rooms).values(insertData).returning();
+    const [room] = await ctx.db.insert(rooms).values(insertData).returning()
 
     if (!room) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to create room',
-      });
+      })
     }
 
-    return room;
+    return room
   }),
 
   update: protectedProcedure
@@ -126,34 +126,34 @@ export const roomRouter = createTRPCRouter({
         updatedAt: new Date(),
         properties: input.data.properties as RoomProperties,
         dimensions: input.data.dimensions as RoomDimensions,
-      };
+      }
 
       const [room] = await ctx.db
         .update(rooms)
         .set(updateData)
         .where(eq(rooms.id, input.id))
-        .returning();
+        .returning()
 
       if (!room) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Room not found',
-        });
+        })
       }
 
-      return room;
+      return room
     }),
 
   delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(rooms).where(eq(rooms.id, input)).returning();
+    const [deleted] = await ctx.db.delete(rooms).where(eq(rooms.id, input)).returning()
 
     if (!deleted) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Room not found',
-      });
+      })
     }
 
-    return { success: true };
+    return { success: true }
   }),
-});
+})

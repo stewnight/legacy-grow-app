@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
-import { Button } from './button';
+import type { Meta, StoryObj } from '@storybook/react'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
+import { Button } from './button'
 
 const meta = {
   title: 'UI/Card',
@@ -9,10 +9,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Card>;
+} satisfies Meta<typeof Card>
 
-export default meta;
-type Story = StoryObj<typeof Card>;
+export default meta
+type Story = StoryObj<typeof Card>
 
 export const Default: Story = {
   args: {
@@ -32,7 +32,7 @@ export const Default: Story = {
     ),
     className: 'w-[380px]',
   },
-};
+}
 
 export const WithForm: Story = {
   args: {
@@ -64,4 +64,4 @@ export const WithForm: Story = {
     ),
     className: 'w-[380px]',
   },
-};
+}

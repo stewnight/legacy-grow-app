@@ -6,4 +6,4 @@ export const env = {
   DISCORD_CLIENT_SECRET: 'mock-discord-client-secret',
   GITHUB_CLIENT_ID: 'mock-github-client-id',
   GITHUB_CLIENT_SECRET: 'mock-github-client-secret',
-};
+}

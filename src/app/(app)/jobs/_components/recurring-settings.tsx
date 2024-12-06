@@ -1,16 +1,16 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 import {
   Form,
   FormControl,
@@ -18,48 +18,48 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Switch } from '@/components/ui/switch';
-import { format } from 'date-fns';
-import { CalendarIcon, X } from 'lucide-react';
-import { cn } from '~/lib/utils';
+} from '@/components/ui/form'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Switch } from '@/components/ui/switch'
+import { format } from 'date-fns'
+import { CalendarIcon, X } from 'lucide-react'
+import { cn } from '~/lib/utils'
 
 interface RecurringSettingsProps {
   value: {
-    frequency: string;
-    interval: number;
-    endDate?: string;
-  } | null;
+    frequency: string
+    interval: number
+    endDate?: string
+  } | null
   onChange: (
     value: {
-      frequency: string;
-      interval: number;
-      endDate?: string;
+      frequency: string
+      interval: number
+      endDate?: string
     } | null
-  ) => void;
+  ) => void
 }
 
 const frequencies = [
   { value: 'daily', label: 'Daily' },
   { value: 'weekly', label: 'Weekly' },
   { value: 'monthly', label: 'Monthly' },
-];
+]
 
 export function RecurringSettings({ value, onChange }: RecurringSettingsProps) {
-  const [isRecurring, setIsRecurring] = useState(!!value);
+  const [isRecurring, setIsRecurring] = useState(!!value)
 
   const handleRecurringChange = (checked: boolean) => {
-    setIsRecurring(checked);
+    setIsRecurring(checked)
     if (!checked) {
-      onChange(null);
+      onChange(null)
     } else {
       onChange({
         frequency: 'daily',
         interval: 1,
-      });
+      })
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
@@ -164,5 +164,5 @@ export function RecurringSettings({ value, onChange }: RecurringSettingsProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

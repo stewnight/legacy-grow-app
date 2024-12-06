@@ -1,34 +1,34 @@
-import { Suspense } from 'react';
-import { Skeleton } from '~/components/ui/skeleton';
-import { auth } from '~/server/auth';
-import { redirect } from 'next/navigation';
-import { DataTable } from '~/components/ui/data-table';
-import { columns, JobsTableFilters } from './_components/jobs-columns';
-import { api } from '~/trpc/server';
-import { AppSheet } from '~/components/layout/app-sheet';
-import { JobForm } from './_components/jobs-form';
-import { type JobWithRelations } from '~/server/db/schema';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { CalendarView } from '~/components/calendar/calendar-view';
-import { GanttView } from '~/components/gantt/gantt-view';
-import { CalendarIcon, TableIcon, GanttChartIcon } from 'lucide-react';
-import { type User } from 'next-auth';
+import { Suspense } from 'react'
+import { Skeleton } from '~/components/ui/skeleton'
+import { auth } from '~/server/auth'
+import { redirect } from 'next/navigation'
+import { DataTable } from '~/components/ui/data-table'
+import { columns, JobsTableFilters } from './_components/jobs-columns'
+import { api } from '~/trpc/server'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { JobForm } from './_components/jobs-form'
+import { type JobWithRelations } from '~/server/db/schema'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { CalendarView } from '~/components/calendar/calendar-view'
+import { GanttView } from '~/components/gantt/gantt-view'
+import { CalendarIcon, TableIcon, GanttChartIcon } from 'lucide-react'
+import { type User } from 'next-auth'
 
 type UserWithImage = {
-  id: string;
-  name: string | null;
-  image: string | null;
-};
+  id: string
+  name: string | null
+  image: string | null
+}
 
 export default async function JobsPage() {
-  const session = await auth();
+  const session = await auth()
   if (!session) {
-    redirect('/');
+    redirect('/')
   }
 
   const { items: jobsData } = await api.job.getAll({
     limit: 100,
-  });
+  })
 
   const jobs: JobWithRelations[] = jobsData.map((job) => ({
     ...job,
@@ -44,7 +44,7 @@ export default async function JobsPage() {
       name: job.createdBy.name || '',
       image: (job.createdBy as UserWithImage).image || '',
     },
-  }));
+  }))
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6">
@@ -96,5 +96,5 @@ export default async function JobsPage() {
         </Tabs>
       </div>
     </div>
-  );
+  )
 }

@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { insertJobSchema, type jobPropertiesSchema, type taskSchema } from '~/server/db/schema';
-import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { insertJobSchema, type jobPropertiesSchema, type taskSchema } from '~/server/db/schema'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -12,16 +12,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { type z } from 'zod';
+} from '@/components/ui/select'
+import { type z } from 'zod'
 import {
   jobStatusEnum,
   jobPriorityEnum,
@@ -29,47 +29,47 @@ import {
   statusEnum,
   jobEntityTypeEnum,
   type JobEntityType,
-} from '~/server/db/schema/enums';
-import { type inferRouterOutputs } from '@trpc/server';
-import { type AppRouter } from '~/server/api/root';
-import { api } from '~/trpc/react';
-import { useToast } from '~/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
-import React from 'react';
-import { TaskManager } from './task-manager';
-import { RecurringSettings } from './recurring-settings';
-import { InstructionsManager } from './instructions-manager';
-import { RequirementsManager } from './requirements-manager';
-import { type JobWithRelations } from '~/server/db/schema';
-import { type TRPCClientErrorLike } from '@trpc/client';
+} from '~/server/db/schema/enums'
+import { type inferRouterOutputs } from '@trpc/server'
+import { type AppRouter } from '~/server/api/root'
+import { api } from '~/trpc/react'
+import { useToast } from '~/hooks/use-toast'
+import { useRouter } from 'next/navigation'
+import { DatePicker } from '@/components/ui/date-picker'
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
+import React from 'react'
+import { TaskManager } from './task-manager'
+import { RecurringSettings } from './recurring-settings'
+import { InstructionsManager } from './instructions-manager'
+import { RequirementsManager } from './requirements-manager'
+import { type JobWithRelations } from '~/server/db/schema'
+import { type TRPCClientErrorLike } from '@trpc/client'
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
+type RouterOutputs = inferRouterOutputs<AppRouter>
 type JobFormValues = z.infer<typeof insertJobSchema> & {
-  properties: JobProperties;
-  metadata: JobMetadata;
-};
-
-interface JobFormProps {
-  mode: 'create' | 'edit';
-  defaultValues?: JobWithRelations;
+  properties: JobProperties
+  metadata: JobMetadata
 }
 
-type JobProperties = z.infer<typeof jobPropertiesSchema>;
-type Task = z.infer<typeof taskSchema>;
+interface JobFormProps {
+  mode: 'create' | 'edit'
+  defaultValues?: JobWithRelations
+}
+
+type JobProperties = z.infer<typeof jobPropertiesSchema>
+type Task = z.infer<typeof taskSchema>
 
 interface JobMetadata {
-  previousJobs: string[];
-  nextJobs: string[];
-  estimatedDuration: number | null;
-  actualDuration: number | null;
+  previousJobs: string[]
+  nextJobs: string[]
+  estimatedDuration: number | null
+  actualDuration: number | null
   location: {
-    id: string;
-    type: string;
-    name: string;
-  } | null;
+    id: string
+    type: string
+    name: string
+  } | null
 }
 
 const defaultProperties = {
@@ -86,7 +86,7 @@ const defaultProperties = {
   ],
   instructions: [''],
   requirements: { tools: [], supplies: [], ppe: [] },
-} satisfies JobProperties;
+} satisfies JobProperties
 
 export function JobForm({ mode, defaultValues }: JobFormProps) {
   const form = useForm<JobFormValues>({
@@ -122,42 +122,42 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
         }),
       },
     },
-  });
+  })
 
-  const utils = api.useUtils();
-  const { toast } = useToast();
+  const utils = api.useUtils()
+  const { toast } = useToast()
 
   const { mutate: createJob, isPending: isCreating } = api.job.create.useMutation({
     onSuccess: async () => {
       toast({
         title: 'Job created successfully',
-      });
-      await utils.job.invalidate();
+      })
+      await utils.job.invalidate()
     },
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
       toast({
         title: 'Error creating job',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   const { mutate: updateJob, isPending: isUpdating } = api.job.update.useMutation({
     onSuccess: async () => {
       toast({
         title: 'Job updated successfully',
-      });
-      await utils.job.invalidate();
+      })
+      await utils.job.invalidate()
     },
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
       toast({
         title: 'Error updating job',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   const onSubmit = async (data: JobFormValues) => {
     try {
@@ -179,26 +179,26 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
           device: 'web',
           updatedAt: new Date().toISOString(),
         },
-      };
+      }
 
       if (mode === 'create') {
-        await createJob(formData);
+        await createJob(formData)
       } else if (defaultValues?.id) {
-        await updateJob({ id: defaultValues.id, data: formData });
+        await updateJob({ id: defaultValues.id, data: formData })
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error('Form submission error:', error)
     }
-  };
+  }
 
   // Fetch users for assignment
-  const { data: users } = api.user.getAll.useQuery();
+  const { data: users } = api.user.getAll.useQuery()
 
   return (
     <Form {...form}>
       <form
         onSubmit={(e) => {
-          e.preventDefault();
+          e.preventDefault()
           form.handleSubmit(async (data: JobFormValues) => {
             try {
               const formData = {
@@ -219,17 +219,17 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
                   device: 'web',
                   updatedAt: new Date().toISOString(),
                 },
-              };
+              }
 
               if (mode === 'create') {
-                await createJob(formData);
+                await createJob(formData)
               } else if (defaultValues?.id) {
-                await updateJob({ id: defaultValues.id, data: formData });
+                await updateJob({ id: defaultValues.id, data: formData })
               }
             } catch (error) {
-              console.error('Form submission error:', error);
+              console.error('Form submission error:', error)
             }
-          })(e);
+          })(e)
         }}
         className="space-y-4 p-1"
         noValidate
@@ -446,7 +446,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
                   onChange={(tasks) => {
                     form.setValue('properties.tasks', tasks, {
                       shouldValidate: true,
-                    });
+                    })
                   }}
                 />
               </FormControl>
@@ -526,59 +526,59 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
         </Button>
       </form>
     </Form>
-  );
+  )
 }
 
 const EntitySelector = React.memo(function EntitySelector({
   entityType,
   onSelect,
 }: {
-  entityType: JobEntityType;
-  onSelect: (value: string) => void;
+  entityType: JobEntityType
+  onSelect: (value: string) => void
 }) {
   const locationQuery = api.location.getAll.useQuery(
     { limit: 50 },
     { enabled: entityType === 'location' }
-  );
-  const plantQuery = api.plant.getAll.useQuery({ limit: 50 }, { enabled: entityType === 'plant' });
-  const batchQuery = api.batch.getAll.useQuery({ limit: 50 }, { enabled: entityType === 'batch' });
+  )
+  const plantQuery = api.plant.getAll.useQuery({ limit: 50 }, { enabled: entityType === 'plant' })
+  const batchQuery = api.batch.getAll.useQuery({ limit: 50 }, { enabled: entityType === 'batch' })
   const geneticQuery = api.genetic.getAll.useQuery(
     { limit: 50 },
     { enabled: entityType === 'genetics' }
-  );
+  )
   const sensorQuery = api.sensor.getAll.useQuery(
     { limit: 50 },
     { enabled: entityType === 'sensors' }
-  );
+  )
   const processingQuery = api.processing.getAll.useQuery(
     { limit: 50 },
     { enabled: entityType === 'processing' }
-  );
+  )
   const harvestQuery = api.harvest.getAll.useQuery(
     { limit: 50 },
     { enabled: entityType === 'harvest' }
-  );
+  )
 
   const queryResult = React.useMemo(() => {
     switch (entityType) {
       case 'location':
-        return locationQuery;
+        return locationQuery
       case 'plant':
-        return plantQuery;
+        return plantQuery
       case 'batch':
-        return batchQuery;
+        return batchQuery
       case 'genetics':
-        return geneticQuery;
+        return geneticQuery
       case 'sensors':
-        return sensorQuery;
+        return sensorQuery
       case 'processing':
-        return processingQuery;
+        return processingQuery
       case 'harvest':
-        return harvestQuery;
+        return harvestQuery
       case 'none':
-        return { data: null, isLoading: false };
+        return { data: null, isLoading: false }
       default:
-        return { data: null, isLoading: false };
+        return { data: null, isLoading: false }
     }
   }, [
     entityType,
@@ -589,38 +589,38 @@ const EntitySelector = React.memo(function EntitySelector({
     sensorQuery,
     processingQuery,
     harvestQuery,
-  ]);
+  ])
 
   if (queryResult.isLoading) {
     return (
       <div className="flex items-center justify-center py-4">
         <Loader2 className="h-4 w-4 animate-spin" />
       </div>
-    );
+    )
   }
 
   if (!queryResult.data?.items?.length) {
-    return <SelectItem value="none">No items found</SelectItem>;
+    return <SelectItem value="none">No items found</SelectItem>
   }
 
   const getDisplayText = (item: any) => {
     switch (entityType) {
       case 'location':
       case 'genetics':
-        return item.name;
+        return item.name
       case 'batch':
-        return item.identifier;
+        return item.identifier
       case 'plant':
-        return `${item.identifier || item.id}`;
+        return `${item.identifier || item.id}`
       case 'sensors':
-        return item.identifier;
+        return item.identifier
       case 'processing':
       case 'harvest':
-        return item.identifier || item.id;
+        return item.identifier || item.id
       default:
-        return item.id;
+        return item.id
     }
-  };
+  }
 
   return (
     <>
@@ -630,5 +630,5 @@ const EntitySelector = React.memo(function EntitySelector({
         </SelectItem>
       ))}
     </>
-  );
-});
+  )
+})

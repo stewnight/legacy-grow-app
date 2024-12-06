@@ -1,23 +1,23 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { format } from 'date-fns';
-import { Button } from '~/components/ui/button';
+import * as React from 'react'
+import { format } from 'date-fns'
+import { Button } from '~/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '~/components/ui/select';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { type CalendarViewMode } from './calendar-view';
+} from '~/components/ui/select'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { type CalendarViewMode } from './calendar-view'
 
 interface CalendarHeaderProps {
-  mode: CalendarViewMode;
-  onModeChange: (mode: CalendarViewMode) => void;
-  currentDate: Date;
-  onDateChange: (date: Date) => void;
+  mode: CalendarViewMode
+  onModeChange: (mode: CalendarViewMode) => void
+  currentDate: Date
+  onDateChange: (date: Date) => void
 }
 
 export function CalendarHeader({
@@ -33,15 +33,15 @@ export function CalendarHeader({
           variant="outline"
           size="icon"
           onClick={() => {
-            const newDate = new Date(currentDate);
+            const newDate = new Date(currentDate)
             if (mode === 'month') {
-              newDate.setMonth(currentDate.getMonth() - 1);
+              newDate.setMonth(currentDate.getMonth() - 1)
             } else if (mode === 'week') {
-              newDate.setDate(currentDate.getDate() - 7);
+              newDate.setDate(currentDate.getDate() - 7)
             } else {
-              newDate.setDate(currentDate.getDate() - 1);
+              newDate.setDate(currentDate.getDate() - 1)
             }
-            onDateChange(newDate);
+            onDateChange(newDate)
           }}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -50,15 +50,15 @@ export function CalendarHeader({
           variant="outline"
           size="icon"
           onClick={() => {
-            const newDate = new Date(currentDate);
+            const newDate = new Date(currentDate)
             if (mode === 'month') {
-              newDate.setMonth(currentDate.getMonth() + 1);
+              newDate.setMonth(currentDate.getMonth() + 1)
             } else if (mode === 'week') {
-              newDate.setDate(currentDate.getDate() + 7);
+              newDate.setDate(currentDate.getDate() + 7)
             } else {
-              newDate.setDate(currentDate.getDate() + 1);
+              newDate.setDate(currentDate.getDate() + 1)
             }
-            onDateChange(newDate);
+            onDateChange(newDate)
           }}
         >
           <ChevronRight className="h-4 w-4" />
@@ -83,5 +83,5 @@ export function CalendarHeader({
         </Button>
       </div>
     </div>
-  );
+  )
 }

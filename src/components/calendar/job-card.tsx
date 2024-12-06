@@ -1,51 +1,51 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { cn } from '~/lib/utils';
-import { Badge } from '~/components/ui/badge';
-import { type JobWithRelations } from '~/server/db/schema';
-import { type JobStatus, type JobPriority } from '~/server/db/schema/enums';
-import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { api } from '~/trpc/react';
+import * as React from 'react'
+import { cn } from '~/lib/utils'
+import { Badge } from '~/components/ui/badge'
+import { type JobWithRelations } from '~/server/db/schema'
+import { type JobStatus, type JobPriority } from '~/server/db/schema/enums'
+import Link from 'next/link'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { api } from '~/trpc/react'
 
 interface JobCardProps {
-  job: JobWithRelations;
-  isMonthView?: boolean;
+  job: JobWithRelations
+  isMonthView?: boolean
 }
 
 export function JobCard({ job, isMonthView = false }: JobCardProps) {
   const { data: assignedTo } = api.user.getById.useQuery(
     { id: job.assignedToId ?? '' },
     { enabled: !!job.assignedToId }
-  );
+  )
   const getPriorityColor = (priority: JobPriority) => {
     switch (priority) {
       case 'critical':
       case 'urgent':
       case 'high':
-        return 'bg-destructive/80 hover:bg-destructive/90 text-destructive-foreground';
+        return 'bg-destructive/80 hover:bg-destructive/90 text-destructive-foreground'
       case 'medium':
-        return 'bg-primary/80 hover:bg-primary/90 text-primary-foreground';
+        return 'bg-primary/80 hover:bg-primary/90 text-primary-foreground'
       case 'low':
-        return 'bg-secondary/80 hover:bg-secondary/90 text-secondary-foreground';
+        return 'bg-secondary/80 hover:bg-secondary/90 text-secondary-foreground'
     }
-  };
+  }
 
   const getStatusVariant = (status: JobStatus) => {
     switch (status) {
       case 'completed':
-        return 'default';
+        return 'default'
       case 'in_progress':
-        return 'secondary';
+        return 'secondary'
       case 'blocked':
-        return 'destructive';
+        return 'destructive'
       case 'deferred':
-        return 'outline';
+        return 'outline'
       default:
-        return 'outline';
+        return 'outline'
     }
-  };
+  }
 
   return (
     <Link href={`/jobs/${job.id}`}>
@@ -69,5 +69,5 @@ export function JobCard({ job, isMonthView = false }: JobCardProps) {
         </div>
       </div>
     </Link>
-  );
+  )
 }

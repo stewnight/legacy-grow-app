@@ -1,20 +1,8 @@
 import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  integer,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  decimal,
-} from 'drizzle-orm/pg-core'
+import { index, integer, varchar, timestamp, json, uuid, decimal } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import {
-  equipmentTypeEnum,
-  equipmentStatusEnum,
-  maintenanceFrequencyEnum,
-} from './enums'
+import { equipmentTypeEnum, equipmentStatusEnum, maintenanceFrequencyEnum } from './enums'
 import { users } from './core'
 import { rooms } from './rooms'
 import { sensors } from './sensors'
@@ -34,9 +22,7 @@ export const equipment = createTable(
       withTimezone: true,
     }),
     status: equipmentStatusEnum('status').default('active').notNull(),
-    maintenanceFrequency: maintenanceFrequencyEnum(
-      'maintenance_frequency'
-    ).notNull(),
+    maintenanceFrequency: maintenanceFrequencyEnum('maintenance_frequency').notNull(),
     lastMaintenanceDate: timestamp('last_maintenance_date', {
       withTimezone: true,
     }),
@@ -102,9 +88,7 @@ export const equipment = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -115,9 +99,7 @@ export const equipment = createTable(
     typeIdx: index('equipment_type_idx').on(table.type),
     statusIdx: index('equipment_status_idx').on(table.status),
     manufacturerIdx: index('equipment_manufacturer_idx').on(table.manufacturer),
-    serialNumberIdx: index('equipment_serial_number_idx').on(
-      table.serialNumber
-    ),
+    serialNumberIdx: index('equipment_serial_number_idx').on(table.serialNumber),
   })
 )
 
@@ -132,19 +114,14 @@ export const equipmentRoomAssignments = createTable(
     roomId: uuid('room_id')
       .notNull()
       .references(() => rooms.id, { onDelete: 'cascade' }),
-    assignedAt: timestamp('assigned_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }).defaultNow().notNull(),
     assignedById: uuid('assigned_by')
       .notNull()
       .references(() => users.id),
     notes: varchar('notes', { length: 1000 }),
   },
   (table) => ({
-    equipmentRoomIdx: index('equipment_room_idx').on(
-      table.equipmentId,
-      table.roomId
-    ),
+    equipmentRoomIdx: index('equipment_room_idx').on(table.equipmentId, table.roomId),
   })
 )
 
@@ -156,9 +133,7 @@ export const maintenanceRecords = createTable(
     equipmentId: uuid('equipment_id')
       .notNull()
       .references(() => equipment.id, { onDelete: 'cascade' }),
-    maintenanceDate: timestamp('maintenance_date', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    maintenanceDate: timestamp('maintenance_date', { withTimezone: true }).defaultNow().notNull(),
     type: varchar('type', { length: 255 }).notNull(),
     description: varchar('description', { length: 1000 }),
     cost: decimal('cost', { precision: 10, scale: 2 }),
@@ -198,42 +173,36 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
   sensors: many(sensors, { relationName: 'equipmentSensors' }),
 }))
 
-export const equipmentRoomAssignmentsRelations = relations(
-  equipmentRoomAssignments,
-  ({ one }) => ({
-    equipment: one(equipment, {
-      fields: [equipmentRoomAssignments.equipmentId],
-      references: [equipment.id],
-      relationName: 'equipmentAssignment',
-    }),
-    room: one(rooms, {
-      fields: [equipmentRoomAssignments.roomId],
-      references: [rooms.id],
-      relationName: 'roomEquipment',
-    }),
-    assignedBy: one(users, {
-      fields: [equipmentRoomAssignments.assignedById],
-      references: [users.id],
-      relationName: 'equipmentAssigner',
-    }),
-  })
-)
+export const equipmentRoomAssignmentsRelations = relations(equipmentRoomAssignments, ({ one }) => ({
+  equipment: one(equipment, {
+    fields: [equipmentRoomAssignments.equipmentId],
+    references: [equipment.id],
+    relationName: 'equipmentAssignment',
+  }),
+  room: one(rooms, {
+    fields: [equipmentRoomAssignments.roomId],
+    references: [rooms.id],
+    relationName: 'roomEquipment',
+  }),
+  assignedBy: one(users, {
+    fields: [equipmentRoomAssignments.assignedById],
+    references: [users.id],
+    relationName: 'equipmentAssigner',
+  }),
+}))
 
-export const maintenanceRecordsRelations = relations(
-  maintenanceRecords,
-  ({ one }) => ({
-    equipment: one(equipment, {
-      fields: [maintenanceRecords.equipmentId],
-      references: [equipment.id],
-      relationName: 'equipmentMaintenance',
-    }),
-    performedBy: one(users, {
-      fields: [maintenanceRecords.performedById],
-      references: [users.id],
-      relationName: 'maintenancePerformer',
-    }),
-  })
-)
+export const maintenanceRecordsRelations = relations(maintenanceRecords, ({ one }) => ({
+  equipment: one(equipment, {
+    fields: [maintenanceRecords.equipmentId],
+    references: [equipment.id],
+    relationName: 'equipmentMaintenance',
+  }),
+  performedBy: one(users, {
+    fields: [maintenanceRecords.performedById],
+    references: [users.id],
+    relationName: 'maintenancePerformer',
+  }),
+}))
 
 // ================== SCHEMAS ==================
 export const insertEquipmentSchema = createInsertSchema(equipment).omit({
@@ -245,14 +214,11 @@ export const insertEquipmentSchema = createInsertSchema(equipment).omit({
 
 export const selectEquipmentSchema = createSelectSchema(equipment)
 
-export const insertMaintenanceRecordSchema = createInsertSchema(
-  maintenanceRecords
-).omit({
+export const insertMaintenanceRecordSchema = createInsertSchema(maintenanceRecords).omit({
   id: true,
 })
 
-export const selectMaintenanceRecordSchema =
-  createSelectSchema(maintenanceRecords)
+export const selectMaintenanceRecordSchema = createSelectSchema(maintenanceRecords)
 
 export const insertEquipmentRoomAssignmentSchema = createInsertSchema(
   equipmentRoomAssignments
@@ -261,16 +227,12 @@ export const insertEquipmentRoomAssignmentSchema = createInsertSchema(
   assignedAt: true,
 })
 
-export const selectEquipmentRoomAssignmentSchema = createSelectSchema(
-  equipmentRoomAssignments
-)
+export const selectEquipmentRoomAssignmentSchema = createSelectSchema(equipmentRoomAssignments)
 
 // ================== TYPES ==================
 export type Equipment = typeof equipment.$inferSelect
 export type NewEquipment = typeof equipment.$inferInsert
 export type MaintenanceRecord = typeof maintenanceRecords.$inferSelect
 export type NewMaintenanceRecord = typeof maintenanceRecords.$inferInsert
-export type EquipmentRoomAssignment =
-  typeof equipmentRoomAssignments.$inferSelect
-export type NewEquipmentRoomAssignment =
-  typeof equipmentRoomAssignments.$inferInsert
+export type EquipmentRoomAssignment = typeof equipmentRoomAssignments.$inferSelect
+export type NewEquipmentRoomAssignment = typeof equipmentRoomAssignments.$inferInsert

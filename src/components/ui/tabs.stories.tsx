@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
-import { Button } from './button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
-import { Input } from './input';
-import { Label } from './label';
+import type { Meta, StoryObj } from '@storybook/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
+import { Button } from './button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
+import { Input } from './input'
+import { Label } from './label'
 
 const meta = {
   title: 'UI/Tabs',
@@ -12,10 +12,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Tabs>;
+} satisfies Meta<typeof Tabs>
 
-export default meta;
-type Story = StoryObj<typeof Tabs>;
+export default meta
+type Story = StoryObj<typeof Tabs>
 
 export const Default: Story = {
   args: {
@@ -76,7 +76,7 @@ export const Default: Story = {
       </>
     ),
   },
-};
+}
 
 export const Simple: Story = {
   args: {
@@ -101,4 +101,4 @@ export const Simple: Story = {
       </>
     ),
   },
-};
+}

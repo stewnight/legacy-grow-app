@@ -1,14 +1,14 @@
-import { relations, sql } from 'drizzle-orm';
-import { index, varchar, timestamp, json, uuid, text, numeric } from 'drizzle-orm/pg-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { createTable } from '../utils';
-import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums';
-import { users } from './core';
-import { batches } from './batches';
-import { harvests } from './harvests';
-import { locations } from './locations';
-import { jobs } from './jobs';
-import { notes } from './notes';
+import { relations, sql } from 'drizzle-orm'
+import { index, varchar, timestamp, json, uuid, text, numeric } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { createTable } from '../utils'
+import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
+import { users } from './core'
+import { batches } from './batches'
+import { harvests } from './harvests'
+import { locations } from './locations'
+import { jobs } from './jobs'
+import { notes } from './notes'
 
 export const processing = createTable(
   'processing',
@@ -39,78 +39,78 @@ export const processing = createTable(
     quality: harvestQualityEnum('quality'),
     properties: json('properties').$type<{
       equipment?: Array<{
-        name: string;
-        type: string;
-        settings?: Record<string, unknown>;
-      }>;
+        name: string
+        type: string
+        settings?: Record<string, unknown>
+      }>
       environment?: {
-        temperature: number;
-        humidity: number;
-        pressure?: number;
-        lightLevel?: number;
-        airflow?: number;
-      };
+        temperature: number
+        humidity: number
+        pressure?: number
+        lightLevel?: number
+        airflow?: number
+      }
       materials?: Array<{
-        name: string;
-        amount: number;
-        unit: string;
-        batch?: string;
-      }>;
+        name: string
+        amount: number
+        unit: string
+        batch?: string
+      }>
       stages?: Array<{
-        name: string;
-        duration: number;
-        conditions?: Record<string, unknown>;
-        completedAt?: string;
-      }>;
+        name: string
+        duration: number
+        conditions?: Record<string, unknown>
+        completedAt?: string
+      }>
     }>(),
     labResults: json('lab_results').$type<{
       potency?: {
-        thc: number;
-        cbd: number;
-        totalCannabinoids: number;
-      };
+        thc: number
+        cbd: number
+        totalCannabinoids: number
+      }
       terpenes?: Array<{
-        name: string;
-        percentage: number;
-      }>;
+        name: string
+        percentage: number
+      }>
       contaminants?: {
-        microbial: boolean;
-        metals: boolean;
-        pesticides: boolean;
-        solvents?: boolean;
-      };
-      moisture?: number;
-      density?: number;
-      viscosity?: number;
-      color?: string;
-      testedAt?: string;
-      testedBy?: string;
-      certificateUrl?: string;
+        microbial: boolean
+        metals: boolean
+        pesticides: boolean
+        solvents?: boolean
+      }
+      moisture?: number
+      density?: number
+      viscosity?: number
+      color?: string
+      testedAt?: string
+      testedBy?: string
+      certificateUrl?: string
     }>(),
     metadata: json('metadata').$type<{
       operators?: Array<{
-        userId: string;
-        role: string;
-        hours: number;
-      }>;
+        userId: string
+        role: string
+        hours: number
+      }>
       qualityChecks?: Array<{
-        timestamp: string;
-        parameter: string;
-        value: unknown;
-        operator: string;
-      }>;
-      notes?: string[];
+        timestamp: string
+        parameter: string
+        value: unknown
+        operator: string
+      }>
+      notes?: string[]
       images?: Array<{
-        url: string;
-        type: string;
-        timestamp: string;
-      }>;
+        url: string
+        type: string
+        timestamp: string
+      }>
       costs?: {
-        labor: number;
-        materials: number;
-        energy: number;
-        other?: number;
-      };
+        labor: number
+        materials: number
+        energy: number
+        other?: number
+      }
     }>(),
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
@@ -133,7 +133,7 @@ export const processing = createTable(
     startedAtIdx: index('processing_started_at_idx').on(table.startedAt),
     statusIdx: index('processing_general_status_idx').on(table.status),
   })
-);
+)
 
 // Relations
 export const processingRelations = relations(processing, ({ one, many }) => ({
@@ -159,16 +159,16 @@ export const processingRelations = relations(processing, ({ one, many }) => ({
   }),
   jobs: many(jobs, { relationName: 'processingJobs' }),
   notes: many(notes, { relationName: 'processingNotes' }),
-}));
+}))
 
 // Zod Schemas
 export const insertProcessingSchema = createInsertSchema(processing).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-});
-export const selectProcessingSchema = createSelectSchema(processing);
+})
+export const selectProcessingSchema = createSelectSchema(processing)
 
 // Types
-export type Processing = typeof processing.$inferSelect;
-export type NewProcessing = typeof processing.$inferInsert;
+export type Processing = typeof processing.$inferSelect
+export type NewProcessing = typeof processing.$inferInsert

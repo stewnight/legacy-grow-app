@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { api } from '~/trpc/react';
-import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
-import { notFound } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Skeleton } from '~/components/ui/skeleton';
-import Link from 'next/link';
+import * as React from 'react'
+import { api } from '~/trpc/react'
+import { format } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import { notFound } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { Skeleton } from '~/components/ui/skeleton'
+import Link from 'next/link'
 import {
   Calendar,
   Clock,
@@ -25,25 +25,25 @@ import {
   ChevronUp,
   PlayCircle,
   GripVertical,
-} from 'lucide-react';
-import { AppSheet } from '../../../../components/layout/app-sheet';
-import { JobForm } from '../_components/jobs-form';
-import { Badge } from '../../../../components/ui/badge';
-import { Button } from '~/components/ui/button';
-import { Checkbox } from '~/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { type Job, type JobWithRelations } from '~/server/db/schema/jobs';
-import { type Location } from '~/server/db/schema/locations';
-import { type Plant } from '~/server/db/schema/plants';
-import { type Batch } from '~/server/db/schema/batches';
-import { type Genetic } from '~/server/db/schema/genetics';
-import { type Sensor } from '~/server/db/schema/sensors';
-import { type Processing } from '~/server/db/schema/processing';
-import { type Harvest } from '~/server/db/schema/harvests';
-import { TaskManager } from '../_components/task-manager';
-import { RecurringSettings } from '../_components/recurring-settings';
-import { InstructionsManager } from '../_components/instructions-manager';
-import { RequirementsManager } from '../_components/requirements-manager';
+} from 'lucide-react'
+import { AppSheet } from '../../../../components/layout/app-sheet'
+import { JobForm } from '../_components/jobs-form'
+import { Badge } from '../../../../components/ui/badge'
+import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { type Job, type JobWithRelations } from '~/server/db/schema/jobs'
+import { type Location } from '~/server/db/schema/locations'
+import { type Plant } from '~/server/db/schema/plants'
+import { type Batch } from '~/server/db/schema/batches'
+import { type Genetic } from '~/server/db/schema/genetics'
+import { type Sensor } from '~/server/db/schema/sensors'
+import { type Processing } from '~/server/db/schema/processing'
+import { type Harvest } from '~/server/db/schema/harvests'
+import { TaskManager } from '../_components/task-manager'
+import { RecurringSettings } from '../_components/recurring-settings'
+import { InstructionsManager } from '../_components/instructions-manager'
+import { RequirementsManager } from '../_components/requirements-manager'
 import {
   DndContext,
   closestCenter,
@@ -51,42 +51,42 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
+} from '@dnd-kit/core'
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { cn } from '../../../../lib/utils';
-import { NotesManager } from '../_components/notes-manager';
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { cn } from '../../../../lib/utils'
+import { NotesManager } from '../_components/notes-manager'
 
 interface SortableTaskItemProps {
-  id: string;
+  id: string
   task: {
-    item: string;
-    completed: boolean;
-    completedAt?: string | null;
-    estimatedMinutes?: number | null;
-    actualMinutes?: number | null;
-    startedAt?: string | null;
-  };
-  onToggle: () => void;
-  onStart: () => void;
-  onComplete: () => void;
+    item: string
+    completed: boolean
+    completedAt?: string | null
+    estimatedMinutes?: number | null
+    actualMinutes?: number | null
+    startedAt?: string | null
+  }
+  onToggle: () => void
+  onStart: () => void
+  onComplete: () => void
 }
 
 function SortableTaskItem({ id, task, onToggle, onStart, onComplete }: SortableTaskItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
-  });
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  };
+  }
 
   return (
     <div
@@ -163,42 +163,42 @@ function SortableTaskItem({ id, task, onToggle, onStart, onComplete }: SortableT
         </Badge>
       </div>
     </div>
-  );
+  )
 }
 
 export default function JobPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = React.use(params);
+  const resolvedParams = React.use(params)
 
-  const pointerSensor = useSensor(PointerSensor);
+  const pointerSensor = useSensor(PointerSensor)
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
-  });
-  const sensors = useSensors(pointerSensor, keyboardSensor);
+  })
+  const sensors = useSensors(pointerSensor, keyboardSensor)
 
   const { data: job, isLoading } = api.job.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  });
+  })
 
-  const utils = api.useUtils();
-  const [showTaskManager, setShowTaskManager] = React.useState(false);
+  const utils = api.useUtils()
+  const [showTaskManager, setShowTaskManager] = React.useState(false)
 
   const { mutate: updateJobStatus } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.job.get.invalidate(resolvedParams.id);
+      void utils.job.get.invalidate(resolvedParams.id)
     },
-  });
+  })
 
   const { mutate: updateJobTasks } = api.job.update.useMutation({
     onSuccess: () => {
-      void utils.job.get.invalidate(resolvedParams.id);
+      void utils.job.get.invalidate(resolvedParams.id)
     },
-  });
+  })
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A';
-    return format(new Date(date), 'PP');
-  };
+    if (!date) return 'N/A'
+    return format(new Date(date), 'PP')
+  }
 
   const handleStatusChange = React.useCallback(
     (newStatus: 'completed' | 'pending' | 'in_progress') => {
@@ -209,23 +209,23 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
             jobStatus: newStatus,
             completedAt: newStatus === 'completed' ? new Date() : null,
           },
-        });
+        })
       }
     },
     [job, updateJobStatus]
-  );
+  )
 
   const handleTaskToggle = React.useCallback(
     (index: number) => {
       if (job?.properties?.tasks) {
-        const tasks = [...job.properties.tasks];
-        const item = tasks[index];
+        const tasks = [...job.properties.tasks]
+        const item = tasks[index]
         if (item) {
           tasks[index] = {
             ...item,
             completed: !item.completed,
             completedAt: !item.completed ? new Date().toISOString() : null,
-          };
+          }
 
           updateJobTasks({
             id: job.id,
@@ -235,23 +235,23 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                 tasks,
               },
             },
-          });
+          })
         }
       }
     },
     [job, updateJobTasks]
-  );
+  )
 
   const handleTaskStart = React.useCallback(
     (index: number) => {
       if (job?.properties?.tasks) {
-        const tasks = [...job.properties.tasks];
-        const item = tasks[index];
+        const tasks = [...job.properties.tasks]
+        const item = tasks[index]
         if (item) {
           tasks[index] = {
             ...item,
             startedAt: new Date().toISOString(),
-          };
+          }
 
           updateJobTasks({
             id: job.id,
@@ -261,29 +261,29 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                 tasks,
               },
             },
-          });
+          })
         }
       }
     },
     [job, updateJobTasks]
-  );
+  )
 
   const handleTaskComplete = React.useCallback(
     (index: number) => {
       if (job?.properties?.tasks) {
-        const tasks = [...job.properties.tasks];
-        const item = tasks[index];
+        const tasks = [...job.properties.tasks]
+        const item = tasks[index]
         if (item) {
-          const now = new Date();
-          const startTime = item.startedAt ? new Date(item.startedAt) : now;
-          const actualMinutes = Math.round((now.getTime() - startTime.getTime()) / 60000);
+          const now = new Date()
+          const startTime = item.startedAt ? new Date(item.startedAt) : now
+          const actualMinutes = Math.round((now.getTime() - startTime.getTime()) / 60000)
 
           tasks[index] = {
             ...item,
             completed: true,
             completedAt: now.toISOString(),
             actualMinutes: actualMinutes,
-          };
+          }
 
           updateJobTasks({
             id: job.id,
@@ -293,12 +293,12 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                 tasks,
               },
             },
-          });
+          })
         }
       }
     },
     [job, updateJobTasks]
-  );
+  )
 
   if (isLoading) {
     return (
@@ -311,11 +311,11 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
           <div className="h-10 w-10 animate-pulse rounded-md bg-muted" />
         </div>
       </div>
-    );
+    )
   }
 
   if (!job) {
-    return notFound();
+    return notFound()
   }
 
   return (
@@ -616,7 +616,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                           ...task,
                           completed: true,
                           completedAt: task.completed ? task.completedAt : new Date().toISOString(),
-                        }));
+                        }))
                         updateJobTasks({
                           id: job.id,
                           data: {
@@ -627,7 +627,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                               })
                             ),
                           },
-                        });
+                        })
                       }
                     }}
                   >
@@ -643,7 +643,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                           ...task,
                           completed: false,
                           completedAt: null,
-                        }));
+                        }))
                         updateJobTasks({
                           id: job.id,
                           data: {
@@ -652,7 +652,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                               tasks: updatedTasks,
                             },
                           },
-                        });
+                        })
                       }
                     }}
                   >
@@ -675,7 +675,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                             tasks,
                           },
                         },
-                      });
+                      })
                     }}
                   />
                 </div>
@@ -687,16 +687,16 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={(event) => {
-                      const { active, over } = event;
+                      const { active, over } = event
                       if (over && active.id !== over.id) {
                         const oldIndex = job.properties!.tasks.findIndex(
                           (task) => `task-${task.item}` === active.id
-                        );
+                        )
                         const newIndex = job.properties!.tasks.findIndex(
                           (task) => `task-${task.item}` === over.id
-                        );
+                        )
 
-                        const updatedTasks = arrayMove(job.properties!.tasks, oldIndex, newIndex);
+                        const updatedTasks = arrayMove(job.properties!.tasks, oldIndex, newIndex)
 
                         updateJobTasks({
                           id: job.id,
@@ -706,7 +706,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                               tasks: updatedTasks,
                             },
                           },
-                        });
+                        })
                       }
                     }}
                   >
@@ -769,7 +769,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                         requirements,
                       },
                     },
-                  });
+                  })
                 }}
               />
             </CardContent>
@@ -806,7 +806,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                         instructions,
                       },
                     },
-                  });
+                  })
                 }}
               />
             </CardContent>
@@ -814,44 +814,44 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
 
 // Helper function to get entity name
 function getEntityName(
   job: JobWithRelations & {
-    location?: Location;
-    plant?: Plant;
-    batch?: Batch;
-    genetic?: Genetic;
-    sensor?: Sensor;
-    processing?: Processing;
-    harvest?: Harvest;
+    location?: Location
+    plant?: Plant
+    batch?: Batch
+    genetic?: Genetic
+    sensor?: Sensor
+    processing?: Processing
+    harvest?: Harvest
   }
 ) {
   switch (job.entityType) {
     case 'location':
-      return job.location?.name;
+      return job.location?.name
     case 'plant':
-      return job.plant?.identifier;
+      return job.plant?.identifier
     case 'batch':
-      return job.batch?.identifier;
+      return job.batch?.identifier
     case 'genetics':
-      return job.genetic?.name;
+      return job.genetic?.name
     case 'sensors':
-      return job.sensor?.id;
+      return job.sensor?.id
     case 'processing':
-      return job.processing?.identifier;
+      return job.processing?.identifier
     case 'harvest':
-      return job.harvest?.identifier;
+      return job.harvest?.identifier
     default:
-      return job.entityId;
+      return job.entityId
   }
 }
 
 const formatDuration = (minutes: number | null | undefined) => {
-  if (!minutes) return null;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-};
+  if (!minutes) return null
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
+}

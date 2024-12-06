@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import { Home, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Home, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,15 +10,15 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import React from 'react';
+} from '@/components/ui/breadcrumb'
+import React from 'react'
 
 export function CustomBreadcrumbs() {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
-  if (pathname === '/') return null;
+  if (pathname === '/') return null
 
-  const pathSegments = pathname.split('/').filter((segment) => segment);
+  const pathSegments = pathname.split('/').filter((segment) => segment)
 
   return (
     <Breadcrumb>
@@ -32,13 +32,13 @@ export function CustomBreadcrumbs() {
         </BreadcrumbItem>
 
         {pathSegments.map((segment, index) => {
-          const path = `/${pathSegments.slice(0, index + 1).join('/')}`;
-          const isLast = index === pathSegments.length - 1;
+          const path = `/${pathSegments.slice(0, index + 1).join('/')}`
+          const isLast = index === pathSegments.length - 1
 
           // Convert slug to readable text
           const readableSegment = segment
             .replace(/-/g, ' ')
-            .replace(/\b\w/g, (char) => char.toUpperCase());
+            .replace(/\b\w/g, (char) => char.toUpperCase())
 
           return (
             <React.Fragment key={path}>
@@ -55,9 +55,9 @@ export function CustomBreadcrumbs() {
                 )}
               </BreadcrumbItem>
             </React.Fragment>
-          );
+          )
         })}
       </BreadcrumbList>
     </Breadcrumb>
-  );
+  )
 }

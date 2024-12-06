@@ -1,17 +1,17 @@
-import { Suspense } from 'react';
-import { Skeleton } from '~/components/ui/skeleton';
-import { auth } from '~/server/auth';
-import { redirect } from 'next/navigation';
-import { DataTable } from '~/components/ui/data-table';
-import { columns } from './_components/batches-columns';
-import { api } from '~/trpc/server';
-import { AppSheet } from '~/components/layout/app-sheet';
-import { BatchForm } from './_components/batches-form';
+import { Suspense } from 'react'
+import { Skeleton } from '~/components/ui/skeleton'
+import { auth } from '~/server/auth'
+import { redirect } from 'next/navigation'
+import { DataTable } from '~/components/ui/data-table'
+import { columns } from './_components/batches-columns'
+import { api } from '~/trpc/server'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { BatchForm } from './_components/batches-form'
 
 export default async function BatchesPage() {
-  const session = await auth();
+  const session = await auth()
   if (!session) {
-    redirect('/');
+    redirect('/')
   }
 
   const { items: batches } = await api.batch.getAll({
@@ -32,5 +32,5 @@ export default async function BatchesPage() {
         </Suspense>
       </div>
     </div>
-  );
+  )
 }

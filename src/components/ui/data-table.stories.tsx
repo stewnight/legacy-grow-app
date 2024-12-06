@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { DataTable } from './data-table';
-import { Button } from './button';
+import type { Meta, StoryObj } from '@storybook/react'
+import { DataTable } from './data-table'
+import { Button } from './button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from './dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+} from './dropdown-menu'
+import { MoreHorizontal } from 'lucide-react'
 
 const meta = {
   title: 'UI/DataTable',
@@ -17,10 +17,10 @@ const meta = {
     layout: 'padded',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof DataTable>;
+} satisfies Meta<typeof DataTable>
 
-export default meta;
-type Story = StoryObj<typeof DataTable>;
+export default meta
+type Story = StoryObj<typeof DataTable>
 
 const columns = [
   {
@@ -48,24 +48,24 @@ const columns = [
       </DropdownMenu>
     ),
   },
-];
+]
 
 const data = [
   { name: 'Plant A', status: 'Active' },
   { name: 'Plant B', status: 'Inactive' },
   { name: 'Plant C', status: 'Processing' },
-];
+]
 
 export const Default: Story = {
   args: {
     columns,
     data,
   },
-};
+}
 
 export const Empty: Story = {
   args: {
     columns,
     data: [],
   },
-};
+}
