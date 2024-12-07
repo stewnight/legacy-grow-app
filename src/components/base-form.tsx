@@ -1,12 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-  useForm,
-  type UseFormProps,
-  type FieldValues,
-  type DefaultValues,
-} from 'react-hook-form'
+import { useForm, type UseFormProps, type FieldValues, type DefaultValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type z } from 'zod'
 import { Form } from '~/components/ui/form'
@@ -31,9 +26,7 @@ export interface BaseFormProps<
   // Default values for the form
   defaultValues: DefaultValues<z.infer<TFormSchema>>
   // Children render prop for form fields
-  children: (
-    form: ReturnType<typeof useForm<z.infer<TFormSchema>>>
-  ) => React.ReactNode
+  children: (form: ReturnType<typeof useForm<z.infer<TFormSchema>>>) => React.ReactNode
   // API mutation paths
   apiPath: {
     create: `${string}.create`
@@ -43,10 +36,7 @@ export interface BaseFormProps<
   // Success callback
   onSuccess?: (data: TEntity) => void
   // Additional form configuration
-  formConfig?: Omit<
-    UseFormProps<z.infer<TFormSchema>>,
-    'resolver' | 'defaultValues'
-  >
+  formConfig?: Omit<UseFormProps<z.infer<TFormSchema>>, 'resolver' | 'defaultValues'>
   // Custom data transformation before submit
   transformData?: (data: z.infer<TFormSchema>) => z.infer<TFormSchema>
   // Redirect path after success
@@ -59,10 +49,7 @@ export interface BaseFormProps<
   }
 }
 
-export function BaseForm<
-  TFormSchema extends z.ZodType<any, any>,
-  TEntity extends FieldValues,
->({
+export function BaseForm<TFormSchema extends z.ZodType<any, any>, TEntity extends FieldValues>({
   mode,
   schema,
   initialData,
@@ -107,11 +94,7 @@ export function BaseForm<
               className="w-fit"
               onClick={() => copyToClipboard(error.message)}
             >
-              {copied ? (
-                <Check className="mr-2 h-4 w-4" />
-              ) : (
-                <Copy className="mr-2 h-4 w-4" />
-              )}
+              {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
               Copy error
             </Button>
           </div>
@@ -181,11 +164,7 @@ export function BaseForm<
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 px-1"
-        noValidate
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1" noValidate>
         {children(form)}
 
         <Button type="submit" disabled={isPending} className="w-full">

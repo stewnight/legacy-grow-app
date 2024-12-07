@@ -3,10 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { equipment, insertEquipmentSchema } from '~/server/db/schema/equipment'
 import { eq, desc, like, and, SQL, not, isNull, lte } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import {
-  equipmentTypeEnum,
-  equipmentStatusEnum,
-} from '~/server/db/schema/enums'
+import { equipmentTypeEnum, equipmentStatusEnum } from '~/server/db/schema/enums'
 
 // Schema for filters
 const equipmentFiltersSchema = z.object({
@@ -32,9 +29,7 @@ export const equipmentRouter = createTRPCRouter({
       const conditions = [
         filters?.type ? eq(equipment.type, filters.type) : undefined,
         filters?.status ? eq(equipment.status, filters.status) : undefined,
-        filters?.search
-          ? like(equipment.name, `%${filters.search}%`)
-          : undefined,
+        filters?.search ? like(equipment.name, `%${filters.search}%`) : undefined,
         filters?.maintenanceNeeded
           ? and(
               not(isNull(equipment.nextMaintenanceDate)),
@@ -71,34 +66,32 @@ export const equipmentRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  getById: protectedProcedure
-    .input(z.string().uuid())
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.db.query.equipment.findFirst({
-        where: eq(equipment.id, input),
-        with: {
-          room: true,
-          location: true,
-          sensors: true,
-          createdBy: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-            },
+  getById: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
+    const result = await ctx.db.query.equipment.findFirst({
+      where: eq(equipment.id, input),
+      with: {
+        room: true,
+        location: true,
+        sensors: true,
+        createdBy: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
+      },
+    })
+
+    if (!result) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Equipment not found',
       })
+    }
 
-      if (!result) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Equipment not found',
-        })
-      }
-
-      return result
-    }),
+    return result
+  }),
 
   getUnassigned: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.equipment.findMany({
@@ -107,28 +100,26 @@ export const equipmentRouter = createTRPCRouter({
     })
   }),
 
-  create: protectedProcedure
-    .input(insertEquipmentSchema)
-    .mutation(async ({ ctx, input }) => {
-      const [item] = await ctx.db
-        .insert(equipment)
-        .values({
-          ...input,
-          createdById: ctx.session.user.id,
-          metadata: input.metadata || {},
-          specifications: input.specifications || {},
-        } as typeof equipment.$inferInsert)
-        .returning()
+  create: protectedProcedure.input(insertEquipmentSchema).mutation(async ({ ctx, input }) => {
+    const [item] = await ctx.db
+      .insert(equipment)
+      .values({
+        ...input,
+        createdById: ctx.session.user.id,
+        metadata: input.metadata || {},
+        specifications: input.specifications || {},
+      } as typeof equipment.$inferInsert)
+      .returning()
 
-      if (!item) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create equipment',
-        })
-      }
+    if (!item) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to create equipment',
+      })
+    }
 
-      return item
-    }),
+    return item
+  }),
 
   update: protectedProcedure
     .input(

@@ -1,20 +1,8 @@
 import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  integer,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  decimal,
-} from 'drizzle-orm/pg-core'
+import { index, integer, varchar, timestamp, json, uuid, decimal } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import {
-  equipmentTypeEnum,
-  equipmentStatusEnum,
-  maintenanceFrequencyEnum,
-} from './enums'
+import { equipmentTypeEnum, equipmentStatusEnum, maintenanceFrequencyEnum } from './enums'
 import { users } from './core'
 import { rooms } from './rooms'
 import { sensors } from './sensors'
@@ -36,9 +24,7 @@ export const equipment = createTable(
       withTimezone: true,
     }),
     status: equipmentStatusEnum('status').default('active').notNull(),
-    maintenanceFrequency: maintenanceFrequencyEnum(
-      'maintenance_frequency'
-    ).notNull(),
+    maintenanceFrequency: maintenanceFrequencyEnum('maintenance_frequency').notNull(),
     lastMaintenanceDate: timestamp('last_maintenance_date', {
       withTimezone: true,
     }),
@@ -81,9 +67,7 @@ export const equipment = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -94,12 +78,8 @@ export const equipment = createTable(
     typeIdx: index('equipment_type_idx').on(table.type),
     statusIdx: index('equipment_status_idx').on(table.status),
     manufacturerIdx: index('equipment_manufacturer_idx').on(table.manufacturer),
-    serialNumberIdx: index('equipment_serial_number_idx').on(
-      table.serialNumber
-    ),
-    nextMaintenanceIdx: index('equipment_next_maintenance_idx').on(
-      table.nextMaintenanceDate
-    ),
+    serialNumberIdx: index('equipment_serial_number_idx').on(table.serialNumber),
+    nextMaintenanceIdx: index('equipment_next_maintenance_idx').on(table.nextMaintenanceDate),
     roomIdx: index('equipment_room_idx').on(table.roomId),
     locationIdx: index('equipment_location_idx').on(table.locationId),
   })
