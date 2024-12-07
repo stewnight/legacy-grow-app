@@ -1,5 +1,12 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, json, uuid, text } from 'drizzle-orm/pg-core'
+import {
+  index,
+  varchar,
+  timestamp,
+  json,
+  uuid,
+  text,
+} from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import {
@@ -20,6 +27,7 @@ import { Sensor, sensors } from './sensors'
 import { Processing, processing } from './processing'
 import { Harvest, harvests } from './harvests'
 import { z } from 'zod'
+import { Equipment, equipment } from './equipment'
 
 const taskSchema = z.object({
   item: z.string(),
@@ -110,7 +118,9 @@ export const jobs = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -140,6 +150,11 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
   }),
   notes: many(notes, {
     relationName: 'jobNotes',
+  }),
+  equipment: one(equipment, {
+    fields: [jobs.entityId],
+    references: [equipment.id],
+    relationName: 'equipmentJobs',
   }),
   location: one(locations, {
     fields: [jobs.entityId],
@@ -209,7 +224,8 @@ export type NewJob = typeof jobs.$inferInsert
 export type JobWithRelations = Job & {
   assignedTo?: { id: string; name: string; image: string } | null
   createdBy: { id: string; name: string }
-  note?: Note[]
+  equipment?: Equipment[] | null
+  notes?: Note[] | null
   location?: Location | undefined
   plant?: Plant | undefined
   batch?: Batch | undefined

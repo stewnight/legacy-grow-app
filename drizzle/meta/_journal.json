@@ -64,6 +64,13 @@
       "when": 1733525581854,
       "tag": "0008_thin_proudstar",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1733531509271,
+      "tag": "0009_silent_reavers",
+      "breakpoints": true
     }
   ]
 }

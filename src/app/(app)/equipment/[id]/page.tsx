@@ -12,11 +12,18 @@ import { format } from 'date-fns'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { ArrowLeftIcon } from 'lucide-react'
 import * as React from 'react'
+import { MaintenanceTab } from '~/app/(app)/equipment/_components/maintenance-tab'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -24,10 +31,13 @@ interface PageProps {
 
 export default function EquipmentDetailPage({ params }: PageProps) {
   const resolvedParams = React.use(params)
-  const { data: equipment, isLoading } = api.equipment.getById.useQuery(resolvedParams.id, {
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  })
+  const { data: equipment, isLoading } = api.equipment.getById.useQuery(
+    resolvedParams.id,
+    {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  )
 
   const formatDate = (date: Date | string | null): string => {
     if (!date) return 'N/A'
@@ -104,14 +114,19 @@ export default function EquipmentDetailPage({ params }: PageProps) {
               </>
             )}
           </div>
-          <h2 className="text-3xl font-bold tracking-tight">{equipment.name}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {equipment.name}
+          </h2>
           <p className="text-muted-foreground">
             {equipment.type.charAt(0).toUpperCase() + equipment.type.slice(1)}
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <Badge variant={equipment.status === 'active' ? 'default' : 'destructive'}>
-            {equipment.status.charAt(0).toUpperCase() + equipment.status.slice(1)}
+          <Badge
+            variant={equipment.status === 'active' ? 'default' : 'destructive'}
+          >
+            {equipment.status.charAt(0).toUpperCase() +
+              equipment.status.slice(1)}
           </Badge>
           <AppSheet mode="edit" entity="equipment">
             <EquipmentForm mode="edit" initialData={equipment} />
@@ -132,7 +147,8 @@ export default function EquipmentDetailPage({ params }: PageProps) {
               {equipment.room && (
                 <div className="text-sm text-muted-foreground">
                   {equipment.location ? `${equipment.location.name} • ` : ''}
-                  {equipment.room.type.charAt(0).toUpperCase() + equipment.room.type.slice(1)}
+                  {equipment.room.type.charAt(0).toUpperCase() +
+                    equipment.room.type.slice(1)}
                 </div>
               )}
             </div>
@@ -141,7 +157,9 @@ export default function EquipmentDetailPage({ params }: PageProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Next Maintenance</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Next Maintenance
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -150,7 +168,9 @@ export default function EquipmentDetailPage({ params }: PageProps) {
                   ? format(new Date(equipment.nextMaintenanceDate), 'PP')
                   : 'Not Scheduled'}
               </div>
-              {isMaintenanceDue && <Badge variant="destructive">Maintenance Due</Badge>}
+              {isMaintenanceDue && (
+                <Badge variant="destructive">Maintenance Due</Badge>
+              )}
               <div className="text-sm text-muted-foreground">
                 {equipment.maintenanceFrequency.charAt(0).toUpperCase() +
                   equipment.maintenanceFrequency.slice(1)}{' '}
@@ -162,10 +182,14 @@ export default function EquipmentDetailPage({ params }: PageProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Connected Sensors</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Connected Sensors
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{equipment.sensors?.length ?? 0}</div>
+            <div className="text-2xl font-bold">
+              {equipment.sensors?.length ?? 0}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -173,6 +197,7 @@ export default function EquipmentDetailPage({ params }: PageProps) {
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
           <TabsTrigger value="sensors">Sensors</TabsTrigger>
         </TabsList>
 
@@ -180,25 +205,35 @@ export default function EquipmentDetailPage({ params }: PageProps) {
           <Card>
             <CardHeader>
               <CardTitle>Equipment Details</CardTitle>
-              <CardDescription>Specifications and maintenance information</CardDescription>
+              <CardDescription>
+                Specifications and maintenance information
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">Manufacturer</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Manufacturer
+                    </div>
                     <div>{equipment.manufacturer ?? '-'}</div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">Model</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Model
+                    </div>
                     <div>{equipment.model ?? '-'}</div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">Serial Number</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Serial Number
+                    </div>
                     <div>{equipment.serialNumber ?? '-'}</div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">Purchase Date</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Purchase Date
+                    </div>
                     <div>
                       {equipment.purchaseDate
                         ? format(new Date(equipment.purchaseDate), 'PP')
@@ -242,7 +277,9 @@ export default function EquipmentDetailPage({ params }: PageProps) {
 
                 {equipment.notes && (
                   <div>
-                    <div className="mb-2 text-sm font-medium text-muted-foreground">Notes</div>
+                    <div className="mb-2 text-sm font-medium text-muted-foreground">
+                      Notes
+                    </div>
                     <p className="whitespace-pre-wrap">{equipment.notes}</p>
                   </div>
                 )}
@@ -251,11 +288,17 @@ export default function EquipmentDetailPage({ params }: PageProps) {
           </Card>
         </TabsContent>
 
+        <TabsContent value="maintenance">
+          <MaintenanceTab equipment={equipment} />
+        </TabsContent>
+
         <TabsContent value="sensors">
           <Card>
             <CardHeader>
               <CardTitle>Connected Sensors</CardTitle>
-              <CardDescription>Sensors monitoring this equipment</CardDescription>
+              <CardDescription>
+                Sensors monitoring this equipment
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
@@ -268,16 +311,20 @@ export default function EquipmentDetailPage({ params }: PageProps) {
                       <div>
                         <p className="font-medium">{sensor.identifier}</p>
                         <p className="text-sm text-muted-foreground">
-                          {sensor.type.charAt(0).toUpperCase() + sensor.type.slice(1)}
+                          {sensor.type.charAt(0).toUpperCase() +
+                            sensor.type.slice(1)}
                         </p>
                       </div>
                       <Badge variant="outline">
-                        {sensor.status.charAt(0).toUpperCase() + sensor.status.slice(1)}
+                        {sensor.status.charAt(0).toUpperCase() +
+                          sensor.status.slice(1)}
                       </Badge>
                     </div>
                   ))}
                   {!equipment.sensors?.length && (
-                    <p className="text-center text-muted-foreground">No sensors connected</p>
+                    <p className="text-center text-muted-foreground">
+                      No sensors connected
+                    </p>
                   )}
                 </div>
               </ScrollArea>

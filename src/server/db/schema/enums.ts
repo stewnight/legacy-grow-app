@@ -1,7 +1,13 @@
 import { pgEnum } from 'drizzle-orm/pg-core'
 
 // System and logging enums
-export const logLevelEnum = pgEnum('log_level', ['debug', 'info', 'warn', 'error', 'fatal'])
+export const logLevelEnum = pgEnum('log_level', [
+  'debug',
+  'info',
+  'warn',
+  'error',
+  'fatal',
+])
 
 export const systemLogSourceEnum = pgEnum('system_log_source', [
   'plants',
@@ -15,7 +21,12 @@ export const systemLogSourceEnum = pgEnum('system_log_source', [
 ])
 
 // User related enums
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'manager', 'viewer'])
+export const userRoleEnum = pgEnum('user_role', [
+  'user',
+  'admin',
+  'manager',
+  'viewer',
+])
 
 // Plant and cultivation enums
 export const batchStatusEnum = pgEnum('batch_status', [
@@ -26,7 +37,12 @@ export const batchStatusEnum = pgEnum('batch_status', [
   'archived',
 ])
 
-export const plantSourceEnum = pgEnum('plant_source', ['seed', 'clone', 'mother', 'tissue_culture'])
+export const plantSourceEnum = pgEnum('plant_source', [
+  'seed',
+  'clone',
+  'mother',
+  'tissue_culture',
+])
 
 export const plantStageEnum = pgEnum('plant_stage', [
   'germination',
@@ -38,7 +54,12 @@ export const plantStageEnum = pgEnum('plant_stage', [
   'clone',
 ])
 
-export const plantSexEnum = pgEnum('plant_sex', ['unknown', 'male', 'female', 'hermaphrodite'])
+export const plantSexEnum = pgEnum('plant_sex', [
+  'unknown',
+  'male',
+  'female',
+  'hermaphrodite',
+])
 
 export const healthStatusEnum = pgEnum('health_status', [
   'healthy',
@@ -49,7 +70,12 @@ export const healthStatusEnum = pgEnum('health_status', [
   'quarantine',
 ])
 
-export const geneticTypeEnum = pgEnum('genetic_type', ['sativa', 'indica', 'hybrid', 'ruderalis'])
+export const geneticTypeEnum = pgEnum('genetic_type', [
+  'sativa',
+  'indica',
+  'hybrid',
+  'ruderalis',
+])
 
 // Location and facility enums
 export const locationTypeEnum = pgEnum('location_type', [
@@ -106,6 +132,7 @@ export const jobCategoryEnum = pgEnum('job_category', [
 ])
 
 export const jobEntityTypeEnum = pgEnum('job_entity_type', [
+  'equipment',
   'plant',
   'batch',
   'location',
@@ -117,7 +144,13 @@ export const jobEntityTypeEnum = pgEnum('job_entity_type', [
 ])
 
 // Processing and harvest enums
-export const harvestQualityEnum = pgEnum('harvest_quality', ['A', 'B', 'C', 'D', 'F'])
+export const harvestQualityEnum = pgEnum('harvest_quality', [
+  'A',
+  'B',
+  'C',
+  'D',
+  'F',
+])
 
 export const noteTypeEnum = pgEnum('note_type', [
   'text',
@@ -157,7 +190,12 @@ export const roomTypeEnum = pgEnum('room_type', [
   'quarantine',
 ])
 
-export const statusEnum = pgEnum('status', ['active', 'inactive', 'archived', 'maintenance'])
+export const statusEnum = pgEnum('status', [
+  'active',
+  'inactive',
+  'archived',
+  'maintenance',
+])
 
 // Equipment related enums
 export const equipmentTypeEnum = pgEnum('equipment_type', [
@@ -192,6 +230,13 @@ export const maintenanceFrequencyEnum = pgEnum('maintenance_frequency', [
   'as_needed',
 ])
 
+export const maintenanceTypeEnum = pgEnum('maintenance_type', [
+  'preventive',
+  'corrective',
+  'predictive',
+  'condition-based',
+])
+
 // Export types for all enums
 export type LogLevel = (typeof logLevelEnum.enumValues)[number]
 export type SystemLogSource = (typeof systemLogSourceEnum.enumValues)[number]
@@ -216,4 +261,6 @@ export type Status = (typeof statusEnum.enumValues)[number]
 export type JobEntityType = (typeof jobEntityTypeEnum.enumValues)[number]
 export type EquipmentType = (typeof equipmentTypeEnum.enumValues)[number]
 export type EquipmentStatus = (typeof equipmentStatusEnum.enumValues)[number]
-export type MaintenanceFrequency = (typeof maintenanceFrequencyEnum.enumValues)[number]
+export type MaintenanceFrequency =
+  (typeof maintenanceFrequencyEnum.enumValues)[number]
+export type MaintenanceType = (typeof maintenanceTypeEnum.enumValues)[number]

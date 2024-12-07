@@ -1,5 +1,13 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, json, uuid, text, AnyPgColumn } from 'drizzle-orm/pg-core'
+import {
+  index,
+  varchar,
+  timestamp,
+  json,
+  uuid,
+  text,
+  AnyPgColumn,
+} from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { noteTypeEnum, statusEnum } from './enums'
@@ -11,6 +19,7 @@ import { batches } from './batches'
 import { jobs } from './jobs'
 import { processing } from './processing'
 import { sensors } from './sensors'
+import { equipment } from './equipment'
 
 export const notes = createTable(
   'note',
@@ -69,7 +78,9 @@ export const notes = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -96,6 +107,11 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
     fields: [notes.createdById],
     references: [users.id],
     relationName: 'noteCreator',
+  }),
+  equipment: one(equipment, {
+    fields: [notes.entityId],
+    references: [equipment.id],
+    relationName: 'equipmentNotes',
   }),
   plant: one(plants, {
     fields: [notes.entityId],
