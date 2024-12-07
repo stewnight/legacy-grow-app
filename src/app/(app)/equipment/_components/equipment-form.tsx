@@ -24,7 +24,7 @@ import {
 import { Textarea } from '~/components/ui/textarea'
 import { DatePicker } from '~/components/ui/date-picker'
 import { addDays, startOfToday } from 'date-fns'
-import { BaseForm } from '~/components/ui/base-form'
+import { BaseForm } from '~/components/base-form'
 import { type z } from 'zod'
 import {
   equipmentTypeEnum,
@@ -32,6 +32,11 @@ import {
   maintenanceFrequencyEnum,
 } from '~/server/db/schema/enums'
 import { api } from '~/trpc/react'
+import { useRouter } from 'next/navigation'
+import { useToast } from '~/hooks/use-toast'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 
 type FormData = z.infer<typeof insertEquipmentSchema>
 
@@ -46,10 +51,62 @@ export function EquipmentForm({
   initialData,
   onSuccess,
 }: EquipmentFormProps) {
+  const router = useRouter()
+  const { toast } = useToast()
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(
+    initialData?.roomId ?? null
+  )
+
   // Get available rooms
   const { data: rooms } = api.room.getAll.useQuery({
     limit: 100,
   })
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(insertEquipmentSchema),
+    defaultValues: initialData
+      ? {
+          ...initialData,
+          purchaseDate: initialData.purchaseDate
+            ? new Date(initialData.purchaseDate)
+            : undefined,
+          warrantyExpiration: initialData.warrantyExpiration
+            ? new Date(initialData.warrantyExpiration)
+            : undefined,
+          lastMaintenanceDate: initialData.lastMaintenanceDate
+            ? new Date(initialData.lastMaintenanceDate)
+            : undefined,
+          nextMaintenanceDate: initialData.nextMaintenanceDate
+            ? new Date(initialData.nextMaintenanceDate)
+            : undefined,
+        }
+      : {
+          type: 'other',
+          status: 'active',
+          maintenanceFrequency: 'monthly',
+          name: '',
+          manufacturer: '',
+          model: '',
+          serialNumber: '',
+          specifications: null,
+          notes: '',
+          roomId: null,
+          locationId: null,
+        },
+  })
+
+  // Get available locations based on selected room
+  const { data: locations, refetch: refetchLocations } =
+    api.location.getAll.useQuery(
+      {
+        filters: {
+          roomId: selectedRoomId ?? undefined,
+        },
+      },
+      {
+        enabled: !!selectedRoomId,
+      }
+    )
 
   // Transform dates for API submission
   const transformData = (data: FormData): FormData => {
@@ -189,9 +246,15 @@ export function EquipmentForm({
               <FormItem>
                 <FormLabel>Room</FormLabel>
                 <Select
-                  onValueChange={(value) =>
-                    field.onChange(value === 'null' ? null : value)
-                  }
+                  onValueChange={(value) => {
+                    const newRoomId = value === 'null' ? null : value
+                    field.onChange(newRoomId)
+                    setSelectedRoomId(newRoomId)
+                    // Clear location when room changes
+                    form.setValue('locationId', null)
+                    // Refetch locations for the new room
+                    void refetchLocations()
+                  }}
                   defaultValue={field.value ?? 'null'}
                 >
                   <FormControl>
@@ -203,13 +266,48 @@ export function EquipmentForm({
                     <SelectItem value="null">None</SelectItem>
                     {rooms?.items.map((room) => (
                       <SelectItem key={room.id} value={room.id}>
-                        {room.name}
+                        {room.name} ({room.type})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Assign this equipment to a room
+                  Assign this equipment to a room (optional)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="locationId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === 'null' ? null : value)
+                  }
+                  defaultValue={field.value ?? 'null'}
+                  disabled={!form.watch('roomId')}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="null">None</SelectItem>
+                    {locations?.items.map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name} ({location.type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Assign to a specific location within the room (optional)
                 </FormDescription>
                 <FormMessage />
               </FormItem>

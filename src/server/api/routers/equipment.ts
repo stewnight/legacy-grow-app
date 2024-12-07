@@ -72,15 +72,21 @@ export const equipmentRouter = createTRPCRouter({
     }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
       const result = await ctx.db.query.equipment.findFirst({
-        where: eq(equipment.id, input.id),
+        where: eq(equipment.id, input),
         with: {
           room: true,
           location: true,
           sensors: true,
-          createdBy: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       })
 

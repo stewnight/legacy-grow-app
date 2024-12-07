@@ -1,4 +1,10 @@
-import { Card, CardTitle, CardHeader, CardContent, CardDescription } from '../ui/card'
+import {
+  Card,
+  CardTitle,
+  CardHeader,
+  CardContent,
+  CardDescription,
+} from '../ui/card'
 import { TabsContent } from '@/components/ui/tabs'
 import { api } from '~/trpc/react'
 import { Badge } from '~/components/ui/badge'
@@ -13,7 +19,14 @@ import { useState } from 'react'
 
 interface JobsTabProps {
   entityId: string
-  entityType: 'location' | 'plant' | 'batch' | 'genetics' | 'sensors' | 'processing' | 'harvest'
+  entityType:
+    | 'location'
+    | 'plant'
+    | 'batch'
+    | 'genetics'
+    | 'sensors'
+    | 'processing'
+    | 'harvest'
 }
 
 export default function JobsTab({ entityId, entityType }: JobsTabProps) {
@@ -50,9 +63,13 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
   }
 
   const activeJobs =
-    jobs?.items.filter((job) => job.jobStatus !== 'completed' && job.entityId === entityId) || []
+    jobs?.items.filter(
+      (job) => job.jobStatus !== 'completed' && job.entityId === entityId
+    ) || []
   const completedJobs =
-    jobs?.items.filter((job) => job.jobStatus === 'completed' && job.entityId === entityId) || []
+    jobs?.items.filter(
+      (job) => job.jobStatus === 'completed' && job.entityId === entityId
+    ) || []
 
   return (
     <TabsContent value="jobs">
@@ -61,7 +78,9 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Active Jobs</CardTitle>
-              <CardDescription>Jobs related to this {entityType}</CardDescription>
+              <CardDescription>
+                Jobs related to this {entityType}
+              </CardDescription>
             </div>
             <AppSheet mode="create" entity="job">
               <JobForm
@@ -70,6 +89,7 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
                   entityType: entityType ?? 'none',
                   entityId: entityId ?? null,
                   status: 'active',
+                  completedAt: null,
                 }}
               />
             </AppSheet>
@@ -91,7 +111,10 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
                         disabled={job.jobStatus === 'completed'}
                       />
                       <div>
-                        <Link href={`/jobs/${job.id}`} className="font-medium hover:underline">
+                        <Link
+                          href={`/jobs/${job.id}`}
+                          className="font-medium hover:underline"
+                        >
                           {job.title}
                         </Link>
                         <div className="mt-1 flex gap-2">
@@ -113,7 +136,11 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
                         </p>
                       </div>
                     </div>
-                    <Badge variant={job.jobStatus === 'completed' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        job.jobStatus === 'completed' ? 'default' : 'secondary'
+                      }
+                    >
                       {job.jobStatus}
                     </Badge>
                   </div>
@@ -135,7 +162,11 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
                   {completedJobs.length !== 1 ? 's' : ''}
                 </CardDescription>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setShowCompleted(!showCompleted)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCompleted(!showCompleted)}
+              >
                 {showCompleted ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -152,7 +183,10 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
                       className="flex items-center justify-between py-2 text-sm text-muted-foreground"
                     >
                       <div className="flex items-center gap-2">
-                        <Link href={`/jobs/${job.id}`} className="hover:underline">
+                        <Link
+                          href={`/jobs/${job.id}`}
+                          className="hover:underline"
+                        >
                           {job.title}
                         </Link>
                         <span>•</span>
