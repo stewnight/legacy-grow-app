@@ -1,9 +1,9 @@
-import '../src/styles/globals.css';
-import { Preview } from '@storybook/react';
-import { SessionProvider } from 'next-auth/react';
-import { ThemeProvider } from '~/components/theme-provider';
-import React from 'react';
-import './styles.css';
+import '../src/styles/globals.css'
+import { Preview } from '@storybook/react'
+import { SessionProvider } from 'next-auth/react'
+import { ThemeProvider } from '~/components/theme-provider'
+import React from 'react'
+import './styles.css'
 
 const preview: Preview = {
   parameters: {
@@ -60,6 +60,6 @@ const preview: Preview = {
       </SessionProvider>
     ),
   ],
-};
+}
 
-export default preview;
+export default preview

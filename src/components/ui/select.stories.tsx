@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
-import { Label } from './label';
+import type { Meta, StoryObj } from '@storybook/react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
+import { Label } from './label'
 
 const meta = {
   title: 'UI/Select',
@@ -9,10 +9,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Select>;
+} satisfies Meta<typeof Select>
 
-export default meta;
-type Story = StoryObj<typeof Select>;
+export default meta
+type Story = StoryObj<typeof Select>
 
 export const Default: Story = {
   render: () => (
@@ -27,7 +27,7 @@ export const Default: Story = {
       </SelectContent>
     </Select>
   ),
-};
+}
 
 export const WithLabel: Story = {
   render: () => (
@@ -45,4 +45,4 @@ export const WithLabel: Story = {
       </Select>
     </div>
   ),
-};
+}

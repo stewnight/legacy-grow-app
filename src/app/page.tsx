@@ -1,15 +1,15 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { auth } from '~/server/auth';
-import { HydrateClient } from '~/trpc/server';
-import { Button } from '~/components/ui/button';
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { auth } from '~/server/auth'
+import { HydrateClient } from '~/trpc/server'
+import { Button } from '~/components/ui/button'
 
 export default async function Home() {
-  const session = await auth();
+  const session = await auth()
 
   // Redirect authenticated users to dashboard
   if (session) {
-    redirect('/dashboard');
+    redirect('/dashboard')
   }
 
   return (
@@ -90,5 +90,5 @@ export default async function Home() {
         </div>
       </div>
     </HydrateClient>
-  );
+  )
 }

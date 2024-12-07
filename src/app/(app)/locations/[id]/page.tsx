@@ -1,31 +1,31 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { api } from '~/trpc/react';
-import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
-import { notFound } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Skeleton } from '~/components/ui/skeleton';
-import Link from 'next/link';
-import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react';
-import { AppSheet } from '../../../../components/layout/app-sheet';
-import { LocationForm } from '../_components/locations-form';
-import { Badge } from '../../../../components/ui/badge';
-import JobsTab from '../../../../components/jobs/tab';
+import * as React from 'react'
+import { api } from '~/trpc/react'
+import { format } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import { notFound } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { Skeleton } from '~/components/ui/skeleton'
+import Link from 'next/link'
+import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react'
+import { AppSheet } from '../../../../components/layout/app-sheet'
+import { LocationForm } from '../_components/locations-form'
+import { Badge } from '../../../../components/ui/badge'
+import JobsTab from '../../../../components/jobs/tab'
 
 export default function LocationPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = React.use(params);
+  const resolvedParams = React.use(params)
 
   const { data: location, isLoading } = api.location.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  });
+  })
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A';
-    return format(new Date(date), 'PP');
-  };
+    if (!date) return 'N/A'
+    return format(new Date(date), 'PP')
+  }
 
   if (isLoading) {
     return (
@@ -51,11 +51,11 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   if (!location) {
-    return notFound();
+    return notFound()
   }
 
   return (
@@ -262,5 +262,5 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { ExternalLink, type LucideIcon } from 'lucide-react';
+import { ExternalLink, type LucideIcon } from 'lucide-react'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -8,23 +8,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '~/components/ui/sidebar';
-import { cn } from '~/lib/utils';
+} from '~/components/ui/sidebar'
+import { cn } from '~/lib/utils'
 
 export function NavSecondary({
   items,
   className,
 }: {
   items: {
-    title: string;
-    url: string;
-    icon: LucideIcon;
-    isExternal?: boolean;
-  }[];
-  className?: string;
+    title: string
+    url: string
+    icon: LucideIcon
+    isExternal?: boolean
+  }[]
+  className?: string
 }) {
-  const { state } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   return (
     <SidebarGroup className={className}>
@@ -52,5 +52,5 @@ export function NavSecondary({
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  );
+  )
 }

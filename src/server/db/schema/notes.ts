@@ -1,16 +1,25 @@
-import { relations, sql } from 'drizzle-orm';
-import { index, varchar, timestamp, json, uuid, text, AnyPgColumn } from 'drizzle-orm/pg-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { createTable } from '../utils';
-import { noteTypeEnum, statusEnum } from './enums';
-import { users } from './core';
-import { plants } from './plants';
-import { harvests } from './harvests';
-import { locations } from './locations';
-import { batches } from './batches';
-import { jobs } from './jobs';
-import { processing } from './processing';
-import { sensors } from './sensors';
+import { relations, sql } from 'drizzle-orm'
+import {
+  index,
+  varchar,
+  timestamp,
+  json,
+  uuid,
+  text,
+  AnyPgColumn,
+} from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { createTable } from '../utils'
+import { noteTypeEnum, statusEnum } from './enums'
+import { users } from './core'
+import { plants } from './plants'
+import { harvests } from './harvests'
+import { locations } from './locations'
+import { batches } from './batches'
+import { jobs } from './jobs'
+import { processing } from './processing'
+import { sensors } from './sensors'
+import { equipment } from './equipment'
 
 export const notes = createTable(
   'note',
@@ -25,51 +34,53 @@ export const notes = createTable(
       onDelete: 'cascade',
     }),
     properties: json('properties').$type<{
-      tags?: string[];
-      priority?: 'low' | 'medium' | 'high';
-      category?: string;
+      tags?: string[]
+      priority?: 'low' | 'medium' | 'high'
+      category?: string
       measurements?: Array<{
-        type: string;
-        value: number;
-        unit: string;
-        timestamp?: string;
-      }>;
+        type: string
+        value: number
+        unit: string
+        timestamp?: string
+      }>
       checklist?: Array<{
-        item: string;
-        completed: boolean;
-        completedAt?: string;
-        completedBy?: string;
-      }>;
+        item: string
+        completed: boolean
+        completedAt?: string
+        completedBy?: string
+      }>
       media?: Array<{
-        type: string;
-        url: string;
-        thumbnail?: string;
-        metadata?: Record<string, unknown>;
-      }>;
+        type: string
+        url: string
+        thumbnail?: string
+        metadata?: Record<string, unknown>
+      }>
     }>(),
     metadata: json('metadata').$type<{
-      device?: string;
+      device?: string
       location?: {
-        latitude?: number;
-        longitude?: number;
-        altitude?: number;
-      };
+        latitude?: number
+        longitude?: number
+        altitude?: number
+      }
       weather?: {
-        temperature?: number;
-        humidity?: number;
-        conditions?: string;
-      };
+        temperature?: number
+        humidity?: number
+        conditions?: string
+      }
       references?: Array<{
-        type: string;
-        id: string;
-        description?: string;
-      }>;
+        type: string
+        id: string
+        description?: string
+      }>
     }>(),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -82,7 +93,7 @@ export const notes = createTable(
     statusIdx: index('note_status_idx').on(table.status),
     createdAtIdx: index('note_created_at_idx').on(table.createdAt),
   })
-);
+)
 
 // Relationships
 export const notesRelations = relations(notes, ({ one, many }) => ({
@@ -96,6 +107,11 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
     fields: [notes.createdById],
     references: [users.id],
     relationName: 'noteCreator',
+  }),
+  equipment: one(equipment, {
+    fields: [notes.entityId],
+    references: [equipment.id],
+    relationName: 'equipmentNotes',
   }),
   plant: one(plants, {
     fields: [notes.entityId],
@@ -132,16 +148,16 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
     references: [sensors.id],
     relationName: 'sensorNotes',
   }),
-}));
+}))
 
 // Zod Schemas
 export const insertNoteSchema = createInsertSchema(notes).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-});
-export const selectNoteSchema = createSelectSchema(notes);
+})
+export const selectNoteSchema = createSelectSchema(notes)
 
 // Types
-export type Note = typeof notes.$inferSelect;
-export type NewNote = typeof notes.$inferInsert;
+export type Note = typeof notes.$inferSelect
+export type NewNote = typeof notes.$inferInsert

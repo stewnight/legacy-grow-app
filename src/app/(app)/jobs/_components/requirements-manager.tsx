@@ -1,51 +1,51 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, X, Wrench, Package, HardHat } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Plus, X, Wrench, Package, HardHat } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface RequirementsManagerProps {
   value: {
-    tools: string[];
-    supplies: string[];
-    ppe: string[];
-  };
-  onChange: (value: { tools: string[]; supplies: string[]; ppe: string[] }) => void;
+    tools: string[]
+    supplies: string[]
+    ppe: string[]
+  }
+  onChange: (value: { tools: string[]; supplies: string[]; ppe: string[] }) => void
 }
 
-type RequirementType = 'tools' | 'supplies' | 'ppe';
+type RequirementType = 'tools' | 'supplies' | 'ppe'
 
 export function RequirementsManager({ value, onChange }: RequirementsManagerProps) {
-  const [newItem, setNewItem] = useState('');
-  const [activeTab, setActiveTab] = useState<RequirementType>('tools');
+  const [newItem, setNewItem] = useState('')
+  const [activeTab, setActiveTab] = useState<RequirementType>('tools')
 
   const addItem = () => {
     if (newItem.trim()) {
       onChange({
         ...value,
         [activeTab]: [...value[activeTab], newItem.trim()],
-      });
-      setNewItem('');
+      })
+      setNewItem('')
     }
-  };
+  }
 
   const removeItem = (type: RequirementType, index: number) => {
-    const updatedItems = value[type].filter((_, i) => i !== index);
+    const updatedItems = value[type].filter((_, i) => i !== index)
     onChange({
       ...value,
       [type]: updatedItems,
-    });
-  };
+    })
+  }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
-      addItem();
+      e.preventDefault()
+      addItem()
     }
-  };
+  }
 
   const renderList = (type: RequirementType, icon: JSX.Element) => (
     <div className="space-y-4">
@@ -95,7 +95,7 @@ export function RequirementsManager({ value, onChange }: RequirementsManagerProp
         )}
       </ScrollArea>
     </div>
-  );
+  )
 
   return (
     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as RequirementType)}>
@@ -123,5 +123,5 @@ export function RequirementsManager({ value, onChange }: RequirementsManagerProp
         {renderList('ppe', <HardHat className="h-4 w-4 text-muted-foreground" />)}
       </TabsContent>
     </Tabs>
-  );
+  )
 }

@@ -1,16 +1,16 @@
-import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../trpc';
-import { processing, insertProcessingSchema } from '~/server/db/schema';
-import { eq, desc, like, and, SQL } from 'drizzle-orm';
-import { TRPCError } from '@trpc/server';
-import { batchStatusEnum, harvestQualityEnum } from '~/server/db/schema/enums';
+import { z } from 'zod'
+import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { processing, insertProcessingSchema } from '~/server/db/schema'
+import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { TRPCError } from '@trpc/server'
+import { batchStatusEnum, harvestQualityEnum } from '~/server/db/schema/enums'
 
 // Schema for filters
 const processingFiltersSchema = z.object({
   status: z.enum(batchStatusEnum.enumValues).optional(),
   quality: z.enum(harvestQualityEnum.enumValues).optional(),
   search: z.string().optional(),
-});
+})
 
 export const processingRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -22,13 +22,13 @@ export const processingRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const { limit, cursor, filters } = input;
+      const { limit, cursor, filters } = input
 
       const conditions = [
         filters?.status ? eq(processing.processStatus, filters.status) : undefined,
         filters?.quality ? eq(processing.quality, filters.quality) : undefined,
         filters?.search ? like(processing.identifier, `%${filters.search}%`) : undefined,
-      ].filter((condition): condition is SQL => condition !== undefined);
+      ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.processing.findMany({
         where: conditions.length ? and(...conditions) : undefined,
@@ -44,15 +44,15 @@ export const processingRouter = createTRPCRouter({
             },
           },
         },
-      });
+      })
 
-      let nextCursor: typeof cursor | undefined = undefined;
+      let nextCursor: typeof cursor | undefined = undefined
       if (items.length > limit) {
-        items.pop();
-        nextCursor = cursor ? cursor + limit : limit;
+        items.pop()
+        nextCursor = cursor ? cursor + limit : limit
       }
 
-      return { items, nextCursor };
+      return { items, nextCursor }
     }),
 
   get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
@@ -67,16 +67,16 @@ export const processingRouter = createTRPCRouter({
           },
         },
       },
-    });
+    })
 
     if (!process) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Processing record not found',
-      });
+      })
     }
 
-    return process;
+    return process
   }),
 
   create: protectedProcedure
@@ -89,7 +89,7 @@ export const processingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, labResults, ...rest } = input;
+      const { properties, metadata, labResults, ...rest } = input
 
       const [process] = await ctx.db
         .insert(processing)
@@ -100,16 +100,16 @@ export const processingRouter = createTRPCRouter({
           labResults: labResults as typeof processing.$inferInsert.labResults,
           createdById: ctx.session.user.id,
         })
-        .returning();
+        .returning()
 
       if (!process) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to create processing record',
-        });
+        })
       }
 
-      return process;
+      return process
     }),
 
   update: protectedProcedure
@@ -125,7 +125,7 @@ export const processingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, labResults, ...rest } = input.data;
+      const { properties, metadata, labResults, ...rest } = input.data
 
       const [process] = await ctx.db
         .update(processing)
@@ -137,28 +137,28 @@ export const processingRouter = createTRPCRouter({
           updatedAt: new Date(),
         })
         .where(eq(processing.id, input.id))
-        .returning();
+        .returning()
 
       if (!process) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Processing record not found',
-        });
+        })
       }
 
-      return process;
+      return process
     }),
 
   delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(processing).where(eq(processing.id, input)).returning();
+    const [deleted] = await ctx.db.delete(processing).where(eq(processing.id, input)).returning()
 
     if (!deleted) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Processing record not found',
-      });
+      })
     }
 
-    return { success: true };
+    return { success: true }
   }),
-});
+})

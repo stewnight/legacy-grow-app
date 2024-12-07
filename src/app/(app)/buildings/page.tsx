@@ -1,17 +1,17 @@
-import { Suspense } from 'react';
-import { Skeleton } from '~/components/ui/skeleton';
-import { auth } from '~/server/auth';
-import { redirect } from 'next/navigation';
-import { DataTable } from '~/components/ui/data-table';
-import { api } from '~/trpc/server';
-import { AppSheet } from '~/components/layout/app-sheet';
-import { BuildingsForm } from './_components/buildings-form';
-import { columns } from './_components/buildings-columns';
+import { Suspense } from 'react'
+import { Skeleton } from '~/components/ui/skeleton'
+import { auth } from '~/server/auth'
+import { redirect } from 'next/navigation'
+import { DataTable } from '~/components/ui/data-table'
+import { api } from '~/trpc/server'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { BuildingsForm } from './_components/buildings-form'
+import { columns } from './_components/buildings-columns'
 
 export default async function BuildingsPage() {
-  const session = await auth();
+  const session = await auth()
   if (!session) {
-    redirect('/');
+    redirect('/')
   }
 
   const { items: buildings } = await api.building.getAll({
@@ -32,5 +32,5 @@ export default async function BuildingsPage() {
         </Suspense>
       </div>
     </div>
-  );
+  )
 }

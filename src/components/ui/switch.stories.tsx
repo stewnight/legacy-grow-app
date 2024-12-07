@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Switch } from './switch';
-import { Label } from './label';
+import type { Meta, StoryObj } from '@storybook/react'
+import { Switch } from './switch'
+import { Label } from './label'
 
 const meta = {
   title: 'UI/Switch',
@@ -9,10 +9,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Switch>;
+} satisfies Meta<typeof Switch>
 
-export default meta;
-type Story = StoryObj<typeof Switch>;
+export default meta
+type Story = StoryObj<typeof Switch>
 
 export const Default: Story = {
   render: () => (
@@ -21,7 +21,7 @@ export const Default: Story = {
       <Label htmlFor="airplane-mode">Airplane Mode</Label>
     </div>
   ),
-};
+}
 
 export const WithDescription: Story = {
   render: () => (
@@ -35,7 +35,7 @@ export const WithDescription: Story = {
       </p>
     </div>
   ),
-};
+}
 
 export const Disabled: Story = {
   render: () => (
@@ -46,4 +46,4 @@ export const Disabled: Story = {
       </Label>
     </div>
   ),
-};
+}

@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { ScrollArea, ScrollBar } from './scroll-area';
-import { Separator } from './separator';
+import type { Meta, StoryObj } from '@storybook/react'
+import { ScrollArea, ScrollBar } from './scroll-area'
+import { Separator } from './separator'
 
 const meta = {
   title: 'UI/ScrollArea',
@@ -9,12 +9,12 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof ScrollArea>;
+} satisfies Meta<typeof ScrollArea>
 
-export default meta;
-type Story = StoryObj<typeof ScrollArea>;
+export default meta
+type Story = StoryObj<typeof ScrollArea>
 
-const tags = Array.from({ length: 50 }).map((_, i, a) => `v1.2.0-beta.${a.length - i}`);
+const tags = Array.from({ length: 50 }).map((_, i, a) => `v1.2.0-beta.${a.length - i}`)
 
 export const Default: Story = {
   args: {
@@ -33,7 +33,7 @@ export const Default: Story = {
       </div>
     ),
   },
-};
+}
 
 export const Horizontal: Story = {
   render: () => (
@@ -48,4 +48,4 @@ export const Horizontal: Story = {
       <ScrollBar orientation="horizontal" />
     </ScrollArea>
   ),
-};
+}

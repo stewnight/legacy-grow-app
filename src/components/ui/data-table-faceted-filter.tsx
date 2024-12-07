@@ -1,10 +1,10 @@
-import * as React from 'react';
-import { CheckIcon, PlusCircleIcon } from 'lucide-react';
-import { Column } from '@tanstack/react-table';
+import * as React from 'react'
+import { CheckIcon, PlusCircleIcon } from 'lucide-react'
+import { Column } from '@tanstack/react-table'
 
-import { cn } from '~/lib/utils';
-import { Badge } from '~/components/ui/badge';
-import { Button } from '~/components/ui/button';
+import { cn } from '~/lib/utils'
+import { Badge } from '~/components/ui/badge'
+import { Button } from '~/components/ui/button'
 import {
   Command,
   CommandEmpty,
@@ -13,23 +13,23 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '~/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
-import { Separator } from '~/components/ui/separator';
+} from '~/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
+import { Separator } from '~/components/ui/separator'
 
 interface DataTableFacetedFilterProps {
-  column?: Column<any, any>;
-  title?: string;
+  column?: Column<any, any>
+  title?: string
   options: {
-    label: string;
-    value: string;
-    icon?: React.ComponentType<{ className?: string }>;
-  }[];
+    label: string
+    value: string
+    icon?: React.ComponentType<{ className?: string }>
+  }[]
 }
 
 export function DataTableFacetedFilter({ column, title, options }: DataTableFacetedFilterProps) {
-  const facets = column?.getFacetedUniqueValues();
-  const selectedValues = new Set(column?.getFilterValue() as string[]);
+  const facets = column?.getFacetedUniqueValues()
+  const selectedValues = new Set(column?.getFilterValue() as string[])
 
   return (
     <Popover>
@@ -73,18 +73,18 @@ export function DataTableFacetedFilter({ column, title, options }: DataTableFace
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
-                const isSelected = selectedValues.has(option.value);
+                const isSelected = selectedValues.has(option.value)
                 return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
                       if (isSelected) {
-                        selectedValues.delete(option.value);
+                        selectedValues.delete(option.value)
                       } else {
-                        selectedValues.add(option.value);
+                        selectedValues.add(option.value)
                       }
-                      const filterValues = Array.from(selectedValues);
-                      column?.setFilterValue(filterValues.length ? filterValues : undefined);
+                      const filterValues = Array.from(selectedValues)
+                      column?.setFilterValue(filterValues.length ? filterValues : undefined)
                     }}
                   >
                     <div
@@ -105,7 +105,7 @@ export function DataTableFacetedFilter({ column, title, options }: DataTableFace
                       </span>
                     )}
                   </CommandItem>
-                );
+                )
               })}
             </CommandGroup>
             {selectedValues.size > 0 && (
@@ -125,5 +125,5 @@ export function DataTableFacetedFilter({ column, title, options }: DataTableFace
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

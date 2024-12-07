@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { insertPlantSchema, type Plant } from '~/server/db/schema';
-import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { insertPlantSchema, type Plant } from '~/server/db/schema'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -11,56 +11,56 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { type z } from 'zod';
+} from '@/components/ui/select'
+import { type z } from 'zod'
 import {
   plantStageEnum,
   plantSourceEnum,
   plantSexEnum,
   healthStatusEnum,
-} from '~/server/db/schema/enums';
-import { type inferRouterOutputs } from '@trpc/server';
-import { type AppRouter } from '~/server/api/root';
-import { api } from '~/trpc/react';
-import { useToast } from '~/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Textarea } from '@/components/ui/textarea';
+} from '~/server/db/schema/enums'
+import { type inferRouterOutputs } from '@trpc/server'
+import { type AppRouter } from '~/server/api/root'
+import { api } from '~/trpc/react'
+import { useToast } from '~/hooks/use-toast'
+import { useRouter } from 'next/navigation'
+import { DatePicker } from '@/components/ui/date-picker'
+import { Textarea } from '@/components/ui/textarea'
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
-type PlantFormValues = z.infer<typeof insertPlantSchema>;
+type RouterOutputs = inferRouterOutputs<AppRouter>
+type PlantFormValues = z.infer<typeof insertPlantSchema>
 type PlantProperties = {
-  height: number;
-  width: number;
+  height: number
+  width: number
   feeding: {
-    schedule: string;
-  };
-};
+    schedule: string
+  }
+}
 
 interface PlantFormProps {
-  mode?: 'create' | 'edit';
-  defaultValues?: RouterOutputs['plant']['get'];
-  onSuccess?: (data: PlantFormValues) => void;
+  mode?: 'create' | 'edit'
+  defaultValues?: RouterOutputs['plant']['get']
+  onSuccess?: (data: PlantFormValues) => void
 }
 
 export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFormProps) {
-  const { toast } = useToast();
-  const router = useRouter();
-  const utils = api.useUtils();
+  const { toast } = useToast()
+  const router = useRouter()
+  const utils = api.useUtils()
 
   const createDefaultProperties = (): PlantProperties => ({
     height: 0,
     width: 0,
     feeding: { schedule: 'daily' },
-  });
+  })
 
   const form = useForm<PlantFormValues>({
     resolver: zodResolver(insertPlantSchema),
@@ -76,7 +76,7 @@ export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFo
       health: defaultValues?.health ?? healthStatusEnum.enumValues[0],
       plantedDate: defaultValues?.plantedDate ?? undefined,
     },
-  });
+  })
 
   // Fetch related data
   const { data: genetics } = api.genetic.getAll.useQuery({
@@ -97,40 +97,40 @@ export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFo
 
   const { mutate: createPlant, isPending: isCreating } = api.plant.create.useMutation({
     onSuccess: (data) => {
-      toast({ title: 'Plant created successfully' });
-      void Promise.all([utils.plant.getAll.invalidate(), utils.plant.get.invalidate(data.id)]);
-      router.push(`/plants/${data.id}`);
-      onSuccess?.(data);
+      toast({ title: 'Plant created successfully' })
+      void Promise.all([utils.plant.getAll.invalidate(), utils.plant.get.invalidate(data.id)])
+      router.push(`/plants/${data.id}`)
+      onSuccess?.(data)
     },
     onError: (error) => {
       toast({
         title: 'Error creating plant',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   const { mutate: updatePlant, isPending: isUpdating } = api.plant.update.useMutation({
     onSuccess: (data) => {
-      toast({ title: 'Plant updated successfully' });
-      void Promise.all([utils.plant.getAll.invalidate(), utils.plant.get.invalidate(data.id)]);
-      onSuccess?.(data);
+      toast({ title: 'Plant updated successfully' })
+      void Promise.all([utils.plant.getAll.invalidate(), utils.plant.get.invalidate(data.id)])
+      onSuccess?.(data)
     },
     onError: (error) => {
       toast({
         title: 'Error updating plant',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   function onSubmit(values: PlantFormValues) {
     if (mode === 'create') {
-      createPlant(values);
+      createPlant(values)
     } else if (defaultValues?.id) {
-      updatePlant({ id: defaultValues.id, data: values });
+      updatePlant({ id: defaultValues.id, data: values })
     }
   }
 
@@ -387,5 +387,5 @@ export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFo
         </Button>
       </form>
     </Form>
-  );
+  )
 }

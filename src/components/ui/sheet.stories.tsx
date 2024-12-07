@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react'
 import {
   Sheet,
   SheetContent,
@@ -7,10 +7,10 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetFooter,
-} from './sheet';
-import { Button } from './button';
-import { Input } from './input';
-import { Label } from './label';
+} from './sheet'
+import { Button } from './button'
+import { Input } from './input'
+import { Label } from './label'
 
 const meta = {
   title: 'UI/Sheet',
@@ -19,10 +19,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Sheet>;
+} satisfies Meta<typeof Sheet>
 
-export default meta;
-type Story = StoryObj<typeof Sheet>;
+export default meta
+type Story = StoryObj<typeof Sheet>
 
 export const Default: Story = {
   args: {
@@ -59,7 +59,7 @@ export const Default: Story = {
       </>
     ),
   },
-};
+}
 
 export const SideSheet: Story = {
   args: {
@@ -89,4 +89,4 @@ export const SideSheet: Story = {
       </>
     ),
   },
-};
+}

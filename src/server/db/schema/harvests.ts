@@ -1,14 +1,14 @@
-import { relations, sql } from 'drizzle-orm';
-import { index, varchar, timestamp, json, uuid, text, date, numeric } from 'drizzle-orm/pg-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { createTable } from '../utils';
-import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums';
-import { users } from './core';
-import { batches } from './batches';
-import { locations } from './locations';
-import { processing } from './processing';
-import { jobs } from './jobs';
-import { notes } from './notes';
+import { relations, sql } from 'drizzle-orm'
+import { index, varchar, timestamp, json, uuid, text, date, numeric } from 'drizzle-orm/pg-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { createTable } from '../utils'
+import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
+import { users } from './core'
+import { batches } from './batches'
+import { locations } from './locations'
+import { processing } from './processing'
+import { jobs } from './jobs'
+import { notes } from './notes'
 
 export const harvests = createTable(
   'harvest',
@@ -31,67 +31,67 @@ export const harvests = createTable(
     harvestStatus: batchStatusEnum('harvest_status').default('active').notNull(),
     properties: json('properties').$type<{
       dryingConditions?: {
-        temperature: number;
-        humidity: number;
-        duration: number;
-        method: string;
-      };
+        temperature: number
+        humidity: number
+        duration: number
+        method: string
+      }
       trimming?: {
-        method: string;
-        machine?: string;
-        team?: string[];
-        duration?: number;
-      };
+        method: string
+        machine?: string
+        team?: string[]
+        duration?: number
+      }
       yield?: {
-        expected: number;
-        actual: number;
-        variance: number;
-        unit: string;
-      };
+        expected: number
+        actual: number
+        variance: number
+        unit: string
+      }
       categories?: Array<{
-        name: string;
-        weight: number;
-        grade?: string;
-      }>;
+        name: string
+        weight: number
+        grade?: string
+      }>
     }>(),
     labResults: json('lab_results').$type<{
-      thc?: number;
-      cbd?: number;
-      moisture?: number;
+      thc?: number
+      cbd?: number
+      moisture?: number
       terpenes?: Array<{
-        name: string;
-        percentage: number;
-      }>;
+        name: string
+        percentage: number
+      }>
       microbials?: {
-        passed: boolean;
-        details?: Record<string, number>;
-      };
+        passed: boolean
+        details?: Record<string, number>
+      }
       metals?: {
-        passed: boolean;
-        details?: Record<string, number>;
-      };
+        passed: boolean
+        details?: Record<string, number>
+      }
       pesticides?: {
-        passed: boolean;
-        details?: Record<string, number>;
-      };
-      testedAt?: string;
-      testedBy?: string;
-      certificateUrl?: string;
+        passed: boolean
+        details?: Record<string, number>
+      }
+      testedAt?: string
+      testedBy?: string
+      certificateUrl?: string
     }>(),
     metadata: json('metadata').$type<{
       environmentalConditions?: {
-        temperature: number;
-        humidity: number;
-        light: number;
-      };
-      team?: string[];
-      equipment?: string[];
-      notes?: string[];
+        temperature: number
+        humidity: number
+        light: number
+      }
+      team?: string[]
+      equipment?: string[]
+      notes?: string[]
       images?: Array<{
-        url: string;
-        type: string;
-        timestamp: string;
-      }>;
+        url: string
+        type: string
+        timestamp: string
+      }>
     }>(),
     notes: text('notes'),
     status: statusEnum('status').default('active').notNull(),
@@ -113,7 +113,7 @@ export const harvests = createTable(
     harvestStatusIdx: index('harvest_status_idx').on(table.harvestStatus),
     statusIdx: index('harvest_general_status_idx').on(table.status),
   })
-);
+)
 
 // Relations
 export const harvestsRelations = relations(harvests, ({ one, many }) => ({
@@ -135,16 +135,16 @@ export const harvestsRelations = relations(harvests, ({ one, many }) => ({
   processing: many(processing, { relationName: 'harvestProcessing' }),
   jobs: many(jobs, { relationName: 'harvestJobs' }),
   notes: many(notes, { relationName: 'harvestNotes' }),
-}));
+}))
 
 // Zod Schemas
 export const insertHarvestSchema = createInsertSchema(harvests).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
-});
-export const selectHarvestSchema = createSelectSchema(harvests);
+})
+export const selectHarvestSchema = createSelectSchema(harvests)
 
 // Types
-export type Harvest = typeof harvests.$inferSelect;
-export type NewHarvest = typeof harvests.$inferInsert;
+export type Harvest = typeof harvests.$inferSelect
+export type NewHarvest = typeof harvests.$inferInsert

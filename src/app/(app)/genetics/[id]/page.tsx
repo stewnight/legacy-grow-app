@@ -1,30 +1,30 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { api } from '~/trpc/react';
-import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card';
-import { notFound } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Skeleton } from '~/components/ui/skeleton';
-import Link from 'next/link';
-import { Dna, Sprout, Timer, Ruler, Leaf, Droplets, Scale, Microscope } from 'lucide-react';
-import { AppSheet } from '../../../../components/layout/app-sheet';
-import { GeneticForm } from '../_components/genetics-form';
-import { Badge } from '../../../../components/ui/badge';
+import * as React from 'react'
+import { api } from '~/trpc/react'
+import { format } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import { notFound } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { Skeleton } from '~/components/ui/skeleton'
+import Link from 'next/link'
+import { Dna, Sprout, Timer, Ruler, Leaf, Droplets, Scale, Microscope } from 'lucide-react'
+import { AppSheet } from '../../../../components/layout/app-sheet'
+import { GeneticForm } from '../_components/genetics-form'
+import { Badge } from '../../../../components/ui/badge'
 
 export default function GeneticPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = React.use(params);
+  const resolvedParams = React.use(params)
 
   const { data: genetic, isLoading } = api.genetic.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  });
+  })
 
   const formatDate = (date: Date | string | null): string => {
-    if (!date) return 'N/A';
-    return format(new Date(date), 'PP');
-  };
+    if (!date) return 'N/A'
+    return format(new Date(date), 'PP')
+  }
 
   if (isLoading) {
     return (
@@ -50,11 +50,11 @@ export default function GeneticPage({ params }: { params: Promise<{ id: string }
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   if (!genetic) {
-    return notFound();
+    return notFound()
   }
 
   return (
@@ -358,5 +358,5 @@ export default function GeneticPage({ params }: { params: Promise<{ id: string }
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

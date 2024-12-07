@@ -3,20 +3,20 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from '~/components/ui/breadcrumb';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { Overview } from './_components/overview';
-import { RecentPlants } from './_components/recent-plants';
-import { QuickActions } from './_components/quick-actions';
-import { StrainDistribution } from './_components/strain-distribution';
-import { auth } from '~/server/auth';
-import { redirect } from 'next/navigation';
+} from '~/components/ui/breadcrumb'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Overview } from './_components/overview'
+import { RecentPlants } from './_components/recent-plants'
+import { QuickActions } from './_components/quick-actions'
+import { StrainDistribution } from './_components/strain-distribution'
+import { auth } from '~/server/auth'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
-  const session = await auth();
+  const session = await auth()
 
   if (!session) {
-    redirect('/');
+    redirect('/')
   }
 
   return (
@@ -114,5 +114,5 @@ export default async function DashboardPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

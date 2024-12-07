@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,8 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './alert-dialog';
-import { Button } from './button';
+} from './alert-dialog'
+import { Button } from './button'
 
 const meta = {
   title: 'UI/AlertDialog',
@@ -19,10 +19,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof AlertDialog>;
+} satisfies Meta<typeof AlertDialog>
 
-export default meta;
-type Story = StoryObj<typeof AlertDialog>;
+export default meta
+type Story = StoryObj<typeof AlertDialog>
 
 export const Default: Story = {
   args: {
@@ -47,7 +47,7 @@ export const Default: Story = {
       </>
     ),
   },
-};
+}
 
 export const WithCustomButtons: Story = {
   args: {
@@ -75,4 +75,4 @@ export const WithCustomButtons: Story = {
       </>
     ),
   },
-};
+}

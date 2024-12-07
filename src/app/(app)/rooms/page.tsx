@@ -1,17 +1,17 @@
-import { Suspense } from 'react';
-import { Skeleton } from '~/components/ui/skeleton';
-import { auth } from '~/server/auth';
-import { redirect } from 'next/navigation';
-import { DataTable } from '~/components/ui/data-table';
-import { columns } from './_components/rooms-columns';
-import { api } from '~/trpc/server';
-import { AppSheet } from '~/components/layout/app-sheet';
-import { RoomForm } from './_components/rooms-form';
+import { Suspense } from 'react'
+import { Skeleton } from '~/components/ui/skeleton'
+import { auth } from '~/server/auth'
+import { redirect } from 'next/navigation'
+import { DataTable } from '~/components/ui/data-table'
+import { columns } from './_components/rooms-columns'
+import { api } from '~/trpc/server'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { RoomForm } from './_components/rooms-form'
 
 export default async function RoomsPage() {
-  const session = await auth();
+  const session = await auth()
   if (!session) {
-    redirect('/');
+    redirect('/')
   }
 
   const { items: rooms } = await api.room.getAll({
@@ -32,5 +32,5 @@ export default async function RoomsPage() {
         </Suspense>
       </div>
     </div>
-  );
+  )
 }

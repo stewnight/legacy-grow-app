@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import type { Meta, StoryObj } from '@storybook/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
 import {
   Form,
   FormControl,
@@ -10,9 +10,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from './form';
-import { Input } from './input';
-import { Button } from './button';
+} from './form'
+import { Input } from './input'
+import { Button } from './button'
 
 const meta = {
   title: 'UI/Form',
@@ -21,22 +21,22 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof Form>;
+} satisfies Meta<typeof Form>
 
-export default meta;
-type Story = StoryObj<typeof Form>;
+export default meta
+type Story = StoryObj<typeof Form>
 
 const FormSchema = z.object({
   username: z.string().min(2, {
     message: 'Username must be at least 2 characters.',
   }),
-});
+})
 
 export const Default: Story = {
   render: () => {
     const form = useForm<z.infer<typeof FormSchema>>({
       resolver: zodResolver(FormSchema),
-    });
+    })
 
     return (
       <Form {...form}>
@@ -58,6 +58,6 @@ export const Default: Story = {
           <Button type="submit">Submit</Button>
         </form>
       </Form>
-    );
+    )
   },
-};
+}

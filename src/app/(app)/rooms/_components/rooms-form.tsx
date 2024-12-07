@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { insertRoomSchema } from '~/server/db/schema';
-import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { insertRoomSchema } from '~/server/db/schema'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -11,39 +11,39 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { type z } from 'zod';
-import { roomTypeEnum, statusEnum } from '~/server/db/schema/enums';
-import { type inferRouterOutputs } from '@trpc/server';
-import { type AppRouter } from '~/server/api/root';
-import { api } from '~/trpc/react';
-import { useToast } from '~/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { RefreshCw } from 'lucide-react';
-import { type UseFormReturn } from 'react-hook-form';
+} from '@/components/ui/select'
+import { type z } from 'zod'
+import { roomTypeEnum, statusEnum } from '~/server/db/schema/enums'
+import { type inferRouterOutputs } from '@trpc/server'
+import { type AppRouter } from '~/server/api/root'
+import { api } from '~/trpc/react'
+import { useToast } from '~/hooks/use-toast'
+import { useRouter } from 'next/navigation'
+import React from 'react'
+import { RefreshCw } from 'lucide-react'
+import { type UseFormReturn } from 'react-hook-form'
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
-type RoomFormValues = z.infer<typeof insertRoomSchema>;
+type RouterOutputs = inferRouterOutputs<AppRouter>
+type RoomFormValues = z.infer<typeof insertRoomSchema>
 
 interface RoomFormProps {
-  mode?: 'create' | 'edit';
-  defaultValues?: RouterOutputs['room']['get'];
-  onSuccess?: (data: RoomFormValues) => void;
+  mode?: 'create' | 'edit'
+  defaultValues?: RouterOutputs['room']['get']
+  onSuccess?: (data: RoomFormValues) => void
 }
 
 export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomFormProps) {
-  const { toast } = useToast();
-  const router = useRouter();
-  const utils = api.useUtils();
+  const { toast } = useToast()
+  const router = useRouter()
+  const utils = api.useUtils()
   const form = useForm<RoomFormValues>({
     resolver: zodResolver(insertRoomSchema),
     defaultValues: {
@@ -67,44 +67,44 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
         usableSqDimensions: undefined,
       },
     },
-  });
+  })
 
   const { mutate: createRoom, isPending: isCreating } = api.room.create.useMutation({
     onSuccess: (data) => {
-      toast({ title: 'Room created successfully' });
-      void Promise.all([utils.room.getAll.invalidate(), utils.room.get.invalidate(data.id)]);
-      router.push(`/rooms/${data.id}`);
-      onSuccess?.(data);
+      toast({ title: 'Room created successfully' })
+      void Promise.all([utils.room.getAll.invalidate(), utils.room.get.invalidate(data.id)])
+      router.push(`/rooms/${data.id}`)
+      onSuccess?.(data)
     },
     onError: (error) => {
       toast({
         title: 'Error creating room',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   const { mutate: updateRoom, isPending: isUpdating } = api.room.update.useMutation({
     onSuccess: (data) => {
-      toast({ title: 'Room updated successfully' });
-      void Promise.all([utils.room.getAll.invalidate(), utils.room.get.invalidate(data.id)]);
-      onSuccess?.(data);
+      toast({ title: 'Room updated successfully' })
+      void Promise.all([utils.room.getAll.invalidate(), utils.room.get.invalidate(data.id)])
+      onSuccess?.(data)
     },
     onError: (error) => {
       toast({
         title: 'Error updating room',
         description: error.message,
         variant: 'destructive',
-      });
+      })
     },
-  });
+  })
 
   function onSubmit(values: RoomFormValues) {
     if (mode === 'create') {
-      createRoom(values);
+      createRoom(values)
     } else if (defaultValues?.id) {
-      updateRoom({ id: defaultValues.id, data: values });
+      updateRoom({ id: defaultValues.id, data: values })
     }
   }
 
@@ -121,8 +121,8 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
       <form
         onSubmit={(e) => {
           form.handleSubmit(onSubmit, (errors) => {
-            console.log('Form Errors:', errors);
-          })(e);
+            console.log('Form Errors:', errors)
+          })(e)
         }}
         className="space-y-4 p-1"
         noValidate
@@ -355,10 +355,10 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   size="icon"
                   className="h-4 w-4"
                   onClick={() => {
-                    const length = form.getValues('dimensions.length');
-                    const width = form.getValues('dimensions.width');
-                    const usableSq = length && width ? Number(length) * Number(width) : null;
-                    form.setValue('dimensions.usableSqDimensions', usableSq);
+                    const length = form.getValues('dimensions.length')
+                    const width = form.getValues('dimensions.width')
+                    const usableSq = length && width ? Number(length) * Number(width) : null
+                    form.setValue('dimensions.usableSqDimensions', usableSq)
                   }}
                 >
                   <RefreshCw className="h-4 w-4" />
@@ -413,5 +413,5 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
         </Button>
       </form>
     </Form>
-  );
+  )
 }
