@@ -11,7 +11,7 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { JobForm } from '~/app/(app)/jobs/_components/jobs-form'
+import { JobForm } from '~/components/jobs/jobs-form'
 import { Badge } from '~/components/ui/badge'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { format } from 'date-fns'
