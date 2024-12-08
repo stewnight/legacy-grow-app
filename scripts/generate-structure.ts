@@ -7,9 +7,11 @@ const IGNORE_PATTERNS = [
   /\.next/,
   /\.turbo/,
   /\.vercel/,
+  /public\/storybook/,
   /dist/,
   /build/,
   /coverage/,
+  /\.DS_Store/,
 ]
 
 interface TreeNode {

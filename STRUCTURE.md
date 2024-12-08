@@ -30,140 +30,6 @@
     0008_thin_proudstar.sql
     0009_silent_reavers.sql
   📁public
-    📁storybook
-      📁sb-addons
-        📁essentials-actions-2
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁essentials-backgrounds-3
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁essentials-controls-1
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁essentials-measure-5
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁essentials-outline-6
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁essentials-toolbars-4
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁interactions-7
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁onboarding-9
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-        📁storybook-core-core-server-presets-0
-          common-manager-bundle.js
-          common-manager-bundle.js.LEGAL.txt
-        📁viewport-8
-          manager-bundle.js
-          manager-bundle.js.LEGAL.txt
-      📁sb-common-assets
-        favicon.svg
-        nunito-sans-bold-italic.woff2
-        nunito-sans-bold.woff2
-        nunito-sans-italic.woff2
-        nunito-sans-regular.woff2
-      📁sb-manager
-        globals-module-info.js
-        globals-runtime.js
-        globals.js
-        runtime.js
-      📁sb-preview
-        globals.js
-        runtime.js
-      1108.dfac0d4e.iframe.bundle.js
-      1170.c78eef7d.iframe.bundle.js
-      1170.c78eef7d.iframe.bundle.js.LICENSE.txt
-      1496.a4048307.iframe.bundle.js
-      207.259f9c92.iframe.bundle.js
-      2749.14e32ef7.iframe.bundle.js
-      2749.14e32ef7.iframe.bundle.js.LICENSE.txt
-      279.e1075214.iframe.bundle.js
-      279.e1075214.iframe.bundle.js.LICENSE.txt
-      289.ef8b7966.iframe.bundle.js
-      289.ef8b7966.iframe.bundle.js.LICENSE.txt
-      3327.6449ef92.iframe.bundle.js
-      3506.c1b6b9a4.iframe.bundle.js
-      3506.c1b6b9a4.iframe.bundle.js.LICENSE.txt
-      3506.c1b6b9a4.iframe.bundle.js.map
-      4067.0fc1102a.iframe.bundle.js
-      4435.36a0a9fa.iframe.bundle.js
-      5247.c7afe09e.iframe.bundle.js
-      5247.c7afe09e.iframe.bundle.js.LICENSE.txt
-      5279.90a5f233.iframe.bundle.js
-      5279.90a5f233.iframe.bundle.js.LICENSE.txt
-      5369.bfef9485.iframe.bundle.js
-      5369.bfef9485.iframe.bundle.js.LICENSE.txt
-      5547.23ac554b.iframe.bundle.js
-      6019.7e0ec3b0.iframe.bundle.js
-      6019.7e0ec3b0.iframe.bundle.js.LICENSE.txt
-      6093.c14aba40.iframe.bundle.js
-      6093.c14aba40.iframe.bundle.js.LICENSE.txt
-      623.e48310f0.iframe.bundle.js
-      6254.98c8438e.iframe.bundle.js
-      6356.dffa7746.iframe.bundle.js
-      6356.dffa7746.iframe.bundle.js.LICENSE.txt
-      7422.f9ec333d.iframe.bundle.js
-      7887.21cf8daa.iframe.bundle.js
-      8898.c8af850d.iframe.bundle.js
-      8898.c8af850d.iframe.bundle.js.map
-      9110.a9bb449b.iframe.bundle.js
-      9243.dfbd428c.iframe.bundle.js
-      9243.dfbd428c.iframe.bundle.js.LICENSE.txt
-      960.f2455c03.iframe.bundle.js
-      9967.53c3eb3f.iframe.bundle.js
-      9967.53c3eb3f.iframe.bundle.js.LICENSE.txt
-      components-theme-toggle-stories.e8619ba0.iframe.bundle.js
-      components-theme-toggle-stories.e8619ba0.iframe.bundle.js.LICENSE.txt
-      components-ui-alert-dialog-stories.2b6c71e3.iframe.bundle.js
-      components-ui-alert-stories.def6bbdb.iframe.bundle.js
-      components-ui-alert-stories.def6bbdb.iframe.bundle.js.LICENSE.txt
-      components-ui-avatar-stories.ded62998.iframe.bundle.js
-      components-ui-badge-stories.1f7f0eb8.iframe.bundle.js
-      components-ui-breadcrumb-stories.0a87c6fb.iframe.bundle.js
-      components-ui-breadcrumb-stories.0a87c6fb.iframe.bundle.js.LICENSE.txt
-      components-ui-button-stories.4490f50f.iframe.bundle.js
-      components-ui-button-stories.4490f50f.iframe.bundle.js.LICENSE.txt
-      components-ui-calendar-stories.81c0330a.iframe.bundle.js
-      components-ui-card-stories.2bd80ec5.iframe.bundle.js
-      components-ui-checkbox-stories.f4c94f72.iframe.bundle.js
-      components-ui-collapsible-stories.bb1b99e7.iframe.bundle.js
-      components-ui-data-table-stories.f8dcc3b9.iframe.bundle.js
-      components-ui-dialog-stories.11d8cf0d.iframe.bundle.js
-      components-ui-dropdown-menu-stories.481820c6.iframe.bundle.js
-      components-ui-dropdown-menu-stories.481820c6.iframe.bundle.js.LICENSE.txt
-      components-ui-form-stories.0b3786a0.iframe.bundle.js
-      components-ui-hover-card-stories.164c62e1.iframe.bundle.js
-      components-ui-hover-card-stories.164c62e1.iframe.bundle.js.LICENSE.txt
-      components-ui-input-stories.6f9382cf.iframe.bundle.js
-      components-ui-progress-stories.0a674445.iframe.bundle.js
-      components-ui-radio-group-stories.6a4846db.iframe.bundle.js
-      components-ui-scroll-area-stories.af3a016f.iframe.bundle.js
-      components-ui-select-stories.1cc845f7.iframe.bundle.js
-      components-ui-separator-stories.1a7eef3d.iframe.bundle.js
-      components-ui-sheet-stories.2e91cc1c.iframe.bundle.js
-      components-ui-slider-stories.8b53d2a6.iframe.bundle.js
-      components-ui-switch-stories.563c792e.iframe.bundle.js
-      components-ui-table-stories.fd3bac19.iframe.bundle.js
-      components-ui-tabs-stories.66d1846a.iframe.bundle.js
-      components-ui-textarea-stories.805e6ced.iframe.bundle.js
-      components-ui-toast-stories.fbbc6e7a.iframe.bundle.js
-      favicon.svg
-      iframe.html
-      index.html
-      index.json
-      main.038485ad.iframe.bundle.js
-      nunito-sans-bold-italic.woff2
-      nunito-sans-bold.woff2
-      nunito-sans-italic.woff2
-      nunito-sans-regular.woff2
-      project.json
-      runtime~main.9f99daca.iframe.bundle.js
     favicon.svg
   📁scripts
     generate-schema.ts
@@ -372,7 +238,6 @@
           sensor.ts
           sensorReading.ts
           user.ts
-        .DS_Store
         root.ts
         trpc.ts
       📁auth
@@ -395,10 +260,8 @@
           rooms.ts
           sensorReadings.ts
           sensors.ts
-        .DS_Store
         index.ts
         utils.ts
-      .DS_Store
       storage.ts
     📁styles
       globals.css
@@ -406,10 +269,8 @@
       query-client.ts
       react.tsx
       server.ts
-    .DS_Store
     env.js
   .cursorrules
-  .DS_Store
   .env
   .env.example
   .env.storybook
