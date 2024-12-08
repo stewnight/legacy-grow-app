@@ -5,10 +5,10 @@ import {
   BreadcrumbPage,
 } from '~/components/ui/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { Overview } from './_components/overview'
-import { RecentPlants } from './_components/recent-plants'
-import { QuickActions } from './_components/quick-actions'
-import { StrainDistribution } from './_components/strain-distribution'
+import { Overview } from '~/components/dashboard/overview'
+import { RecentPlants } from '~/components/dashboard/recent-plants'
+import { QuickActions } from '~/components/dashboard/quick-actions'
+import { StrainDistribution } from '~/components/dashboard/strain-distribution'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 
@@ -41,16 +41,22 @@ export default async function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Plants</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Plants
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">142</div>
-              <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Batches</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Batches
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">8</div>
@@ -63,16 +69,22 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">3 pending approval</p>
+              <p className="text-xs text-muted-foreground">
+                3 pending approval
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Harvest Value</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Harvest Value
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">$45,231.89</div>
-              <p className="text-xs text-muted-foreground">+19% from last quarter</p>
+              <p className="text-xs text-muted-foreground">
+                +19% from last quarter
+              </p>
             </CardContent>
           </Card>
         </div>
