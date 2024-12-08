@@ -23,12 +23,21 @@ import Link from 'next/link'
 import { Button } from '../ui/button'
 import { ScrollArea, ScrollBar } from '../ui/scroll-area'
 import { api } from '~/trpc/react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Progress } from '../ui/progress'
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable'
-import { AppSheet } from '../layout/app-sheet'
-import { JobForm } from '../../app/(app)/jobs/_components/jobs-form'
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '../ui/resizable'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { JobForm } from '~/components/jobs/jobs-form'
 
 const PAST_MONTHS = 1 // Show 1 month in the past
 const FUTURE_MONTHS = 6 // Show 6 months in the future
@@ -67,7 +76,8 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
             '[data-radix-scroll-area-viewport]'
           ) as HTMLElement
           if (container) {
-            const scrollPosition = todayIndex * CELL_WIDTH - container.clientWidth / 2
+            const scrollPosition =
+              todayIndex * CELL_WIDTH - container.clientWidth / 2
             container.scrollLeft = scrollPosition
           }
         }
@@ -89,7 +99,8 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
           '[data-radix-scroll-area-viewport]'
         ) as HTMLElement
         if (container) {
-          const scrollPosition = todayIndex * CELL_WIDTH - container.clientWidth / 2
+          const scrollPosition =
+            todayIndex * CELL_WIDTH - container.clientWidth / 2
           container.scrollTo({
             left: scrollPosition,
             behavior: 'smooth',
@@ -118,14 +129,21 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
 
   const calculateProgress = (job: JobWithRelations) => {
     if (!job.properties?.tasks?.length) return 0
-    const completedTasks = job.properties.tasks.filter((task) => task?.completed)
+    const completedTasks = job.properties.tasks.filter(
+      (task) => task?.completed
+    )
     return (completedTasks.length / job.properties.tasks.length) * 100
   }
 
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b p-2">
-        <Button variant="outline" onClick={jumpToToday} size="sm" className="h-7">
+        <Button
+          variant="outline"
+          onClick={jumpToToday}
+          size="sm"
+          className="h-7"
+        >
           Today
         </Button>
       </div>
@@ -157,7 +175,9 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
                           src={job.assignedTo.image || ''}
                           alt={job.assignedTo.name || ''}
                         />
-                        <AvatarFallback>{job.assignedTo.name?.[0] || 'U'}</AvatarFallback>
+                        <AvatarFallback>
+                          {job.assignedTo.name?.[0] || 'U'}
+                        </AvatarFallback>
                       </Avatar>
                     )}
                   </div>
@@ -215,7 +235,8 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
                       className="absolute bottom-0 top-0 w-px bg-orange-500"
                       style={{
                         left: `${
-                          periods.findIndex((date) => isDateToday(date)) * CELL_WIDTH +
+                          periods.findIndex((date) => isDateToday(date)) *
+                            CELL_WIDTH +
                           CELL_WIDTH / 2
                         }px`,
                       }}
@@ -235,68 +256,78 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
                           className="relative flex-none border-r"
                           style={{ width: CELL_WIDTH }}
                         >
-                          {job.dueDate && isSameDay(date, new Date(job.dueDate)) && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div
-                                    className={cn(
-                                      'absolute inset-2 max-h-6 rounded-full',
-                                      getStatusColor(job.jobStatus)
-                                    )}
-                                  >
-                                    <Progress
-                                      value={calculateProgress(job)}
-                                      className="h-full rounded-full opacity-10"
-                                    />
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="w-72 p-3">
-                                  <div className="mb-2 flex items-center justify-between">
-                                    <Link
-                                      href={`/jobs/${job.id}`}
-                                      className="text-sm font-medium hover:underline"
+                          {job.dueDate &&
+                            isSameDay(date, new Date(job.dueDate)) && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                      className={cn(
+                                        'absolute inset-2 max-h-6 rounded-full',
+                                        getStatusColor(job.jobStatus)
+                                      )}
                                     >
-                                      {job.title}
-                                    </Link>
-                                    <AppSheet
-                                      mode="edit"
-                                      entity="job"
-                                      trigger={
-                                        <Button variant="outline" size="sm" className="h-7">
-                                          Edit
-                                        </Button>
-                                      }
-                                    >
-                                      <JobForm mode="edit" defaultValues={job} />
-                                    </AppSheet>
-                                  </div>
-                                  <div className="space-y-1.5">
-                                    {job.assignedTo && (
-                                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <Avatar className="h-5 w-5">
-                                          <AvatarImage
-                                            src={job.assignedTo.image || ''}
-                                            alt={job.assignedTo.name || ''}
-                                          />
-                                          <AvatarFallback>
-                                            {job.assignedTo.name?.[0] || 'U'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                        <span>{job.assignedTo.name}</span>
+                                      <Progress
+                                        value={calculateProgress(job)}
+                                        className="h-full rounded-full opacity-10"
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="w-72 p-3">
+                                    <div className="mb-2 flex items-center justify-between">
+                                      <Link
+                                        href={`/jobs/${job.id}`}
+                                        className="text-sm font-medium hover:underline"
+                                      >
+                                        {job.title}
+                                      </Link>
+                                      <AppSheet
+                                        mode="edit"
+                                        entity="job"
+                                        trigger={
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-7"
+                                          >
+                                            Edit
+                                          </Button>
+                                        }
+                                      >
+                                        <JobForm
+                                          mode="edit"
+                                          defaultValues={job}
+                                        />
+                                      </AppSheet>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      {job.assignedTo && (
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                          <Avatar className="h-5 w-5">
+                                            <AvatarImage
+                                              src={job.assignedTo.image || ''}
+                                              alt={job.assignedTo.name || ''}
+                                            />
+                                            <AvatarFallback>
+                                              {job.assignedTo.name?.[0] || 'U'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <span>{job.assignedTo.name}</span>
+                                        </div>
+                                      )}
+                                      <div className="text-xs text-muted-foreground">
+                                        Due{' '}
+                                        {format(new Date(job.dueDate), 'PP')}
                                       </div>
-                                    )}
-                                    <div className="text-xs text-muted-foreground">
-                                      Due {format(new Date(job.dueDate), 'PP')}
+                                      <div className="text-xs text-muted-foreground">
+                                        Progress:{' '}
+                                        {Math.round(calculateProgress(job))}%
+                                      </div>
                                     </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      Progress: {Math.round(calculateProgress(job))}%
-                                    </div>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                         </div>
                       ))}
                     </div>
