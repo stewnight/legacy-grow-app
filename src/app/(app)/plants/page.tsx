@@ -3,10 +3,10 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
-import { columns } from './_components/plants-columns'
+import { columns } from '../../../components/plants/plants-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { PlantForm } from './_components/plants-form'
+import { PlantForm } from '../../../components/plants/plants-form'
 
 export default async function PlantsPage() {
   const session = await auth()
@@ -28,7 +28,11 @@ export default async function PlantsPage() {
       </div>
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <DataTable columns={columns} data={plants} filterColumn="identifier" />
+          <DataTable
+            columns={columns}
+            data={plants}
+            filterColumn="identifier"
+          />
         </Suspense>
       </div>
     </div>

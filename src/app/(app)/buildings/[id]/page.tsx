@@ -18,7 +18,7 @@ import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
 import { BuildingsForm } from '../../../../components/buildings/buildings-form'
 import { Badge } from '../../../../components/ui/badge'
-import { RoomForm } from '../../rooms/_components/rooms-form'
+import { RoomForm } from '../../../../components/rooms/rooms-form'
 
 export default function BuildingPage({
   params,
