@@ -3,10 +3,10 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
-import { columns } from './_components/locations-columns'
+import { columns } from '../../../components/locations/locations-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { LocationForm } from './_components/locations-form'
+import { LocationForm } from '../../../components/locations/locations-form'
 
 export default async function LocationsPage() {
   const session = await auth()
