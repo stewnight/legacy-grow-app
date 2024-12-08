@@ -3,17 +3,36 @@
 import * as React from 'react'
 import { api } from '~/trpc/react'
 import { format } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '~/components/ui/card'
 import { notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
-import { Leaf, MapPin, Calendar, Users, Sprout, Thermometer, Droplets, Timer } from 'lucide-react'
+import {
+  Leaf,
+  MapPin,
+  Calendar,
+  Users,
+  Sprout,
+  Thermometer,
+  Droplets,
+  Timer,
+} from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
-import { BatchForm } from '../_components/batches-form'
+import { BatchForm } from '../../../../components/batches/batches-form'
 import JobsTab from '../../../../components/jobs/tab'
 
-export default function BatchPage({ params }: { params: Promise<{ id: string }> }) {
+export default function BatchPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const resolvedParams = React.use(params)
 
   const { data: batch, isLoading } = api.batch.get.useQuery(resolvedParams.id, {
@@ -61,12 +80,17 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{batch.identifier}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {batch.identifier}
+          </h2>
           <p className="text-muted-foreground">
             {batch.genetic ? (
               <>
                 Strain:{' '}
-                <Link href={`/genetics/${batch.genetic.id}`} className="hover:underline">
+                <Link
+                  href={`/genetics/${batch.genetic.id}`}
+                  className="hover:underline"
+                >
                   {batch.genetic.name}
                 </Link>
               </>
@@ -88,7 +112,9 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">{batch.stage}</div>
-            <p className="text-xs text-muted-foreground">Current growth stage</p>
+            <p className="text-xs text-muted-foreground">
+              Current growth stage
+            </p>
           </CardContent>
         </Card>
 
@@ -109,7 +135,9 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatDate(batch.startDate)}</div>
+            <div className="text-2xl font-bold">
+              {formatDate(batch.startDate)}
+            </div>
             <p className="text-xs text-muted-foreground">Batch started</p>
           </CardContent>
         </Card>
@@ -120,7 +148,9 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
             <Timer className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold capitalize">{batch.batchStatus}</div>
+            <div className="text-2xl font-bold capitalize">
+              {batch.batchStatus}
+            </div>
             <p className="text-xs text-muted-foreground">Current status</p>
           </CardContent>
         </Card>
@@ -143,10 +173,15 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
               <CardContent>
                 <dl className="space-y-2">
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Location</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Location
+                    </dt>
                     <dd className="text-sm">
                       {batch.location ? (
-                        <Link href={`/locations/${batch.location.id}`} className="hover:underline">
+                        <Link
+                          href={`/locations/${batch.location.id}`}
+                          className="hover:underline"
+                        >
                           {batch.location.name}
                         </Link>
                       ) : (
@@ -155,15 +190,21 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Stage</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Stage
+                    </dt>
                     <dd className="text-sm capitalize">{batch.stage}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Status</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Status
+                    </dt>
                     <dd className="text-sm capitalize">{batch.batchStatus}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Created</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Created
+                    </dt>
                     <dd className="text-sm">
                       {formatDate(batch.createdAt)} by {batch.createdBy?.name}
                     </dd>
@@ -181,8 +222,12 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
                   <dl className="space-y-2">
                     {batch.properties.source && (
                       <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Source</dt>
-                        <dd className="text-sm capitalize">{batch.properties.source}</dd>
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Source
+                        </dt>
+                        <dd className="text-sm capitalize">
+                          {batch.properties.source}
+                        </dd>
                       </div>
                     )}
                     {batch.properties.medium && (
@@ -190,13 +235,19 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
                         <dt className="text-sm font-medium text-muted-foreground">
                           Growing Medium
                         </dt>
-                        <dd className="text-sm capitalize">{batch.properties.medium}</dd>
+                        <dd className="text-sm capitalize">
+                          {batch.properties.medium}
+                        </dd>
                       </div>
                     )}
                     {batch.properties.container && (
                       <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Container</dt>
-                        <dd className="text-sm capitalize">{batch.properties.container}</dd>
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Container
+                        </dt>
+                        <dd className="text-sm capitalize">
+                          {batch.properties.container}
+                        </dd>
                       </div>
                     )}
                   </dl>
@@ -227,7 +278,9 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
                   )}
                   {batch.properties.environment.humidity && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Humidity Range</dt>
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        Humidity Range
+                      </dt>
                       <dd className="text-sm">
                         {batch.properties.environment.humidity.min}% -{' '}
                         {batch.properties.environment.humidity.max}%
@@ -236,7 +289,9 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
                   )}
                   {batch.properties.environment.light && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Light Schedule</dt>
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        Light Schedule
+                      </dt>
                       <dd className="text-sm">
                         {batch.properties.environment.light.hours} hours
                         {batch.properties.environment.light.intensity &&
@@ -246,7 +301,9 @@ export default function BatchPage({ params }: { params: Promise<{ id: string }> 
                   )}
                 </dl>
               ) : (
-                <p className="text-muted-foreground">No environmental settings configured</p>
+                <p className="text-muted-foreground">
+                  No environmental settings configured
+                </p>
               )}
             </CardContent>
           </Card>
