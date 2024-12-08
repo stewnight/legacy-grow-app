@@ -1,0 +1,561 @@
+{
+  "framework": {
+    "name": "T3 Stack",
+    "version": "7.38.1",
+    "base": "create-t3-app",
+    "core": {
+      "nextjs": "15.0.3",
+      "typescript": "5.6.3",
+      "tailwind": "3.4.15",
+      "trpc": "11.0.0-rc.638",
+      "nextAuth": "5.0.0"
+    },
+    "patterns": {
+      "api": {
+        "location": "~/server/api/routers",
+        "pattern": "tRPC router with protected procedures",
+        "context": "~/server/api/trpc.ts"
+      },
+      "auth": {
+        "location": "~/server/auth.ts",
+        "pattern": "AuthJS v5 with Discord provider",
+        "adapter": "@auth/drizzle-adapter"
+      },
+      "env": {
+        "location": "~/env.ts",
+        "validation": "@t3-oss/env-nextjs",
+        "schema": "server and client env separation"
+      },
+      "utils": {
+        "location": "~/utils",
+        "trpc": {
+          "server": "~/server/api/trpc.ts",
+          "client": "~/trpc/react.ts"
+        }
+      }
+    },
+    "structure": {
+      "root": {
+        "src/": "main source code",
+        "prisma/": "database schema (migrated to drizzle)",
+        "public/": "static assets",
+        "src/server/": "backend code",
+        "src/app/": "Next.js app router"
+      }
+    }
+  },
+  "styleGuide": "Custom",
+  "lintConfig": {
+    "extends": [
+      "next/core-web-vitals",
+      "eslint-config-prettier",
+      "plugin:@typescript-eslint/recommended-type-checked",
+      "plugin:@typescript-eslint/stylistic-type-checked",
+      "plugin:storybook/recommended"
+    ]
+  },
+  "formattingRules": {
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "printWidth": 100
+  },
+  "componentPatterns": {
+    "clientComponents": {
+      "directive": "'use client'",
+      "location": "top"
+    },
+    "naming": {
+      "components": "PascalCase",
+      "files": "kebab-case",
+      "types": "PascalCase",
+      "interfaces": "PascalCase"
+    }
+  },
+  "typePatterns": {
+    "drizzle": {
+      "tableTypes": "typeof table.$inferSelect",
+      "insertTypes": "typeof table.$inferInsert",
+      "schemaTypes": "z.infer<typeof schema>"
+    },
+    "forms": {
+      "data": "z.infer<typeof formSchema>",
+      "props": "interface ComponentProps"
+    }
+  },
+  "architecture": {
+    "forms": {
+      "layers": [
+        "AppSheet",
+        "BaseForm",
+        "EntityForm"
+      ],
+      "validation": "zod",
+      "stateManagement": "react-hook-form"
+    },
+    "api": {
+      "pattern": "tRPC",
+      "security": "protectedProcedure",
+      "validation": "zod"
+    }
+  },
+  "testing": {
+    "framework": "Storybook",
+    "version": "8.4.5",
+    "components": "@storybook/react"
+  },
+  "styling": {
+    "framework": "Tailwind CSS",
+    "components": "shadcn/ui",
+    "cssVariables": true,
+    "baseColor": "slate"
+  },
+  "stateManagement": {
+    "server": "tRPC",
+    "version": "11.0.0-rc.638",
+    "client": {
+      "name": "@tanstack/react-query",
+      "version": "5.60.5",
+      "features": {
+        "devtools": true,
+        "persistence": true,
+        "syncStorage": true
+      }
+    }
+  },
+  "dateHandling": {
+    "library": "date-fns",
+    "patterns": {
+      "display": {
+        "default": "PPP",
+        "short": "PP",
+        "time": "p",
+        "datetime": "PPp"
+      },
+      "parsing": {
+        "iso": "yyyy-MM-dd'T'HH:mm:ss.SSSxxx",
+        "date": "yyyy-MM-dd"
+      },
+      "relative": {
+        "past": "formatDistanceToNow",
+        "future": "formatDistanceToNowStrict"
+      }
+    },
+    "formHandling": {
+      "store": "Date objects",
+      "submit": "ISO strings",
+      "display": "formatted strings"
+    }
+  },
+  "metadata": {
+    "standardPattern": {
+      "device": "string?",
+      "location": "LocationMetadata?",
+      "weather": "WeatherMetadata?",
+      "references": "EntityReference[]?",
+      "timestamps": {
+        "createdAt": "Date",
+        "updatedAt": "Date",
+        "completedAt": "Date?"
+      }
+    }
+  },
+  "auth": {
+    "provider": "AuthJS",
+    "version": "5.0.0",
+    "strategy": "Discord",
+    "sessionHandling": {
+      "server": "protectedProcedure",
+      "client": "useSession",
+      "middleware": "middleware.ts"
+    }
+  },
+  "queryPatterns": {
+    "tanstack": {
+      "version": "5.0.0",
+      "caching": {
+        "staleTime": 300000,
+        "gcTime": 3600000
+      },
+      "prefetching": {
+        "lists": true,
+        "details": true
+      },
+      "mutations": {
+        "optimisticUpdates": true,
+        "invalidation": "smart"
+      }
+    }
+  },
+  "mobileFirst": {
+    "breakpoints": {
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px",
+      "2xl": "1536px"
+    },
+    "touchTargets": {
+      "minimum": "44px",
+      "comfortable": "48px"
+    },
+    "gestures": {
+      "swipe": true,
+      "pinchZoom": true,
+      "longPress": true
+    }
+  },
+  "accessibility": {
+    "aria": {
+      "required": true,
+      "landmarks": true,
+      "labels": true
+    },
+    "keyboard": {
+      "focusManagement": true,
+      "shortcuts": true,
+      "trapFocus": true
+    },
+    "motion": {
+      "reduceMotion": true,
+      "animations": "prefers-reduced-motion"
+    }
+  },
+  "errorBoundaries": {
+    "global": "GlobalError",
+    "layout": "LayoutError",
+    "component": "ComponentError",
+    "reporting": {
+      "sentry": true,
+      "console": true,
+      "analytics": true
+    }
+  },
+  "compliance": {
+    "logging": {
+      "mutations": true,
+      "access": true,
+      "errors": true
+    },
+    "tracking": {
+      "batch": true,
+      "plant": true,
+      "modifications": true
+    },
+    "reporting": {
+      "exports": [
+        "CSV",
+        "PDF",
+        "JSON"
+      ],
+      "audit": true
+    }
+  },
+  "notifications": {
+    "library": "sonner",
+    "implementation": "use-toast",
+    "patterns": {
+      "success": {
+        "duration": 3000,
+        "position": "bottom-right"
+      },
+      "error": {
+        "duration": 5000,
+        "position": "bottom-right"
+      },
+      "loading": {
+        "duration": null,
+        "position": "bottom-right"
+      }
+    }
+  },
+  "storage": {
+    "database": {
+      "type": "postgres",
+      "orm": "drizzle",
+      "version": "0.36.3",
+      "tools": {
+        "drizzle-kit": "0.28.1",
+        "drizzle-zod": "0.5.1"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "services": [
+        "@aws-sdk/client-s3",
+        "@aws-sdk/s3-request-presigner"
+      ]
+    }
+  },
+  "dragAndDrop": {
+    "library": "@dnd-kit/core",
+    "addons": [
+      "@dnd-kit/sortable",
+      "@dnd-kit/utilities"
+    ]
+  },
+  "errorHandling": {
+    "boundary": "react-error-boundary",
+    "version": "4.1.2"
+  },
+  "fileHandling": {
+    "upload": "react-dropzone",
+    "version": "14.3.5"
+  },
+  "qr": {
+    "library": "qrcode.react",
+    "version": "4.1.0"
+  },
+  "hooks": {
+    "location": "~/hooks",
+    "naming": "use{Feature}",
+    "patterns": {
+      "queries": {
+        "conditional": {
+          "pattern": "useQuery with enabled option",
+          "example": "useQuery({ enabled: condition })"
+        },
+        "parallel": {
+          "pattern": "declare all queries at top level",
+          "placement": "before any other hooks or logic"
+        }
+      },
+      "memoization": {
+        "useMemo": {
+          "rules": [
+            "no hooks inside useMemo",
+            "include all dependencies",
+            "only memoize expensive calculations"
+          ],
+          "usage": {
+            "correct": "memoize query selection or data transformation",
+            "incorrect": "calling hooks or async operations"
+          }
+        },
+        "useCallback": {
+          "rules": [
+            "use for function props",
+            "include all referenced values in deps"
+          ]
+        }
+      },
+      "rules": {
+        "topLevel": "call hooks at the top level only",
+        "componentScope": "only call hooks in React components or custom hooks",
+        "conditionals": "no hooks in conditions or loops",
+        "dependencies": "include all referenced values in dependency arrays"
+      }
+    },
+    "tanstack": {
+      "queries": {
+        "placement": "top level of component",
+        "options": {
+          "enabled": "boolean | (() => boolean)",
+          "staleTime": 300000,
+          "gcTime": 3600000
+        },
+        "patterns": {
+          "conditional": "useQuery({ enabled: condition })",
+          "dependent": "useQuery({ enabled: !!dependentData })",
+          "prefetch": "prefetchQuery({ queryKey })"
+        }
+      },
+      "queryClient": {
+        "defaultOptions": {
+          "queries": {
+            "staleTime": 300000,
+            "gcTime": 3600000,
+            "networkMode": "offlineFirst",
+            "retry": {
+              "maxAttempts": 3,
+              "excludeCodes": [
+                "NOT_FOUND",
+                "UNAUTHORIZED",
+                "FORBIDDEN"
+              ]
+            }
+          },
+          "mutations": {
+            "networkMode": "offlineFirst",
+            "retry": false
+          }
+        },
+        "persistence": {
+          "storage": "localStorage",
+          "maxAge": 86400000,
+          "serialize": "SuperJSON",
+          "deserialize": "SuperJSON"
+        }
+      }
+    },
+    "forms": {
+      "layers": {
+        "AppSheet": {
+          "responsibility": "modal container and form context",
+          "features": [
+            "unsaved changes protection",
+            "form state management",
+            "UI feedback"
+          ]
+        },
+        "BaseForm": {
+          "responsibility": "form state and API interaction",
+          "features": [
+            "React Hook Form integration",
+            "Zod validation",
+            "tRPC mutations",
+            "optimistic updates"
+          ]
+        },
+        "EntityForm": {
+          "responsibility": "specific form implementation",
+          "features": [
+            "field definitions",
+            "business logic",
+            "data transformation"
+          ]
+        }
+      },
+      "validation": {
+        "resolver": "zodResolver",
+        "schema": "insertEntitySchema"
+      },
+      "state": {
+        "library": "react-hook-form",
+        "context": "FormContext",
+        "persistence": true
+      }
+    }
+  },
+  "packageManager": {
+    "name": "pnpm",
+    "version": "9.12.3",
+    "commands": {
+      "install": "pnpm install",
+      "add": "pnpm add",
+      "remove": "pnpm remove",
+      "dev": "pnpm dev",
+      "build": "pnpm build-storybook && pnpm build",
+      "start": "pnpm start",
+      "lint": "pnpm lint",
+      "lint:fix": "pnpm lint:fix",
+      "check": "pnpm check",
+      "typecheck": "pnpm typecheck",
+      "format:check": "pnpm format:check",
+      "format:write": "pnpm format:write",
+      "preview": "pnpm preview",
+      "db:generate": "pnpm db:generate",
+      "db:push": "pnpm db:push",
+      "db:migrate": "pnpm db:migrate",
+      "db:studio": "pnpm db:studio",
+      "storybook": "pnpm storybook",
+      "build-storybook": "pnpm build-storybook",
+      "test-storybook": "pnpm test-storybook"
+    }
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.38.1"
+  },
+  "componentStructure": {
+    "ui": {
+      "location": "~/components/ui",
+      "type": "shadcn/ui components only",
+      "naming": "kebab-case",
+      "components": [
+        "alert-dialog",
+        "alert",
+        "avatar",
+        "badge",
+        "breadcrumb",
+        "button",
+        "calendar",
+        "card",
+        "checkbox",
+        "collapsible",
+        "command",
+        "data-table",
+        "date-picker",
+        "dialog",
+        "dropdown-menu",
+        "form",
+        "hover-card",
+        "input",
+        "label",
+        "popover",
+        "progress",
+        "radio-group",
+        "resizable",
+        "scroll-area",
+        "select",
+        "separator",
+        "sheet",
+        "sidebar",
+        "skeleton",
+        "slider",
+        "switch",
+        "table",
+        "tabs",
+        "textarea",
+        "toast",
+        "tooltip"
+      ]
+    },
+    "custom": {
+      "location": "~/components",
+      "subDirectories": {
+        "layout": "app layout components",
+        "calendar": "calendar view components",
+        "gantt": "gantt chart components",
+        "notes": "note management components",
+        "equipment": "equipment management components",
+        "jobs": "job management components",
+        "dashboard": "dashboard components"
+      },
+      "standalone": [
+        "base-form.tsx",
+        "create-form-wrapper.tsx",
+        "icons.tsx",
+        "media-upload.tsx",
+        "session-provider.tsx",
+        "theme-provider.tsx",
+        "theme-toggle.tsx"
+      ]
+    }
+  },
+  "features": {
+    "core": [
+      "authentication",
+      "form management",
+      "data tables",
+      "file uploads",
+      "notifications"
+    ],
+    "domain": {
+      "entities": [
+        "plants",
+        "rooms",
+        "locations",
+        "jobs",
+        "genetics",
+        "equipment",
+        "buildings",
+        "batches"
+      ],
+      "views": [
+        "list",
+        "calendar",
+        "gantt",
+        "dashboard"
+      ]
+    },
+    "ui": {
+      "components": "shadcn/ui",
+      "customizations": {
+        "theme": "dark/light mode",
+        "layout": "responsive design",
+        "animations": "framer-motion"
+      }
+    }
+  }
+}
