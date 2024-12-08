@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { sensorReadings, insertSensorReadingSchema } from '~/server/db/schema/sensorReadings'
+import {
+  sensorReadings,
+  insertSensorReadingSchema,
+} from '~/server/db/schema/sensorReadings'
 import { eq, desc, and, SQL, gte, lte } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 
@@ -24,9 +27,15 @@ export const sensorReadingRouter = createTRPCRouter({
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.sensorId ? eq(sensorReadings.sensorId, filters.sensorId) : undefined,
-        filters?.startDate ? gte(sensorReadings.timestamp, filters.startDate) : undefined,
-        filters?.endDate ? lte(sensorReadings.timestamp, filters.endDate) : undefined,
+        filters?.sensorId
+          ? eq(sensorReadings.sensorId, filters.sensorId)
+          : undefined,
+        filters?.startDate
+          ? gte(sensorReadings.timestamp, filters.startDate)
+          : undefined,
+        filters?.endDate
+          ? lte(sensorReadings.timestamp, filters.endDate)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db
@@ -46,22 +55,24 @@ export const sensorReadingRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const reading = await ctx.db
-      .select()
-      .from(sensorReadings)
-      .where(eq(sensorReadings.id, input))
-      .limit(1)
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const reading = await ctx.db
+        .select()
+        .from(sensorReadings)
+        .where(eq(sensorReadings.id, input))
+        .limit(1)
 
-    if (!reading[0]) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Sensor reading not found',
-      })
-    }
+      if (!reading[0]) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Sensor reading not found',
+        })
+      }
 
-    return reading[0]
-  }),
+      return reading[0]
+    }),
 
   create: protectedProcedure
     .input(
@@ -78,7 +89,8 @@ export const sensorReadingRouter = createTRPCRouter({
         .insert(sensorReadings)
         .values({
           ...rest,
-          metadata: (metadata as typeof sensorReadings.$inferInsert.metadata) || null,
+          metadata:
+            (metadata as typeof sensorReadings.$inferInsert.metadata) || null,
         })
         .returning()
 
@@ -109,7 +121,8 @@ export const sensorReadingRouter = createTRPCRouter({
         .values(
           input.map(({ metadata, ...rest }) => ({
             ...rest,
-            metadata: (metadata as typeof sensorReadings.$inferInsert.metadata) || null,
+            metadata:
+              (metadata as typeof sensorReadings.$inferInsert.metadata) || null,
           }))
         )
         .returning()
@@ -117,19 +130,21 @@ export const sensorReadingRouter = createTRPCRouter({
       return readings
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db
-      .delete(sensorReadings)
-      .where(eq(sensorReadings.id, input))
-      .returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(sensorReadings)
+        .where(eq(sensorReadings.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Sensor reading not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Sensor reading not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

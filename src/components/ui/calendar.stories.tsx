@@ -19,7 +19,12 @@ export const Default: Story = {
   render: () => {
     const [date, setDate] = useState<Date | undefined>(new Date())
     return (
-      <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
+      <Calendar
+        mode="single"
+        selected={date}
+        onSelect={setDate}
+        className="rounded-md border"
+      />
     )
   },
 }
@@ -28,7 +33,12 @@ export const WithInitialDate: Story = {
   render: () => {
     const [date, setDate] = useState<Date | undefined>(new Date('2024-03-15'))
     return (
-      <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
+      <Calendar
+        mode="single"
+        selected={date}
+        onSelect={setDate}
+        className="rounded-md border"
+      />
     )
   },
 }

@@ -1,5 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './card'
 import { Button } from './button'
 
 const meta = {
@@ -40,7 +47,9 @@ export const WithForm: Story = {
       <>
         <CardHeader>
           <CardTitle>Create Project</CardTitle>
-          <CardDescription>Deploy your new project in one-click.</CardDescription>
+          <CardDescription>
+            Deploy your new project in one-click.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -51,7 +60,10 @@ export const WithForm: Story = {
               </div>
               <div className="flex flex-col space-y-1.5">
                 <label htmlFor="description">Description</label>
-                <textarea id="description" placeholder="Describe your project" />
+                <textarea
+                  id="description"
+                  placeholder="Describe your project"
+                />
               </div>
             </div>
           </form>

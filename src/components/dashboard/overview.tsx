@@ -53,8 +53,16 @@ export function Overview() {
           axisLine={false}
           tickFormatter={(value) => `${value}`}
         />
-        <Bar dataKey="plants" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="harvests" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="plants"
+          fill="hsl(var(--chart-1))"
+          radius={[4, 4, 0, 0]}
+        />
+        <Bar
+          dataKey="harvests"
+          fill="hsl(var(--chart-2))"
+          radius={[4, 4, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   )

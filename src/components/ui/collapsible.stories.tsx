@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from './collapsible'
 import { Button } from './button'
 import { ChevronsUpDown } from 'lucide-react'
 
@@ -26,8 +30,12 @@ export const Default: Story = {
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2">
-          <div className="rounded-md border px-4 py-3 font-mono text-sm">Content 1</div>
-          <div className="rounded-md border px-4 py-3 font-mono text-sm">Content 2</div>
+          <div className="rounded-md border px-4 py-3 font-mono text-sm">
+            Content 1
+          </div>
+          <div className="rounded-md border px-4 py-3 font-mono text-sm">
+            Content 2
+          </div>
         </CollapsibleContent>
       </>
     ),
@@ -49,9 +57,15 @@ export const WithCustomTrigger: Story = {
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent className="space-y-2">
-          <div className="rounded-md border px-4 py-2 text-sm">Push Notifications</div>
-          <div className="rounded-md border px-4 py-2 text-sm">Email Notifications</div>
-          <div className="rounded-md border px-4 py-2 text-sm">SMS Notifications</div>
+          <div className="rounded-md border px-4 py-2 text-sm">
+            Push Notifications
+          </div>
+          <div className="rounded-md border px-4 py-2 text-sm">
+            Email Notifications
+          </div>
+          <div className="rounded-md border px-4 py-2 text-sm">
+            SMS Notifications
+          </div>
         </CollapsibleContent>
       </>
     ),

@@ -26,7 +26,13 @@ export const WithLabel: Story = {
   render: () => (
     <div className="grid w-full max-w-sm gap-2">
       <Label htmlFor="volume">Volume</Label>
-      <Slider id="volume" defaultValue={[50]} max={100} step={1} className="w-[60%]" />
+      <Slider
+        id="volume"
+        defaultValue={[50]}
+        max={100}
+        step={1}
+        className="w-[60%]"
+      />
     </div>
   ),
 }

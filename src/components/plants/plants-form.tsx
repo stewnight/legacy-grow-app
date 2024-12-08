@@ -51,7 +51,11 @@ interface PlantFormProps {
   onSuccess?: (data: PlantFormValues) => void
 }
 
-export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFormProps) {
+export function PlantForm({
+  mode = 'create',
+  defaultValues,
+  onSuccess,
+}: PlantFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -95,36 +99,44 @@ export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFo
     limit: 100,
   })
 
-  const { mutate: createPlant, isPending: isCreating } = api.plant.create.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Plant created successfully' })
-      void Promise.all([utils.plant.getAll.invalidate(), utils.plant.get.invalidate(data.id)])
-      router.push(`/plants/${data.id}`)
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error creating plant',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createPlant, isPending: isCreating } =
+    api.plant.create.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Plant created successfully' })
+        void Promise.all([
+          utils.plant.getAll.invalidate(),
+          utils.plant.get.invalidate(data.id),
+        ])
+        router.push(`/plants/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error creating plant',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updatePlant, isPending: isUpdating } = api.plant.update.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Plant updated successfully' })
-      void Promise.all([utils.plant.getAll.invalidate(), utils.plant.get.invalidate(data.id)])
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error updating plant',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updatePlant, isPending: isUpdating } =
+    api.plant.update.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Plant updated successfully' })
+        void Promise.all([
+          utils.plant.getAll.invalidate(),
+          utils.plant.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error updating plant',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   function onSubmit(values: PlantFormValues) {
     if (mode === 'create') {
@@ -207,7 +219,10 @@ export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFo
           render={({ field }) => (
             <FormItem>
               <FormLabel>Batch (Optional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? undefined}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select batch" />
@@ -233,7 +248,10 @@ export function PlantForm({ mode = 'create', defaultValues, onSuccess }: PlantFo
           render={({ field }) => (
             <FormItem>
               <FormLabel>Mother Plant (Optional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? undefined}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select mother plant" />

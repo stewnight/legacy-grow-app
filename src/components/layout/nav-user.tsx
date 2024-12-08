@@ -43,7 +43,9 @@ export function NavUser({ user }: { user: UserData }) {
             <SidebarMenuButton>
               <Avatar className="h-6 w-6">
                 <AvatarImage src={user.image ?? ''} alt={user.name ?? ''} />
-                <AvatarFallback>{user.name?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
+                <AvatarFallback>
+                  {user.name?.charAt(0).toUpperCase() ?? 'U'}
+                </AvatarFallback>
               </Avatar>
               <span>{user.name}</span>
             </SidebarMenuButton>
@@ -59,11 +61,17 @@ export function NavUser({ user }: { user: UserData }) {
                 <div className="flex flex-row items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={user.image ?? ''} alt={user.name ?? ''} />
-                    <AvatarFallback>{user.name?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
+                    <AvatarFallback>
+                      {user.name?.charAt(0).toUpperCase() ?? 'U'}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
                   <ThemeToggle />
                 </div>

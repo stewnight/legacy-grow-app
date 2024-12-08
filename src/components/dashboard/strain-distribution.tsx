@@ -8,7 +8,11 @@ const data = [
   { name: 'Hybrid', value: 40 },
 ]
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']
+const COLORS = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+]
 
 export function StrainDistribution() {
   return (

@@ -111,7 +111,10 @@ export function TaskManager({ tasks, onChange }: TaskManagerProps) {
                   <FormItem>
                     <FormLabel>Task Description</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter task description..." />
+                      <Input
+                        {...field}
+                        placeholder="Enter task description..."
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -140,7 +143,11 @@ export function TaskManager({ tasks, onChange }: TaskManagerProps) {
                 )}
               />
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">Add Task</Button>
@@ -173,7 +180,9 @@ export function TaskManager({ tasks, onChange }: TaskManagerProps) {
                   {task.estimatedMinutes && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      <span>Estimated: {formatDuration(task.estimatedMinutes)}</span>
+                      <span>
+                        Estimated: {formatDuration(task.estimatedMinutes)}
+                      </span>
                     </div>
                   )}
                 </div>

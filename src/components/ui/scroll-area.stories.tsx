@@ -14,7 +14,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof ScrollArea>
 
-const tags = Array.from({ length: 50 }).map((_, i, a) => `v1.2.0-beta.${a.length - i}`)
+const tags = Array.from({ length: 50 }).map(
+  (_, i, a) => `v1.2.0-beta.${a.length - i}`
+)
 
 export const Default: Story = {
   args: {
@@ -40,7 +42,10 @@ export const Horizontal: Story = {
     <ScrollArea className="w-96 whitespace-nowrap rounded-md border">
       <div className="flex p-4">
         {Array.from({ length: 50 }, (_, i) => (
-          <div key={i} className="flex w-[200px] items-center justify-center p-4">
+          <div
+            key={i}
+            className="flex w-[200px] items-center justify-center p-4"
+          >
             <span className="font-medium">Item {i + 1}</span>
           </div>
         ))}

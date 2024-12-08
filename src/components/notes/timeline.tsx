@@ -18,22 +18,34 @@ interface TimelineProps {
   onDelete?: (noteId: number) => void
 }
 
-export function Timeline({ entityType, entityId, onReply, onEdit, onDelete }: TimelineProps) {
+export function Timeline({
+  entityType,
+  entityId,
+  onReply,
+  onEdit,
+  onDelete,
+}: TimelineProps) {
   const { ref, inView } = useInView()
 
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
-    api.notes.list.useInfiniteQuery(
-      {
-        entityType,
-        entityId,
-        limit: 10,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-        refetchOnWindowFocus: false,
-        enabled: true,
-      }
-    )
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = api.notes.list.useInfiniteQuery(
+    {
+      entityType,
+      entityId,
+      limit: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false,
+      enabled: true,
+    }
+  )
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

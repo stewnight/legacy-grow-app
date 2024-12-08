@@ -31,7 +31,9 @@ export const buildingRouter = createTRPCRouter({
       const conditions = [
         filters?.type ? eq(buildings.type, filters.type) : undefined,
         filters?.status ? eq(buildings.status, filters.status) : undefined,
-        filters?.search ? like(buildings.name, `%${filters.search}%`) : undefined,
+        filters?.search
+          ? like(buildings.name, `%${filters.search}%`)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.buildings.findMany({
@@ -60,54 +62,61 @@ export const buildingRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input),
-      with: {
-        rooms: {
-          with: {
-            children: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const building = await ctx.db.query.buildings.findFirst({
+        where: eq(buildings.id, input),
+        with: {
+          rooms: {
+            with: {
+              children: true,
+            },
+          },
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    })
-
-    if (!building) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Facility not found',
       })
-    }
 
-    return building
-  }),
+      if (!building) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Facility not found',
+        })
+      }
 
-  create: protectedProcedure.input(insertBuildingSchema).mutation(async ({ ctx, input }) => {
-    const insertData = {
-      ...input,
-      createdById: ctx.session.user.id,
-      properties: input.properties as BuildingProperties,
-      address: input.address as BuildingAddress,
-    }
+      return building
+    }),
 
-    const [building] = await ctx.db.insert(buildings).values(insertData).returning()
+  create: protectedProcedure
+    .input(insertBuildingSchema)
+    .mutation(async ({ ctx, input }) => {
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as BuildingProperties,
+        address: input.address as BuildingAddress,
+      }
 
-    if (!building) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create facility',
-      })
-    }
+      const [building] = await ctx.db
+        .insert(buildings)
+        .values(insertData)
+        .returning()
 
-    return building
-  }),
+      if (!building) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create facility',
+        })
+      }
+
+      return building
+    }),
 
   update: protectedProcedure
     .input(
@@ -120,7 +129,8 @@ export const buildingRouter = createTRPCRouter({
       const updateData = {
         ...input.data,
         updatedAt: new Date(),
-        properties: input.data.properties as typeof buildings.$inferInsert.properties,
+        properties: input.data
+          .properties as typeof buildings.$inferInsert.properties,
         address: input.data.address as typeof buildings.$inferInsert.address,
       }
 
@@ -140,16 +150,21 @@ export const buildingRouter = createTRPCRouter({
       return building
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(buildings).where(eq(buildings.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(buildings)
+        .where(eq(buildings.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Building not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Building not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

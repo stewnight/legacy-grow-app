@@ -14,7 +14,11 @@ interface MediaUploaderProps {
   onUploadError: (error: Error) => void
 }
 
-export function MediaUploader({ onUpload, onUploadComplete, onUploadError }: MediaUploaderProps) {
+export function MediaUploader({
+  onUpload,
+  onUploadComplete,
+  onUploadError,
+}: MediaUploaderProps) {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
 
@@ -61,7 +65,9 @@ export function MediaUploader({ onUpload, onUploadComplete, onUploadError }: Med
         xhr.setRequestHeader('Content-Type', file.type)
         xhr.send(file)
       } catch (error) {
-        onUploadError(error instanceof Error ? error : new Error('Upload failed'))
+        onUploadError(
+          error instanceof Error ? error : new Error('Upload failed')
+        )
         setIsUploading(false)
       }
     },
@@ -90,7 +96,11 @@ export function MediaUploader({ onUpload, onUploadComplete, onUploadError }: Med
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm">Uploading...</span>
-            <Button variant="ghost" size="sm" onClick={() => setIsUploading(false)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsUploading(false)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>

@@ -34,7 +34,9 @@ export function AppSheet<T>({
       </SheetTrigger>
       <SheetContent className="max-h-[calc(100vh)] w-full p-0 sm:max-w-2xl">
         <SheetHeader className="p-4 pb-0">
-          <SheetTitle>{mode === 'edit' ? `Edit ${entity}` : `Create ${entity}`}</SheetTitle>
+          <SheetTitle>
+            {mode === 'edit' ? `Edit ${entity}` : `Create ${entity}`}
+          </SheetTitle>
           <SheetDescription>
             {mode === 'edit'
               ? `Make changes to your ${entity}.`

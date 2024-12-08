@@ -131,7 +131,12 @@ export function MediaUpload({
         <div className="space-y-4">
           {preview && (
             <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-              <Image src={preview} alt="Preview" fill className="object-cover" />
+              <Image
+                src={preview}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
             </div>
           )}
 
@@ -150,7 +155,10 @@ export function MediaUpload({
             </Button>
           </div>
 
-          <Button onClick={handleUpload} disabled={progress > 0 && progress < 100}>
+          <Button
+            onClick={handleUpload}
+            disabled={progress > 0 && progress < 100}
+          >
             Upload
           </Button>
         </div>

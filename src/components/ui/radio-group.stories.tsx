@@ -37,14 +37,18 @@ export const WithDescription: Story = {
           <RadioGroupItem value="card" id="card" />
           <div className="grid gap-1.5">
             <Label htmlFor="card">Card Payment</Label>
-            <p className="text-sm text-muted-foreground">Pay with your credit or debit card.</p>
+            <p className="text-sm text-muted-foreground">
+              Pay with your credit or debit card.
+            </p>
           </div>
         </div>
         <div className="flex items-center space-x-3 space-y-0">
           <RadioGroupItem value="paypal" id="paypal" />
           <div className="grid gap-1.5">
             <Label htmlFor="paypal">PayPal</Label>
-            <p className="text-sm text-muted-foreground">Pay with your PayPal account.</p>
+            <p className="text-sm text-muted-foreground">
+              Pay with your PayPal account.
+            </p>
           </div>
         </div>
       </div>

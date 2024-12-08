@@ -77,56 +77,60 @@ export const plantRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const plant = await ctx.db.query.plants.findFirst({
-      where: eq(plants.id, input),
-      with: {
-        genetic: true,
-        location: true,
-        batch: true,
-        mother: true,
-        children: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const plant = await ctx.db.query.plants.findFirst({
+        where: eq(plants.id, input),
+        with: {
+          genetic: true,
+          location: true,
+          batch: true,
+          mother: true,
+          children: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!plant) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Plant not found',
       })
-    }
 
-    return plant
-  }),
+      if (!plant) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Plant not found',
+        })
+      }
 
-  create: protectedProcedure.input(insertPlantSchema).mutation(async ({ ctx, input }) => {
-    const insertData = {
-      ...input,
-      batchId: input.batchId === 'none' ? null : input.batchId,
-      motherId: input.motherId === 'none' ? null : input.motherId,
-      createdById: ctx.session.user.id,
-      properties: input.properties as typeof plants.$inferInsert.properties,
-      metadata: input.metadata as typeof plants.$inferInsert.metadata,
-    }
+      return plant
+    }),
 
-    const [plant] = await ctx.db.insert(plants).values(insertData).returning()
+  create: protectedProcedure
+    .input(insertPlantSchema)
+    .mutation(async ({ ctx, input }) => {
+      const insertData = {
+        ...input,
+        batchId: input.batchId === 'none' ? null : input.batchId,
+        motherId: input.motherId === 'none' ? null : input.motherId,
+        createdById: ctx.session.user.id,
+        properties: input.properties as typeof plants.$inferInsert.properties,
+        metadata: input.metadata as typeof plants.$inferInsert.metadata,
+      }
 
-    if (!plant) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create plant',
-      })
-    }
+      const [plant] = await ctx.db.insert(plants).values(insertData).returning()
 
-    return plant
-  }),
+      if (!plant) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create plant',
+        })
+      }
+
+      return plant
+    }),
 
   update: protectedProcedure
     .input(
@@ -140,7 +144,8 @@ export const plantRouter = createTRPCRouter({
         ...input.data,
         batchId: input.data.batchId === 'none' ? null : input.data.batchId,
         motherId: input.data.motherId === 'none' ? null : input.data.motherId,
-        properties: input.data.properties as typeof plants.$inferInsert.properties,
+        properties: input.data
+          .properties as typeof plants.$inferInsert.properties,
         metadata: input.data.metadata as typeof plants.$inferInsert.metadata,
         updatedAt: new Date(),
       }
@@ -161,16 +166,21 @@ export const plantRouter = createTRPCRouter({
       return plant
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(plants).where(eq(plants.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(plants)
+        .where(eq(plants.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Plant not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Plant not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

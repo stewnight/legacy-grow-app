@@ -25,7 +25,9 @@ export const batchRouter = createTRPCRouter({
 
       const conditions = [
         filters?.status ? eq(batches.batchStatus, filters.status) : undefined,
-        filters?.search ? like(batches.identifier, `%${filters.search}%`) : undefined,
+        filters?.search
+          ? like(batches.identifier, `%${filters.search}%`)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.batches.findMany({
@@ -55,31 +57,33 @@ export const batchRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const batch = await ctx.db.query.batches.findFirst({
-      where: eq(batches.id, input),
-      with: {
-        genetic: true,
-        location: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const batch = await ctx.db.query.batches.findFirst({
+        where: eq(batches.id, input),
+        with: {
+          genetic: true,
+          location: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!batch) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Batch not found',
       })
-    }
 
-    return batch
-  }),
+      if (!batch) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Batch not found',
+        })
+      }
+
+      return batch
+    }),
 
   create: protectedProcedure
     .input(insertBatchSchema.omit({ id: true }))
@@ -89,7 +93,10 @@ export const batchRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       }
 
-      const [batch] = await ctx.db.insert(batches).values(insertData).returning()
+      const [batch] = await ctx.db
+        .insert(batches)
+        .values(insertData)
+        .returning()
 
       if (!batch) {
         throw new TRPCError({
@@ -130,16 +137,21 @@ export const batchRouter = createTRPCRouter({
       return batch
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(batches).where(eq(batches.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(batches)
+        .where(eq(batches.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Batch not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Batch not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

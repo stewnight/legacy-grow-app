@@ -48,7 +48,10 @@ export const WithAction: Story = {
             title: 'Undo Changes?',
             description: 'Your changes will be lost if you continue.',
             action: (
-              <ToastAction altText="Undo changes" onClick={() => console.log('Undo')}>
+              <ToastAction
+                altText="Undo changes"
+                onClick={() => console.log('Undo')}
+              >
                 Undo
               </ToastAction>
             ),

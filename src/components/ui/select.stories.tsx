@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './select'
 import { Label } from './label'
 
 const meta = {

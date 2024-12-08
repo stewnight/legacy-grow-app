@@ -166,6 +166,7 @@
       runtime~main.9f99daca.iframe.bundle.js
     favicon.svg
   📁scripts
+    generate-schema.ts
     generate-structure.ts
   📁src
     📁__mocks__

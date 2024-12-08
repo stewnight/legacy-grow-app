@@ -20,7 +20,9 @@ export const Default: Story = {
       <>
         <Terminal className="h-4 w-4" />
         <AlertTitle>Heads up!</AlertTitle>
-        <AlertDescription>You can add components to your app using the cli.</AlertDescription>
+        <AlertDescription>
+          You can add components to your app using the cli.
+        </AlertDescription>
       </>
     ),
   },
@@ -31,7 +33,9 @@ export const WithoutIcon: Story = {
     children: (
       <>
         <AlertTitle>Note</AlertTitle>
-        <AlertDescription>This is a simple alert without an icon.</AlertDescription>
+        <AlertDescription>
+          This is a simple alert without an icon.
+        </AlertDescription>
       </>
     ),
   },

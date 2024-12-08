@@ -45,7 +45,9 @@ export function CalendarView({
   jobs,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date())
-  const [mode, setMode] = React.useState<CalendarViewMode>(initialViewMode ?? initialMode)
+  const [mode, setMode] = React.useState<CalendarViewMode>(
+    initialViewMode ?? initialMode
+  )
 
   const isMobile = useIsMobile()
   const isDesktop = useIsDesktop()
@@ -100,7 +102,9 @@ export function CalendarView({
       // For week and day views, show all jobs in the visible periods
       const periods = getSurroundingDays()
       const allDays = periods.flat()
-      return allDays.some((day) => format(dueDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
+      return allDays.some(
+        (day) => format(dueDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+      )
     })
   }, [jobs, currentDate, mode, getSurroundingDays])
 

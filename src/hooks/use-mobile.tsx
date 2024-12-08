@@ -20,7 +20,9 @@ export function useIsMobile() {
 }
 
 export function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = React.useState<boolean | undefined>(undefined)
+  const [isDesktop, setIsDesktop] = React.useState<boolean | undefined>(
+    undefined
+  )
 
   React.useEffect(() => {
     const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`)

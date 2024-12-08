@@ -23,7 +23,10 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
     cell: ({ row }) => {
       const genetic = row.original
       return (
-        <Link href={`/genetics/${genetic.id}`} className="font-medium hover:underline">
+        <Link
+          href={`/genetics/${genetic.id}`}
+          className="font-medium hover:underline"
+        >
           {genetic.name}
         </Link>
       )
@@ -119,7 +122,11 @@ export const columns: ColumnDef<typeof genetics.$inferSelect>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                if (window.confirm('Are you sure you want to delete this genetic?')) {
+                if (
+                  window.confirm(
+                    'Are you sure you want to delete this genetic?'
+                  )
+                ) {
                   deleteGenetic(genetic.id)
                 }
               }}

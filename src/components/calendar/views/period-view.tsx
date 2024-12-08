@@ -11,7 +11,12 @@ interface PeriodViewProps {
   currentPeriodIndex: number
 }
 
-export function PeriodView({ mode, periods, jobs, currentPeriodIndex }: PeriodViewProps) {
+export function PeriodView({
+  mode,
+  periods,
+  jobs,
+  currentPeriodIndex,
+}: PeriodViewProps) {
   // Calculate grid columns based on number of periods
   const gridCols = React.useMemo(() => {
     switch (periods.length) {
@@ -71,14 +76,17 @@ export function PeriodView({ mode, periods, jobs, currentPeriodIndex }: PeriodVi
                   key={job.id}
                   className={cn(
                     'transition-all duration-200',
-                    !isCurrentPeriod && 'hover:translate-x-1 hover:opacity-100 hover:shadow-sm'
+                    !isCurrentPeriod &&
+                      'hover:translate-x-1 hover:opacity-100 hover:shadow-sm'
                   )}
                 >
                   <JobCard key={job.id} job={job} />
                 </div>
               ))}
               {periodJobs.length === 0 && (
-                <div className="py-2 text-center text-sm text-muted-foreground">No tasks</div>
+                <div className="py-2 text-center text-sm text-muted-foreground">
+                  No tasks
+                </div>
               )}
             </div>
           </div>

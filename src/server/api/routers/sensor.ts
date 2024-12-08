@@ -27,7 +27,9 @@ export const sensorRouter = createTRPCRouter({
       const conditions = [
         filters?.type ? eq(sensors.type, filters.type) : undefined,
         filters?.status ? eq(sensors.status, filters.status) : undefined,
-        filters?.search ? like(sensors.identifier, `%${filters.search}%`) : undefined,
+        filters?.search
+          ? like(sensors.identifier, `%${filters.search}%`)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.sensors.findMany({
@@ -55,33 +57,35 @@ export const sensorRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const sensor = await ctx.db.query.sensors.findFirst({
-      where: eq(sensors.id, input),
-      with: {
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const sensor = await ctx.db.query.sensors.findFirst({
+        where: eq(sensors.id, input),
+        with: {
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          readings: {
+            limit: 100,
+            orderBy: [desc(sensors.createdAt)],
           },
         },
-        readings: {
-          limit: 100,
-          orderBy: [desc(sensors.createdAt)],
-        },
-      },
-    })
-
-    if (!sensor) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Sensor not found',
       })
-    }
 
-    return sensor
-  }),
+      if (!sensor) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Sensor not found',
+        })
+      }
+
+      return sensor
+    }),
 
   create: protectedProcedure
     .input(
@@ -99,7 +103,8 @@ export const sensorRouter = createTRPCRouter({
         .insert(sensors)
         .values({
           ...rest,
-          specifications: specifications as typeof sensors.$inferInsert.specifications,
+          specifications:
+            specifications as typeof sensors.$inferInsert.specifications,
           metadata: metadata as typeof sensors.$inferInsert.metadata,
           createdById: ctx.session.user.id,
         })
@@ -134,7 +139,8 @@ export const sensorRouter = createTRPCRouter({
         .update(sensors)
         .set({
           ...rest,
-          specifications: specifications as typeof sensors.$inferInsert.specifications,
+          specifications:
+            specifications as typeof sensors.$inferInsert.specifications,
           metadata: metadata as typeof sensors.$inferInsert.metadata,
           updatedAt: new Date(),
         })
@@ -151,16 +157,21 @@ export const sensorRouter = createTRPCRouter({
       return sensor
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(sensors).where(eq(sensors.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(sensors)
+        .where(eq(sensors.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Sensor not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Sensor not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

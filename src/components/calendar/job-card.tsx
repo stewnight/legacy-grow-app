@@ -50,7 +50,10 @@ export function JobCard({ job, isMonthView = false }: JobCardProps) {
   return (
     <Link href={`/jobs/${job.id}`}>
       <div
-        className={cn('mb-1 cursor-pointer rounded-md p-2 text-sm', getPriorityColor(job.priority))}
+        className={cn(
+          'mb-1 cursor-pointer rounded-md p-2 text-sm',
+          getPriorityColor(job.priority)
+        )}
       >
         <div className="truncate text-[13px] font-medium">{job.title}</div>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
@@ -59,7 +62,10 @@ export function JobCard({ job, isMonthView = false }: JobCardProps) {
               {job.category}
             </Badge>
           )}
-          <Badge variant={getStatusVariant(job.jobStatus)} className="text-[10px]">
+          <Badge
+            variant={getStatusVariant(job.jobStatus)}
+            className="text-[10px]"
+          >
             {job.jobStatus}
           </Badge>
           <Avatar className={cn('h-5 w-5', isMonthView && 'h-4 w-4')}>

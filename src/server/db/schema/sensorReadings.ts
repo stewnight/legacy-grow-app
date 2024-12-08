@@ -1,5 +1,12 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, numeric, uuid, json } from 'drizzle-orm/pg-core'
+import {
+  index,
+  varchar,
+  timestamp,
+  numeric,
+  uuid,
+  json,
+} from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { sensors } from './sensors'
@@ -16,7 +23,9 @@ export const sensorReadings = createTable(
       scale: 2,
     }).notNull(),
     unit: varchar('unit', { length: 50 }).notNull(),
-    timestamp: timestamp('timestamp', { withTimezone: true }).defaultNow().notNull(),
+    timestamp: timestamp('timestamp', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     metadata: json('metadata').$type<{
       accuracy?: number
       resolution?: number
@@ -25,7 +34,9 @@ export const sensorReadings = createTable(
         humidity?: number
       }
     }>(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -46,7 +57,9 @@ export const sensorReadingsRelations = relations(sensorReadings, ({ one }) => ({
 }))
 
 // Zod Schemas
-export const insertSensorReadingSchema = createInsertSchema(sensorReadings).omit({
+export const insertSensorReadingSchema = createInsertSchema(
+  sensorReadings
+).omit({
   createdAt: true,
   updatedAt: true,
 })

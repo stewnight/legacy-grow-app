@@ -34,7 +34,9 @@ export const locationRouter = createTRPCRouter({
         filters?.type ? eq(locations.type, filters.type) : undefined,
         filters?.status ? eq(locations.status, filters.status) : undefined,
         filters?.roomId ? eq(locations.roomId, filters.roomId) : undefined,
-        filters?.search ? like(locations.name, `%${filters.search}%`) : undefined,
+        filters?.search
+          ? like(locations.name, `%${filters.search}%`)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.locations.findMany({
@@ -66,54 +68,61 @@ export const locationRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const location = await ctx.db.query.locations.findFirst({
-      where: eq(locations.id, input),
-      with: {
-        room: true,
-        plants: true,
-        sensors: true,
-        batches: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const location = await ctx.db.query.locations.findFirst({
+        where: eq(locations.id, input),
+        with: {
+          room: true,
+          plants: true,
+          sensors: true,
+          batches: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!location) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Location not found',
       })
-    }
 
-    return location
-  }),
+      if (!location) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Location not found',
+        })
+      }
 
-  create: protectedProcedure.input(insertLocationSchema).mutation(async ({ ctx, input }) => {
-    const insertData = {
-      ...input,
-      createdById: ctx.session.user.id,
-      properties: input.properties as LocationProperties,
-      coordinates: input.coordinates as LocationCoordinates,
-      dimensions: input.dimensions as LocationDimensions,
-    }
+      return location
+    }),
 
-    const [location] = await ctx.db.insert(locations).values(insertData).returning()
+  create: protectedProcedure
+    .input(insertLocationSchema)
+    .mutation(async ({ ctx, input }) => {
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as LocationProperties,
+        coordinates: input.coordinates as LocationCoordinates,
+        dimensions: input.dimensions as LocationDimensions,
+      }
 
-    if (!location) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create location',
-      })
-    }
+      const [location] = await ctx.db
+        .insert(locations)
+        .values(insertData)
+        .returning()
 
-    return location
-  }),
+      if (!location) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create location',
+        })
+      }
+
+      return location
+    }),
 
   update: protectedProcedure
     .input(
@@ -147,16 +156,21 @@ export const locationRouter = createTRPCRouter({
       return location
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(locations).where(eq(locations.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(locations)
+        .where(eq(locations.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Location not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Location not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

@@ -71,7 +71,9 @@ export const SideSheet: Story = {
         <SheetContent side="right" className="w-[400px] sm:w-[540px]">
           <SheetHeader>
             <SheetTitle>Side Panel</SheetTitle>
-            <SheetDescription>This is a side panel that slides in from the right.</SheetDescription>
+            <SheetDescription>
+              This is a side panel that slides in from the right.
+            </SheetDescription>
           </SheetHeader>
           <div className="flex flex-col gap-4 py-4">
             <p className="text-sm text-muted-foreground">

@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { Volume2, FileText } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
 import { type Note } from '~/server/db/schema/notes'
 
 interface MediaPreviewProps {

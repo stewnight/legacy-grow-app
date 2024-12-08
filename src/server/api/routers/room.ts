@@ -34,7 +34,9 @@ export const roomRouter = createTRPCRouter({
         filters?.type ? eq(rooms.type, filters.type) : undefined,
         filters?.status ? eq(rooms.status, filters.status) : undefined,
         filters?.search ? like(rooms.name, `%${filters.search}%`) : undefined,
-        filters?.buildingId ? eq(rooms.buildingId, filters.buildingId) : undefined,
+        filters?.buildingId
+          ? eq(rooms.buildingId, filters.buildingId)
+          : undefined,
         filters?.parentId ? eq(rooms.parentId, filters.parentId) : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
@@ -66,52 +68,56 @@ export const roomRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const room = await ctx.db.query.rooms.findFirst({
-      where: eq(rooms.id, input),
-      with: {
-        building: true,
-        parent: true,
-        children: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const room = await ctx.db.query.rooms.findFirst({
+        where: eq(rooms.id, input),
+        with: {
+          building: true,
+          parent: true,
+          children: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!room) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Room not found',
       })
-    }
 
-    return room
-  }),
+      if (!room) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Room not found',
+        })
+      }
 
-  create: protectedProcedure.input(insertRoomSchema).mutation(async ({ ctx, input }) => {
-    const insertData = {
-      ...input,
-      createdById: ctx.session.user.id,
-      properties: input.properties as RoomProperties,
-      dimensions: input.dimensions as RoomDimensions,
-    }
+      return room
+    }),
 
-    const [room] = await ctx.db.insert(rooms).values(insertData).returning()
+  create: protectedProcedure
+    .input(insertRoomSchema)
+    .mutation(async ({ ctx, input }) => {
+      const insertData = {
+        ...input,
+        createdById: ctx.session.user.id,
+        properties: input.properties as RoomProperties,
+        dimensions: input.dimensions as RoomDimensions,
+      }
 
-    if (!room) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create room',
-      })
-    }
+      const [room] = await ctx.db.insert(rooms).values(insertData).returning()
 
-    return room
-  }),
+      if (!room) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create room',
+        })
+      }
+
+      return room
+    }),
 
   update: protectedProcedure
     .input(
@@ -144,16 +150,21 @@ export const roomRouter = createTRPCRouter({
       return room
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(rooms).where(eq(rooms.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(rooms)
+        .where(eq(rooms.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Room not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Room not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

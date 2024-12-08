@@ -18,7 +18,9 @@ export function CreateFormWrapper({ children }: CreateFormWrapperProps) {
   if (status === 'unauthenticated') {
     return (
       <Alert>
-        <AlertDescription>Please sign in to access this feature</AlertDescription>
+        <AlertDescription>
+          Please sign in to access this feature
+        </AlertDescription>
       </Alert>
     )
   }

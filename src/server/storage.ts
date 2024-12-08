@@ -11,7 +11,11 @@ export const s3Client = new S3Client({
   },
 })
 
-export async function generatePresignedUrl(key: string, contentType: string, expiresIn = 3600) {
+export async function generatePresignedUrl(
+  key: string,
+  contentType: string,
+  expiresIn = 3600
+) {
   const command = new PutObjectCommand({
     Bucket: env.R2_BUCKET_NAME,
     Key: key,

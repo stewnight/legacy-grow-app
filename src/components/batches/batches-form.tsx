@@ -41,7 +41,11 @@ interface BatchFormProps {
   onSuccess?: (data: BatchFormValues) => void
 }
 
-export function BatchForm({ mode = 'create', defaultValues, onSuccess }: BatchFormProps) {
+export function BatchForm({
+  mode = 'create',
+  defaultValues,
+  onSuccess,
+}: BatchFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -67,36 +71,44 @@ export function BatchForm({ mode = 'create', defaultValues, onSuccess }: BatchFo
     },
   })
 
-  const { mutate: createBatch, isPending: isCreating } = api.batch.create.useMutation({
-    onSuccess: async (data) => {
-      toast({ title: 'Batch created successfully' })
-      await Promise.all([utils.batch.getAll.invalidate(), utils.batch.get.invalidate(data.id)])
-      router.push(`/batches/${data.id}`)
-      onSuccess?.(data)
-    },
-    onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      toast({
-        title: 'Error creating batch',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createBatch, isPending: isCreating } =
+    api.batch.create.useMutation({
+      onSuccess: async (data) => {
+        toast({ title: 'Batch created successfully' })
+        await Promise.all([
+          utils.batch.getAll.invalidate(),
+          utils.batch.get.invalidate(data.id),
+        ])
+        router.push(`/batches/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
+        toast({
+          title: 'Error creating batch',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updateBatch, isPending: isUpdating } = api.batch.update.useMutation({
-    onSuccess: async (data) => {
-      toast({ title: 'Batch updated successfully' })
-      await Promise.all([utils.batch.getAll.invalidate(), utils.batch.get.invalidate(data.id)])
-      onSuccess?.(data)
-    },
-    onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      toast({
-        title: 'Error updating batch',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updateBatch, isPending: isUpdating } =
+    api.batch.update.useMutation({
+      onSuccess: async (data) => {
+        toast({ title: 'Batch updated successfully' })
+        await Promise.all([
+          utils.batch.getAll.invalidate(),
+          utils.batch.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error: TRPCClientErrorLike<AppRouter>) => {
+        toast({
+          title: 'Error updating batch',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   const onSubmit = async (values: BatchFormValues) => {
     try {

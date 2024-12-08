@@ -17,11 +17,17 @@ export const metadata: Metadata = {
   icons: [{ rel: 'icon', url: '/favicon.svg' }],
 }
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const session = await auth()
 
   return (
-    <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${GeistSans.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen">
         <ThemeProvider
           attribute="class"
@@ -47,7 +53,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               )}
               <Toaster />
             </SessionProvider>
-            {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+            {process.env.NODE_ENV === 'development' && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
           </TRPCReactProvider>
         </ThemeProvider>
       </body>

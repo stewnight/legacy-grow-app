@@ -28,7 +28,9 @@ export const noteRouter = createTRPCRouter({
       const conditions = [
         filters?.type ? eq(notes.type, filters.type) : undefined,
         filters?.status ? eq(notes.status, filters.status) : undefined,
-        filters?.entityType ? eq(notes.entityType, filters.entityType) : undefined,
+        filters?.entityType
+          ? eq(notes.entityType, filters.entityType)
+          : undefined,
         filters?.entityId ? eq(notes.entityId, filters.entityId) : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
@@ -59,76 +61,82 @@ export const noteRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  getAllForJob: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const note = await ctx.db.query.notes.findMany({
-      where: eq(notes.entityId, input),
-      with: {
-        parent: true,
-        children: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            image: true,
+  getAllForJob: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const note = await ctx.db.query.notes.findMany({
+        where: eq(notes.entityId, input),
+        with: {
+          parent: true,
+          children: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              image: true,
+            },
           },
         },
-      },
-    })
-
-    if (!note) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Notes not found',
       })
-    }
 
-    return note
-  }),
+      if (!note) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Notes not found',
+        })
+      }
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const note = await ctx.db.query.notes.findFirst({
-      where: eq(notes.id, input),
-      with: {
-        parent: true,
-        children: true,
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+      return note
+    }),
+
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const note = await ctx.db.query.notes.findFirst({
+        where: eq(notes.id, input),
+        with: {
+          parent: true,
+          children: true,
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!note) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Note not found',
       })
-    }
 
-    return note
-  }),
+      if (!note) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Note not found',
+        })
+      }
 
-  create: protectedProcedure.input(insertNoteSchema).mutation(async ({ ctx, input }) => {
-    const [note] = await ctx.db
-      .insert(notes)
-      .values({
-        ...input,
-        createdById: ctx.session.user.id,
-      } as typeof notes.$inferInsert)
-      .returning()
+      return note
+    }),
 
-    if (!note) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create note',
-      })
-    }
+  create: protectedProcedure
+    .input(insertNoteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const [note] = await ctx.db
+        .insert(notes)
+        .values({
+          ...input,
+          createdById: ctx.session.user.id,
+        } as typeof notes.$inferInsert)
+        .returning()
 
-    return note
-  }),
+      if (!note) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create note',
+        })
+      }
+
+      return note
+    }),
 
   update: protectedProcedure
     .input(
@@ -157,16 +165,21 @@ export const noteRouter = createTRPCRouter({
       return note
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(notes).where(eq(notes.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(notes)
+        .where(eq(notes.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Note not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Note not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

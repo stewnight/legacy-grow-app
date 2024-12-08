@@ -30,7 +30,10 @@ const config: StorybookConfig = {
       '@': path.resolve(__dirname, '../src'),
       // Mock modules
       'geist/font/sans': path.resolve(__dirname, '../src/__mocks__/geist.ts'),
-      '@/server/auth/config': path.resolve(__dirname, '../src/__mocks__/auth.ts'),
+      '@/server/auth/config': path.resolve(
+        __dirname,
+        '../src/__mocks__/auth.ts'
+      ),
       '@/server/db': path.resolve(__dirname, '../src/__mocks__/db.ts'),
       '@/env': path.resolve(__dirname, '../src/__mocks__/env.ts'),
     }
