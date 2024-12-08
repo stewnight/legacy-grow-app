@@ -3,10 +3,10 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
-import { columns } from './_components/genetics-columns'
+import { columns } from '../../../components/genetics/genetics-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { GeneticForm } from './_components/genetics-form'
+import { GeneticForm } from '../../../components/genetics/genetics-form'
 
 export default async function GeneticsPage() {
   const session = await auth()

@@ -27,7 +27,7 @@ import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'
 import { type inferRouterOutputs } from '@trpc/server'
 import { type AppRouter } from '~/server/api/root'
 import { Checkbox } from '@/components/ui/checkbox'
-import { api } from '../../../../trpc/react'
+import { api } from '../../trpc/react'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type GeneticFormValues = z.infer<typeof insertGeneticSchema>
@@ -38,7 +38,11 @@ interface GeneticFormProps {
   onSuccess?: (data: GeneticFormValues) => void
 }
 
-export function GeneticForm({ mode = 'create', defaultValues, onSuccess }: GeneticFormProps) {
+export function GeneticForm({
+  mode = 'create',
+  defaultValues,
+  onSuccess,
+}: GeneticFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -54,36 +58,44 @@ export function GeneticForm({ mode = 'create', defaultValues, onSuccess }: Genet
     },
   })
 
-  const { mutate: createGenetic, isPending: isCreating } = api.genetic.create.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Genetic created successfully' })
-      void Promise.all([utils.genetic.getAll.invalidate(), utils.genetic.get.invalidate(data.id)])
-      router.push(`/genetics/${data.id}`)
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error creating genetic',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createGenetic, isPending: isCreating } =
+    api.genetic.create.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Genetic created successfully' })
+        void Promise.all([
+          utils.genetic.getAll.invalidate(),
+          utils.genetic.get.invalidate(data.id),
+        ])
+        router.push(`/genetics/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error creating genetic',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updateGenetic, isPending: isUpdating } = api.genetic.update.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Genetic updated successfully' })
-      void Promise.all([utils.genetic.getAll.invalidate(), utils.genetic.get.invalidate(data.id)])
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error updating genetic',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updateGenetic, isPending: isUpdating } =
+    api.genetic.update.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Genetic updated successfully' })
+        void Promise.all([
+          utils.genetic.getAll.invalidate(),
+          utils.genetic.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error updating genetic',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   function onSubmit(values: GeneticFormValues) {
     if (mode === 'create') {
@@ -178,7 +190,10 @@ export function GeneticForm({ mode = 'create', defaultValues, onSuccess }: Genet
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
               <FormControl>
-                <Checkbox checked={field.value || false} onCheckedChange={field.onChange} />
+                <Checkbox
+                  checked={field.value || false}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
               <FormLabel>In House</FormLabel>
               <FormMessage />
