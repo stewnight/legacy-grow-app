@@ -16,13 +16,13 @@ import {
 import { Badge } from '~/components/ui/badge'
 import { cn } from '~/lib/utils'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { EquipmentForm } from './equipment-form'
+import { EquipmentForm } from '~/components/equipment/equipment-form'
 import { type Equipment } from '~/server/db/schema/equipment'
-import { DataTableColumnHeader } from '../../../../components/ui/data-table-column-header'
+import { DataTableColumnHeader } from '../ui/data-table-column-header'
 import Link from 'next/link'
-import { DataTableFacetedFilter } from '../../../../components/ui/data-table-faceted-filter'
-import { equipmentStatusEnum, statusEnum } from '../../../../server/db/schema/enums'
-import { equipmentTypeEnum } from '../../../../server/db/schema/enums'
+import { DataTableFacetedFilter } from '../ui/data-table-faceted-filter'
+import { equipmentStatusEnum, statusEnum } from '~/server/db/schema/enums'
+import { equipmentTypeEnum } from '~/server/db/schema/enums'
 
 // Helper function to safely format dates
 const formatDate = (date: Date | string | null) => {
@@ -63,7 +63,10 @@ export function EquipmentTableFilters({ table }: EquipmentTableFiltersProps) {
         <DropdownMenuContent align="end">
           {table
             .getAllColumns()
-            .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())
+            .filter(
+              (column) =>
+                typeof column.accessorFn !== 'undefined' && column.getCanHide()
+            )
             .map((column) => {
               return (
                 <DropdownMenuCheckboxItem
@@ -85,7 +88,9 @@ export function EquipmentTableFilters({ table }: EquipmentTableFiltersProps) {
 export const columns: ColumnDef<Equipment>[] = [
   {
     accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
     cell: ({ row }) => {
       const equipment = row.original
       return (
@@ -100,7 +105,9 @@ export const columns: ColumnDef<Equipment>[] = [
   },
   {
     accessorKey: 'type',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
+    ),
     cell: ({ row }) => {
       const type = row.getValue('type') as string
       return type.charAt(0).toUpperCase() + type.slice(1)
@@ -108,7 +115,9 @@ export const columns: ColumnDef<Equipment>[] = [
   },
   {
     accessorKey: 'status',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => {
       const status = row.getValue('status') as string
       return (
@@ -127,29 +136,40 @@ export const columns: ColumnDef<Equipment>[] = [
   },
   {
     accessorKey: 'purchaseDate',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Purchase Date" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Purchase Date" />
+    ),
     cell: ({ row }) => formatDate(row.original.purchaseDate),
   },
   {
     accessorKey: 'warrantyExpiration',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Warranty Expiration" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Warranty Expiration" />
+    ),
     cell: ({ row }) => formatDate(row.original.warrantyExpiration),
   },
   {
     accessorKey: 'lastMaintenanceDate',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Last Maintenance" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Last Maintenance" />
+    ),
     cell: ({ row }) => formatDate(row.original.lastMaintenanceDate),
   },
   {
     accessorKey: 'nextMaintenanceDate',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Next Maintenance" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Next Maintenance" />
+    ),
     cell: ({ row }) => {
       const date = row.original.nextMaintenanceDate
       if (!date) return '-'
       const dateObj = new Date(date)
       const isOverdue = dateObj < new Date()
       return (
-        <Badge variant="outline" className={cn(isOverdue && 'border-red-500 text-red-500')}>
+        <Badge
+          variant="outline"
+          className={cn(isOverdue && 'border-red-500 text-red-500')}
+        >
           {format(dateObj, 'PP')}
         </Badge>
       )

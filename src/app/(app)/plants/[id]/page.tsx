@@ -3,18 +3,37 @@
 import * as React from 'react'
 import { api } from '~/trpc/react'
 import { format } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '~/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '~/components/ui/card'
 import { notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
-import { Leaf, Calendar, Activity, Ruler, Sprout, Timer, MapPin, Box } from 'lucide-react'
+import {
+  Leaf,
+  Calendar,
+  Activity,
+  Ruler,
+  Sprout,
+  Timer,
+  MapPin,
+  Box,
+} from 'lucide-react'
 import { AppSheet } from '../../../../components/layout/app-sheet'
-import { PlantForm } from '../_components/plants-form'
+import { PlantForm } from '../../../../components/plants/plants-form'
 import { Badge } from '../../../../components/ui/badge'
 import JobsTab from '../../../../components/jobs/tab'
 
-export default function PlantPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PlantPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const resolvedParams = React.use(params)
 
   const { data: plant, isLoading } = api.plant.get.useQuery(resolvedParams.id, {
@@ -62,12 +81,17 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{plant.identifier}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {plant.identifier}
+          </h2>
           <p className="text-muted-foreground">
             {plant.genetic ? (
               <>
                 Strain:{' '}
-                <Link href={`/genetics/${plant.genetic.id}`} className="hover:underline">
+                <Link
+                  href={`/genetics/${plant.genetic.id}`}
+                  className="hover:underline"
+                >
                   {plant.genetic.name}
                 </Link>
               </>
@@ -89,7 +113,9 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">{plant.stage}</div>
-            <p className="text-xs text-muted-foreground">Current growth stage</p>
+            <p className="text-xs text-muted-foreground">
+              Current growth stage
+            </p>
           </CardContent>
         </Card>
 
@@ -100,7 +126,9 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">{plant.health}</div>
-            <p className="text-xs text-muted-foreground">Current health status</p>
+            <p className="text-xs text-muted-foreground">
+              Current health status
+            </p>
           </CardContent>
         </Card>
 
@@ -110,7 +138,9 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
             <Timer className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatDate(plant.plantedDate)}</div>
+            <div className="text-2xl font-bold">
+              {formatDate(plant.plantedDate)}
+            </div>
             <p className="text-xs text-muted-foreground">Planted date</p>
           </CardContent>
         </Card>
@@ -122,7 +152,9 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
               <Ruler className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{plant.properties.height} cm</div>
+              <div className="text-2xl font-bold">
+                {plant.properties.height} cm
+              </div>
               <p className="text-xs text-muted-foreground">Current height</p>
             </CardContent>
           </Card>
@@ -146,10 +178,15 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
               <CardContent>
                 <dl className="space-y-2">
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Location</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Location
+                    </dt>
                     <dd className="text-sm">
                       {plant.location ? (
-                        <Link href={`/locations/${plant.location.id}`} className="hover:underline">
+                        <Link
+                          href={`/locations/${plant.location.id}`}
+                          className="hover:underline"
+                        >
                           {plant.location.name}
                         </Link>
                       ) : (
@@ -158,10 +195,15 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Batch</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Batch
+                    </dt>
                     <dd className="text-sm">
                       {plant.batch ? (
-                        <Link href={`/batches/${plant.batch.id}`} className="hover:underline">
+                        <Link
+                          href={`/batches/${plant.batch.id}`}
+                          className="hover:underline"
+                        >
                           {plant.batch.identifier}
                         </Link>
                       ) : (
@@ -170,21 +212,30 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Source</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Source
+                    </dt>
                     <dd className="text-sm capitalize">{plant.source}</dd>
                   </div>
                   {plant.source === 'clone' && plant.mother && (
                     <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Mother Plant</dt>
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        Mother Plant
+                      </dt>
                       <dd className="text-sm">
-                        <Link href={`/plants/${plant.mother.id}`} className="hover:underline">
+                        <Link
+                          href={`/plants/${plant.mother.id}`}
+                          className="hover:underline"
+                        >
                           {plant.mother.identifier}
                         </Link>
                       </dd>
                     </div>
                   )}
                   <div>
-                    <dt className="text-sm font-medium text-muted-foreground">Sex</dt>
+                    <dt className="text-sm font-medium text-muted-foreground">
+                      Sex
+                    </dt>
                     <dd className="text-sm capitalize">{plant.sex}</dd>
                   </div>
                 </dl>
@@ -203,7 +254,9 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
                         <dt className="text-sm font-medium text-muted-foreground">
                           Feeding Schedule
                         </dt>
-                        <dd className="text-sm capitalize">{plant.properties.feeding.schedule}</dd>
+                        <dd className="text-sm capitalize">
+                          {plant.properties.feeding.schedule}
+                        </dd>
                       </div>
                     )}
                     {plant.properties.training && (
@@ -211,7 +264,9 @@ export default function PlantPage({ params }: { params: Promise<{ id: string }> 
                         <dt className="text-sm font-medium text-muted-foreground">
                           Training Method
                         </dt>
-                        <dd className="text-sm capitalize">{plant.properties.training.method}</dd>
+                        <dd className="text-sm capitalize">
+                          {plant.properties.training.method}
+                        </dd>
                       </div>
                     )}
                   </dl>

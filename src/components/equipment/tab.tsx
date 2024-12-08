@@ -1,11 +1,17 @@
-import { Card, CardTitle, CardHeader, CardContent, CardDescription } from '../ui/card'
+import {
+  Card,
+  CardTitle,
+  CardHeader,
+  CardContent,
+  CardDescription,
+} from '../ui/card'
 import { TabsContent } from '@/components/ui/tabs'
 import { api } from '~/trpc/react'
 import { Badge } from '~/components/ui/badge'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { AppSheet } from '../layout/app-sheet'
-import { EquipmentForm } from '~/app/(app)/equipment/_components/equipment-form'
+import { EquipmentForm } from '~/components/equipment/equipment-form'
 import { Button } from '../ui/button'
 import { ChevronDown, ChevronUp, PlusIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -30,9 +36,14 @@ interface EquipmentTabProps {
   entityType: 'room' | 'location' | 'building'
 }
 
-export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps) {
+export default function EquipmentTab({
+  entityId,
+  entityType,
+}: EquipmentTabProps) {
   const [showInactive, setShowInactive] = useState(false)
-  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null)
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(
+    null
+  )
 
   const { data: equipment, isLoading } = api.equipment.getAll.useQuery({
     filters: {
@@ -65,8 +76,9 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
   }
 
   const activeEquipment =
-    equipment?.items.filter((item) => item.status === 'active' || item.status === 'maintenance') ||
-    []
+    equipment?.items.filter(
+      (item) => item.status === 'active' || item.status === 'maintenance'
+    ) || []
 
   const inactiveEquipment =
     equipment?.items.filter(
@@ -105,8 +117,8 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
                     <DialogHeader>
                       <DialogTitle>Assign Equipment</DialogTitle>
                       <DialogDescription>
-                        Select equipment to assign to this room. Equipment already assigned to other
-                        rooms will be relocated.
+                        Select equipment to assign to this room. Equipment
+                        already assigned to other rooms will be relocated.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -130,7 +142,9 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
                                 </span>
                                 {item.roomId && (
                                   <Badge variant="secondary" className="ml-2">
-                                    {item.roomId === entityId ? 'Current Room' : 'Assigned'}
+                                    {item.roomId === entityId
+                                      ? 'Current Room'
+                                      : 'Assigned'}
                                   </Badge>
                                 )}
                               </div>
@@ -142,7 +156,10 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
                         <DialogTrigger asChild>
                           <Button variant="outline">Cancel</Button>
                         </DialogTrigger>
-                        <Button onClick={handleAssign} disabled={!selectedEquipmentId}>
+                        <Button
+                          onClick={handleAssign}
+                          disabled={!selectedEquipmentId}
+                        >
                           Assign to Room
                         </Button>
                       </div>
@@ -181,12 +198,21 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
                     className="flex items-center justify-between rounded border p-4"
                   >
                     <div>
-                      <Link href={`/equipment/${item.id}`} className="font-medium hover:underline">
+                      <Link
+                        href={`/equipment/${item.id}`}
+                        className="font-medium hover:underline"
+                      >
                         {item.name}
                       </Link>
                       <div className="mt-1 flex gap-2">
                         <Badge variant="outline">{item.type}</Badge>
-                        <Badge variant={item.status === 'maintenance' ? 'destructive' : 'default'}>
+                        <Badge
+                          variant={
+                            item.status === 'maintenance'
+                              ? 'destructive'
+                              : 'default'
+                          }
+                        >
                           {item.status}
                         </Badge>
                         {isMaintenanceDue(item.nextMaintenanceDate) && (
@@ -242,9 +268,15 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Inactive Equipment</CardTitle>
-                <CardDescription>{inactiveEquipment.length} inactive equipment</CardDescription>
+                <CardDescription>
+                  {inactiveEquipment.length} inactive equipment
+                </CardDescription>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setShowInactive(!showInactive)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowInactive(!showInactive)}
+              >
                 {showInactive ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -261,7 +293,10 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
                       className="flex items-center justify-between py-2 text-sm text-muted-foreground"
                     >
                       <div className="flex items-center gap-2">
-                        <Link href={`/equipment/${item.id}`} className="hover:underline">
+                        <Link
+                          href={`/equipment/${item.id}`}
+                          className="hover:underline"
+                        >
                           {item.name}
                         </Link>
                         <span>•</span>
@@ -294,7 +329,9 @@ export default function EquipmentTab({ entityId, entityType }: EquipmentTabProps
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => unassignRoom({ equipmentId: item.id })}
+                            onClick={() =>
+                              unassignRoom({ equipmentId: item.id })
+                            }
                           >
                             Unassign
                           </Button>

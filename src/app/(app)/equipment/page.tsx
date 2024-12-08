@@ -1,14 +1,23 @@
 import { Suspense } from 'react'
 import { api } from '~/trpc/server'
-import { columns, EquipmentTableFilters } from './_components/equipment-columns'
+import {
+  columns,
+  EquipmentTableFilters,
+} from '../../../components/equipment/equipment-columns'
 import { DataTable } from '~/components/ui/data-table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { isBefore } from 'date-fns'
 import { Skeleton } from '~/components/ui/skeleton'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { EquipmentForm } from './_components/equipment-form'
+import { EquipmentForm } from '../../../components/equipment/equipment-form'
 import { type Equipment } from '~/server/db/schema/equipment'
 
 export default async function EquipmentPage() {
@@ -58,7 +67,9 @@ export default async function EquipmentPage() {
             <CardDescription>Equipment requiring attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{equipmentData.filter(isMaintenanceDue).length}</p>
+            <p className="text-2xl font-bold">
+              {equipmentData.filter(isMaintenanceDue).length}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -70,7 +81,8 @@ export default async function EquipmentPage() {
             <p className="text-2xl font-bold">
               {
                 equipmentData.filter(
-                  (item) => item.status === 'offline' || item.status === 'maintenance'
+                  (item) =>
+                    item.status === 'offline' || item.status === 'maintenance'
                 ).length
               }
             </p>
@@ -81,7 +93,9 @@ export default async function EquipmentPage() {
       <Card className="bg-transparent">
         <CardHeader>
           <CardTitle>Equipment List</CardTitle>
-          <CardDescription>View and manage all equipment in your facility</CardDescription>
+          <CardDescription>
+            View and manage all equipment in your facility
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>

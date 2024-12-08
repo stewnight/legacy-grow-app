@@ -2,7 +2,11 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertBuildingSchema, buildingTypeEnum, statusEnum } from '~/server/db/schema'
+import {
+  insertBuildingSchema,
+  buildingTypeEnum,
+  statusEnum,
+} from '~/server/db/schema'
 import {
   Form,
   FormField,
@@ -25,7 +29,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../../components/ui/select'
+} from '../ui/select'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type BuildingFormValues = z.infer<typeof insertBuildingSchema>
@@ -38,7 +42,11 @@ interface BuildingFormProps {
   onSuccess?: (data: BuildingFormValues) => void
 }
 
-export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: BuildingFormProps) {
+export function BuildingsForm({
+  mode = 'create',
+  defaultValues,
+  onSuccess,
+}: BuildingFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -81,36 +89,44 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
     },
   })
 
-  const { mutate: createBuilding, isPending: isCreating } = api.building.create.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Building created successfully' })
-      void Promise.all([utils.building.getAll.invalidate(), utils.building.get.invalidate(data.id)])
-      router.push(`/buildings/${data.id}`)
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error creating building',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createBuilding, isPending: isCreating } =
+    api.building.create.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Building created successfully' })
+        void Promise.all([
+          utils.building.getAll.invalidate(),
+          utils.building.get.invalidate(data.id),
+        ])
+        router.push(`/buildings/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error creating building',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updateBuilding, isPending: isUpdating } = api.building.update.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Building updated successfully' })
-      void Promise.all([utils.building.getAll.invalidate(), utils.building.get.invalidate(data.id)])
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error updating building',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updateBuilding, isPending: isUpdating } =
+    api.building.update.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Building updated successfully' })
+        void Promise.all([
+          utils.building.getAll.invalidate(),
+          utils.building.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error updating building',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   async function onSubmit(values: BuildingFormValues) {
     if (mode === 'create') {
@@ -162,7 +178,10 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
             <FormItem>
               <FormLabel>Type</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -192,7 +211,8 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                   <Input
                     {...field}
                     value={
-                      typeof field.value === 'string' || typeof field.value === 'number'
+                      typeof field.value === 'string' ||
+                      typeof field.value === 'number'
                         ? field.value
                         : ''
                     }
@@ -214,7 +234,8 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' || typeof field.value === 'number'
+                        typeof field.value === 'string' ||
+                        typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -235,7 +256,8 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' || typeof field.value === 'number'
+                        typeof field.value === 'string' ||
+                        typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -258,7 +280,8 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' || typeof field.value === 'number'
+                        typeof field.value === 'string' ||
+                        typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -279,7 +302,8 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                     <Input
                       {...field}
                       value={
-                        typeof field.value === 'string' || typeof field.value === 'number'
+                        typeof field.value === 'string' ||
+                        typeof field.value === 'number'
                           ? field.value
                           : ''
                       }
@@ -304,9 +328,13 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                       step="any"
                       {...field}
                       value={
-                        typeof field.value === 'number' ? field.value : Number(field.value) || 0
+                        typeof field.value === 'number'
+                          ? field.value
+                          : Number(field.value) || 0
                       }
-                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                      onChange={(e) =>
+                        field.onChange(Number(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -326,9 +354,13 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
                       step="any"
                       {...field}
                       value={
-                        typeof field.value === 'number' ? field.value : Number(field.value) || 0
+                        typeof field.value === 'number'
+                          ? field.value
+                          : Number(field.value) || 0
                       }
-                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                      onChange={(e) =>
+                        field.onChange(Number(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -350,7 +382,10 @@ export function BuildingsForm({ mode = 'create', defaultValues, onSuccess }: Bui
               <FormItem>
                 <FormLabel>Control Type</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value as string}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value as string}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select control type" />
                     </SelectTrigger>

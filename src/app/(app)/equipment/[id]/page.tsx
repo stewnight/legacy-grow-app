@@ -7,7 +7,7 @@ import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { Skeleton } from '~/components/ui/skeleton'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { EquipmentForm } from '../_components/equipment-form'
+import { EquipmentForm } from '../../../../components/equipment/equipment-form'
 import { format } from 'date-fns'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { ArrowLeftIcon } from 'lucide-react'
 import * as React from 'react'
-import { MaintenanceTab } from '~/app/(app)/equipment/_components/maintenance-tab'
+import { MaintenanceTab } from '~/components/equipment/maintenance-tab'
 
 interface PageProps {
   params: Promise<{ id: string }>

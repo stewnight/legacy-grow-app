@@ -32,9 +32,9 @@ import {
   PlayCircle,
   GripVertical,
 } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
-import { JobForm } from '../_components/jobs-form'
-import { Badge } from '../../../../components/ui/badge'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { JobForm } from '~/components/jobs/jobs-form'
+import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -47,10 +47,10 @@ import { type Sensor } from '~/server/db/schema/sensors'
 import { type Processing } from '~/server/db/schema/processing'
 import { type Harvest } from '~/server/db/schema/harvests'
 import { type Equipment } from '~/server/db/schema/equipment'
-import { TaskManager } from '../_components/task-manager'
-import { RecurringSettings } from '../_components/recurring-settings'
-import { InstructionsManager } from '../_components/instructions-manager'
-import { RequirementsManager } from '../_components/requirements-manager'
+import { TaskManager } from '~/components/jobs/task-manager'
+import { RecurringSettings } from '~/components/jobs/recurring-settings'
+import { InstructionsManager } from '~/components/jobs/instructions-manager'
+import { RequirementsManager } from '~/components/jobs/requirements-manager'
 import {
   DndContext,
   closestCenter,
@@ -67,8 +67,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { cn } from '../../../../lib/utils'
-import { NotesManager } from '../_components/notes-manager'
+import { cn } from '~/lib/utils'
+import { NotesManager } from '~/components/jobs/notes-manager'
 
 interface SortableTaskItemProps {
   id: string

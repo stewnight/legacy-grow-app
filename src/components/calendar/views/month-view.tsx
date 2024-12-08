@@ -3,10 +3,10 @@ import { format, isSameMonth, isToday } from 'date-fns'
 import { cn } from '~/lib/utils'
 import { type JobWithRelations } from '~/server/db/schema'
 import { JobCard } from '../job-card'
-import { AppSheet } from '../../layout/app-sheet'
-import { JobForm } from '../../../app/(app)/jobs/_components/jobs-form'
-import { SheetTrigger } from '../../ui/sheet'
-import { Button } from '../../ui/button'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { JobForm } from '~/components/jobs/jobs-form'
+import { SheetTrigger } from '~/components/ui/sheet'
+import { Button } from '~/components/ui/button'
 import { PlusIcon } from 'lucide-react'
 
 interface MonthViewProps {
@@ -20,7 +20,10 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
     <div>
       <div className="grid grid-cols-7 text-muted-foreground">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-          <div key={day} className="border-b p-0.5 text-center text-xs font-medium">
+          <div
+            key={day}
+            className="border-b p-0.5 text-center text-xs font-medium"
+          >
             {day}
           </div>
         ))}
@@ -30,7 +33,8 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
           const dayJobs = jobs.filter(
             (job) =>
               job.dueDate &&
-              format(new Date(job.dueDate), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+              format(new Date(job.dueDate), 'yyyy-MM-dd') ===
+                format(date, 'yyyy-MM-dd')
           )
 
           return (

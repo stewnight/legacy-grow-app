@@ -16,7 +16,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { api } from '~/trpc/react'
-import { toast, useToast } from '../../../../hooks/use-toast'
+import { toast, useToast } from '../../hooks/use-toast'
 import { useRouter } from 'next/navigation'
 
 export const columns: ColumnDef<typeof buildings.$inferSelect>[] = [
@@ -26,7 +26,10 @@ export const columns: ColumnDef<typeof buildings.$inferSelect>[] = [
     cell: ({ row }) => {
       const building = row.original
       return (
-        <Link href={`/buildings/${building.id}`} className="font-medium hover:underline">
+        <Link
+          href={`/buildings/${building.id}`}
+          className="font-medium hover:underline"
+        >
           {building.name}
         </Link>
       )
@@ -133,11 +136,17 @@ export const columns: ColumnDef<typeof buildings.$inferSelect>[] = [
               <Link href={`/buildings/${building.id}`}>View Details</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`/buildings/${building.id}/batches`}>View Batches</Link>
+              <Link href={`/buildings/${building.id}/batches`}>
+                View Batches
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                if (window.confirm('Are you sure you want to delete this building?')) {
+                if (
+                  window.confirm(
+                    'Are you sure you want to delete this building?'
+                  )
+                ) {
                   deleteBuilding(building.id)
                 }
               }}

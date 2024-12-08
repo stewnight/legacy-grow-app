@@ -3,10 +3,10 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
-import { columns } from './_components/batches-columns'
+import { columns } from '../../../components/batches/batches-columns'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { BatchForm } from './_components/batches-form'
+import { BatchForm } from '../../../components/batches/batches-form'
 
 export default async function BatchesPage() {
   const session = await auth()
@@ -28,7 +28,11 @@ export default async function BatchesPage() {
       </div>
       <div className="h-full">
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <DataTable columns={columns} data={batches} filterColumn="identifier" />
+          <DataTable
+            columns={columns}
+            data={batches}
+            filterColumn="identifier"
+          />
         </Suspense>
       </div>
     </div>
