@@ -43,6 +43,39 @@ interface RelationInfo {
   references: string[]
 }
 
+interface DrizzleRelation {
+  references?: {
+    table: any
+    column: string
+    onDelete?: string
+  }
+  fields?: string[]
+}
+
+interface DrizzleColumn {
+  dataType?: string
+  $type?: string
+  notNull?: boolean
+  default?: any
+  isUnique?: boolean
+  primaryKey?: boolean
+  references?: {
+    table: any
+    column: string
+    onDelete?: string
+  }
+  enumValues?: string[]
+  precision?: number
+  scale?: number
+  length?: number
+}
+
+declare const DrizzleColumns: unique symbol
+
+interface DrizzleTable {
+  [DrizzleColumns]: Record<string, DrizzleColumn>
+}
+
 function isTableWithColumns(value: unknown): value is PgTableWithColumns<any> {
   if (!value || typeof value !== 'object') return false
   const obj = value as any
@@ -142,9 +175,12 @@ async function generateSchemaDoc() {
             )) {
               if (!relation || typeof relation !== 'object') continue
 
-              const relatedTableName = getTableName(relation.references?.table)
+              const typedRelation = relation as DrizzleRelation
+              const relatedTableName = getTableName(
+                typedRelation.references?.table
+              )
               const relationType =
-                relation.fields?.length === 1 ? 'one' : 'many'
+                typedRelation.fields?.length === 1 ? 'one' : 'many'
 
               console.log(
                 `Found relation: ${tableName} -> ${relationType} -> ${relatedTableName} (${relationName})`
@@ -154,8 +190,10 @@ async function generateSchemaDoc() {
                 name: relationName,
                 type: relationType,
                 table: relatedTableName,
-                fields: relation.fields || [],
-                references: relation.references || [],
+                fields: typedRelation.fields || [],
+                references: typedRelation.references
+                  ? [typedRelation.references.column]
+                  : [],
               })
               totalRelations++
             }
@@ -177,7 +215,10 @@ async function generateSchemaDoc() {
       const tableInfo = tableMap.get(exportName)
       if (!tableInfo) continue
 
-      const columns = table[Symbol.for('drizzle:Columns')]
+      const typedTable = table as unknown as DrizzleTable
+      const columns = (typedTable as any)[
+        Symbol.for('drizzle:Columns')
+      ] as Record<string, DrizzleColumn>
       console.log('Table structure:', {
         name: tableName,
         columnCount: Object.keys(columns).length,
@@ -191,36 +232,37 @@ async function generateSchemaDoc() {
           continue
         }
 
+        const typedColumn = column as DrizzleColumn
         console.log(`\nColumn ${columnName}:`, {
-          type: column.dataType || column.$type || 'unknown',
-          nullable: !column.notNull,
-          hasDefault: 'default' in column,
-          isUnique: column.isUnique,
-          isPrimary: column.primaryKey,
-          hasReferences: 'references' in column,
-          keys: safeGetKeys(column),
+          type: typedColumn.dataType || typedColumn.$type || 'unknown',
+          nullable: !typedColumn.notNull,
+          hasDefault: 'default' in typedColumn,
+          isUnique: typedColumn.isUnique,
+          isPrimary: typedColumn.primaryKey,
+          hasReferences: 'references' in typedColumn,
+          keys: safeGetKeys(typedColumn),
         })
 
         const columnInfo: ColumnInfo = {
           name: columnName,
-          type: getColumnType(column),
-          nullable: !column.notNull,
-          defaultValue: column.default,
-          isUnique: column.isUnique,
-          isPrimary: column.primaryKey,
+          type: getColumnType(typedColumn),
+          nullable: !typedColumn.notNull,
+          defaultValue: typedColumn.default,
+          isUnique: typedColumn.isUnique,
+          isPrimary: typedColumn.primaryKey,
         }
 
         // Handle references
-        if ('references' in column) {
+        if ('references' in typedColumn && typedColumn.references) {
           console.log('Reference details:', {
-            table: column.references.table,
-            column: column.references.column,
-            onDelete: column.references.onDelete,
+            table: typedColumn.references.table,
+            column: typedColumn.references.column,
+            onDelete: typedColumn.references.onDelete,
           })
           columnInfo.references = {
-            table: getTableName(column.references.table),
-            column: column.references.column,
-            onDelete: column.references.onDelete,
+            table: getTableName(typedColumn.references.table),
+            column: typedColumn.references.column,
+            onDelete: typedColumn.references.onDelete,
           }
         }
 
