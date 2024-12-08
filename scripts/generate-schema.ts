@@ -60,6 +60,11 @@ function safeGetKeys(obj: any): string[] {
   return Object.keys(obj)
 }
 
+function getTableName(obj: any): string {
+  if (!obj) return 'unknown'
+  return obj[Symbol.for('drizzle:BaseName')] || obj.name || 'unknown'
+}
+
 async function generateSchemaDoc() {
   const tables: TableInfo[] = []
   let totalColumns = 0
@@ -86,6 +91,27 @@ async function generateSchemaDoc() {
   console.log('\n=== Starting Schema Generation ===')
   console.log(`Found ${modules.length} schema modules to process`)
 
+  // First pass: collect all tables
+  const tableMap = new Map<string, TableInfo>()
+  for (const module of modules) {
+    for (const [exportName, exportValue] of Object.entries(module)) {
+      if (exportName.includes('Schema') || exportName.includes('Relations')) {
+        continue
+      }
+
+      if (isTableWithColumns(exportValue)) {
+        const tableName = getTableName(exportValue)
+        const tableInfo: TableInfo = {
+          name: tableName,
+          columns: [],
+          relations: [],
+        }
+        tableMap.set(exportName, tableInfo)
+      }
+    }
+  }
+
+  // Second pass: process tables and relations
   for (const module of modules) {
     console.log('\n--- Processing Module ---')
     console.log('Module exports:', Object.keys(module))
@@ -93,47 +119,69 @@ async function generateSchemaDoc() {
     for (const [exportName, exportValue] of Object.entries(module)) {
       console.log(`\nChecking export: ${exportName}`)
 
-      // Skip schema and relation exports
-      if (exportName.includes('Schema') || exportName.includes('Relations')) {
-        console.log('Skipping: Schema or Relations export')
+      // Skip schema exports
+      if (exportName.includes('Schema')) {
+        console.log('Skipping: Schema export')
         continue
       }
 
-      // Log the structure of the export
-      if (exportValue && typeof exportValue === 'object') {
-        const obj = exportValue as any
-        console.log('Export structure:', {
-          isDrizzleTable: obj[Symbol.for('drizzle:IsDrizzleTable')],
-          name: obj[Symbol.for('drizzle:Name')],
-          hasColumns: obj[Symbol.for('drizzle:Columns')] !== undefined,
-          keys: safeGetKeys(obj),
-          symbols: Object.getOwnPropertySymbols(obj).map((sym) =>
-            sym.toString()
-          ),
-        })
+      // Process relations first
+      if (exportName.includes('Relations')) {
+        console.log('Processing relations export')
+        const relations = exportValue
+        if (
+          relations &&
+          typeof relations === 'object' &&
+          '$relations' in relations
+        ) {
+          const tableName = exportName.replace('Relations', '')
+          const tableInfo = tableMap.get(tableName)
+          if (tableInfo) {
+            for (const [relationName, relation] of Object.entries(
+              relations.$relations
+            )) {
+              if (!relation || typeof relation !== 'object') continue
+
+              const relatedTableName = getTableName(relation.references?.table)
+              const relationType =
+                relation.fields?.length === 1 ? 'one' : 'many'
+
+              console.log(
+                `Found relation: ${tableName} -> ${relationType} -> ${relatedTableName} (${relationName})`
+              )
+
+              tableInfo.relations.push({
+                name: relationName,
+                type: relationType,
+                table: relatedTableName,
+                fields: relation.fields || [],
+                references: relation.references || [],
+              })
+              totalRelations++
+            }
+          }
+        }
+        continue
       }
 
-      // Check if this is a table
+      // Process table
       if (!isTableWithColumns(exportValue)) {
         console.log('Skipping: Not a valid Drizzle table')
         continue
       }
 
       const table = exportValue
-      const tableName = table[Symbol.for('drizzle:BaseName')]
+      const tableName = getTableName(table)
       console.log(`\nProcessing table: ${tableName}`)
+
+      const tableInfo = tableMap.get(exportName)
+      if (!tableInfo) continue
 
       const columns = table[Symbol.for('drizzle:Columns')]
       console.log('Table structure:', {
         name: tableName,
         columnCount: Object.keys(columns).length,
       })
-
-      const tableInfo: TableInfo = {
-        name: tableName,
-        columns: [],
-        relations: [],
-      }
 
       // Get columns
       console.log('\nProcessing columns:')
@@ -170,7 +218,7 @@ async function generateSchemaDoc() {
             onDelete: column.references.onDelete,
           })
           columnInfo.references = {
-            table: column.references.table[Symbol.for('drizzle:BaseName')],
+            table: getTableName(column.references.table),
             column: column.references.column,
             onDelete: column.references.onDelete,
           }
@@ -180,53 +228,15 @@ async function generateSchemaDoc() {
         totalColumns++
       }
 
-      // Get relations
-      const relationsExport = (module as any)[`${exportName}Relations`]
-      if (relationsExport && typeof relationsExport === 'object') {
-        console.log('\nProcessing relations:')
-        console.log('Relations export structure:', {
-          hasRelations: '$relations' in relationsExport,
-          keys: safeGetKeys(relationsExport),
-        })
-
-        const relations = relationsExport
-        if ('$relations' in relations) {
-          for (const [relationName, relation] of Object.entries(
-            relations.$relations
-          )) {
-            if (!relation || typeof relation !== 'object') {
-              console.log(
-                `Skipping relation ${relationName}: Invalid relation data`
-              )
-              continue
-            }
-
-            console.log(`\nRelation ${relationName}:`, {
-              type: relation.fields?.length === 1 ? 'one' : 'many',
-              fields: relation.fields,
-              references: relation.references,
-              keys: safeGetKeys(relation),
-            })
-
-            tableInfo.relations.push({
-              name: relationName,
-              type: relation.fields?.length === 1 ? 'one' : 'many',
-              table: relation.references?.table[Symbol.for('drizzle:BaseName')],
-              fields: relation.fields || [],
-              references: relation.references || [],
-            })
-            totalRelations++
-          }
-        }
-      }
-
-      tables.push(tableInfo)
       console.log(`\nFinished processing table ${tableName}:`, {
         columnCount: tableInfo.columns.length,
         relationCount: tableInfo.relations.length,
       })
     }
   }
+
+  // Convert map to array
+  tables.push(...tableMap.values())
 
   console.log('\n=== Schema Statistics ===')
   console.log(`Total Tables: ${tables.length}`)
