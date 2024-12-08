@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
 import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
-import { BuildingsForm } from './_components/buildings-form'
-import { columns } from './_components/buildings-columns'
+import { BuildingsForm } from '../../../components/buildings/buildings-form'
+import { columns } from '../../../components/buildings/buildings-columns'
 
 export default async function BuildingsPage() {
   const session = await auth()
