@@ -1,10 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import {
-  sensorReadings,
-  insertSensorReadingSchema,
-} from '~/server/db/schema/sensorReadings'
-import { eq, desc, and, SQL, gte, lte } from 'drizzle-orm'
+import { sensorReadings, insertSensorReadingSchema } from '~/server/db/schema/sensorReadings'
+import { eq, desc, and, type SQL, gte, lte } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 
 // Schema for filters

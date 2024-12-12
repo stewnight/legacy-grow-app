@@ -318,12 +318,8 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Entity Type" />
     ),
     cell: ({ row }) => {
-      const entityType = row.getValue('entityType') as string
-      return entityType === 'none' ? (
-        '-'
-      ) : (
-        <Badge variant="outline">{entityType}</Badge>
-      )
+      const entityType = row.getValue('entityType')
+      return entityType === 'none' ? '-' : <Badge variant="outline">{entityType}</Badge>
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
