@@ -167,7 +167,38 @@ You are a senior software engineer pair-programming with a colleague on their **
 3. **Frontend**:
 
    - Mobile-responsive layout
-   - Reusable UI components
+   - Entity-specific components organized by domain:
+     ```typescript
+     // ~/components/<entity_name>/
+     ;-(<entity_name>-form.tsx) - // Form implementation with validation
+       <entity_name>-columns.tsx - // Data table column definitions
+       <entity_name>-card.tsx - // Optional card view
+       <entity_name>-list.tsx - // Optional list view
+       <entity_name>-details.tsx // Optional detailed view
+     ```
+   - Form Implementation Pattern:
+
+     ```typescript
+     // Entity-specific form with complete implementation
+     export function EntityForm({
+       defaultValues,
+       onSubmit,
+     }: EntityFormProps) {
+       const form = useForm<EntityFormData>({
+         resolver: zodResolver(entitySchema),
+         defaultValues,
+       })
+
+       return (
+         <Form {...form}>
+           <form onSubmit={form.handleSubmit(onSubmit)}>
+             {/* Form fields with validation */}
+           </form>
+         </Form>
+       )
+     }
+     ```
+
    - Type-safe data fetching
    - Optimistic updates
 
@@ -294,7 +325,7 @@ interface EntityFormProps {
 // 1. Initialize form with schema validation
 const form = useForm<FormData>({
   resolver: zodResolver(insertEntitySchema),
-  defaultValues: getDefaultValues(initialData),
+  initialData: getinitialData(initialData),
 })
 
 // 2. Setup mutations with proper types

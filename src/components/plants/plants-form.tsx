@@ -47,13 +47,13 @@ type PlantProperties = {
 
 interface PlantFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['plant']['get']
+  initialData?: RouterOutputs['plant']['get']
   onSuccess?: (data: PlantFormValues) => void
 }
 
 export function PlantForm({
   mode = 'create',
-  defaultValues,
+  initialData,
   onSuccess,
 }: PlantFormProps) {
   const { toast } = useToast()
@@ -68,17 +68,17 @@ export function PlantForm({
 
   const form = useForm<PlantFormValues>({
     resolver: zodResolver(insertPlantSchema),
-    defaultValues: {
-      identifier: defaultValues?.identifier ?? '',
-      geneticId: defaultValues?.geneticId ?? '',
-      locationId: defaultValues?.locationId ?? '',
-      batchId: defaultValues?.batchId ?? undefined,
-      motherId: defaultValues?.motherId ?? undefined,
-      source: defaultValues?.source ?? plantSourceEnum.enumValues[0],
-      stage: defaultValues?.stage ?? plantStageEnum.enumValues[0],
-      sex: defaultValues?.sex ?? plantSexEnum.enumValues[0],
-      health: defaultValues?.health ?? healthStatusEnum.enumValues[0],
-      plantedDate: defaultValues?.plantedDate ?? undefined,
+    initialData: {
+      identifier: initialData?.identifier ?? '',
+      geneticId: initialData?.geneticId ?? '',
+      locationId: initialData?.locationId ?? '',
+      batchId: initialData?.batchId ?? undefined,
+      motherId: initialData?.motherId ?? undefined,
+      source: initialData?.source ?? plantSourceEnum.enumValues[0],
+      stage: initialData?.stage ?? plantStageEnum.enumValues[0],
+      sex: initialData?.sex ?? plantSexEnum.enumValues[0],
+      health: initialData?.health ?? healthStatusEnum.enumValues[0],
+      plantedDate: initialData?.plantedDate ?? undefined,
     },
   })
 
@@ -141,8 +141,8 @@ export function PlantForm({
   function onSubmit(values: PlantFormValues) {
     if (mode === 'create') {
       createPlant(values)
-    } else if (defaultValues?.id) {
-      updatePlant({ id: defaultValues.id, data: values })
+    } else if (initialData?.id) {
+      updatePlant({ id: initialData.id, data: values })
     }
   }
 

@@ -36,13 +36,13 @@ type RoomFormValues = z.infer<typeof insertRoomSchema>
 
 interface RoomFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['room']['get']
+  initialData?: RouterOutputs['room']['get']
   onSuccess?: (data: RoomFormValues) => void
 }
 
 export function RoomForm({
   mode = 'create',
-  defaultValues,
+  initialData,
   onSuccess,
 }: RoomFormProps) {
   const { toast } = useToast()
@@ -50,20 +50,20 @@ export function RoomForm({
   const utils = api.useUtils()
   const form = useForm<RoomFormValues>({
     resolver: zodResolver(insertRoomSchema),
-    defaultValues: {
-      name: defaultValues?.name || '',
-      capacity: defaultValues?.capacity || 10,
-      status: defaultValues?.status || statusEnum.enumValues[0],
-      buildingId: defaultValues?.buildingId || '',
-      parentId: defaultValues?.parentId || undefined,
-      type: defaultValues?.type || undefined,
-      properties: defaultValues?.properties || {
+    initialData: {
+      name: initialData?.name || '',
+      capacity: initialData?.capacity || 10,
+      status: initialData?.status || statusEnum.enumValues[0],
+      buildingId: initialData?.buildingId || '',
+      parentId: initialData?.parentId || undefined,
+      type: initialData?.type || undefined,
+      properties: initialData?.properties || {
         temperature: { min: 65, max: 80 },
         humidity: { min: 40, max: 60 },
         light: { type: 'LED', intensity: 100 },
         co2: { min: 400, max: 1500 },
       },
-      dimensions: defaultValues?.dimensions || {
+      dimensions: initialData?.dimensions || {
         length: 10,
         width: 10,
         height: 8,
@@ -115,8 +115,8 @@ export function RoomForm({
   function onSubmit(values: RoomFormValues) {
     if (mode === 'create') {
       createRoom(values)
-    } else if (defaultValues?.id) {
-      updateRoom({ id: defaultValues.id, data: values })
+    } else if (initialData?.id) {
+      updateRoom({ id: initialData.id, data: values })
     }
   }
 

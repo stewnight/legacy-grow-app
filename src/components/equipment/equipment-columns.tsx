@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { Badge } from '~/components/ui/badge'
 import { cn } from '~/lib/utils'
-import { AppSheet } from '~/components/layout/app-sheet'
+import { AppSheet } from '~/components/Layout/app-sheet'
 import { EquipmentForm } from '~/components/equipment/equipment-form'
 import { type Equipment } from '~/server/db/schema/equipment'
 import { DataTableColumnHeader } from '../ui/data-table-column-header'

@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { format } from 'date-fns'
-import { AppSheet } from '~/components/layout/app-sheet'
+import { AppSheet } from '~/components/Layout/app-sheet'
 import { PlantForm } from '~/components/plants/plants-form'
 
 // Define the type including relations
@@ -188,7 +188,7 @@ export const columns: ColumnDef<PlantWithRelations>[] = [
               <Link href={`/plants/${plant.id}`}>View Details</Link>
             </DropdownMenuItem>
             <AppSheet mode="edit">
-              <PlantForm mode="edit" defaultValues={plant as Plant} />
+              <PlantForm mode="edit" initialData={plant as Plant} />
             </AppSheet>
             <DropdownMenuItem
               onClick={() => {

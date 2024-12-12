@@ -11,7 +11,7 @@ import { Badge } from '~/components/ui/badge'
 import { Checkbox } from '~/components/ui/checkbox'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { AppSheet } from '../layout/app-sheet'
+import { AppSheet } from '../Layout/app-sheet'
 import { JobForm } from '~/components/jobs/jobs-form'
 import { Button } from '../ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
@@ -85,7 +85,7 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
             <AppSheet mode="create" entity="job">
               <JobForm
                 mode="create"
-                defaultValues={{
+                initialData={{
                   entityType: entityType ?? 'none',
                   entityId: entityId ?? null,
                   status: 'active',

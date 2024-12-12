@@ -1,6 +1,6 @@
 import { SidebarTrigger } from '../ui/sidebar'
 import { auth } from '~/server/auth'
-import { CustomBreadcrumbs } from '../layout/custom-breadcrumbs'
+import { CustomBreadcrumbs } from './custom-breadcrumbs'
 
 export default async function Header() {
   const session = await auth()

@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
 import { MapPin, Thermometer, Droplets, Ruler, Users } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
+import { AppSheet } from '../../../../components/Layout/app-sheet'
 import { LocationForm } from '../../../../components/locations/locations-form'
 import { Badge } from '../../../../components/ui/badge'
 import JobsTab from '../../../../components/jobs/tab'
@@ -93,7 +93,7 @@ export default function LocationPage({
           </p>
         </div>
         <AppSheet mode="edit" entity="location">
-          <LocationForm mode="edit" defaultValues={location} />
+          <LocationForm mode="edit" initialData={location} />
         </AppSheet>
       </div>
 

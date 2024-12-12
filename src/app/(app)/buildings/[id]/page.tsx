@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
 import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
+import { AppSheet } from '../../../../components/Layout/app-sheet'
 import { BuildingsForm } from '../../../../components/buildings/buildings-form'
 import { Badge } from '../../../../components/ui/badge'
 import { RoomForm } from '../../../../components/rooms/rooms-form'
@@ -83,7 +83,7 @@ export default function BuildingPage({
           </p>
         </div>
         <AppSheet mode="edit" entity="building">
-          <BuildingsForm mode="edit" defaultValues={building} />
+          <BuildingsForm mode="edit" initialData={building} />
         </AppSheet>
       </div>
 
@@ -282,7 +282,7 @@ export default function BuildingPage({
                 <AppSheet mode="create" entity="room">
                   <RoomForm
                     mode="create"
-                    defaultValues={{
+                    initialData={{
                       id: '',
                       buildingId: building.id,
                       status: 'active' as const,

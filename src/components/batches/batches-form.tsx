@@ -37,13 +37,13 @@ type BatchFormValues = z.infer<typeof insertBatchSchema>
 
 interface BatchFormProps {
   mode: 'create' | 'edit'
-  defaultValues?: RouterOutputs['batch']['get']
+  initialData?: RouterOutputs['batch']['get']
   onSuccess?: (data: BatchFormValues) => void
 }
 
 export function BatchForm({
   mode = 'create',
-  defaultValues,
+  initialData,
   onSuccess,
 }: BatchFormProps) {
   const { toast } = useToast()
@@ -60,14 +60,14 @@ export function BatchForm({
 
   const form = useForm<BatchFormValues>({
     resolver: zodResolver(insertBatchSchema),
-    defaultValues: {
-      identifier: defaultValues?.identifier || '',
-      geneticId: defaultValues?.geneticId || '',
-      locationId: defaultValues?.locationId || '',
-      stage: defaultValues?.stage || 'germination',
-      batchStatus: defaultValues?.batchStatus || 'active',
-      startDate: defaultValues?.startDate || new Date(),
-      plantCount: defaultValues?.plantCount || 0,
+    initialData: {
+      identifier: initialData?.identifier || '',
+      geneticId: initialData?.geneticId || '',
+      locationId: initialData?.locationId || '',
+      stage: initialData?.stage || 'germination',
+      batchStatus: initialData?.batchStatus || 'active',
+      startDate: initialData?.startDate || new Date(),
+      plantCount: initialData?.plantCount || 0,
     },
   })
 
@@ -114,8 +114,8 @@ export function BatchForm({
     try {
       if (mode === 'create') {
         await createBatch(values)
-      } else if (defaultValues?.id) {
-        await updateBatch({ id: defaultValues.id, data: values })
+      } else if (initialData?.id) {
+        await updateBatch({ id: initialData.id, data: values })
       }
     } catch (error) {
       console.error('Form submission error:', error)

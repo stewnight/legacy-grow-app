@@ -55,7 +55,7 @@ export function TaskManager({ tasks, onChange }: TaskManagerProps) {
 
   const form = useForm<z.infer<typeof taskFormSchema>>({
     resolver: zodResolver(taskFormSchema),
-    defaultValues: {
+    initialData: {
       item: '',
       estimatedMinutes: null,
     },

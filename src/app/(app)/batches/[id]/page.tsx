@@ -24,7 +24,7 @@ import {
   Droplets,
   Timer,
 } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
+import { AppSheet } from '../../../../components/Layout/app-sheet'
 import { BatchForm } from '../../../../components/batches/batches-form'
 import JobsTab from '../../../../components/jobs/tab'
 
@@ -100,7 +100,7 @@ export default function BatchPage({
           </p>
         </div>
         <AppSheet mode="edit" entity="batch">
-          <BatchForm mode="edit" defaultValues={batch} />
+          <BatchForm mode="edit" initialData={batch} />
         </AppSheet>
       </div>
 

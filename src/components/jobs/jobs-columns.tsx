@@ -6,7 +6,7 @@ import { DataTableColumnHeader } from '~/components/ui/data-table-column-header'
 import { DataTableFacetedFilter } from '~/components/ui/data-table-faceted-filter'
 import { Badge } from '~/components/ui/badge'
 import { format, formatDistanceToNow } from 'date-fns'
-import { AppSheet } from '~/components/layout/app-sheet'
+import { AppSheet } from '~/components/Layout/app-sheet'
 import { JobForm } from './jobs-form'
 import { Button } from '~/components/ui/button'
 import {
@@ -319,7 +319,11 @@ export const columns: ColumnDef<JobWithRelations>[] = [
     ),
     cell: ({ row }) => {
       const entityType = row.getValue('entityType')
-      return entityType === 'none' ? '-' : <Badge variant="outline">{entityType}</Badge>
+      return entityType === 'none' ? (
+        '-'
+      ) : (
+        <Badge variant="outline">{entityType}</Badge>
+      )
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
@@ -360,7 +364,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
               </Button>
             }
           >
-            <JobForm mode="edit" defaultValues={row.original} />
+            <JobForm mode="edit" initialData={row.original} />
           </AppSheet>
         </div>
       )

@@ -58,7 +58,7 @@ type JobFormValues = z.infer<typeof insertJobSchema> & {
 
 interface JobFormProps {
   mode: 'create' | 'edit'
-  defaultValues?: JobWithRelations
+  initialData?: JobWithRelations
 }
 
 type JobProperties = z.infer<typeof jobPropertiesSchema>
@@ -76,25 +76,25 @@ interface JobMetadata {
   } | null
 }
 
-export function JobForm({ mode, defaultValues }: JobFormProps) {
+export function JobForm({ mode, initialData }: JobFormProps) {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(insertJobSchema),
-    defaultValues: {
-      title: defaultValues?.title || '',
-      description: defaultValues?.description || '',
-      priority: defaultValues?.priority || 'low',
-      jobStatus: defaultValues?.jobStatus || 'pending',
-      dueDate: defaultValues?.dueDate || undefined,
-      assignedToId: defaultValues?.assignedToId || undefined,
-      entityType: defaultValues?.entityType || 'none',
-      entityId: defaultValues?.entityId || undefined,
-      status: defaultValues?.status || 'active',
-      category: defaultValues?.category || 'maintenance',
+    initialData: {
+      title: initialData?.title || '',
+      description: initialData?.description || '',
+      priority: initialData?.priority || 'low',
+      jobStatus: initialData?.jobStatus || 'pending',
+      dueDate: initialData?.dueDate || undefined,
+      assignedToId: initialData?.assignedToId || undefined,
+      entityType: initialData?.entityType || 'none',
+      entityId: initialData?.entityId || undefined,
+      status: initialData?.status || 'active',
+      category: initialData?.category || 'maintenance',
       properties: {
-        recurring: (defaultValues?.properties)!?.recurring || null,
-        tasks: (defaultValues?.properties)!?.tasks || [],
-        instructions: (defaultValues?.properties)!?.instructions || [],
-        requirements: (defaultValues?.properties)!?.requirements || {
+        recurring: (initialData?.properties)!?.recurring || null,
+        tasks: (initialData?.properties)!?.tasks || [],
+        instructions: (initialData?.properties)!?.instructions || [],
+        requirements: (initialData?.properties)!?.requirements || {
           tools: [],
           supplies: [],
           ppe: [],
@@ -172,8 +172,8 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
 
       if (mode === 'create') {
         createJob(formData)
-      } else if (defaultValues?.id) {
-        updateJob({ id: defaultValues.id, data: formData })
+      } else if (initialData?.id) {
+        updateJob({ id: initialData.id, data: formData })
       }
     } catch (error) {
       toast({
@@ -219,8 +219,8 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
 
               if (mode === 'create') {
                 createJob(formData)
-              } else if (defaultValues?.id) {
-                updateJob({ id: defaultValues.id, data: formData })
+              } else if (initialData?.id) {
+                updateJob({ id: initialData.id, data: formData })
               }
             } catch (error) {
               console.error('Form submission error:', error)
@@ -450,7 +450,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Tasks</FormLabel>
               <FormControl>
                 <TaskManager
-                  tasks={(field.value || [])}
+                  tasks={field.value || []}
                   onChange={(tasks) => {
                     form.setValue('properties.tasks', tasks, {
                       shouldValidate: true,
@@ -471,7 +471,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Recurring Settings</FormLabel>
               <FormControl>
                 <RecurringSettings
-                  value={(field.value) || null}
+                  value={field.value || null}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -506,7 +506,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormControl>
                 <RequirementsManager
                   value={
-                    (field.value) || {
+                    field.value || {
                       tools: [],
                       supplies: [],
                       ppe: [],

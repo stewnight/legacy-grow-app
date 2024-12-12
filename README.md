@@ -157,7 +157,7 @@ interface EntityFormProps {
 // 2. Form Setup
 const form = useForm<FormData>({
   resolver: zodResolver(insertEntitySchema),
-  defaultValues: {
+  initialData: {
     // Use nullish coalescing for all defaults
     field: initialData?.field ?? defaultValue,
   },

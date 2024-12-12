@@ -34,13 +34,13 @@ type GeneticFormValues = z.infer<typeof insertGeneticSchema>
 
 interface GeneticFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['genetic']['get']
+  initialData?: RouterOutputs['genetic']['get']
   onSuccess?: (data: GeneticFormValues) => void
 }
 
 export function GeneticForm({
   mode = 'create',
-  defaultValues,
+  initialData,
   onSuccess,
 }: GeneticFormProps) {
   const { toast } = useToast()
@@ -48,13 +48,13 @@ export function GeneticForm({
   const utils = api.useUtils()
   const form = useForm<GeneticFormValues>({
     resolver: zodResolver(insertGeneticSchema),
-    defaultValues: {
-      name: defaultValues?.name || '',
-      type: defaultValues?.type || 'hybrid',
-      breeder: defaultValues?.breeder || '',
-      description: defaultValues?.description || '',
-      inHouse: defaultValues?.inHouse || false,
-      status: defaultValues?.status || 'active',
+    initialData: {
+      name: initialData?.name || '',
+      type: initialData?.type || 'hybrid',
+      breeder: initialData?.breeder || '',
+      description: initialData?.description || '',
+      inHouse: initialData?.inHouse || false,
+      status: initialData?.status || 'active',
     },
   })
 
@@ -100,8 +100,8 @@ export function GeneticForm({
   function onSubmit(values: GeneticFormValues) {
     if (mode === 'create') {
       createGenetic(values)
-    } else if (defaultValues?.id) {
-      updateGenetic({ id: defaultValues.id, data: values })
+    } else if (initialData?.id) {
+      updateGenetic({ id: initialData.id, data: values })
     }
   }
 

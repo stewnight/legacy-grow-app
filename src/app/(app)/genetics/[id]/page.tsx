@@ -24,7 +24,7 @@ import {
   Scale,
   Microscope,
 } from 'lucide-react'
-import { AppSheet } from '../../../../components/layout/app-sheet'
+import { AppSheet } from '../../../../components/Layout/app-sheet'
 import { GeneticForm } from '../../../../components/genetics/genetics-form'
 import { Badge } from '../../../../components/ui/badge'
 
@@ -93,7 +93,7 @@ export default function GeneticPage({
           </p>
         </div>
         <AppSheet mode="edit" entity="genetic">
-          <GeneticForm mode="edit" defaultValues={genetic} />
+          <GeneticForm mode="edit" initialData={genetic} />
         </AppSheet>
       </div>
 

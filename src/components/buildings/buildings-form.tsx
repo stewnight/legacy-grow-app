@@ -38,20 +38,20 @@ type BuildingAddress = z.infer<typeof insertBuildingSchema.shape.address>
 
 interface BuildingFormProps {
   mode: 'create' | 'edit'
-  defaultValues?: RouterOutputs['building']['get']
+  initialData?: RouterOutputs['building']['get']
   onSuccess?: (data: BuildingFormValues) => void
 }
 
 export function BuildingsForm({
   mode = 'create',
-  defaultValues,
+  initialData,
   onSuccess,
 }: BuildingFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
 
-  const defaultProperties: BuildingProperties = defaultValues?.properties ?? {
+  const defaultProperties: BuildingProperties = initialData?.properties ?? {
     climate: {
       controlType: 'manual',
       hvacSystem: '',
@@ -66,7 +66,7 @@ export function BuildingsForm({
     },
   }
 
-  const defaultAddress: BuildingAddress = defaultValues?.address ?? {
+  const defaultAddress: BuildingAddress = initialData?.address ?? {
     street: '',
     city: '',
     state: '',
@@ -80,10 +80,10 @@ export function BuildingsForm({
 
   const form = useForm<BuildingFormValues>({
     resolver: zodResolver(insertBuildingSchema),
-    defaultValues: {
-      name: defaultValues?.name ?? '',
-      type: defaultValues?.type ?? buildingTypeEnum.enumValues[0],
-      status: defaultValues?.status ?? statusEnum.enumValues[0],
+    initialData: {
+      name: initialData?.name ?? '',
+      type: initialData?.type ?? buildingTypeEnum.enumValues[0],
+      status: initialData?.status ?? statusEnum.enumValues[0],
       address: defaultAddress,
       properties: defaultProperties,
     },
@@ -131,8 +131,8 @@ export function BuildingsForm({
   async function onSubmit(values: BuildingFormValues) {
     if (mode === 'create') {
       createBuilding(values)
-    } else if (defaultValues?.id) {
-      updateBuilding({ id: defaultValues.id, data: values })
+    } else if (initialData?.id) {
+      updateBuilding({ id: initialData.id, data: values })
     }
   }
 

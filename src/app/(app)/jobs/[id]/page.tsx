@@ -32,7 +32,7 @@ import {
   PlayCircle,
   GripVertical,
 } from 'lucide-react'
-import { AppSheet } from '~/components/layout/app-sheet'
+import { AppSheet } from '~/components/Layout/app-sheet'
 import { JobForm } from '~/components/jobs/jobs-form'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -369,7 +369,7 @@ export default function JobPage({
             </Button>
           )}
           <AppSheet mode="edit" entity="job">
-            <JobForm mode="edit" defaultValues={job} />
+            <JobForm mode="edit" initialData={job} />
           </AppSheet>
         </div>
       </div>

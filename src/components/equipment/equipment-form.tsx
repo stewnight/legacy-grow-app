@@ -24,7 +24,6 @@ import {
 import { Textarea } from '~/components/ui/textarea'
 import { DatePicker } from '~/components/ui/date-picker'
 import { addDays, startOfToday } from 'date-fns'
-import { BaseForm } from '~/components/base-form'
 import { type z } from 'zod'
 import {
   equipmentTypeEnum,
@@ -64,7 +63,7 @@ export function EquipmentForm({
 
   const form = useForm<FormData>({
     resolver: zodResolver(insertEquipmentSchema),
-    defaultValues: initialData
+    initialData: initialData
       ? {
           ...initialData,
           purchaseDate: initialData.purchaseDate
@@ -162,7 +161,7 @@ export function EquipmentForm({
       mode={mode}
       schema={insertEquipmentSchema}
       initialData={parsedInitialData}
-      defaultValues={{
+      initialData={{
         name: parsedInitialData?.name ?? '',
         type: parsedInitialData?.type ?? 'sensor',
         manufacturer: parsedInitialData?.manufacturer ?? '',

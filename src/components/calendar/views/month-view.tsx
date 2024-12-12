@@ -3,7 +3,7 @@ import { format, isSameMonth, isToday } from 'date-fns'
 import { cn } from '~/lib/utils'
 import { type JobWithRelations } from '~/server/db/schema'
 import { JobCard } from '../job-card'
-import { AppSheet } from '~/components/layout/app-sheet'
+import { AppSheet } from '~/components/Layout/app-sheet'
 import { JobForm } from '~/components/jobs/jobs-form'
 import { SheetTrigger } from '~/components/ui/sheet'
 import { Button } from '~/components/ui/button'
@@ -67,7 +67,7 @@ export function MonthView({ currentDate, days, jobs }: MonthViewProps) {
                   }
                 >
                   <JobForm
-                    defaultValues={{
+                    initialData={{
                       dueDate: date,
                       entityType: 'none',
                       entityId: null,

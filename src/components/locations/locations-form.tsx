@@ -46,13 +46,13 @@ type LocationProperties = {
 
 interface LocationFormProps {
   mode?: 'create' | 'edit'
-  defaultValues?: RouterOutputs['location']['get']
+  initialData?: RouterOutputs['location']['get']
   onSuccess?: (data: LocationFormValues) => void
 }
 
 export function LocationForm({
   mode = 'create',
-  defaultValues,
+  initialData,
   onSuccess,
 }: LocationFormProps) {
   const { toast } = useToast()
@@ -75,9 +75,9 @@ export function LocationForm({
 
   const form = useForm<LocationFormValues>({
     resolver: zodResolver(insertLocationSchema),
-    defaultValues: {
-      name: defaultValues?.name ?? '',
-      type: defaultValues?.type ?? locationTypeEnum.enumValues[0],
+    initialData: {
+      name: initialData?.name ?? '',
+      type: initialData?.type ?? locationTypeEnum.enumValues[0],
     },
   })
 
@@ -123,8 +123,8 @@ export function LocationForm({
   function onSubmit(values: LocationFormValues) {
     if (mode === 'create') {
       createLocation(values)
-    } else if (defaultValues?.id) {
-      updateLocation({ id: defaultValues.id, data: values })
+    } else if (initialData?.id) {
+      updateLocation({ id: initialData.id, data: values })
     }
   }
 
