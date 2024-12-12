@@ -68,7 +68,10 @@ export function CalendarHeader({
         </div>
       </div>
       <div className="flex items-center space-x-2">
-        <Select value={mode} onValueChange={(value) => onModeChange(value as CalendarViewMode)}>
+        <Select
+          value={mode}
+          onValueChange={(value) => onModeChange(value as CalendarViewMode)}
+        >
           <SelectTrigger className="w-[120px]">
             <SelectValue />
           </SelectTrigger>

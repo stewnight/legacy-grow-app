@@ -13,12 +13,19 @@ interface RequirementsManagerProps {
     supplies: string[]
     ppe: string[]
   }
-  onChange: (value: { tools: string[]; supplies: string[]; ppe: string[] }) => void
+  onChange: (value: {
+    tools: string[]
+    supplies: string[]
+    ppe: string[]
+  }) => void
 }
 
 type RequirementType = 'tools' | 'supplies' | 'ppe'
 
-export function RequirementsManager({ value, onChange }: RequirementsManagerProps) {
+export function RequirementsManager({
+  value,
+  onChange,
+}: RequirementsManagerProps) {
   const [newItem, setNewItem] = useState('')
   const [activeTab, setActiveTab] = useState<RequirementType>('tools')
 
@@ -98,7 +105,10 @@ export function RequirementsManager({ value, onChange }: RequirementsManagerProp
   )
 
   return (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as RequirementType)}>
+    <Tabs
+      value={activeTab}
+      onValueChange={(v) => setActiveTab(v as RequirementType)}
+    >
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="tools" className="flex items-center gap-2">
           <Wrench className="h-4 w-4" />
@@ -114,13 +124,22 @@ export function RequirementsManager({ value, onChange }: RequirementsManagerProp
         </TabsTrigger>
       </TabsList>
       <TabsContent value="tools">
-        {renderList('tools', <Wrench className="h-4 w-4 text-muted-foreground" />)}
+        {renderList(
+          'tools',
+          <Wrench className="h-4 w-4 text-muted-foreground" />
+        )}
       </TabsContent>
       <TabsContent value="supplies">
-        {renderList('supplies', <Package className="h-4 w-4 text-muted-foreground" />)}
+        {renderList(
+          'supplies',
+          <Package className="h-4 w-4 text-muted-foreground" />
+        )}
       </TabsContent>
       <TabsContent value="ppe">
-        {renderList('ppe', <HardHat className="h-4 w-4 text-muted-foreground" />)}
+        {renderList(
+          'ppe',
+          <HardHat className="h-4 w-4 text-muted-foreground" />
+        )}
       </TabsContent>
     </Tabs>
   )

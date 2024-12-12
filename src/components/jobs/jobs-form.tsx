@@ -91,13 +91,10 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       status: defaultValues?.status || 'active',
       category: defaultValues?.category || 'maintenance',
       properties: {
-        recurring:
-          (defaultValues?.properties!)?.recurring || null,
-        tasks: (defaultValues?.properties!)?.tasks || [],
-        instructions:
-          (defaultValues?.properties!)?.instructions || [],
-        requirements: (defaultValues?.properties!)
-          ?.requirements || {
+        recurring: (defaultValues?.properties)!?.recurring || null,
+        tasks: (defaultValues?.properties)!?.tasks || [],
+        instructions: (defaultValues?.properties)!?.instructions || [],
+        requirements: (defaultValues?.properties)!?.requirements || {
           tools: [],
           supplies: [],
           ppe: [],

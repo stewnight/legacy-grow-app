@@ -36,7 +36,14 @@ interface SortableItemProps {
 }
 
 function SortableItem({ id, instruction, index, onRemove }: SortableItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id,
   })
 
@@ -71,7 +78,10 @@ function SortableItem({ id, instruction, index, onRemove }: SortableItemProps) {
   )
 }
 
-export function InstructionsManager({ value, onChange }: InstructionsManagerProps) {
+export function InstructionsManager({
+  value,
+  onChange,
+}: InstructionsManagerProps) {
   const [newInstruction, setNewInstruction] = useState('')
 
   const sensors = useSensors(

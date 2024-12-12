@@ -1,5 +1,13 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, json, uuid, text, numeric } from 'drizzle-orm/pg-core'
+import {
+  index,
+  varchar,
+  timestamp,
+  json,
+  uuid,
+  text,
+  numeric,
+} from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
@@ -35,7 +43,9 @@ export const processing = createTable(
     startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     duration: numeric('duration', { precision: 10, scale: 2 }), // in hours
-    processStatus: batchStatusEnum('process_status').default('active').notNull(),
+    processStatus: batchStatusEnum('process_status')
+      .default('active')
+      .notNull(),
     quality: harvestQualityEnum('quality'),
     properties: json('properties').$type<{
       equipment?: Array<{
@@ -117,7 +127,9 @@ export const processing = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -128,7 +140,10 @@ export const processing = createTable(
     harvestIdIdx: index('processing_harvest_id_idx').on(table.harvestId),
     batchIdIdx: index('processing_batch_id_idx').on(table.batchId),
     locationIdIdx: index('processing_location_id_idx').on(table.locationId),
-    typeMethodIdx: index('processing_type_method_idx').on(table.type, table.method),
+    typeMethodIdx: index('processing_type_method_idx').on(
+      table.type,
+      table.method
+    ),
     processStatusIdx: index('processing_status_idx').on(table.processStatus),
     startedAtIdx: index('processing_started_at_idx').on(table.startedAt),
     statusIdx: index('processing_general_status_idx').on(table.status),

@@ -1,5 +1,13 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, json, uuid, text, boolean } from 'drizzle-orm/pg-core'
+import {
+  index,
+  varchar,
+  timestamp,
+  json,
+  uuid,
+  text,
+  boolean,
+} from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { geneticTypeEnum, statusEnum } from './enums'
@@ -67,7 +75,9 @@ export const genetics = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()

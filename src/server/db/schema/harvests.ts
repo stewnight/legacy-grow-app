@@ -1,5 +1,14 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, json, uuid, text, date, numeric } from 'drizzle-orm/pg-core'
+import {
+  index,
+  varchar,
+  timestamp,
+  json,
+  uuid,
+  text,
+  date,
+  numeric,
+} from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
@@ -28,7 +37,9 @@ export const harvests = createTable(
     trimWeight: numeric('trim_weight', { precision: 10, scale: 3 }),
     wasteWeight: numeric('waste_weight', { precision: 10, scale: 3 }),
     quality: harvestQualityEnum('quality'),
-    harvestStatus: batchStatusEnum('harvest_status').default('active').notNull(),
+    harvestStatus: batchStatusEnum('harvest_status')
+      .default('active')
+      .notNull(),
     properties: json('properties').$type<{
       dryingConditions?: {
         temperature: number
@@ -98,7 +109,9 @@ export const harvests = createTable(
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()

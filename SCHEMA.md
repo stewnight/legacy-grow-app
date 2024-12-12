@@ -1,498 +1,673 @@
-# Database Schema Documentation
-
-## Schema Diagram
+# Database Schema
 
 ```mermaid
-classDiagram
-%% Core Schema
-class user {
-id uuid
-name varchar
-email varchar
-emailVerified timestamp
-image varchar
-role user_role
-active boolean
-permissions json
-preferences json
-lastLogin timestamp
-createdAt timestamp
-updatedAt timestamp
-}
-class account {
-id uuid
-userId uuid
-type varchar
-provider varchar
-providerAccountId varchar
-refresh_token text
-access_token text
-expires_at integer
-token_type varchar
-scope varchar
-id_token text
-session_state varchar
-}
-class session {
-sessionToken varchar
-userId uuid
-expires timestamp
-}
-class systemLog {
-id uuid
-level log_level
-source system_log_source
-message text
-metadata json
-createdAt timestamp
-}
-%% Facility Schema
-class building {
-id uuid
-name varchar
-type building_type
-address json
-properties json
-licenseNumber varchar
-description text
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class room {
-id uuid
-buildingId uuid
-parentId uuid
-name varchar
-type room_type
-properties json
-dimensions json
-capacity integer
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class location {
-id uuid
-roomId uuid
-name varchar
-type location_type
-coordinates json
-properties json
-dimensions json
-capacity integer
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-%% Cultivation Schema
-class genetic {
-id uuid
-name varchar
-type genetic_type
-breeder varchar
-description text
-properties json
-growProperties json
-lineage json
-inHouse boolean
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class batch {
-id uuid
-identifier varchar
-geneticId uuid
-locationId uuid
-stage plant_stage
-batchStatus batch_status
-startDate date
-expectedEndDate date
-actualEndDate date
-plantCount integer
-properties json
-metadata json
-notes text
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class plant {
-id uuid
-identifier varchar
-geneticId uuid
-locationId uuid
-batchId uuid
-motherId uuid
-source plant_source
-stage plant_stage
-sex plant_sex
-health health_status
-plantedDate date
-properties json
-metadata json
-notes text
-status varchar
-destroyedAt timestamp
-destroyReason text
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-%% Operations Schema
-class sensor {
-id uuid
-identifier varchar
-type sensor_type
-manufacturer varchar
-model varchar
-serialNumber varchar
-lastCalibration timestamp
-nextCalibration timestamp
-calibrationInterval numeric
-specifications json
-metadata json
-locationId uuid
-notes text
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class sensorReading {
-id uuid
-sensorId uuid
-readingValue numeric
-unit varchar
-timestamp timestamp
-metadata json
-createdAt timestamp
-updatedAt timestamp
-}
-class task {
-id uuid
-title varchar
-description text
-entityId uuid
-entityType task_entity_type
-assignedToId uuid
-category task_category
-priority task_priority
-taskStatus task_status
-status varchar
-dueDate timestamp
-startedAt timestamp
-completedAt timestamp
-properties json
-metadata json
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-%% Processing Schema
-class harvest {
-id uuid
-identifier varchar
-batchId uuid
-locationId uuid
-harvestDate date
-wetWeight numeric
-dryWeight numeric
-trimWeight numeric
-wasteWeight numeric
-quality harvest_quality
-harvestStatus batch_status
-properties json
-labResults json
-metadata json
-notes text
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class processing {
-id uuid
-identifier varchar
-harvestId uuid
-batchId uuid
-locationId uuid
-type varchar
-method varchar
-inputWeight numeric
-outputWeight numeric
-yieldPercentage numeric
-startedAt timestamp
-completedAt timestamp
-duration numeric
-processStatus batch_status
-quality harvest_quality
-properties json
-labResults json
-metadata json
-notes text
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-class Note {
-id uuid
-type note_type
-title varchar
-content text
-entityId uuid
-entityType varchar
-parentId uuid
-properties json
-metadata json
-status varchar
-createdById uuid
-createdAt timestamp
-updatedAt timestamp
-}
-%% Core Relationships
-user --> "" account
-user --> "" session
-user --> "" plant : created
-user --> "" genetic : created
-user --> "" Note : created
-user --> "" task : created
-user --> "" sensor : created
-user --> "" building : created
-user --> "" room : created
-user --> "" location : created
-user --> "" harvest : created
-user --> "" processing : created
-task --> user : assignedTo
-%% Facility Relationships
-building --> "" room
-room --> "" location
-room --> room : parent
-location --> "" plant
-location --> "" sensor
-location --> "" batch
-location --> "" harvest
-location --> "" processing
-%% Cultivation Relationships
-genetic --> "" plant
-genetic --> "" batch
-batch --> "" plant
-plant --> plant : mother
-plant --> location
-%% Operations Relationships
-sensor --> "" sensorReading
-task --> "" Note
-%% Processing Relationships
-harvest --> "" processing
-batch --> "" harvest
-%% Notes Relationships
-Note --> Note : parent
-Note --> user : createdBy
+erDiagram
+
+    batch {
+        string id
+        string(100) identifier UK
+        string geneticId
+        string locationId
+        enum(germination|seedling|vegetative|flowering|harvested|mother|clone) stage
+        enum(active|completed|pending|cancelled|archived) batchStatus
+        date startDate NULL
+        date expectedEndDate NULL
+        date actualEndDate NULL
+        number plantCount NULL
+        json properties NULL
+        json metadata NULL
+        string notes NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    building {
+        string id
+        string(255) name
+        enum(indoor|outdoor|greenhouse|hybrid) type
+        json address NULL
+        json properties NULL
+        string(100) licenseNumber NULL
+        string description NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    account {
+        string userId
+        string(255) type
+        string(255) provider
+        string(255) providerAccountId
+        string refresh_token NULL
+        string access_token NULL
+        number expires_at NULL
+        string(255) token_type NULL
+        string(255) scope NULL
+        string id_token NULL
+        string(255) session_state NULL
+    }
+
+    session {
+        string(255) sessionToken
+        string userId
+        date expires
+    }
+
+    system_log {
+        string id
+        enum(debug|info|warn|error|fatal) level
+        enum(plants|harvests|jobs|system|auth|sensors|compliance|facility) source
+        string message
+        json metadata NULL
+        date createdAt
+    }
+
+    user {
+        string id
+        string(255) name NULL
+        string(255) email UK
+        date emailVerified NULL
+        string(255) image NULL
+        enum(user|admin|manager|viewer) role
+        boolean active NULL
+        json permissions NULL
+        json preferences NULL
+        date lastLogin NULL
+        date createdAt
+        date updatedAt
+    }
+
+    verification_token {
+        string(255) identifier
+        string(255) token
+        date expires
+    }
+
+    equipment {
+        string id
+        string(255) name
+        enum(hvac|lighting|irrigation|co2|dehumidifier|fan|filter|sensor|pump|other) type
+        string(255) model NULL
+        string(255) manufacturer NULL
+        string(255) serialNumber NULL
+        date purchaseDate NULL
+        date warrantyExpiration NULL
+        enum(active|maintenance|offline|decommissioned|standby) status
+        enum(daily|weekly|biweekly|monthly|quarterly|biannual|annual|as_needed) maintenanceFrequency
+        date lastMaintenanceDate NULL
+        date nextMaintenanceDate NULL
+        string roomId NULL
+        string locationId NULL
+        json specifications NULL
+        json metadata NULL
+        string(1000) notes NULL
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    genetic {
+        string id
+        string(255) name
+        enum(sativa|indica|hybrid|ruderalis) type
+        string(255) breeder NULL
+        string description NULL
+        json properties NULL
+        json growProperties NULL
+        json lineage NULL
+        boolean inHouse NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    harvest {
+        string id
+        string(100) identifier UK
+        string batchId
+        string locationId
+        string harvestDate
+        numeric(10,3) wetWeight NULL
+        numeric(10,3) dryWeight NULL
+        numeric(10,3) trimWeight NULL
+        numeric(10,3) wasteWeight NULL
+        enum(A|B|C|D|F) quality NULL
+        enum(active|completed|pending|cancelled|archived) harvestStatus
+        json properties NULL
+        json labResults NULL
+        json metadata NULL
+        string notes NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    job {
+        string id
+        string(255) title
+        string description NULL
+        string entityId NULL
+        enum(equipment|plant|batch|location|genetics|sensors|processing|harvest|none) entityType
+        string assignedToId NULL
+        enum(maintenance|transplanting|cloning|feeding|environmental|harvest|drying|trimming|packing|cleaning|inspection) category
+        enum(low|medium|high|urgent|critical) priority
+        enum(pending|in_progress|completed|cancelled|blocked|deferred) jobStatus
+        enum(active|inactive|archived|maintenance) status
+        date dueDate NULL
+        date startedAt NULL
+        date completedAt NULL
+        json properties NULL
+        json metadata NULL
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    location {
+        string id
+        string roomId
+        string(255) name
+        enum(room|section|bench|shelf|tray|pot) type
+        json coordinates NULL
+        json properties NULL
+        json dimensions NULL
+        number capacity NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    note {
+        string id
+        enum(text|voice|image|file|checklist|measurement) type
+        string(255) title NULL
+        string content NULL
+        string entityId
+        string(50) entityType
+        string parentId NULL
+        json properties NULL
+        json metadata NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    plant {
+        string id
+        string(100) identifier UK
+        string geneticId
+        string locationId
+        string batchId NULL
+        string motherId NULL
+        enum(seed|clone|mother|tissue_culture) source
+        enum(germination|seedling|vegetative|flowering|harvested|mother|clone) stage
+        enum(unknown|male|female|hermaphrodite) sex
+        enum(healthy|sick|pest|nutrient|dead|quarantine) health
+        date plantedDate
+        json properties NULL
+        json metadata NULL
+        string notes NULL
+        enum(active|inactive|archived|maintenance) status
+        date destroyedAt NULL
+        string destroyReason NULL
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    processing {
+        string id
+        string(100) identifier UK
+        string harvestId
+        string batchId
+        string locationId
+        string(50) type
+        string(100) method
+        numeric(10,3) inputWeight
+        numeric(10,3) outputWeight NULL
+        numeric(5,2) yieldPercentage NULL
+        date startedAt
+        date completedAt NULL
+        numeric(10,2) duration NULL
+        enum(active|completed|pending|cancelled|archived) processStatus
+        enum(A|B|C|D|F) quality NULL
+        json properties NULL
+        json labResults NULL
+        json metadata NULL
+        string notes NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    room {
+        string id
+        string buildingId
+        string parentId NULL
+        string(255) name
+        enum(vegetation|flowering|drying|storage|processing|mother|clone|quarantine) type
+        json properties NULL
+        json dimensions NULL
+        number capacity NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    sensor {
+        string id
+        string(100) identifier UK
+        enum(temperature|humidity|co2|light|ph|ec|moisture|pressure|airflow) type
+        string(255) manufacturer NULL
+        string(255) model NULL
+        string(100) serialNumber NULL
+        date lastCalibration NULL
+        date nextCalibration NULL
+        numeric(5,2) calibrationInterval NULL
+        string equipmentId NULL
+        json specifications NULL
+        json metadata NULL
+        string locationId
+        string notes NULL
+        enum(active|inactive|archived|maintenance) status
+        string createdById
+        date createdAt
+        date updatedAt
+    }
+
+    sensor_reading {
+        string id
+        string sensorId
+        numeric(10,2) readingValue
+        string(50) unit
+        date timestamp
+        json metadata NULL
+        date createdAt
+        date updatedAt
+    }
+
 ```
 
-## Schema Groups
+## Summary
 
-### Core Schema
+- Total Tables: 18
+- Total Columns: 239
+- Total Relations: 0
 
-Core user management and system functionality.
+## Tables
 
-#### Users and Authentication
+### batch
 
-- **user**: Core user entity
+#### Columns
 
-  - Role-based access control
-  - JSON preferences and permissions
-  - Activity tracking
-  - OAuth integration
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| identifier | string(100) | No | - | Yes | No | - |
+| geneticId | string | No | - | No | No | - |
+| locationId | string | No | - | No | No | - |
+| stage | enum(germination|seedling|vegetative|flowering|harvested|mother|clone) | No | - | No | No | - |
+| batchStatus | enum(active|completed|pending|cancelled|archived) | No | active | No | No | - |
+| startDate | date | Yes | - | No | No | - |
+| expectedEndDate | date | Yes | - | No | No | - |
+| actualEndDate | date | Yes | - | No | No | - |
+| plantCount | number | Yes | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| notes | string | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-- **account**: OAuth account connections
+### building
 
-  - Multiple provider support
-  - Token management
-  - Provider-specific data
+#### Columns
 
-- **session**: User session management
-  - Token-based authentication
-  - Expiration tracking
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| name | string(255) | No | - | No | No | - |
+| type | enum(indoor|outdoor|greenhouse|hybrid) | No | - | No | No | - |
+| address | json | Yes | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| licenseNumber | string(100) | Yes | - | No | No | - |
+| description | string | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-#### System
+### account
 
-- **systemLog**: System-wide logging
-  - Structured logging levels
-  - Source categorization
-  - JSON metadata support
+#### Columns
 
-### Facility Schema
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| userId | string | No | - | No | No | - |
+| type | string(255) | No | - | No | No | - |
+| provider | string(255) | No | - | No | No | - |
+| providerAccountId | string(255) | No | - | No | No | - |
+| refresh_token | string | Yes | - | No | No | - |
+| access_token | string | Yes | - | No | No | - |
+| expires_at | number | Yes | - | No | No | - |
+| token_type | string(255) | Yes | - | No | No | - |
+| scope | string(255) | Yes | - | No | No | - |
+| id_token | string | Yes | - | No | No | - |
+| session_state | string(255) | Yes | - | No | No | - |
 
-Physical facility and space management.
+### session
 
-#### Buildings
+#### Columns
 
-- **building**: Physical structures
-  - Building categorization
-  - Address information
-  - License management
-  - Environmental controls
-  - Security features
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| sessionToken | string(255) | No | - | No | No | - |
+| userId | string | No | - | No | No | - |
+| expires | date | No | - | No | No | - |
 
-#### Rooms
+### system_log
 
-- **room**: Spaces within buildings
-  - Hierarchical organization (parent/child)
-  - Environmental specifications
-  - Dimensional tracking
-  - Capacity management
+#### Columns
 
-#### Locations
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| level | enum(debug|info|warn|error|fatal) | No | - | No | No | - |
+| source | enum(plants|harvests|jobs|system|auth|sensors|compliance|facility) | No | - | No | No | - |
+| message | string | No | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
 
-- **location**: Specific positions
-  - Precise coordinate tracking
-  - Equipment placement
-  - Resource allocation
-  - Capacity monitoring
+### user
 
-### Cultivation Schema
+#### Columns
 
-Plant cultivation and genetics management.
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| name | string(255) | Yes | - | No | No | - |
+| email | string(255) | No | - | Yes | No | - |
+| emailVerified | date | Yes | - | No | No | - |
+| image | string(255) | Yes | - | No | No | - |
+| role | enum(user|admin|manager|viewer) | No | user | No | No | - |
+| active | boolean | Yes | true | No | No | - |
+| permissions | json | Yes |  | No | No | - |
+| preferences | json | Yes | [object Object] | No | No | - |
+| lastLogin | date | Yes | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-#### Genetics
+### verification_token
 
-- **genetic**: Strain/variety management
-  - Detailed characteristics
-  - Growth specifications
-  - Lineage tracking
-  - Performance metrics
+#### Columns
 
-#### Batches
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| identifier | string(255) | No | - | No | No | - |
+| token | string(255) | No | - | No | No | - |
+| expires | date | No | - | No | No | - |
 
-- **batch**: Group cultivation tracking
-  - Growth stage management
-  - Environmental requirements
-  - Resource allocation
-  - Yield projections
+### equipment
 
-#### Plants
+#### Columns
 
-- **plant**: Individual plant tracking
-  - Lifecycle management
-  - Health monitoring
-  - Genealogy tracking
-  - Growth metrics
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| name | string(255) | No | - | No | No | - |
+| type | enum(hvac|lighting|irrigation|co2|dehumidifier|fan|filter|sensor|pump|other) | No | - | No | No | - |
+| model | string(255) | Yes | - | No | No | - |
+| manufacturer | string(255) | Yes | - | No | No | - |
+| serialNumber | string(255) | Yes | - | No | No | - |
+| purchaseDate | date | Yes | - | No | No | - |
+| warrantyExpiration | date | Yes | - | No | No | - |
+| status | enum(active|maintenance|offline|decommissioned|standby) | No | active | No | No | - |
+| maintenanceFrequency | enum(daily|weekly|biweekly|monthly|quarterly|biannual|annual|as_needed) | No | - | No | No | - |
+| lastMaintenanceDate | date | Yes | - | No | No | - |
+| nextMaintenanceDate | date | Yes | - | No | No | - |
+| roomId | string | Yes | - | No | No | - |
+| locationId | string | Yes | - | No | No | - |
+| specifications | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| notes | string(1000) | Yes | - | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-### Operations Schema
+### genetic
 
-Day-to-day operational management.
+#### Columns
 
-#### Sensors
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| name | string(255) | No | - | No | No | - |
+| type | enum(sativa|indica|hybrid|ruderalis) | No | - | No | No | - |
+| breeder | string(255) | Yes | - | No | No | - |
+| description | string | Yes | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| growProperties | json | Yes | - | No | No | - |
+| lineage | json | Yes | - | No | No | - |
+| inHouse | boolean | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-- **sensor**: Environmental monitoring
+### harvest
 
-  - Multiple sensor types
-  - Calibration tracking
-  - Specification management
-  - Maintenance scheduling
+#### Columns
 
-- **sensorReading**: Sensor data collection
-  - Time-series data
-  - Measurement accuracy
-  - Environmental context
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| identifier | string(100) | No | - | Yes | No | - |
+| batchId | string | No | - | No | No | - |
+| locationId | string | No | - | No | No | - |
+| harvestDate | string | No | - | No | No | - |
+| wetWeight | numeric(10,3) | Yes | - | No | No | - |
+| dryWeight | numeric(10,3) | Yes | - | No | No | - |
+| trimWeight | numeric(10,3) | Yes | - | No | No | - |
+| wasteWeight | numeric(10,3) | Yes | - | No | No | - |
+| quality | enum(A|B|C|D|F) | Yes | - | No | No | - |
+| harvestStatus | enum(active|completed|pending|cancelled|archived) | No | active | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| labResults | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| notes | string | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-#### Tasks
+### job
 
-- **task**: Work management
-  - Multi-entity association
-  - Priority and status tracking
-  - Assignment management
-  - Checklist functionality
-  - Scheduling and duration tracking
+#### Columns
 
-### Processing Schema
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| title | string(255) | No | - | No | No | - |
+| description | string | Yes | - | No | No | - |
+| entityId | string | Yes | - | No | No | - |
+| entityType | enum(equipment|plant|batch|location|genetics|sensors|processing|harvest|none) | No | - | No | No | - |
+| assignedToId | string | Yes | - | No | No | - |
+| category | enum(maintenance|transplanting|cloning|feeding|environmental|harvest|drying|trimming|packing|cleaning|inspection) | No | - | No | No | - |
+| priority | enum(low|medium|high|urgent|critical) | No | - | No | No | - |
+| jobStatus | enum(pending|in_progress|completed|cancelled|blocked|deferred) | No | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| dueDate | date | Yes | - | No | No | - |
+| startedAt | date | Yes | - | No | No | - |
+| completedAt | date | Yes | - | No | No | - |
+| properties | json | Yes | [object Object] | No | No | - |
+| metadata | json | Yes | [object Object] | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-Post-harvest operations and compliance.
+### location
 
-#### Harvests
+#### Columns
 
-- **harvest**: Harvest tracking
-  - Weight measurements
-  - Quality grading
-  - Lab testing integration
-  - Waste tracking
-  - Yield analysis
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| roomId | string | No | - | No | No | - |
+| name | string(255) | No | - | No | No | - |
+| type | enum(room|section|bench|shelf|tray|pot) | No | - | No | No | - |
+| coordinates | json | Yes | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| dimensions | json | Yes | - | No | No | - |
+| capacity | number | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-#### Processing
+### note
 
-- **processing**: Post-harvest processing
-  - Multiple process types
-  - Input/output tracking
-  - Equipment utilization
-  - Quality control
-  - Lab result integration
+#### Columns
 
-### Notes Schema
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| type | enum(text|voice|image|file|checklist|measurement) | No | text | No | No | - |
+| title | string(255) | Yes | - | No | No | - |
+| content | string | Yes | - | No | No | - |
+| entityId | string | No | - | No | No | - |
+| entityType | string(50) | No | - | No | No | - |
+| parentId | string | Yes | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-Documentation and annotation system.
+### plant
 
-#### Notes
+#### Columns
 
-- **Note**: Multi-purpose annotation system
-  - Multiple content types
-  - Entity association
-  - Hierarchical organization
-  - Property customization
-  - Metadata tracking
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| identifier | string(100) | No | - | Yes | No | - |
+| geneticId | string | No | - | No | No | - |
+| locationId | string | No | - | No | No | - |
+| batchId | string | Yes | - | No | No | - |
+| motherId | string | Yes | - | No | No | - |
+| source | enum(seed|clone|mother|tissue_culture) | No | - | No | No | - |
+| stage | enum(germination|seedling|vegetative|flowering|harvested|mother|clone) | No | - | No | No | - |
+| sex | enum(unknown|male|female|hermaphrodite) | No | unknown | No | No | - |
+| health | enum(healthy|sick|pest|nutrient|dead|quarantine) | No | healthy | No | No | - |
+| plantedDate | date | No | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| notes | string | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| destroyedAt | date | Yes | - | No | No | - |
+| destroyReason | string | Yes | - | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-## Best Practices
+### processing
 
-1. Always maintain referential integrity
-2. Use appropriate indexes for performance
-3. Include audit trails (created/updated timestamps)
-4. Maintain hierarchical relationships
-5. Track status changes
-6. Store structured metadata in JSON fields
-7. Implement proper cascading deletes
-8. Use enum types for constrained values
-9. Implement proper validation at schema level
-10. Maintain consistent naming conventions
+#### Columns
 
-## Common Patterns
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| identifier | string(100) | No | - | Yes | No | - |
+| harvestId | string | No | - | No | No | - |
+| batchId | string | No | - | No | No | - |
+| locationId | string | No | - | No | No | - |
+| type | string(50) | No | - | No | No | - |
+| method | string(100) | No | - | No | No | - |
+| inputWeight | numeric(10,3) | No | - | No | No | - |
+| outputWeight | numeric(10,3) | Yes | - | No | No | - |
+| yieldPercentage | numeric(5,2) | Yes | - | No | No | - |
+| startedAt | date | No | - | No | No | - |
+| completedAt | date | Yes | - | No | No | - |
+| duration | numeric(10,2) | Yes | - | No | No | - |
+| processStatus | enum(active|completed|pending|cancelled|archived) | No | active | No | No | - |
+| quality | enum(A|B|C|D|F) | Yes | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| labResults | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| notes | string | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-1. **Tracking Fields**
+### room
 
-   - `createdById`, `createdAt`, `updatedAt` on all tables
-   - `status` enum for entity state management
-   - `metadata` JSON for flexible additional data
+#### Columns
 
-2. **Location Hierarchy**
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| buildingId | string | No | - | No | No | - |
+| parentId | string | Yes | - | No | No | - |
+| name | string(255) | No | - | No | No | - |
+| type | enum(vegetation|flowering|drying|storage|processing|mother|clone|quarantine) | No | - | No | No | - |
+| properties | json | Yes | - | No | No | - |
+| dimensions | json | Yes | - | No | No | - |
+| capacity | number | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-   - Building → Room → Location
-   - Support for sub-rooms through parent/child relationships
+### sensor
 
-3. **Entity References**
+#### Columns
 
-   - UUID primary keys
-   - Consistent foreign key patterns
-   - Optional parent/child relationships
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| identifier | string(100) | No | - | Yes | No | - |
+| type | enum(temperature|humidity|co2|light|ph|ec|moisture|pressure|airflow) | No | - | No | No | - |
+| manufacturer | string(255) | Yes | - | No | No | - |
+| model | string(255) | Yes | - | No | No | - |
+| serialNumber | string(100) | Yes | - | No | No | - |
+| lastCalibration | date | Yes | - | No | No | - |
+| nextCalibration | date | Yes | - | No | No | - |
+| calibrationInterval | numeric(5,2) | Yes | - | No | No | - |
+| equipmentId | string | Yes | - | No | No | - |
+| specifications | json | Yes | - | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| locationId | string | No | - | No | No | - |
+| notes | string | Yes | - | No | No | - |
+| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
+| createdById | string | No | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-4. **Property Storage**
+### sensor_reading
 
-   - Structured JSON for flexible properties
-   - Typed metadata fields
-   - Standardized measurement units
+#### Columns
 
-5. **Status Management**
+| Name | Type | Nullable | Default | Unique | Primary | References |
+|------|------|----------|----------|---------|----------|------------|
+| id | string | No | [object Object] | No | No | - |
+| sensorId | string | No | - | No | No | - |
+| readingValue | numeric(10,2) | No | - | No | No | - |
+| unit | string(50) | No | - | No | No | - |
+| timestamp | date | No | [object Object] | No | No | - |
+| metadata | json | Yes | - | No | No | - |
+| createdAt | date | No | [object Object] | No | No | - |
+| updatedAt | date | No | [object Object] | No | No | - |
 
-   - Entity-specific status enums
-   - Active/inactive flags
-   - Archival support
-
-6. **Measurement Tracking**
-   - Precise numeric fields
-   - Unit specification
-   - Timestamp tracking

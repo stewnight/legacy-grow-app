@@ -25,9 +25,13 @@ export const harvestRouter = createTRPCRouter({
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.status ? eq(harvests.harvestStatus, filters.status) : undefined,
+        filters?.status
+          ? eq(harvests.harvestStatus, filters.status)
+          : undefined,
         filters?.quality ? eq(harvests.quality, filters.quality) : undefined,
-        filters?.search ? like(harvests.identifier, `%${filters.search}%`) : undefined,
+        filters?.search
+          ? like(harvests.identifier, `%${filters.search}%`)
+          : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.harvests.findMany({
@@ -55,29 +59,31 @@ export const harvestRouter = createTRPCRouter({
       return { items, nextCursor }
     }),
 
-  get: protectedProcedure.input(z.string().uuid()).query(async ({ ctx, input }) => {
-    const harvest = await ctx.db.query.harvests.findFirst({
-      where: eq(harvests.id, input),
-      with: {
-        createdBy: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
+  get: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      const harvest = await ctx.db.query.harvests.findFirst({
+        where: eq(harvests.id, input),
+        with: {
+          createdBy: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    })
-
-    if (!harvest) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Harvest not found',
       })
-    }
 
-    return harvest
-  }),
+      if (!harvest) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Harvest not found',
+        })
+      }
+
+      return harvest
+    }),
 
   create: protectedProcedure
     .input(
@@ -149,16 +155,21 @@ export const harvestRouter = createTRPCRouter({
       return harvest
     }),
 
-  delete: protectedProcedure.input(z.string().uuid()).mutation(async ({ ctx, input }) => {
-    const [deleted] = await ctx.db.delete(harvests).where(eq(harvests.id, input)).returning()
+  delete: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input }) => {
+      const [deleted] = await ctx.db
+        .delete(harvests)
+        .where(eq(harvests.id, input))
+        .returning()
 
-    if (!deleted) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Harvest not found',
-      })
-    }
+      if (!deleted) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Harvest not found',
+        })
+      }
 
-    return { success: true }
-  }),
+      return { success: true }
+    }),
 })

@@ -15,27 +15,31 @@ interface NotesManagerProps {
   notes?: Note[]
 }
 
-export function NotesManager({ jobId, notes: initialNotes }: NotesManagerProps) {
+export function NotesManager({
+  jobId,
+  notes: initialNotes,
+}: NotesManagerProps) {
   const [content, setContent] = React.useState('')
   const { toast } = useToast()
   const utils = api.useUtils()
 
   const { data: notes, isLoading } = api.note.getAllForJob.useQuery(jobId)
 
-  const { mutate: createNote, isPending: isCreating } = api.note.create.useMutation({
-    onSuccess: () => {
-      setContent('')
-      toast({ title: 'Note added successfully' })
-      void utils.note.getAllForJob.invalidate(jobId)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error adding note',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createNote, isPending: isCreating } =
+    api.note.create.useMutation({
+      onSuccess: () => {
+        setContent('')
+        toast({ title: 'Note added successfully' })
+        void utils.note.getAllForJob.invalidate(jobId)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error adding note',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,13 +83,18 @@ export function NotesManager({ jobId, notes: initialNotes }: NotesManagerProps) 
 
       <div className="space-y-4">
         {notes?.map((note) => (
-          <div key={note.id} className="flex gap-4 rounded-lg border bg-card p-4">
+          <div
+            key={note.id}
+            className="flex gap-4 rounded-lg border bg-card p-4"
+          >
             <Avatar className="h-8 w-8">
               <AvatarImage
                 src={note.createdBy?.image || undefined}
                 alt={note.createdBy?.name || ''}
               />
-              <AvatarFallback>{note.createdBy?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>
+                {note.createdBy?.name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
@@ -100,7 +109,9 @@ export function NotesManager({ jobId, notes: initialNotes }: NotesManagerProps) 
         ))}
 
         {notes?.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground">No notes yet. Add one above.</p>
+          <p className="text-center text-sm text-muted-foreground">
+            No notes yet. Add one above.
+          </p>
         )}
       </div>
     </div>

@@ -34,7 +34,9 @@ export const systemLogs = createTable(
     source: systemLogSourceEnum('source').notNull(),
     message: text('message').notNull(),
     metadata: json('metadata').$type<Record<string, unknown>>(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => ({
     levelIdx: index('system_log_level_idx').on(table.level),
@@ -72,7 +74,9 @@ export const users = createTable(
     permissions: json('permissions').$type<string[]>().default([]),
     preferences: json('preferences').$type<UserPreferences>().default({}),
     lastLogin: timestamp('last_login', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
@@ -91,7 +95,9 @@ export const accounts = createTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    type: varchar('type', { length: 255 }).$type<AdapterAccount['type']>().notNull(),
+    type: varchar('type', { length: 255 })
+      .$type<AdapterAccount['type']>()
+      .notNull(),
     provider: varchar('provider', { length: 255 }).notNull(),
     providerAccountId: varchar('provider_account_id', {
       length: 255,
@@ -115,7 +121,9 @@ export const accounts = createTable(
 export const sessions = createTable(
   'session',
   {
-    sessionToken: varchar('session_token', { length: 255 }).notNull().primaryKey(),
+    sessionToken: varchar('session_token', { length: 255 })
+      .notNull()
+      .primaryKey(),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),

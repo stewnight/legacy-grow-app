@@ -50,7 +50,11 @@ interface LocationFormProps {
   onSuccess?: (data: LocationFormValues) => void
 }
 
-export function LocationForm({ mode = 'create', defaultValues, onSuccess }: LocationFormProps) {
+export function LocationForm({
+  mode = 'create',
+  defaultValues,
+  onSuccess,
+}: LocationFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -77,36 +81,44 @@ export function LocationForm({ mode = 'create', defaultValues, onSuccess }: Loca
     },
   })
 
-  const { mutate: createLocation, isPending: isCreating } = api.location.create.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Location created successfully' })
-      void Promise.all([utils.location.getAll.invalidate(), utils.location.get.invalidate(data.id)])
-      router.push(`/locations/${data.id}`)
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error creating location',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createLocation, isPending: isCreating } =
+    api.location.create.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Location created successfully' })
+        void Promise.all([
+          utils.location.getAll.invalidate(),
+          utils.location.get.invalidate(data.id),
+        ])
+        router.push(`/locations/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error creating location',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updateLocation, isPending: isUpdating } = api.location.update.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Location updated successfully' })
-      void Promise.all([utils.location.getAll.invalidate(), utils.location.get.invalidate(data.id)])
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error updating location',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updateLocation, isPending: isUpdating } =
+    api.location.update.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Location updated successfully' })
+        void Promise.all([
+          utils.location.getAll.invalidate(),
+          utils.location.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error updating location',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   function onSubmit(values: LocationFormValues) {
     if (mode === 'create') {
@@ -363,7 +375,10 @@ export function LocationForm({ mode = 'create', defaultValues, onSuccess }: Loca
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Unit</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value?.toString()}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value?.toString()}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select unit" />

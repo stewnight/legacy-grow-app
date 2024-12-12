@@ -23,7 +23,10 @@ export const columns: ColumnDef<typeof locations.$inferSelect>[] = [
     cell: ({ row }) => {
       const location = row.original
       return (
-        <Link href={`/locations/${location.id}`} className="font-medium hover:underline">
+        <Link
+          href={`/locations/${location.id}`}
+          className="font-medium hover:underline"
+        >
           {location.name}
         </Link>
       )
@@ -111,7 +114,11 @@ export const columns: ColumnDef<typeof locations.$inferSelect>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                if (window.confirm('Are you sure you want to delete this location?')) {
+                if (
+                  window.confirm(
+                    'Are you sure you want to delete this location?'
+                  )
+                ) {
                   deleteLocation(location.id)
                 }
               }}

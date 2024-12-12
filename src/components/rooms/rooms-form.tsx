@@ -40,7 +40,11 @@ interface RoomFormProps {
   onSuccess?: (data: RoomFormValues) => void
 }
 
-export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomFormProps) {
+export function RoomForm({
+  mode = 'create',
+  defaultValues,
+  onSuccess,
+}: RoomFormProps) {
   const { toast } = useToast()
   const router = useRouter()
   const utils = api.useUtils()
@@ -69,36 +73,44 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
     },
   })
 
-  const { mutate: createRoom, isPending: isCreating } = api.room.create.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Room created successfully' })
-      void Promise.all([utils.room.getAll.invalidate(), utils.room.get.invalidate(data.id)])
-      router.push(`/rooms/${data.id}`)
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error creating room',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: createRoom, isPending: isCreating } =
+    api.room.create.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Room created successfully' })
+        void Promise.all([
+          utils.room.getAll.invalidate(),
+          utils.room.get.invalidate(data.id),
+        ])
+        router.push(`/rooms/${data.id}`)
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error creating room',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
-  const { mutate: updateRoom, isPending: isUpdating } = api.room.update.useMutation({
-    onSuccess: (data) => {
-      toast({ title: 'Room updated successfully' })
-      void Promise.all([utils.room.getAll.invalidate(), utils.room.get.invalidate(data.id)])
-      onSuccess?.(data)
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error updating room',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
-  })
+  const { mutate: updateRoom, isPending: isUpdating } =
+    api.room.update.useMutation({
+      onSuccess: (data) => {
+        toast({ title: 'Room updated successfully' })
+        void Promise.all([
+          utils.room.getAll.invalidate(),
+          utils.room.get.invalidate(data.id),
+        ])
+        onSuccess?.(data)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error updating room',
+          description: error.message,
+          variant: 'destructive',
+        })
+      },
+    })
 
   function onSubmit(values: RoomFormValues) {
     if (mode === 'create') {
@@ -147,7 +159,10 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? ''}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -172,7 +187,10 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Building</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? ''}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select building" />
@@ -198,7 +216,9 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
             <FormItem>
               <FormLabel>Lung Room</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(value === 'undefined' ? undefined : value)}
+                onValueChange={(value) =>
+                  field.onChange(value === 'undefined' ? undefined : value)
+                }
                 defaultValue={field.value || 'undefined'}
               >
                 <FormControl>
@@ -231,12 +251,15 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   type="number"
                   {...field}
                   value={
-                    typeof field.value === 'string' || typeof field.value === 'number'
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
                       ? field.value
                       : ''
                   }
                   onChange={(e) =>
-                    field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                    field.onChange(
+                      e.target.value === '' ? null : Number(e.target.value)
+                    )
                   }
                 />
               </FormControl>
@@ -256,12 +279,15 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   type="number"
                   {...field}
                   value={
-                    typeof field.value === 'string' || typeof field.value === 'number'
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
                       ? field.value
                       : ''
                   }
                   onChange={(e) =>
-                    field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                    field.onChange(
+                      e.target.value === '' ? null : Number(e.target.value)
+                    )
                   }
                 />
               </FormControl>
@@ -281,12 +307,15 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   type="number"
                   {...field}
                   value={
-                    typeof field.value === 'string' || typeof field.value === 'number'
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
                       ? field.value
                       : ''
                   }
                   onChange={(e) =>
-                    field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
                   }
                 />
               </FormControl>
@@ -306,12 +335,15 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   type="number"
                   {...field}
                   value={
-                    typeof field.value === 'string' || typeof field.value === 'number'
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
                       ? field.value
                       : ''
                   }
                   onChange={(e) =>
-                    field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
                   }
                 />
               </FormControl>
@@ -326,7 +358,10 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Unit</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value?.toString()}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select unit" />
@@ -357,7 +392,8 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   onClick={() => {
                     const length = form.getValues('dimensions.length')
                     const width = form.getValues('dimensions.width')
-                    const usableSq = length && width ? Number(length) * Number(width) : null
+                    const usableSq =
+                      length && width ? Number(length) * Number(width) : null
                     form.setValue('dimensions.usableSqDimensions', usableSq)
                   }}
                 >
@@ -369,12 +405,15 @@ export function RoomForm({ mode = 'create', defaultValues, onSuccess }: RoomForm
                   type="number"
                   {...field}
                   value={
-                    typeof field.value === 'string' || typeof field.value === 'number'
+                    typeof field.value === 'string' ||
+                    typeof field.value === 'number'
                       ? field.value
                       : ''
                   }
                   onChange={(e) =>
-                    field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
                   }
                 />
               </FormControl>

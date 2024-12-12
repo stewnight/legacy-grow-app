@@ -17,8 +17,18 @@ import {
   GitBranch,
   Flower as FlowerIcon,
 } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
-import type { HealthStatus, PlantSex, PlantStage, PlantSource } from '../server/db/schema/enums'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
+import type {
+  HealthStatus,
+  PlantSex,
+  PlantStage,
+  PlantSource,
+} from '../server/db/schema/enums'
 
 interface StatusIconProps {
   className?: string
@@ -48,7 +58,10 @@ export function HealthStatusIcon({
   )
 }
 
-export function PlantSexIcon({ sex, className }: { sex: PlantSex } & StatusIconProps) {
+export function PlantSexIcon({
+  sex,
+  className,
+}: { sex: PlantSex } & StatusIconProps) {
   const icon = {
     male: <CircleMinus className={className} />,
     female: <CircleDot className={className} />,
@@ -68,7 +81,10 @@ export function PlantSexIcon({ sex, className }: { sex: PlantSex } & StatusIconP
   )
 }
 
-export function PlantStageIcon({ stage, className }: { stage: PlantStage } & StatusIconProps) {
+export function PlantStageIcon({
+  stage,
+  className,
+}: { stage: PlantStage } & StatusIconProps) {
   const icon = {
     seedling: <Sprout className={className} />,
     vegetative: <Leaf className={className} />,
@@ -88,7 +104,10 @@ export function PlantStageIcon({ stage, className }: { stage: PlantStage } & Sta
   )
 }
 
-export function PlantSourceIcon({ source, className }: { source: PlantSource } & StatusIconProps) {
+export function PlantSourceIcon({
+  source,
+  className,
+}: { source: PlantSource } & StatusIconProps) {
   const icon = {
     seed: <Sprout className={className} />,
     clone: <GitBranch className={className} />,

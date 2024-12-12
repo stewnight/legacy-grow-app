@@ -14,7 +14,9 @@ export const createQueryClient = () => {
         retry: (failureCount, error) => {
           if (error instanceof TRPCError) {
             return (
-              !['NOT_FOUND', 'UNAUTHORIZED', 'FORBIDDEN'].includes(error.code) && failureCount < 3
+              !['NOT_FOUND', 'UNAUTHORIZED', 'FORBIDDEN'].includes(
+                error.code
+              ) && failureCount < 3
             )
           }
           return failureCount < 3

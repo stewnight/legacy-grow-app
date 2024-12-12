@@ -26,7 +26,13 @@ interface NoteCardProps {
   className?: string
 }
 
-export function NoteCard({ note, onReply, onEdit, onDelete, className }: NoteCardProps) {
+export function NoteCard({
+  note,
+  onReply,
+  onEdit,
+  onDelete,
+  className,
+}: NoteCardProps) {
   const [isEditing, setIsEditing] = useState(false)
 
   return (
@@ -34,7 +40,9 @@ export function NoteCard({ note, onReply, onEdit, onDelete, className }: NoteCar
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2">
         <Avatar className="h-8 w-8">
           <AvatarImage src={note.createdBy.image ?? undefined} />
-          <AvatarFallback>{note.createdBy.name?.charAt(0) ?? 'U'}</AvatarFallback>
+          <AvatarFallback>
+            {note.createdBy.name?.charAt(0) ?? 'U'}
+          </AvatarFallback>
         </Avatar>
         <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
@@ -88,7 +96,9 @@ export function NoteCard({ note, onReply, onEdit, onDelete, className }: NoteCar
       </CardContent>
       {note.parentId && (
         <CardFooter>
-          <div className="text-xs text-muted-foreground">Reply to note #{note.parentId}</div>
+          <div className="text-xs text-muted-foreground">
+            Reply to note #{note.parentId}
+          </div>
         </CardFooter>
       )}
     </Card>

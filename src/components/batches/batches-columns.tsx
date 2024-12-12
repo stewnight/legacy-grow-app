@@ -36,7 +36,10 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
     cell: ({ row }) => {
       const batch = row.original
       return (
-        <Link href={`/batches/${batch.id}`} className="font-medium hover:underline">
+        <Link
+          href={`/batches/${batch.id}`}
+          className="font-medium hover:underline"
+        >
           {batch.identifier}
         </Link>
       )
@@ -50,7 +53,10 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
       return batch.genetic ? (
         <div className="flex items-center gap-2">
           <Leaf className="h-4 w-4 text-muted-foreground" />
-          <Link href={`/genetics/${batch.genetic.id}`} className="hover:underline">
+          <Link
+            href={`/genetics/${batch.genetic.id}`}
+            className="hover:underline"
+          >
             {batch.genetic.name}
           </Link>
         </div>
@@ -67,7 +73,10 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
       return batch.location ? (
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-muted-foreground" />
-          <Link href={`/locations/${batch.location.id}`} className="hover:underline">
+          <Link
+            href={`/locations/${batch.location.id}`}
+            className="hover:underline"
+          >
             {batch.location.name}
           </Link>
         </div>
@@ -144,7 +153,9 @@ export const columns: ColumnDef<BatchWithRelations>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                if (window.confirm('Are you sure you want to delete this batch?')) {
+                if (
+                  window.confirm('Are you sure you want to delete this batch?')
+                ) {
                   deleteBatch(batch.id)
                 }
               }}

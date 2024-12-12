@@ -1,7 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { type Equipment, insertEquipmentSchema } from '~/server/db/schema/equipment'
+import {
+  type Equipment,
+  insertEquipmentSchema,
+} from '~/server/db/schema/equipment'
 import { Input } from '~/components/ui/input'
 import {
   FormControl,
@@ -43,10 +46,16 @@ interface EquipmentFormProps {
   onSuccess?: (data: Equipment) => void
 }
 
-export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormProps) {
+export function EquipmentForm({
+  mode,
+  initialData,
+  onSuccess,
+}: EquipmentFormProps) {
   const router = useRouter()
   const { toast } = useToast()
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(initialData?.roomId ?? null)
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(
+    initialData?.roomId ?? null
+  )
 
   // Get available rooms
   const { data: rooms } = api.room.getAll.useQuery({
@@ -58,7 +67,9 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
     defaultValues: initialData
       ? {
           ...initialData,
-          purchaseDate: initialData.purchaseDate ? new Date(initialData.purchaseDate) : undefined,
+          purchaseDate: initialData.purchaseDate
+            ? new Date(initialData.purchaseDate)
+            : undefined,
           warrantyExpiration: initialData.warrantyExpiration
             ? new Date(initialData.warrantyExpiration)
             : undefined,
@@ -85,16 +96,17 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
   })
 
   // Get available locations based on selected room
-  const { data: locations, refetch: refetchLocations } = api.location.getAll.useQuery(
-    {
-      filters: {
-        roomId: selectedRoomId ?? undefined,
+  const { data: locations, refetch: refetchLocations } =
+    api.location.getAll.useQuery(
+      {
+        filters: {
+          roomId: selectedRoomId ?? undefined,
+        },
       },
-    },
-    {
-      enabled: !!selectedRoomId,
-    }
-  )
+      {
+        enabled: !!selectedRoomId,
+      }
+    )
 
   // Transform dates for API submission
   const transformData = (data: FormData): FormData => {
@@ -157,11 +169,13 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
         model: parsedInitialData?.model ?? '',
         serialNumber: parsedInitialData?.serialNumber ?? '',
         status: parsedInitialData?.status ?? 'active',
-        maintenanceFrequency: parsedInitialData?.maintenanceFrequency ?? 'monthly',
+        maintenanceFrequency:
+          parsedInitialData?.maintenanceFrequency ?? 'monthly',
         purchaseDate: parsedInitialData?.purchaseDate ?? null,
         warrantyExpiration: parsedInitialData?.warrantyExpiration ?? null,
         lastMaintenanceDate: parsedInitialData?.lastMaintenanceDate ?? null,
-        nextMaintenanceDate: parsedInitialData?.nextMaintenanceDate ?? addDays(startOfToday(), 30),
+        nextMaintenanceDate:
+          parsedInitialData?.nextMaintenanceDate ?? addDays(startOfToday(), 30),
         roomId: parsedInitialData?.roomId ?? null,
         locationId: parsedInitialData?.locationId ?? null,
         notes: parsedInitialData?.notes ?? '',
@@ -203,7 +217,10 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select equipment type" />
@@ -254,7 +271,9 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>Assign this equipment to a room (optional)</FormDescription>
+                <FormDescription>
+                  Assign this equipment to a room (optional)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -267,7 +286,9 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(value === 'null' ? null : value)}
+                  onValueChange={(value) =>
+                    field.onChange(value === 'null' ? null : value)
+                  }
                   defaultValue={field.value ?? 'null'}
                   disabled={!form.watch('roomId')}
                 >
@@ -301,7 +322,11 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
                 <FormItem>
                   <FormLabel>Manufacturer</FormLabel>
                   <FormControl>
-                    <Input placeholder="Manufacturer name" {...field} value={field.value ?? ''} />
+                    <Input
+                      placeholder="Manufacturer name"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -315,7 +340,11 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
                 <FormItem>
                   <FormLabel>Model</FormLabel>
                   <FormControl>
-                    <Input placeholder="Model number" {...field} value={field.value ?? ''} />
+                    <Input
+                      placeholder="Model number"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -330,7 +359,11 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
               <FormItem>
                 <FormLabel>Serial Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="Serial number" {...field} value={field.value ?? ''} />
+                  <Input
+                    placeholder="Serial number"
+                    {...field}
+                    value={field.value ?? ''}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -344,7 +377,10 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -369,7 +405,10 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Maintenance Frequency</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select frequency" />
@@ -378,7 +417,8 @@ export function EquipmentForm({ mode, initialData, onSuccess }: EquipmentFormPro
                     <SelectContent>
                       {maintenanceFrequencyEnum.enumValues.map((frequency) => (
                         <SelectItem key={frequency} value={frequency}>
-                          {frequency.charAt(0).toUpperCase() + frequency.slice(1)}
+                          {frequency.charAt(0).toUpperCase() +
+                            frequency.slice(1)}
                         </SelectItem>
                       ))}
                     </SelectContent>

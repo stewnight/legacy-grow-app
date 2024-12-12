@@ -5,7 +5,13 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Textarea } from '~/components/ui/textarea'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '~/components/ui/form'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '~/components/ui/form'
 import { api } from '~/trpc/react'
 import { useSession } from 'next-auth/react'
 import { createOptimisticNote } from '~/lib/optimistic-update'
@@ -118,7 +124,10 @@ export function CreateNoteForm({
       return { previousData }
     },
     onError: (err, newNote, context) => {
-      utils.notes.list.setData({ entityType, entityId, limit: 50 }, context?.previousData)
+      utils.notes.list.setData(
+        { entityType, entityId, limit: 50 },
+        context?.previousData
+      )
       toast({
         title: 'Failed to create note',
         description: 'Please try again',
@@ -203,7 +212,10 @@ export function CreateNoteForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-4', className)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn('space-y-4', className)}
+      >
         <div className="relative">
           <FormField
             control={form.control}
@@ -267,7 +279,10 @@ export function CreateNoteForm({
             </Button>
             <Button
               type="submit"
-              disabled={(!form.getValues('content') && !mediaUrl) || createMutation.isPending}
+              disabled={
+                (!form.getValues('content') && !mediaUrl) ||
+                createMutation.isPending
+              }
             >
               <Send className="mr-2 h-4 w-4" />
               Send

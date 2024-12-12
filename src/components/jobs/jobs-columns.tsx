@@ -9,9 +9,22 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { AppSheet } from '~/components/layout/app-sheet'
 import { JobForm } from './jobs-form'
 import { Button } from '~/components/ui/button'
-import { CalendarIcon, Columns2, User, Clock, Tag, Box, PencilIcon, EyeIcon } from 'lucide-react'
+import {
+  CalendarIcon,
+  Columns2,
+  User,
+  Clock,
+  Tag,
+  Box,
+  PencilIcon,
+  EyeIcon,
+} from 'lucide-react'
 import { Calendar } from '~/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover'
 import {
   jobCategoryEnum,
   jobPriorityEnum,
@@ -37,11 +50,16 @@ interface JobsTableFiltersProps {
 export function JobsTableFilters({ table }: JobsTableFiltersProps) {
   if (!table) return null
 
-  const dueDate = table.getColumn('dueDate')?.getFilterValue() as Date | undefined
+  const dueDate = table.getColumn('dueDate')?.getFilterValue() as
+    | Date
+    | undefined
 
   // Get unique assigned users for the filter
   const assignedUsers = React.useMemo(() => {
-    const users = new Map<string, { id: string; name: string; image: string | null }>()
+    const users = new Map<
+      string,
+      { id: string; name: string; image: string | null }
+    >()
     table.getFilteredRowModel().rows.forEach((row) => {
       const assignedTo = row.getValue('assignedTo')
       if (assignedTo) {
@@ -135,7 +153,10 @@ export function JobsTableFilters({ table }: JobsTableFiltersProps) {
         <DropdownMenuContent align="end">
           {table
             .getAllColumns()
-            .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())
+            .filter(
+              (column) =>
+                typeof column.accessorFn !== 'undefined' && column.getCanHide()
+            )
             .map((column) => {
               return (
                 <DropdownMenuCheckboxItem
@@ -175,11 +196,16 @@ const categories = jobCategoryEnum.enumValues.map((value) => ({
 export const columns: ColumnDef<JobWithRelations>[] = [
   {
     accessorKey: 'title',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Title" />
+    ),
     cell: ({ row }) => {
       const job = row.original
       return (
-        <Link href={`/jobs/${job.id}`} className="text-nowrap font-medium hover:underline">
+        <Link
+          href={`/jobs/${job.id}`}
+          className="text-nowrap font-medium hover:underline"
+        >
           {job.title}
         </Link>
       )
@@ -187,7 +213,9 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'priority',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Priority" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Priority" />
+    ),
     cell: ({ row }) => {
       const priority = row.getValue('priority')
       return (
@@ -203,12 +231,16 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'jobStatus',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => {
       const status = row.getValue('jobStatus')
       return (
         <Badge variant={status.toLowerCase() as 'default'}>
-          <span className="text-nowrap capitalize">{status.toLowerCase().replace('_', ' ')}</span>
+          <span className="text-nowrap capitalize">
+            {status.toLowerCase().replace('_', ' ')}
+          </span>
         </Badge>
       )
     },
@@ -219,11 +251,15 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'dueDate',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Due Date" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Due Date" />
+    ),
     cell: ({ row }) => {
       const date = row.getValue('dueDate')
       return date ? (
-        <span className="text-nowrap">{formatDistanceToNow(date, { addSuffix: true })}</span>
+        <span className="text-nowrap">
+          {formatDistanceToNow(date, { addSuffix: true })}
+        </span>
       ) : (
         '-'
       )
@@ -237,7 +273,9 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'assignedTo',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Assigned To" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Assigned To" />
+    ),
     cell: ({ row }) => {
       const assignedTo = row.getValue('assignedTo')
       if (!assignedTo) return '-'
@@ -245,7 +283,9 @@ export const columns: ColumnDef<JobWithRelations>[] = [
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={assignedTo.image ?? ''} alt={assignedTo.name} />
-            <AvatarFallback>{assignedTo.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>
+              {assignedTo.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <span>{assignedTo.name}</span>
         </div>
@@ -260,7 +300,9 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'category',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Category" />
+    ),
     cell: ({ row }) => {
       const category = row.getValue('category')
       return <Badge variant="outline">{category}</Badge>
@@ -272,7 +314,9 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'entityType',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Entity Type" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Entity Type" />
+    ),
     cell: ({ row }) => {
       const entityType = row.getValue('entityType')
       return entityType === 'none' ? '-' : <Badge variant="outline">{entityType}</Badge>
@@ -284,11 +328,16 @@ export const columns: ColumnDef<JobWithRelations>[] = [
   },
   {
     accessorKey: 'properties',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Est. Duration" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Est. Duration" />
+    ),
     cell: ({ row }) => {
       const properties = row.getValue('properties')
       const totalMinutes =
-        properties?.tasks?.reduce((acc, task) => acc + (task.estimatedMinutes || 0), 0) || 0
+        properties?.tasks?.reduce(
+          (acc, task) => acc + (task.estimatedMinutes || 0),
+          0
+        ) || 0
       return totalMinutes ? `${totalMinutes} mins` : '-'
     },
   },
