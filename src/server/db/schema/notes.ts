@@ -12,23 +12,24 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { noteTypeEnum, statusEnum } from './enums'
 import { users } from './core'
-import { plants } from './plants'
-import { harvests } from './harvests'
+import { Plant, plants } from './plants'
+import { Harvest, harvests } from './harvests'
 import { locations } from './locations'
-import { batches } from './batches'
-import { jobs } from './jobs'
-import { processing } from './processing'
-import { sensors } from './sensors'
-import { equipment } from './equipment'
+import { Batch, batches } from './batches'
+import { Job, jobs } from './jobs'
+import { Processing, processing } from './processing'
+import { Sensor, sensors } from './sensors'
+import { Equipment, equipment } from './equipment'
+import { Genetic } from './genetics'
 
 export const notes = createTable(
   'note',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     type: noteTypeEnum('type').default('text').notNull(),
-    title: varchar('title', { length: 255 }),
+    title: varchar('title', { length: 255 }).notNull(),
     content: text('content'),
-    entityId: uuid('entity_id').notNull(),
+    entityId: uuid('entity_id'),
     entityType: varchar('entity_type', { length: 50 }).notNull(),
     parentId: uuid('parent_id').references((): AnyPgColumn => notes.id, {
       onDelete: 'cascade',
@@ -161,3 +162,16 @@ export const selectNoteSchema = createSelectSchema(notes)
 // Types
 export type Note = typeof notes.$inferSelect
 export type NewNote = typeof notes.$inferInsert
+
+export type NoteWithRelations = Note & {
+  createdBy: { id: string; name: string; image: string }
+  equipment?: Equipment[] | null
+  plant?: Plant | undefined
+  batch?: Batch | undefined
+  harvest?: Harvest | undefined
+  location?: Location | undefined
+  job?: Job | undefined
+  processing?: Processing | undefined
+  sensor?: Sensor | undefined
+  genetic?: Genetic | undefined
+}

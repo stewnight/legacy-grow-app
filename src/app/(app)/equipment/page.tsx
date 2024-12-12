@@ -43,7 +43,7 @@ export default async function EquipmentPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Equipment</h2>
           <p className="text-muted-foreground">
-            Manage your facility's equipment and maintenance schedules
+            Manage your facility&apos;s equipment and maintenance schedules
           </p>
         </div>
         <AppSheet mode="create" entity="equipment">

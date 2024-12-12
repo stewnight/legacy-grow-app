@@ -49,12 +49,12 @@ export function GeneticForm({
   const form = useForm<GeneticFormValues>({
     resolver: zodResolver(insertGeneticSchema),
     initialData: {
-      name: initialData?.name || '',
-      type: initialData?.type || 'hybrid',
-      breeder: initialData?.breeder || '',
-      description: initialData?.description || '',
-      inHouse: initialData?.inHouse || false,
-      status: initialData?.status || 'active',
+      name: initialData?.name ?? '',
+      type: initialData?.type ?? 'hybrid',
+      breeder: initialData?.breeder ?? '',
+      description: initialData?.description ?? '',
+      inHouse: initialData?.inHouse ?? false,
+      status: initialData?.status ?? 'active',
     },
   })
 
@@ -109,7 +109,6 @@ export function GeneticForm({
     <Form {...form}>
       <form
         onSubmit={(e) => {
-          console.log('Form Submitted Event')
           form.handleSubmit(onSubmit, (errors) => {
             console.log('Form Errors:', errors)
           })(e)
@@ -163,7 +162,7 @@ export function GeneticForm({
             <FormItem>
               <FormLabel>Breeder</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,7 +176,7 @@ export function GeneticForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -191,7 +190,7 @@ export function GeneticForm({
             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
               <FormControl>
                 <Checkbox
-                  checked={field.value || false}
+                  checked={field.value ?? false}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>

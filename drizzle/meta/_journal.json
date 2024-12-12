@@ -71,6 +71,13 @@
       "when": 1733531509271,
       "tag": "0009_silent_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1733983281197,
+      "tag": "0010_polite_thanos",
+      "breakpoints": true
     }
   ]
 }

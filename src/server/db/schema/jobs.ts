@@ -222,9 +222,9 @@ export type NewJob = typeof jobs.$inferInsert
 
 export type JobWithRelations = Job & {
   assignedTo?: { id: string; name: string; image: string } | null
-  createdBy: { id: string; name: string }
-  equipment?: Equipment[] | null
-  notes?: Note[] | null
+  createdBy: { id: string; name: string; image: string }
+  equipment?: Equipment[] | null[]
+  notes?: Note[] | null[]
   location?: Location | undefined
   plant?: Plant | undefined
   batch?: Batch | undefined

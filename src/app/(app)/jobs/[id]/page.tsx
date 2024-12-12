@@ -12,20 +12,15 @@ import {
 } from '~/components/ui/card'
 import { notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
 import {
   Calendar,
   Clock,
   AlertCircle,
   CheckCircle2,
-  User,
   Tag,
   ListChecks,
   Timer,
-  Wrench,
-  Package,
-  HardHat,
   Link as LinkIcon,
   ChevronDown,
   ChevronUp,
@@ -48,7 +43,6 @@ import { type Processing } from '~/server/db/schema/processing'
 import { type Harvest } from '~/server/db/schema/harvests'
 import { type Equipment } from '~/server/db/schema/equipment'
 import { TaskManager } from '~/components/jobs/task-manager'
-import { RecurringSettings } from '~/components/jobs/recurring-settings'
 import { InstructionsManager } from '~/components/jobs/instructions-manager'
 import { RequirementsManager } from '~/components/jobs/requirements-manager'
 import {
@@ -369,7 +363,7 @@ export default function JobPage({
             </Button>
           )}
           <AppSheet mode="edit" entity="job">
-            <JobForm mode="edit" initialData={job} />
+            <JobForm mode="edit" initialData={job as JobWithRelations} />
           </AppSheet>
         </div>
       </div>

@@ -27,9 +27,7 @@ import { type AppRouter } from '~/server/api/root'
 import { api } from '~/trpc/react'
 import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
-import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/date-picker'
-import { format } from 'date-fns'
 import { type TRPCClientErrorLike } from '@trpc/client'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
@@ -61,13 +59,13 @@ export function BatchForm({
   const form = useForm<BatchFormValues>({
     resolver: zodResolver(insertBatchSchema),
     initialData: {
-      identifier: initialData?.identifier || '',
-      geneticId: initialData?.geneticId || '',
-      locationId: initialData?.locationId || '',
-      stage: initialData?.stage || 'germination',
-      batchStatus: initialData?.batchStatus || 'active',
-      startDate: initialData?.startDate || new Date(),
-      plantCount: initialData?.plantCount || 0,
+      identifier: initialData?.identifier ?? '',
+      geneticId: initialData?.geneticId ?? '',
+      locationId: initialData?.locationId ?? '',
+      stage: initialData?.stage ?? 'germination',
+      batchStatus: initialData?.batchStatus ?? 'active',
+      startDate: initialData?.startDate ?? new Date(),
+      plantCount: initialData?.plantCount ?? 0,
     },
   })
 
@@ -113,9 +111,9 @@ export function BatchForm({
   const onSubmit = async (values: BatchFormValues) => {
     try {
       if (mode === 'create') {
-        await createBatch(values)
+        createBatch(values)
       } else if (initialData?.id) {
-        await updateBatch({ id: initialData.id, data: values })
+        updateBatch({ id: initialData.id, data: values })
       }
     } catch (error) {
       console.error('Form submission error:', error)

@@ -78,12 +78,12 @@ export default function EquipmentTab({
   const activeEquipment =
     equipment?.items.filter(
       (item) => item.status === 'active' || item.status === 'maintenance'
-    ) || []
+    ) ?? []
 
   const inactiveEquipment =
     equipment?.items.filter(
       (item) => item.status === 'offline' || item.status === 'decommissioned'
-    ) || []
+    ) ?? []
 
   const isMaintenanceDue = (date: Date | string | null) => {
     if (!date) return false

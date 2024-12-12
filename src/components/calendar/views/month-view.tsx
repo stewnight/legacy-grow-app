@@ -5,7 +5,6 @@ import { type JobWithRelations } from '~/server/db/schema'
 import { JobCard } from '../job-card'
 import { AppSheet } from '~/components/Layout/app-sheet'
 import { JobForm } from '~/components/jobs/jobs-form'
-import { SheetTrigger } from '~/components/ui/sheet'
 import { Button } from '~/components/ui/button'
 import { PlusIcon } from 'lucide-react'
 

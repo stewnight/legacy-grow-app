@@ -14,16 +14,7 @@ import { notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
-import {
-  Dna,
-  Sprout,
-  Timer,
-  Ruler,
-  Leaf,
-  Droplets,
-  Scale,
-  Microscope,
-} from 'lucide-react'
+import { Dna, Timer, Leaf, Scale } from 'lucide-react'
 import { AppSheet } from '../../../../components/Layout/app-sheet'
 import { GeneticForm } from '../../../../components/genetics/genetics-form'
 import { Badge } from '../../../../components/ui/badge'

@@ -3,22 +3,16 @@
 import * as React from 'react'
 import {
   format,
-  isSameMonth,
   isToday as isDateToday,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
   addMonths,
   subMonths,
-  formatDistanceToNow,
-  differenceInDays,
   isSameDay,
-  isAfter,
 } from 'date-fns'
 import { cn } from '~/lib/utils'
 import { type JobWithRelations } from '~/server/db/schema'
-import { Badge } from '../ui/badge'
-import { Calendar, Clock, Users, ListChecks, GripVertical } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '../ui/button'
 import { ScrollArea, ScrollBar } from '../ui/scroll-area'
@@ -172,11 +166,11 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
                     {job.assignedTo && (
                       <Avatar className="ml-2 h-6 w-6 flex-shrink-0">
                         <AvatarImage
-                          src={job.assignedTo.image || ''}
-                          alt={job.assignedTo.name || ''}
+                          src={job.assignedTo.image ?? ''}
+                          alt={job.assignedTo.name ?? ''}
                         />
                         <AvatarFallback>
-                          {job.assignedTo.name?.[0] || 'U'}
+                          {job.assignedTo.name?.[0] ?? 'U'}
                         </AvatarFallback>
                       </Avatar>
                     )}
@@ -309,7 +303,7 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
                                               alt={job.assignedTo.name || ''}
                                             />
                                             <AvatarFallback>
-                                              {job.assignedTo.name?.[0] || 'U'}
+                                              {job.assignedTo.name?.[0] ?? 'U'}
                                             </AvatarFallback>
                                           </Avatar>
                                           <span>{job.assignedTo.name}</span>

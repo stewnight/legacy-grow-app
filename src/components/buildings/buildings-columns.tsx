@@ -2,8 +2,6 @@
 
 import { type ColumnDef } from '@tanstack/react-table'
 import { type buildings } from '~/server/db/schema'
-import { Badge } from '~/components/ui/badge'
-import { format } from 'date-fns'
 import { MoreHorizontal, Shield, Thermometer, Zap } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
