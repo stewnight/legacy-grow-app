@@ -1,6 +1,6 @@
 {
   "name": "legacy-grow-app",
-  "version": "0.1126",
+  "version": "0.1212.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,10 +20,7 @@
     "pr-prep": "pnpm generate:structure && pnpm generate:schema && pnpm format:write",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "rimraf public/storybook && storybook build --output-dir public/storybook",
-    "test-storybook": "test-storybook"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
@@ -99,34 +96,21 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^3.2.2",
-    "@storybook/addon-actions": "^8.4.7",
-    "@storybook/addon-controls": "^8.4.7",
-    "@storybook/addon-essentials": "^8.4.7",
-    "@storybook/addon-interactions": "^8.4.7",
-    "@storybook/addon-onboarding": "^8.4.7",
-    "@storybook/blocks": "^8.4.7",
-    "@storybook/nextjs": "^8.4.7",
-    "@storybook/react": "^8.4.7",
-    "@storybook/test": "^8.4.7",
     "@types/eslint": "^9.6.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.16",
     "@types/react-dom": "^18.3.5",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
-    "chromatic": "^11.20.2",
     "drizzle-kit": "^0.28.1",
     "eslint": "^9.16.0",
     "eslint-config-next": "^15.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-drizzle": "^0.2.3",
-    "eslint-plugin-storybook": "^0.11.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
     "rimraf": "^6.0.1",
-    "storybook": "^8.4.7",
     "tailwindcss": "^3.4.16",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
