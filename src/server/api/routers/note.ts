@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { notes, insertNoteSchema } from '~/server/db/schema'
-import { eq, desc, and, SQL } from 'drizzle-orm'
+import { eq, desc, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { noteTypeEnum, statusEnum } from '~/server/db/schema/enums'
 

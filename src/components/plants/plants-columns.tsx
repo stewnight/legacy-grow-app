@@ -1,7 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { Plant, type plants } from '~/server/db/schema'
+import { type Plant, type plants } from '~/server/db/schema'
 import { Badge } from '~/components/ui/badge'
 import { MoreHorizontal, Leaf, MapPin, Calendar, Activity } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -106,7 +106,7 @@ export const columns: ColumnDef<PlantWithRelations>[] = [
     accessorKey: 'health',
     header: 'Health',
     cell: ({ row }) => {
-      const health = row.getValue('health') as string
+      const health = row.getValue('health')
       return (
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-muted-foreground" />

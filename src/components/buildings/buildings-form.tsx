@@ -22,7 +22,7 @@ import { Button } from '~/components/ui/button'
 import { api } from '~/trpc/react'
 import { type z } from 'zod'
 import { type AppRouter } from '~/server/api/root'
-import { inferRouterOutputs } from '@trpc/server'
+import { type inferRouterOutputs } from '@trpc/server'
 import {
   Select,
   SelectContent,

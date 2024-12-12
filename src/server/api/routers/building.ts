@@ -2,7 +2,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { buildings, insertBuildingSchema } from '~/server/db/schema'
-import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { eq, desc, like, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { buildingTypeEnum, statusEnum } from '~/server/db/schema/enums'
 

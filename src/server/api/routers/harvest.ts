@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { harvests, insertHarvestSchema } from '~/server/db/schema'
-import { eq, desc, like, and, SQL } from 'drizzle-orm'
+import { eq, desc, like, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { batchStatusEnum, harvestQualityEnum } from '~/server/db/schema/enums'
 

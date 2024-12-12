@@ -1,5 +1,5 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, varchar, timestamp, json, uuid, text, AnyPgColumn } from 'drizzle-orm/pg-core'
+import { index, varchar, timestamp, json, uuid, text, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import {
