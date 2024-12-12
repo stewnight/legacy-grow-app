@@ -1,6 +1,6 @@
 {
   "name": "legacy-grow-app",
-  "version": "0.1212.1",
+  "version": "0.1212.2",
   "private": true,
   "type": "module",
   "scripts": {

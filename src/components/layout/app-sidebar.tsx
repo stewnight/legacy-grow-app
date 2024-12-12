@@ -105,12 +105,6 @@ const data = {
   ],
   navSecondary: [
     {
-      title: 'Storybook',
-      url: '/storybook/index.html',
-      icon: Code2,
-      isExternal: true,
-    },
-    {
       title: 'Github',
       url: 'https://github.com/stewnight/legacy-grow-app',
       icon: Github,
