@@ -6,7 +6,7 @@ import {
   json,
   uuid,
   text,
-  AnyPgColumn,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'

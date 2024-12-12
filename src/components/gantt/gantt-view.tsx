@@ -74,7 +74,7 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
         if (todayIndex !== -1) {
           const container = timelineRef.current.querySelector(
             '[data-radix-scroll-area-viewport]'
-          ) as HTMLElement
+          )!
           if (container) {
             const scrollPosition =
               todayIndex * CELL_WIDTH - container.clientWidth / 2
@@ -97,7 +97,7 @@ export function GanttView({ jobs }: { jobs: JobWithRelations[] }) {
       if (todayIndex !== -1) {
         const container = timelineRef.current.querySelector(
           '[data-radix-scroll-area-viewport]'
-        ) as HTMLElement
+        )!
         if (container) {
           const scrollPosition =
             todayIndex * CELL_WIDTH - container.clientWidth / 2

@@ -1,6 +1,6 @@
 'use client'
 
-import { Table, type ColumnDef } from '@tanstack/react-table'
+import { type Table, type ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
 import { Columns2, MoreHorizontal } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -109,7 +109,7 @@ export const columns: ColumnDef<Equipment>[] = [
       <DataTableColumnHeader column={column} title="Type" />
     ),
     cell: ({ row }) => {
-      const type = row.getValue('type') as string
+      const type = row.getValue('type')
       return type.charAt(0).toUpperCase() + type.slice(1)
     },
   },
@@ -119,7 +119,7 @@ export const columns: ColumnDef<Equipment>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const status = row.getValue('status') as string
+      const status = row.getValue('status')
       return (
         <Badge
           variant="outline"

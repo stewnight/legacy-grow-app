@@ -92,11 +92,11 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       category: defaultValues?.category || 'maintenance',
       properties: {
         recurring:
-          (defaultValues?.properties as JobProperties)?.recurring || null,
-        tasks: (defaultValues?.properties as JobProperties)?.tasks || [],
+          (defaultValues?.properties!)?.recurring || null,
+        tasks: (defaultValues?.properties!)?.tasks || [],
         instructions:
-          (defaultValues?.properties as JobProperties)?.instructions || [],
-        requirements: (defaultValues?.properties as JobProperties)
+          (defaultValues?.properties!)?.instructions || [],
+        requirements: (defaultValues?.properties!)
           ?.requirements || {
           tools: [],
           supplies: [],
@@ -453,7 +453,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Tasks</FormLabel>
               <FormControl>
                 <TaskManager
-                  tasks={(field.value || []) as Task[]}
+                  tasks={(field.value || [])}
                   onChange={(tasks) => {
                     form.setValue('properties.tasks', tasks, {
                       shouldValidate: true,
@@ -474,7 +474,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Recurring Settings</FormLabel>
               <FormControl>
                 <RecurringSettings
-                  value={(field.value as JobProperties['recurring']) || null}
+                  value={(field.value) || null}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -491,7 +491,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Instructions</FormLabel>
               <FormControl>
                 <InstructionsManager
-                  value={field.value as JobProperties['instructions']}
+                  value={field.value}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -509,7 +509,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormControl>
                 <RequirementsManager
                   value={
-                    (field.value as JobProperties['requirements']) || {
+                    (field.value) || {
                       tools: [],
                       supplies: [],
                       ppe: [],
