@@ -91,13 +91,10 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
       status: defaultValues?.status || 'active',
       category: defaultValues?.category || 'maintenance',
       properties: {
-        recurring:
-          (defaultValues?.properties!)?.recurring || null,
-        tasks: (defaultValues?.properties!)?.tasks || [],
-        instructions:
-          (defaultValues?.properties!)?.instructions || [],
-        requirements: (defaultValues?.properties!)
-          ?.requirements || {
+        recurring: (defaultValues?.properties)!?.recurring || null,
+        tasks: (defaultValues?.properties)!?.tasks || [],
+        instructions: (defaultValues?.properties)!?.instructions || [],
+        requirements: (defaultValues?.properties)!?.requirements || {
           tools: [],
           supplies: [],
           ppe: [],
@@ -453,7 +450,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Tasks</FormLabel>
               <FormControl>
                 <TaskManager
-                  tasks={(field.value || [])}
+                  tasks={field.value || []}
                   onChange={(tasks) => {
                     form.setValue('properties.tasks', tasks, {
                       shouldValidate: true,
@@ -474,7 +471,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormLabel>Recurring Settings</FormLabel>
               <FormControl>
                 <RecurringSettings
-                  value={(field.value) || null}
+                  value={field.value || null}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -509,7 +506,7 @@ export function JobForm({ mode, defaultValues }: JobFormProps) {
               <FormControl>
                 <RequirementsManager
                   value={
-                    (field.value) || {
+                    field.value || {
                       tools: [],
                       supplies: [],
                       ppe: [],

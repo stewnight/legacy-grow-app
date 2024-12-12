@@ -2,10 +2,6 @@
 
 ```
 📁legacy-grow-app
-  📁.storybook
-    main.ts
-    preview.tsx
-    styles.css
   📁drizzle
     📁meta
       _journal.json
@@ -35,11 +31,6 @@
     generate-schema.ts
     generate-structure.ts
   📁src
-    📁__mocks__
-      auth.ts
-      db.ts
-      env.ts
-      geist.ts
     📁app
       📁(app)
         📁batches
@@ -126,8 +117,6 @@
         locations-columns.tsx
         locations-form.tsx
       📁notes
-        📁__mocks__
-          timeline.tsx
         create-note-form.tsx
         media-preview.tsx
         media-uploader.tsx
@@ -140,71 +129,43 @@
         rooms-columns.tsx
         rooms-form.tsx
       📁ui
-        alert-dialog.stories.tsx
         alert-dialog.tsx
-        alert.stories.tsx
         alert.tsx
-        avatar.stories.tsx
         avatar.tsx
-        badge.stories.tsx
         badge.tsx
-        breadcrumb.stories.tsx
         breadcrumb.tsx
-        button.stories.tsx
         button.tsx
-        calendar.stories.tsx
         calendar.tsx
-        card.stories.tsx
         card.tsx
         chart.tsx
-        checkbox.stories.tsx
         checkbox.tsx
-        collapsible.stories.tsx
         collapsible.tsx
         command.tsx
         data-table-column-header.tsx
         data-table-faceted-filter.tsx
-        data-table.stories.tsx
         data-table.tsx
         date-picker.tsx
-        dialog.stories.tsx
         dialog.tsx
-        dropdown-menu.stories.tsx
         dropdown-menu.tsx
-        form.stories.tsx
         form.tsx
-        hover-card.stories.tsx
         hover-card.tsx
-        input.stories.tsx
         input.tsx
         label.tsx
         popover.tsx
-        progress.stories.tsx
         progress.tsx
-        radio-group.stories.tsx
         radio-group.tsx
         resizable.tsx
-        scroll-area.stories.tsx
         scroll-area.tsx
-        select.stories.tsx
         select.tsx
-        separator.stories.tsx
         separator.tsx
-        sheet.stories.tsx
         sheet.tsx
         sidebar.tsx
         skeleton.tsx
-        slider.stories.tsx
         slider.tsx
-        switch.stories.tsx
         switch.tsx
-        table.stories.tsx
         table.tsx
-        tabs.stories.tsx
         tabs.tsx
-        textarea.stories.tsx
         textarea.tsx
-        toast.stories.tsx
         toast.tsx
         toaster.tsx
         tooltip.tsx
@@ -214,7 +175,6 @@
       media-upload.tsx
       session-provider.tsx
       theme-provider.tsx
-      theme-toggle.stories.tsx
       theme-toggle.tsx
     📁hooks
       use-mobile.tsx
@@ -273,10 +233,8 @@
   .cursorrules
   .env
   .env.example
-  .env.storybook
   .eslintignore
   .eslintrc.cjs
-  chromatic.config.json
   components.json
   drizzle.config.ts
   middleware.ts
