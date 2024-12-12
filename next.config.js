@@ -12,22 +12,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  rewrites: async () => {
-    return [
-      {
-        source: '/storybook',
-        destination: '/storybook/index.html',
-      },
-      {
-        source: '/storybook/:path*',
-        destination: '/storybook/:path*',
-      },
-      {
-        source: '/sb-:path*',
-        destination: '/storybook/sb-:path*',
-      },
-    ]
-  },
 }
 
 export default nextConfig
