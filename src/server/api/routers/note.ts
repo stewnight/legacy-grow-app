@@ -37,7 +37,7 @@ export const noteRouter = createTRPCRouter({
       const items = await ctx.db.query.notes.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
-        offset: cursor || 0,
+        offset: cursor ?? 0,
         orderBy: [desc(notes.createdAt)],
         with: {
           parent: true,

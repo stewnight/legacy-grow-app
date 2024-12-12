@@ -130,7 +130,7 @@ export function TaskManager({ tasks, onChange }: TaskManagerProps) {
                       <Input
                         type="number"
                         {...field}
-                        value={field.value || ''}
+                        value={field.value ?? ''}
                         onChange={(e) => {
                           const value = e.target.value
                           field.onChange(value ? parseInt(value, 10) : null)

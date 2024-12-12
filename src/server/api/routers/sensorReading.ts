@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { sensorReadings, insertSensorReadingSchema } from '~/server/db/schema/sensorReadings'
+import {
+  sensorReadings,
+  insertSensorReadingSchema,
+} from '~/server/db/schema/sensorReadings'
 import { eq, desc, and, type SQL, gte, lte } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 
@@ -40,7 +43,7 @@ export const sensorReadingRouter = createTRPCRouter({
         .from(sensorReadings)
         .where(conditions.length ? and(...conditions) : undefined)
         .limit(limit + 1)
-        .offset(cursor || 0)
+        .offset(cursor ?? 0)
         .orderBy(desc(sensorReadings.timestamp))
 
       let nextCursor: typeof cursor | undefined = undefined
@@ -87,7 +90,7 @@ export const sensorReadingRouter = createTRPCRouter({
         .values({
           ...rest,
           metadata:
-            (metadata as typeof sensorReadings.$inferInsert.metadata) || null,
+            (metadata as typeof sensorReadings.$inferInsert.metadata) ?? null,
         })
         .returning()
 
@@ -119,7 +122,7 @@ export const sensorReadingRouter = createTRPCRouter({
           input.map(({ metadata, ...rest }) => ({
             ...rest,
             metadata:
-              (metadata as typeof sensorReadings.$inferInsert.metadata) || null,
+              (metadata as typeof sensorReadings.$inferInsert.metadata) ?? null,
           }))
         )
         .returning()

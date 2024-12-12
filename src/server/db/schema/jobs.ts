@@ -15,7 +15,6 @@ import {
   jobCategoryEnum,
   statusEnum,
   jobEntityTypeEnum,
-  JobEntityType,
 } from './enums'
 import { users } from './core'
 import { type Note, notes } from './notes'

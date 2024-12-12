@@ -1,13 +1,5 @@
 import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  integer,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  decimal,
-} from 'drizzle-orm/pg-core'
+import { index, varchar, timestamp, json, uuid } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import {

@@ -3,14 +3,11 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { api } from '~/trpc/react'
-import { auth } from '~/server/auth'
-import { redirect } from 'next/navigation'
 import { Skeleton } from '~/components/ui/skeleton'
 import { AppSheet } from '~/components/Layout/app-sheet'
-import { EquipmentForm } from '../../../../components/equipment/equipment-form'
+import { EquipmentForm } from '~/components/equipment/equipment-form'
 import { format } from 'date-fns'
 import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
 import Link from 'next/link'
 import {
   Card,
@@ -289,7 +286,9 @@ export default function EquipmentDetailPage({ params }: PageProps) {
         </TabsContent>
 
         <TabsContent value="maintenance">
-          <MaintenanceTab equipment={equipment} />
+          <Suspense fallback={<div>Loading maintenance history...</div>}>
+            <MaintenanceTab equipment={equipment} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="sensors">

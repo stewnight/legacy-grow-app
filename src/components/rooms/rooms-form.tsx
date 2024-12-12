@@ -29,7 +29,6 @@ import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { RefreshCw } from 'lucide-react'
-import { type UseFormReturn } from 'react-hook-form'
 
 type RouterOutputs = inferRouterOutputs<AppRouter>
 type RoomFormValues = z.infer<typeof insertRoomSchema>
@@ -51,19 +50,19 @@ export function RoomForm({
   const form = useForm<RoomFormValues>({
     resolver: zodResolver(insertRoomSchema),
     initialData: {
-      name: initialData?.name || '',
-      capacity: initialData?.capacity || 10,
-      status: initialData?.status || statusEnum.enumValues[0],
-      buildingId: initialData?.buildingId || '',
-      parentId: initialData?.parentId || undefined,
-      type: initialData?.type || undefined,
-      properties: initialData?.properties || {
+      name: initialData?.name ?? '',
+      capacity: initialData?.capacity ?? 10,
+      status: initialData?.status ?? statusEnum.enumValues[0],
+      buildingId: initialData?.buildingId ?? '',
+      parentId: initialData?.parentId ?? undefined,
+      type: initialData?.type ?? undefined,
+      properties: initialData?.properties ?? {
         temperature: { min: 65, max: 80 },
         humidity: { min: 40, max: 60 },
         light: { type: 'LED', intensity: 100 },
         co2: { min: 400, max: 1500 },
       },
-      dimensions: initialData?.dimensions || {
+      dimensions: initialData?.dimensions ?? {
         length: 10,
         width: 10,
         height: 8,
@@ -219,7 +218,7 @@ export function RoomForm({
                 onValueChange={(value) =>
                   field.onChange(value === 'undefined' ? undefined : value)
                 }
-                defaultValue={field.value || 'undefined'}
+                defaultValue={field.value ?? 'undefined'}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -360,7 +359,7 @@ export function RoomForm({
               <FormLabel>Unit</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value?.toString()}
+                defaultValue={field.value?.toString() ?? 'm'}
               >
                 <FormControl>
                   <SelectTrigger>

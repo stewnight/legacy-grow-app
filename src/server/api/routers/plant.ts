@@ -51,7 +51,7 @@ export const plantRouter = createTRPCRouter({
       const items = await ctx.db.query.plants.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
-        offset: cursor || 0,
+        offset: cursor ?? 0,
         orderBy: [desc(plants.createdAt)],
         with: {
           genetic: true,

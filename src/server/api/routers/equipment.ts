@@ -47,7 +47,7 @@ export const equipmentRouter = createTRPCRouter({
       const items = await ctx.db.query.equipment.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
-        offset: cursor || 0,
+        offset: cursor ?? 0,
         orderBy: [desc(equipment.createdAt)],
         with: {
           room: true,
@@ -115,8 +115,8 @@ export const equipmentRouter = createTRPCRouter({
         .values({
           ...input,
           createdById: ctx.session.user.id,
-          metadata: input.metadata || {},
-          specifications: input.specifications || {},
+          metadata: input.metadata ?? {},
+          specifications: input.specifications ?? {},
         } as typeof equipment.$inferInsert)
         .returning()
 
@@ -143,8 +143,8 @@ export const equipmentRouter = createTRPCRouter({
         .set({
           ...input.data,
           updatedAt: new Date(),
-          metadata: input.data.metadata || {},
-          specifications: input.data.specifications || {},
+          metadata: input.data.metadata ?? {},
+          specifications: input.data.specifications ?? {},
         } as typeof equipment.$inferInsert)
         .where(eq(equipment.id, input.id))
         .returning()

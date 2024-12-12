@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertPlantSchema, type Plant } from '~/server/db/schema'
+import { insertPlantSchema } from '~/server/db/schema'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -393,7 +393,7 @@ export function PlantForm({
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea {...field} value={field.value || ''} />
+                <Textarea {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>

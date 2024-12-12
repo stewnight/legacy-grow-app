@@ -14,11 +14,11 @@ import { notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
-import { Building2, MapPin, Users, Settings, Shield, Zap } from 'lucide-react'
-import { AppSheet } from '../../../../components/Layout/app-sheet'
-import { BuildingsForm } from '../../../../components/buildings/buildings-form'
-import { Badge } from '../../../../components/ui/badge'
-import { RoomForm } from '../../../../components/rooms/rooms-form'
+import { MapPin, Settings, Shield, Zap } from 'lucide-react'
+import { AppSheet } from '~/components/Layout/app-sheet'
+import { BuildingsForm } from '~/components/buildings/buildings-form'
+import { Badge } from '~/components/ui/badge'
+import { RoomForm } from '~/components/rooms/rooms-form'
 
 export default function BuildingPage({
   params,
@@ -95,10 +95,10 @@ export default function BuildingPage({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {building.address?.city || 'N/A'}
+              {building.address?.city ?? 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {building.address?.country || 'No location set'}
+              {building.address?.country ?? 'No location set'}
             </p>
           </CardContent>
         </Card>
@@ -116,7 +116,7 @@ export default function BuildingPage({
                 {building.properties.climate.controlType}
               </div>
               <p className="text-xs text-muted-foreground">
-                {building.properties.climate.hvacSystem || 'Standard HVAC'}
+                {building.properties.climate.hvacSystem ?? 'Standard HVAC'}
               </p>
             </CardContent>
           </Card>

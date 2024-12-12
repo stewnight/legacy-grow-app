@@ -89,8 +89,8 @@ export function NotesManager({
           >
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={note.createdBy?.image || undefined}
-                alt={note.createdBy?.name || ''}
+                src={note.createdBy?.image ?? undefined}
+                alt={note.createdBy?.name ?? ''}
               />
               <AvatarFallback>
                 {note.createdBy?.name?.charAt(0).toUpperCase()}

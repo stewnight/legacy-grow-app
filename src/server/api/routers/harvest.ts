@@ -37,7 +37,7 @@ export const harvestRouter = createTRPCRouter({
       const items = await ctx.db.query.harvests.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
-        offset: cursor || 0,
+        offset: cursor ?? 0,
         orderBy: [desc(harvests.createdAt)],
         with: {
           createdBy: {

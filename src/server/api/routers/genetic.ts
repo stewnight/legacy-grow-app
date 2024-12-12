@@ -1,7 +1,12 @@
 // src/server/api/routers/genetic.ts
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { batches, genetics, insertGeneticSchema, plants } from '~/server/db/schema'
+import {
+  batches,
+  genetics,
+  insertGeneticSchema,
+  plants,
+} from '~/server/db/schema'
 import { eq, desc, like, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { geneticTypeEnum, statusEnum } from '~/server/db/schema/enums'

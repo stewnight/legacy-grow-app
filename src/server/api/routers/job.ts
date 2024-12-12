@@ -9,7 +9,6 @@ import {
   jobCategoryEnum,
   statusEnum,
   jobEntityTypeEnum,
-  type JobEntityType,
 } from '~/server/db/schema/enums'
 
 // Schema for filters using the enum directly
@@ -102,7 +101,7 @@ export const jobRouter = createTRPCRouter({
       const items = await ctx.db.query.jobs.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
-        offset: cursor || 0,
+        offset: cursor ?? 0,
         orderBy,
         with: {
           assignedTo: {

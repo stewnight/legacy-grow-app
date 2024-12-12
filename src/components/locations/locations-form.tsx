@@ -377,7 +377,7 @@ export function LocationForm({
                 <FormLabel>Unit</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value?.toString()}
+                  value={field.value?.toString() ?? 'm'}
                 >
                   <FormControl>
                     <SelectTrigger>

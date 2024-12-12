@@ -35,7 +35,7 @@ export const sensorRouter = createTRPCRouter({
       const items = await ctx.db.query.sensors.findMany({
         where: conditions.length ? and(...conditions) : undefined,
         limit: limit + 1,
-        offset: cursor || 0,
+        offset: cursor ?? 0,
         orderBy: [desc(sensors.createdAt)],
         with: {
           createdBy: {

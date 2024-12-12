@@ -65,11 +65,11 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
   const activeJobs =
     jobs?.items.filter(
       (job) => job.jobStatus !== 'completed' && job.entityId === entityId
-    ) || []
+    ) ?? []
   const completedJobs =
     jobs?.items.filter(
       (job) => job.jobStatus === 'completed' && job.entityId === entityId
-    ) || []
+    ) ?? []
 
   return (
     <TabsContent value="jobs">
@@ -190,7 +190,7 @@ export default function JobsTab({ entityId, entityType }: JobsTabProps) {
                           {job.title}
                         </Link>
                         <span>•</span>
-                        <span>{job.assignedTo?.name || 'Unassigned'}</span>
+                        <span>{job.assignedTo?.name ?? 'Unassigned'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
