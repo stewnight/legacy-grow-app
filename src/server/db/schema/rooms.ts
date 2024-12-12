@@ -6,7 +6,7 @@ import {
   timestamp,
   json,
   uuid,
-  AnyPgColumn,
+  type AnyPgColumn,
   decimal,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'

@@ -2,7 +2,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { plants, insertPlantSchema } from '~/server/db/schema'
-import { eq, desc, like, and, or, SQL } from 'drizzle-orm'
+import { eq, desc, like, and, or, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import {
   plantStageEnum,

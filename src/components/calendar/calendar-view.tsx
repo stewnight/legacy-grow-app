@@ -16,7 +16,7 @@ import { api } from '~/trpc/react'
 import { CalendarHeader } from './calendar-header'
 import { MonthView } from './views/month-view'
 import { PeriodView } from './views/period-view'
-import { JobWithRelations } from '../../server/db/schema'
+import { type JobWithRelations } from '../../server/db/schema'
 import { useIsMobile, useIsDesktop } from '../../hooks/use-mobile'
 
 export type CalendarViewMode = 'month' | 'week' | 'day'
@@ -121,13 +121,13 @@ export function CalendarView({
           <MonthView
             currentDate={currentDate}
             days={monthDays}
-            jobs={filteredJobs as JobWithRelations[]}
+            jobs={filteredJobs}
           />
         ) : (
           <PeriodView
             mode={mode}
             periods={getSurroundingDays()}
-            jobs={filteredJobs as JobWithRelations[]}
+            jobs={filteredJobs}
             currentPeriodIndex={surroundingPeriods}
           />
         )}

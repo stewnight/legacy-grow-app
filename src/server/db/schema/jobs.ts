@@ -18,16 +18,16 @@ import {
   JobEntityType,
 } from './enums'
 import { users } from './core'
-import { Note, notes } from './notes'
-import { Location, locations } from './locations'
-import { Plant, plants } from './plants'
-import { Batch, batches } from './batches'
-import { Genetic, genetics } from './genetics'
-import { Sensor, sensors } from './sensors'
-import { Processing, processing } from './processing'
-import { Harvest, harvests } from './harvests'
+import { type Note, notes } from './notes'
+import { type Location, locations } from './locations'
+import { type Plant, plants } from './plants'
+import { type Batch, batches } from './batches'
+import { type Genetic, genetics } from './genetics'
+import { type Sensor, sensors } from './sensors'
+import { type Processing, processing } from './processing'
+import { type Harvest, harvests } from './harvests'
 import { z } from 'zod'
-import { Equipment, equipment } from './equipment'
+import { type Equipment, equipment } from './equipment'
 
 const taskSchema = z.object({
   item: z.string(),

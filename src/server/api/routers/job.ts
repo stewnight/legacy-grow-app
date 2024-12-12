@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { jobs, insertJobSchema } from '~/server/db/schema'
-import { eq, desc, like, and, SQL, asc, sql } from 'drizzle-orm'
+import { eq, desc, like, and, type SQL, asc, sql } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import {
   jobStatusEnum,

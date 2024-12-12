@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { equipment, insertEquipmentSchema } from '~/server/db/schema/equipment'
-import { eq, desc, like, and, SQL, not, isNull, lte } from 'drizzle-orm'
+import { eq, desc, like, and, type SQL, not, isNull, lte } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import {
   equipmentTypeEnum,

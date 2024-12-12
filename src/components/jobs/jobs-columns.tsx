@@ -61,11 +61,7 @@ export function JobsTableFilters({ table }: JobsTableFiltersProps) {
       { id: string; name: string; image: string | null }
     >()
     table.getFilteredRowModel().rows.forEach((row) => {
-      const assignedTo = row.getValue('assignedTo') as {
-        id: string
-        name: string
-        image: string | null
-      } | null
+      const assignedTo = row.getValue('assignedTo')
       if (assignedTo) {
         users.set(assignedTo.id, assignedTo)
       }
@@ -221,7 +217,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Priority" />
     ),
     cell: ({ row }) => {
-      const priority = row.getValue('priority') as JobPriority
+      const priority = row.getValue('priority')
       return (
         <Badge variant={priority as 'default'}>
           <span className="text-nowrap capitalize">{priority}</span>
@@ -239,7 +235,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const status = row.getValue('jobStatus') as JobStatus
+      const status = row.getValue('jobStatus')
       return (
         <Badge variant={status.toLowerCase() as 'default'}>
           <span className="text-nowrap capitalize">
@@ -259,7 +255,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Due Date" />
     ),
     cell: ({ row }) => {
-      const date = row.getValue('dueDate') as Date
+      const date = row.getValue('dueDate')
       return date ? (
         <span className="text-nowrap">
           {formatDistanceToNow(date, { addSuffix: true })}
@@ -269,7 +265,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       )
     },
     filterFn: (row, id, value: Date) => {
-      const rowDate = row.getValue(id) as Date
+      const rowDate = row.getValue(id)
       if (!rowDate) return false
       return rowDate.toDateString() === value.toDateString()
     },
@@ -281,11 +277,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Assigned To" />
     ),
     cell: ({ row }) => {
-      const assignedTo = row.getValue('assignedTo') as {
-        id: string
-        name: string
-        image: string | null
-      } | null
+      const assignedTo = row.getValue('assignedTo')
       if (!assignedTo) return '-'
       return (
         <div className="flex items-center gap-2">
@@ -300,7 +292,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      const assignedTo = row.getValue(id) as { id: string } | null
+      const assignedTo = row.getValue(id)
       if (!assignedTo) return value.includes('unassigned')
       return value.includes(assignedTo.id)
     },
@@ -312,7 +304,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Category" />
     ),
     cell: ({ row }) => {
-      const category = row.getValue('category') as string
+      const category = row.getValue('category')
       return <Badge variant="outline">{category}</Badge>
     },
     filterFn: (row, id, value) => {
@@ -344,9 +336,7 @@ export const columns: ColumnDef<JobWithRelations>[] = [
       <DataTableColumnHeader column={column} title="Est. Duration" />
     ),
     cell: ({ row }) => {
-      const properties = row.getValue('properties') as
-        | { tasks?: Array<{ estimatedMinutes: number | null }> }
-        | undefined
+      const properties = row.getValue('properties')
       const totalMinutes =
         properties?.tasks?.reduce(
           (acc, task) => acc + (task.estimatedMinutes || 0),

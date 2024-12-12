@@ -123,7 +123,7 @@ export function EquipmentForm({
     for (const field of dateFields) {
       if (transformedData[field]) {
         // Ensure we have a valid Date object
-        transformedData[field] = new Date(transformedData[field] as Date)
+        transformedData[field] = new Date(transformedData[field])
       }
     }
 

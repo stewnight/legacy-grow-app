@@ -75,9 +75,7 @@ export const equipment = createTable(
         unit: string
       }
     }>(),
-    metadata: json('metadata').$type<{
-      [key: string]: string | undefined
-    }>(),
+    metadata: json('metadata').$type<Record<string, string | undefined>>(),
     notes: varchar('notes', { length: 1000 }),
     createdById: uuid('created_by')
       .notNull()
