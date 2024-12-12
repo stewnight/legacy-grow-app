@@ -87,7 +87,6 @@
     "forms": {
       "layers": [
         "AppSheet",
-        "BaseForm",
         "EntityForm"
       ],
       "validation": "zod",
@@ -385,29 +384,16 @@
     },
     "forms": {
       "layers": {
-        "AppSheet": {
-          "responsibility": "modal container and form context",
-          "features": [
-            "unsaved changes protection",
-            "form state management",
-            "UI feedback"
-          ]
-        },
-        "BaseForm": {
-          "responsibility": "form state and API interaction",
-          "features": [
-            "React Hook Form integration",
-            "Zod validation",
-            "tRPC mutations",
-            "optimistic updates"
-          ]
-        },
         "EntityForm": {
-          "responsibility": "specific form implementation",
+          "responsibility": "complete form implementation",
           "features": [
+            "form context and state management",
             "field definitions",
             "business logic",
-            "data transformation"
+            "data transformation",
+            "validation",
+            "error handling",
+            "UI feedback"
           ]
         }
       },
@@ -493,18 +479,24 @@
     },
     "custom": {
       "location": "~/components",
+      "entityComponents": {
+        "pattern": "~/components/<entity_name>",
+        "required": [
+          "<entity_name>-form.tsx",
+          "<entity_name>-columns.tsx"
+        ],
+        "optional": [
+          "<entity_name>-card.tsx",
+          "<entity_name>-list.tsx",
+          "<entity_name>-details.tsx"
+        ]
+      },
       "subDirectories": {
         "layout": "app layout components",
         "calendar": "calendar view components",
-        "gantt": "gantt chart components",
-        "notes": "note management components",
-        "equipment": "equipment management components",
-        "jobs": "job management components",
-        "dashboard": "dashboard components"
+        "gantt": "gantt chart components"
       },
       "standalone": [
-        "base-form.tsx",
-        "create-form-wrapper.tsx",
         "icons.tsx",
         "media-upload.tsx",
         "session-provider.tsx",
