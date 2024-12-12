@@ -15,7 +15,7 @@ import {
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { api } from '~/trpc/react'
-import { toast, useToast } from '~/hooks/use-toast'
+import { useToast } from '~/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { AppRouter } from '../../server/api/root'
 import { inferRouterOutputs } from '@trpc/server'
