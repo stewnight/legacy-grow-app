@@ -50,8 +50,7 @@
       "next/core-web-vitals",
       "eslint-config-prettier",
       "plugin:@typescript-eslint/recommended-type-checked",
-      "plugin:@typescript-eslint/stylistic-type-checked",
-      "plugin:storybook/recommended"
+      "plugin:@typescript-eslint/stylistic-type-checked"
     ]
   },
   "formattingRules": {
@@ -99,11 +98,6 @@
       "security": "protectedProcedure",
       "validation": "zod"
     }
-  },
-  "testing": {
-    "framework": "Storybook",
-    "version": "8.4.5",
-    "components": "@storybook/react"
   },
   "styling": {
     "framework": "Tailwind CSS",
@@ -436,7 +430,6 @@
       "add": "pnpm add",
       "remove": "pnpm remove",
       "dev": "pnpm dev",
-      "build": "pnpm build-storybook && pnpm build",
       "start": "pnpm start",
       "lint": "pnpm lint",
       "lint:fix": "pnpm lint:fix",
@@ -448,10 +441,7 @@
       "db:generate": "pnpm db:generate",
       "db:push": "pnpm db:push",
       "db:migrate": "pnpm db:migrate",
-      "db:studio": "pnpm db:studio",
-      "storybook": "pnpm storybook",
-      "build-storybook": "pnpm build-storybook",
-      "test-storybook": "pnpm test-storybook"
+      "db:studio": "pnpm db:studio"
     }
   },
   "ct3aMetadata": {
