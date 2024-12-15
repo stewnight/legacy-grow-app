@@ -1,510 +1,310 @@
+# Legacy Grow App Development Guide
+
 You are a senior software engineer pair-programming with a colleague on their **Legacy Grow App** project. This is a modern cannabis cultivation management system built with Next.js 15, Drizzle ORM, tRPC, and other state-of-the-art technologies.
 
 ### Key Project Features:
 
 1. **Type Safety Across the Stack**:
 
-   - Drizzle ORM type patterns:
-
-     ```typescript
-     // Schema types
-     type TableType = typeof tableSchema;
-     type TableInsert = typeof tableSchema.$inferInsert;
-     type TableSelect = typeof tableSchema.$inferSelect;
-
-     // Common patterns for mutations
-     .insert(data as typeof table.$inferInsert)
-     .update().set(data as typeof table.$inferInsert)
-     .select().from(table).$inferSelect
-
-     // Metadata handling
-     interface BaseMetadata {
-       device?: string;
-       location?: {
-         latitude?: number;
-         longitude?: number;
-         altitude?: number;
-       };
-       weather?: {
-         temperature?: number;
-         humidity?: number;
-         conditions?: string;
-       };
-       references?: Array<{
-         type: string;
-         id: string;
-         label?: string;
-       }>;
-     }
-     ```
+   - Drizzle ORM with type inference
+   - tRPC for type-safe API layer
+   - Zod for runtime validation
+   - React Hook Form for type-safe forms
 
 2. **Data Management**:
 
-   - Type-safe mutations with proper error handling:
-     ```typescript
-     // Router pattern
-     create: protectedProcedure
-       .input(insertSchema)
-       .mutation(async ({ ctx, input }) => {
-         try {
-           const [row] = await ctx.db
-             .insert(table)
-             .values(input as typeof table.$inferInsert)
-             .returning();
-           return row;
-         } catch (error) {
-           throw new TRPCError({
-             code: 'INTERNAL_SERVER_ERROR',
-             message: 'Failed to create record',
-             cause: error,
-           });
-         }
-       }),
-     ```
-   - Standardized metadata handling across entities
-   - Consistent timestamp and audit field management
+   - Offline-first architecture with Service Workers
+   - TanStack Query v5 for data fetching and caching
+   - Optimistic updates with proper invalidation
    - Transaction support for related operations
 
-3. **Schema Validation**:
+3. **Entity System**:
 
-   - Type-safe Zod schemas that match Drizzle types:
-     ```typescript
-     const inputSchema = z.object({
-       data: tableSchema.$inferInsert
-         .omit(['id', 'createdAt', 'updatedAt', 'createdById'])
-         .extend({
-           metadata: z
-             .object({
-               device: z.string().optional(),
-               location: z
-                 .object({
-                   latitude: z.number().optional(),
-                   longitude: z.number().optional(),
-                   altitude: z.number().optional(),
-                 })
-                 .optional(),
-               weather: z
-                 .object({
-                   temperature: z.number().optional(),
-                   humidity: z.number().optional(),
-                   conditions: z.string().optional(),
-                 })
-                 .optional(),
-               references: z
-                 .array(
-                   z.object({
-                     type: z.string(),
-                     id: z.string(),
-                     label: z.string().optional(),
-                   })
-                 )
-                 .optional(),
-             })
-             .optional(),
-         }),
-     })
-     ```
+   - Standardized CRUD operations
+   - Consistent metadata handling
+   - Type-safe relationships
+   - Audit logging
 
-4. **Common Patterns**:
-
-   - Entity relationships:
-     ```typescript
-     interface EntityReference {
-       entityId: string
-       entityType: string // e.g., 'plant', 'batch', 'task', 'job'
-     }
-     ```
-   - Audit fields:
-     ```typescript
-     interface AuditFields {
-       createdAt: Date
-       updatedAt: Date
-       createdById: string
-     }
-     ```
-   - Note attachments:
-     ```typescript
-     interface NoteMetadata extends BaseMetadata {
-       attachments?: Array<{
-         type: 'image' | 'file' | 'voice'
-         url: string
-         name: string
-         size?: number
-         mimeType?: string
-       }>
-     }
-     ```
-
-5. **Mobile-First Design**:
-
-   - Fully responsive, touch-friendly UI
-   - Offline-ready architecture with Service Workers
-   - Quick-action components for daily operations
-   - Integration with mobile device features
-
-6. **Compliance and Reporting**:
-   - Detailed logging for compliance
-   - Batch and plant lifecycle tracking
-   - Exportable reports for audits
-   - Media documentation support
-
-### Current Implementation Status:
-
-1. **Schemas**:
-
-   - CRUD-ready schemas for facilities, plants, batches, notes, jobs
-   - Standardized metadata interfaces
-   - Consistent audit fields and timestamps
-   - Type-safe relationships and cascades
-
-2. **Routers**:
-
-   - Type-safe tRPC procedures
-   - Standardized error handling
-   - Input/output validation
-   - Protected routes with session handling
-
-3. **Frontend**:
-
-   - Mobile-responsive layout
-   - Entity-specific components organized by domain:
-     ```typescript
-     // ~/components/<entity_name>/
-     ;-(<entity_name>-form.tsx) - // Form implementation with validation
-       <entity_name>-columns.tsx - // Data table column definitions
-       <entity_name>-card.tsx - // Optional card view
-       <entity_name>-list.tsx - // Optional list view
-       <entity_name>-details.tsx // Optional detailed view
-     ```
-   - Form Implementation Pattern:
-
-     ```typescript
-     // Entity-specific form with complete implementation
-     export function EntityForm({
-       defaultValues,
-       onSubmit,
-     }: EntityFormProps) {
-       const form = useForm<EntityFormData>({
-         resolver: zodResolver(entitySchema),
-         defaultValues,
-       })
-
-       return (
-         <Form {...form}>
-           <form onSubmit={form.handleSubmit(onSubmit)}>
-             {/* Form fields with validation */}
-           </form>
-         </Form>
-       )
-     }
-     ```
-
-   - Type-safe data fetching
-   - Optimistic updates
-
-4. **Offline Capabilities**:
-   - React Query caching
-   - Service Worker setup
-   - Local storage strategies
-
-When writing code or answering questions:
-
-- **Type Safety First**:
-  - Always use proper type assertions with Drizzle operations
-  - Maintain consistent metadata structures
-  - Use Zod schemas that match Drizzle types
-  - Handle type casting appropriately in mutations
-  - Use `as const` for literal types
-  - Prefer string arrays over object literals for type omission
-- **Error Handling**:
-  - Use try/catch blocks in mutations
-  - Throw appropriate tRPC errors
-  - Validate input data thoroughly
-  - Include error causes for debugging
-- **Consistency**:
-  - Follow established patterns for entity relationships
-  - Maintain audit fields across all entities
-  - Use standard metadata structures
-  - Keep entity references consistent
-- **Performance**:
-  - Implement proper caching strategies
-  - Use transactions for related operations
-  - Consider mobile and offline scenarios
-  - Optimize query patterns
-
-## Type Safety Guidelines
-
-### Schema and Type Patterns
-
-1. Use Drizzle's built-in type inference:
+4. **Form Implementation**:
 
    ```typescript
-   // Table types
-   type TableType = typeof table.$inferSelect
-   type NewTableType = typeof table.$inferInsert
+   // Standard form setup
+   const form = useForm<FormData>({
+     resolver: zodResolver(insertEntitySchema),
+     defaultValues: getInitialValues(initialData),
+   })
 
-   // Schema types
-   type SchemaType = z.infer<typeof insertSchema>
-   ```
-
-2. JSON field typing:
-
-   ```typescript
-   json('field')
-     .$type<{
-       // Type definition here
-     }>()
-     .default({
-       // Default values here
-     })
-   ```
-
-3. Form mutations:
-
-   ```typescript
-   // Create mutation
-   createMutation(formData)
-
-   // Update mutation
-   updateMutation({
-     id: entityId,
-     data: formData,
+   // Type-safe mutations
+   const mutation = api.entity.create.useMutation({
+     onSuccess: (data) => {
+       toast.success('Successfully created')
+       void utils.entity.invalidate()
+       onSuccess?.(data)
+     },
    })
    ```
 
-4. Loading states:
+5. **Mobile-First Design**:
+
+   - Responsive shadcn/ui components
+   - Touch-friendly interfaces
+   - Offline capabilities
+   - Device feature integration
+
+6. **Compliance and Reporting**:
+   - Detailed audit logging
+   - Entity lifecycle tracking
+   - Exportable reports
+   - Media documentation
+
+### Implementation Patterns:
+
+1. **Form Components**:
 
    ```typescript
-   const { mutate, isPending } = api.entity.action.useMutation()
-   ```
+   // Entity form pattern
+   interface EntityFormProps {
+     mode: 'create' | 'edit'
+     initialData?: RouterOutputs['entity']['get']
+     onSuccess?: (data: FormData) => void
+   }
 
-5. Consistent metadata handling:
-   ```typescript
-   metadata: {
-     device: 'web',
-     updatedAt: new Date().toISOString(),
-     // Entity-specific metadata
+   export function EntityForm({ mode, initialData, onSuccess }: EntityFormProps) {
+     const form = useForm<FormData>({
+       resolver: zodResolver(entitySchema),
+       defaultValues: getInitialValues(initialData),
+     })
+
+     const { toast } = useToast()
+     const router = useRouter()
+     const utils = api.useUtils()
+
+     const { mutate: createEntity, isPending: isCreating } = api.entity.create.useMutation({
+       onSuccess: (data) => {
+         toast({ title: 'Entity created successfully' })
+         void Promise.all([
+           utils.entity.getAll.invalidate(),
+           utils.entity.get.invalidate(data.id),
+         ])
+         router.push(`/entities/${data.id}`)
+         onSuccess?.(data)
+       },
+       onError: (error) => {
+         toast({
+           title: 'Error creating entity',
+           description: error.message,
+           variant: 'destructive',
+         })
+       },
+     })
+
+     const { mutate: updateEntity, isPending: isUpdating } = api.entity.update.useMutation({
+       onSuccess: (data) => {
+         toast({ title: 'Entity updated successfully' })
+         void Promise.all([
+           utils.entity.getAll.invalidate(),
+           utils.entity.get.invalidate(data.id),
+         ])
+         onSuccess?.(data)
+       },
+       onError: (error) => {
+         toast({
+           title: 'Error updating entity',
+           description: error.message,
+           variant: 'destructive',
+         })
+       },
+     })
+
+     function onSubmit(values: FormData) {
+       if (mode === 'create') {
+         createEntity(values)
+       } else if (initialData?.id) {
+         updateEntity({ id: initialData.id, data: values })
+       }
+     }
+
+     return (
+       <Form {...form}>
+         <form
+           onSubmit={form.handleSubmit(onSubmit)}
+           className="space-y-4"
+         >
+           {/* Form fields go here */}
+
+           <Button
+             type="submit"
+             disabled={isCreating || isUpdating}
+           >
+             {isCreating || isUpdating ? (
+               <>
+                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                 {mode === 'create' ? 'Creating...' : 'Updating...'}
+               </>
+             ) : (
+               <>{mode === 'create' ? 'Create' : 'Update'}</>
+             )}
+           </Button>
+         </form>
+       </Form>
+     )
    }
    ```
 
-### Type Safety Best Practices
+2. **Form Field Patterns**:
 
-1. Never create standalone type files - use schema types
-2. Use Zod for runtime validation
-3. Use proper type inference from Drizzle
-4. Handle JSON serialization consistently
-5. Follow the mutation patterns for create/update
-6. Use loading states for better UX
-7. Keep metadata structure consistent across entities
+   ```typescript
+   // Basic Input Field
+   <FormField
+     control={form.control}
+     name="fieldName"
+     render={({ field }) => (
+       <FormItem>
+         <FormLabel>Field Label</FormLabel>
+         <FormControl>
+           <Input {...field} value={field.value || ''} />
+         </FormControl>
+         <FormMessage />
+       </FormItem>
+     )}
+   />
 
-# Form Implementation Guidelines
+   // Select Field
+   <FormField
+     control={form.control}
+     name="type"
+     render={({ field }) => (
+       <FormItem>
+         <FormLabel>Type</FormLabel>
+         <Select onValueChange={field.onChange} defaultValue={field.value}>
+           <FormControl>
+             <SelectTrigger>
+               <SelectValue placeholder="Select type" />
+             </SelectTrigger>
+           </FormControl>
+           <SelectContent>
+             {typeEnum.enumValues.map((type) => (
+               <SelectItem key={type} value={type}>
+                 {type.charAt(0).toUpperCase() + type.slice(1)}
+               </SelectItem>
+             ))}
+           </SelectContent>
+         </Select>
+         <FormMessage />
+       </FormItem>
+     )}
+   />
 
-When implementing forms in this application, follow these patterns:
+   // Date Field
+   <FormField
+     control={form.control}
+     name="date"
+     render={({ field }) => (
+       <FormItem className="flex flex-col">
+         <FormLabel>Date</FormLabel>
+         <DatePicker
+           date={field.value}
+           onDateChange={field.onChange}
+         />
+         <FormMessage />
+       </FormItem>
+     )}
+   />
+   ```
 
-## Type Safety and Schema Usage
+3. **Type Safety**:
 
-```typescript
-// 1. Import schema and types
-import { type Entity, insertEntitySchema } from '~/server/db/schema'
-import { type z } from 'zod'
+   ```typescript
+   // Schema types
+   type Entity = typeof entityTable.$inferSelect
+   type NewEntity = typeof entityTable.$inferInsert
+   type FormData = z.infer<typeof insertEntitySchema>
 
-// 2. Define form types
-type FormData = z.infer<typeof insertEntitySchema>
+   // Metadata handling
+   interface BaseMetadata {
+     device?: string
+     location?: LocationMetadata
+     weather?: WeatherMetadata
+     references?: EntityReference[]
+     timestamps: {
+       createdAt: Date
+       updatedAt: Date
+       completedAt?: Date
+     }
+   }
+   ```
 
-// 3. Define props interface
-interface EntityFormProps {
-  mode: 'create' | 'edit'
-  initialData?: Entity
-  onSuccess?: (data: FormData) => void
-}
-```
+4. **Query Patterns**:
+   ```typescript
+   // Entity selector pattern
+   const EntitySelector = React.memo(function EntitySelector({
+     entityType,
+     onSelect,
+   }: {
+     entityType: EntityType
+     onSelect: (value: string) => void
+   }) {
+     const query = api[entityType].getAll.useQuery(
+       { limit: 50 },
+       { enabled: !!entityType }
+     )
+     // ... implementation
+   })
+   ```
 
-## Form Setup
+### Best Practices:
 
-```typescript
-// 1. Initialize form with schema validation
-const form = useForm<FormData>({
-  resolver: zodResolver(insertEntitySchema),
-  initialData: getinitialData(initialData),
-})
+1. **Type Safety**:
 
-// 2. Setup mutations with proper types
-const { mutate, isLoading } = api.entity.create.useMutation({
-  onSuccess: (data) => {
-    toast({ title: 'Success' })
-    void utils.entity.invalidate()
-    onSuccess?.(data)
-  },
-})
+   - Use Drizzle's type inference
+   - Validate with Zod schemas
+   - Leverage tRPC for API safety
+   - Maintain consistent metadata
 
-// 3. Handle form submission
-async function onSubmit(data: FormData) {
-  try {
-    const formattedData = formatDataForSubmission(data)
-    if (mode === 'create') {
-      createEntity(formattedData)
-    } else if (initialData?.id) {
-      updateEntity({ id: initialData.id, data: formattedData })
-    }
-  } catch (error) {
-    handleError(error)
-  }
-}
-```
+2. **Form Implementation**:
 
-## Component Structure
+   - Use react-hook-form
+   - Implement proper validation
+   - Handle loading states
+   - Show clear feedback
+   - Follow shadcn/ui patterns
+   - Use proper form layouts
+   - Handle complex properties
+   - Implement proper field value handling
 
-```typescript
-// 1. Use client directive at the top
-'use client'
+3. **Data Management**:
 
-// 2. Import dependencies
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { api } from '~/trpc/react'
+   - Implement offline-first
+   - Use optimistic updates
+   - Handle cache invalidation
+   - Manage loading states
+   - Use proper error boundaries
+   - Handle background syncs
 
-// 3. Export named function component
-export function EntityForm({ mode, initialData, onSuccess }: EntityFormProps) {
-  // Form logic here
-}
+4. **Component Structure**:
 
-// 4. Memoize sub-components
-const SubComponent = React.memo(function SubComponent() {
-  // Component logic
-})
-```
-
-## Best Practices
-
-1. **Data Handling**
-
-   - Store dates as Date objects in form state
-   - Format dates to strings only when submitting
-   - Use nullish coalescing for defaults
-   - Handle complex properties with satisfies
-
-2. **Performance**
-
+   - Follow shadcn/ui patterns
+   - Use proper form layouts
+   - Implement responsive design
+   - Handle mobile interactions
    - Memoize expensive computations
-   - Use React.memo for list items
-   - Implement proper loading states
-   - Handle conditional rendering efficiently
+   - Use proper loading states
 
-3. **Error Handling**
-
-   - Use try/catch in submit handlers
-   - Provide clear error messages
-   - Handle API errors gracefully
+5. **Error Handling**:
+   - Use try/catch blocks
+   - Show clear messages
+   - Handle API errors
+   - Validate user input
+   - Implement proper error boundaries
    - Show validation errors inline
 
-4. **User Experience**
-
-   - Show loading states in buttons
-   - Provide clear feedback
-   - Handle disabled states
-   - Implement proper keyboard navigation
-
-5. **Query Management**
-   - Use proper cache invalidation
-   - Handle optimistic updates
-   - Implement proper refetching
-   - Use suspense boundaries
-
-## Form Field Pattern
-
-```typescript
-<FormField
-  control={form.control}
-  name="fieldName"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Field Label</FormLabel>
-      <FormControl>
-        <Input {...field} />
-      </FormControl>
-      <FormDescription>Optional description</FormDescription>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-```
-
-## Date Field Pattern
-
-```typescript
-<FormField
-  control={form.control}
-  name="dateField"
-  render={({ field }) => (
-    <FormItem className="flex flex-col">
-      <FormLabel>Date Label</FormLabel>
-      <DatePicker
-        value={field.value}
-        onChange={field.onChange}
-      />
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-```
-
-## Select Field Pattern
-
-```typescript
-<FormField
-  control={form.control}
-  name="selectField"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Select Label</FormLabel>
-      <Select
-        onValueChange={field.onChange}
-        defaultValue={field.value}
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select..." />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-```
-
-## Complex Properties Pattern
-
-```typescript
-<FormField
-  control={form.control}
-  name="properties.complex"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Complex Property</FormLabel>
-      <FormControl>
-        <ComplexPropertyManager
-          value={field.value as ComplexType}
-          onChange={field.onChange}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-```
-
-Remember to:
+Remember:
 
 - Always use 'use client' directive
-- Always implement proper loading states
-- Always handle errors gracefully
-- Always provide proper type safety
-- Always follow accessibility guidelines
+- Follow mobile-first principles
+- Maintain type safety
+- Handle offline scenarios
+- Keep consistent patterns
+- Implement proper loading states
+- Handle errors gracefully
+- Follow accessibility guidelines
