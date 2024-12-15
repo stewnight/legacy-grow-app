@@ -16,7 +16,7 @@ import { auth } from '~/server/auth'
 import { redirect } from 'next/navigation'
 import { isBefore } from 'date-fns'
 import { Skeleton } from '~/components/ui/skeleton'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { EquipmentForm } from '../../../components/equipment/equipment-form'
 import { type Equipment } from '~/server/db/schema/equipment'
 

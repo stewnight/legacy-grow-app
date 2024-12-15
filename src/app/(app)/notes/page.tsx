@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
 import { columns, NotesTableFilters } from '~/components/notes/notes-columns'
 import { api } from '~/trpc/server'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { NoteForm } from '~/components/notes/notes-form'
 import { type NoteWithRelations } from '~/server/db/schema'
 

@@ -6,7 +6,7 @@ import { DataTableColumnHeader } from '~/components/ui/data-table-column-header'
 import { DataTableFacetedFilter } from '~/components/ui/data-table-faceted-filter'
 import { Badge } from '~/components/ui/badge'
 import { format, formatDistanceToNow } from 'date-fns'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { JobForm } from './jobs-form'
 import { Button } from '~/components/ui/button'
 import {

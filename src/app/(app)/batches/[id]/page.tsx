@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
 import { Calendar, Users, Sprout, Timer } from 'lucide-react'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { BatchForm } from '~/components/batches/batches-form'
 import JobsTab from '~/components/jobs/tab'
 

@@ -22,7 +22,7 @@ import {
   Lightbulb,
   Wind,
 } from 'lucide-react'
-import { AppSheet } from '../../../../components/Layout/app-sheet'
+import { AppSheet } from '../../../../components/layout/app-sheet'
 import { RoomForm } from '../../../../components/rooms/rooms-form'
 import { Badge } from '../../../../components/ui/badge'
 import EquipmentTab from '../../../../components/equipment/tab'

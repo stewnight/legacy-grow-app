@@ -27,7 +27,7 @@ import {
   PlayCircle,
   GripVertical,
 } from 'lucide-react'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { JobForm } from '~/components/jobs/jobs-form'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'

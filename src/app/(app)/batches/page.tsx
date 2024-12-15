@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
 import { columns } from '../../../components/batches/batches-columns'
 import { api } from '~/trpc/server'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { BatchForm } from '../../../components/batches/batches-form'
 
 export default async function BatchesPage() {

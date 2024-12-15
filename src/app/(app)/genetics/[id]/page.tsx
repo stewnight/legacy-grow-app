@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Skeleton } from '~/components/ui/skeleton'
 import Link from 'next/link'
 import { Dna, Timer, Leaf, Scale } from 'lucide-react'
-import { AppSheet } from '../../../../components/Layout/app-sheet'
+import { AppSheet } from '../../../../components/layout/app-sheet'
 import { GeneticForm } from '../../../../components/genetics/genetics-form'
 import { Badge } from '../../../../components/ui/badge'
 

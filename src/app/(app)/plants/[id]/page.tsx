@@ -24,7 +24,7 @@ import {
   MapPin,
   Box,
 } from 'lucide-react'
-import { AppSheet } from '../../../../components/Layout/app-sheet'
+import { AppSheet } from '../../../../components/layout/app-sheet'
 import { PlantForm } from '../../../../components/plants/plants-form'
 import { Badge } from '../../../../components/ui/badge'
 import JobsTab from '../../../../components/jobs/tab'

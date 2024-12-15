@@ -30,7 +30,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from '../ui/resizable'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { JobForm } from '~/components/jobs/jobs-form'
 
 const PAST_MONTHS = 1 // Show 1 month in the past

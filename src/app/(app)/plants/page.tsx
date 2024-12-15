@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { DataTable } from '~/components/ui/data-table'
 import { columns } from '../../../components/plants/plants-columns'
 import { api } from '~/trpc/server'
-import { AppSheet } from '~/components/Layout/app-sheet'
+import { AppSheet } from '~/components/layout/app-sheet'
 import { PlantForm } from '../../../components/plants/plants-form'
 
 export default async function PlantsPage() {
