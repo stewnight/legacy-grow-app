@@ -107,7 +107,7 @@ export function MediaUpload({ value = [], onChange }: MediaUploadProps) {
     <div className="space-y-4">
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+        className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
           isDragActive
             ? 'border-primary bg-primary/10'
             : 'border-muted-foreground/25 hover:border-primary'

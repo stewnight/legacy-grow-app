@@ -244,7 +244,7 @@ export default function NotePage({ params }: PageProps) {
               <CardDescription>Full note content and details</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="prose max-w-none dark:prose-invert">
+              <div className="prose dark:prose-invert max-w-none">
                 {note.content}
               </div>
             </CardContent>
@@ -283,7 +283,7 @@ export default function NotePage({ params }: PageProps) {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                  <File className="h-8 w-8 mb-2" />
+                  <File className="mb-2 h-8 w-8" />
                   <p>No media attachments</p>
                 </div>
               )}

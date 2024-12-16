@@ -187,14 +187,11 @@ erDiagram
     note {
         string id
         enum(text|voice|image|file|checklist|measurement) type
-        string(255) title NULL
+        string(255) title
         string content NULL
-        string entityId
+        string entityId NULL
         string(50) entityType
-        string parentId NULL
         json properties NULL
-        json metadata NULL
-        enum(active|inactive|archived|maintenance) status
         string createdById
         date createdAt
         date updatedAt
@@ -301,7 +298,7 @@ erDiagram
 ## Summary
 
 - Total Tables: 18
-- Total Columns: 239
+- Total Columns: 236
 - Total Relations: 0
 
 ## Tables
@@ -543,14 +540,11 @@ erDiagram
 |------|------|----------|----------|---------|----------|------------|
 | id | string | No | [object Object] | No | No | - |
 | type | enum(text|voice|image|file|checklist|measurement) | No | text | No | No | - |
-| title | string(255) | Yes | - | No | No | - |
+| title | string(255) | No | - | No | No | - |
 | content | string | Yes | - | No | No | - |
-| entityId | string | No | - | No | No | - |
+| entityId | string | Yes | - | No | No | - |
 | entityType | string(50) | No | - | No | No | - |
-| parentId | string | Yes | - | No | No | - |
 | properties | json | Yes | - | No | No | - |
-| metadata | json | Yes | - | No | No | - |
-| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
 | createdById | string | No | - | No | No | - |
 | createdAt | date | No | [object Object] | No | No | - |
 | updatedAt | date | No | [object Object] | No | No | - |

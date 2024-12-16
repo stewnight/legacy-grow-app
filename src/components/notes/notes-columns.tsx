@@ -206,7 +206,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
       return (
         <Link
           href={`/notes/${note.id}`}
-          className="font-medium hover:underline text-nowrap"
+          className="text-nowrap font-medium hover:underline"
         >
           {note.title}
         </Link>
@@ -262,7 +262,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
       return (
         <Link
           href={`/${note.entityType}s/${note.entityId}`}
-          className="flex items-center gap-1 hover:underline text-nowrap"
+          className="flex items-center gap-1 text-nowrap hover:underline"
         >
           <LinkIcon className="h-3 w-3" />
           <span className="capitalize">{note.entityType}</span>

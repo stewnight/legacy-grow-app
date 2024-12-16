@@ -2,6 +2,10 @@
 
 ```
 📁legacy-grow-app
+  📁docs
+    ARCHITECTURE.md
+    CONTRIBUTING.md
+    ROADMAP.md
   📁drizzle
     📁meta
       _journal.json
@@ -15,6 +19,8 @@
       0007_snapshot.json
       0008_snapshot.json
       0009_snapshot.json
+      0010_snapshot.json
+      0011_snapshot.json
     0000_next_silk_fever.sql
     0001_shocking_mindworm.sql
     0002_white_ma_gnuci.sql
@@ -25,8 +31,15 @@
     0007_damp_cargill.sql
     0008_thin_proudstar.sql
     0009_silent_reavers.sql
+    0010_polite_thanos.sql
+    0011_lucky_pretty_boy.sql
   📁public
+    📁screenshots
+      desktop.png
+      mobile.png
     favicon.svg
+    icon-192x192.png
+    icon-512x512.png
   📁scripts
     generate-schema.ts
     generate-structure.ts
@@ -53,6 +66,10 @@
           📁[id]
             page.tsx
           page.tsx
+        📁notes
+          📁[id]
+            page.tsx
+          page.tsx
         📁plants
           📁[id]
             page.tsx
@@ -69,6 +86,7 @@
       📁dashboard
         page.tsx
       layout.tsx
+      manifest.ts
       page.tsx
     📁components
       📁batches
@@ -81,7 +99,7 @@
         calendar-header.tsx
         calendar-view.tsx
         job-card.tsx
-      📁Dashboard
+      📁dashboard
         maintenance-overview.tsx
         overview.tsx
         quick-actions.tsx
@@ -105,7 +123,7 @@
         requirements-manager.tsx
         tab.tsx
         task-manager.tsx
-      📁Layout
+      📁layout
         app-sheet.tsx
         app-sidebar.tsx
         custom-breadcrumbs.tsx
@@ -117,7 +135,9 @@
         locations-columns.tsx
         locations-form.tsx
       📁notes
+        media-upload.tsx
         notes-columns.tsx
+        notes-dashboard.tsx
         notes-form.tsx
       📁plants
         plants-columns.tsx
