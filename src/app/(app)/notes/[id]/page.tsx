@@ -35,6 +35,7 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { ScrollArea } from '~/components/ui/scroll-area'
+import { NoteWithRelations } from '../../../../server/db/schema'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -122,7 +123,7 @@ export default function NotePage({ params }: PageProps) {
               </Button>
             }
           >
-            <NoteForm mode="edit" initialData={note} />
+            <NoteForm mode="edit" initialData={note as NoteWithRelations} />
           </AppSheet>
           <Button
             variant="outline"
@@ -169,10 +170,10 @@ export default function NotePage({ params }: PageProps) {
               <Avatar className="h-8 w-8">
                 <AvatarImage
                   src={note.createdBy.image ?? ''}
-                  alt={note.createdBy.name}
+                  alt={note.createdBy.name ?? ''}
                 />
                 <AvatarFallback>
-                  {note.createdBy.name.charAt(0).toUpperCase()}
+                  {note.createdBy.name?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-1">

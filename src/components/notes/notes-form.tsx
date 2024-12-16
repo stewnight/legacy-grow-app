@@ -1,5 +1,4 @@
 'use client'
-
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { insertNoteSchema, type NoteWithRelations } from '~/server/db/schema'
@@ -35,8 +34,50 @@ import { Badge } from '../ui/badge'
 import { MediaUpload } from './media-upload'
 import React from 'react'
 
+type SimplifiedProperties = {
+  tags?: string[]
+  media?: Array<{
+    type: string
+    url: string
+    thumbnail?: string
+    metadata?: Record<string, unknown>
+  }>
+}
+
+type NoteFormValues = {
+  title: string
+  content?: string
+  type: string
+  entityType: string
+  entityId?: string
+  properties: SimplifiedProperties
+}
+
+const noteFormSchema = insertNoteSchema
+  .pick({
+    title: true,
+    content: true,
+    type: true,
+    entityType: true,
+    entityId: true,
+  })
+  .extend({
+    properties: z.object({
+      tags: z.array(z.string()).optional(),
+      media: z
+        .array(
+          z.object({
+            type: z.string(),
+            url: z.string(),
+            thumbnail: z.string().optional(),
+            metadata: z.record(z.unknown()).optional(),
+          })
+        )
+        .optional(),
+    }),
+  })
+
 type RouterOutputs = inferRouterOutputs<AppRouter>
-type NoteFormValues = z.infer<typeof insertNoteSchema>
 
 interface NoteFormProps {
   mode: 'create' | 'edit'
@@ -49,13 +90,13 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
   const router = useRouter()
 
   const form = useForm<NoteFormValues>({
-    resolver: zodResolver(insertNoteSchema),
+    resolver: zodResolver(noteFormSchema),
     defaultValues: {
       title: initialData?.title ?? '',
       content: initialData?.content ?? '',
       type: initialData?.type ?? 'text',
       entityType: initialData?.entityType ?? 'none',
-      entityId: initialData?.entityId,
+      entityId: initialData?.entityId ?? undefined,
       properties: {
         tags: initialData?.properties?.tags ?? [],
         media: initialData?.properties?.media ?? [],
@@ -99,12 +140,18 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
       const formData = {
         ...data,
         entityId: data.entityType === 'none' ? null : data.entityId,
+        properties: {
+          tags: data.properties.tags ?? [],
+          media: data.properties.media ?? [],
+        },
       }
-
       if (mode === 'create') {
-        createNote(formData)
+        createNote(formData as z.infer<typeof insertNoteSchema>)
       } else if (initialData?.id) {
-        updateNote({ id: initialData.id, data: formData })
+        updateNote({
+          id: initialData.id,
+          data: formData as z.infer<typeof insertNoteSchema>,
+        })
       }
     } catch (error) {
       toast({
@@ -146,7 +193,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="entityType"
@@ -178,7 +224,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             </FormItem>
           )}
         />
-
         {form.watch('entityType') !== 'none' && (
           <FormField
             control={form.control}
@@ -209,7 +254,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             )}
           />
         )}
-
         <FormField
           control={form.control}
           name="title"
@@ -223,7 +267,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="content"
@@ -237,7 +280,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="properties.tags"
@@ -285,7 +327,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="properties.media"
@@ -296,7 +337,10 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
                 <MediaUpload
                   value={field.value ?? []}
                   onChange={(media) =>
-                    form.setValue('properties.media', media as Json[])
+                    form.setValue(
+                      'properties.media',
+                      media as SimplifiedProperties['media']
+                    )
                   }
                 />
               </FormControl>
@@ -304,7 +348,6 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             </FormItem>
           )}
         />
-
         <Button
           type="submit"
           disabled={isCreating || isUpdating}

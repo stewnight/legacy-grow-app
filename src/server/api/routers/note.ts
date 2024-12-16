@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { notes, insertNoteSchema } from '~/server/db/schema'
+import {
+  notes,
+  insertNoteSchema,
+  type NoteWithRelations,
+} from '~/server/db/schema'
 import { eq, desc, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { noteTypeEnum, statusEnum } from '~/server/db/schema/enums'
@@ -96,6 +100,7 @@ export const noteRouter = createTRPCRouter({
               id: true,
               name: true,
               email: true,
+              image: true,
             },
           },
         },
