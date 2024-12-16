@@ -10,7 +10,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { noteTypeEnum, statusEnum } from './enums'
+import { noteTypeEnum } from './enums'
 import { users } from './core'
 import { Plant, plants } from './plants'
 import { Harvest, harvests } from './harvests'
@@ -31,25 +31,9 @@ export const notes = createTable(
     content: text('content'),
     entityId: uuid('entity_id'),
     entityType: varchar('entity_type', { length: 50 }).notNull(),
-    parentId: uuid('parent_id').references((): AnyPgColumn => notes.id, {
-      onDelete: 'cascade',
-    }),
     properties: json('properties').$type<{
       tags?: string[]
       priority?: 'low' | 'medium' | 'high'
-      category?: string
-      measurements?: Array<{
-        type: string
-        value: number
-        unit: string
-        timestamp?: string
-      }>
-      checklist?: Array<{
-        item: string
-        completed: boolean
-        completedAt?: string
-        completedBy?: string
-      }>
       media?: Array<{
         type: string
         url: string
@@ -57,25 +41,6 @@ export const notes = createTable(
         metadata?: Record<string, unknown>
       }>
     }>(),
-    metadata: json('metadata').$type<{
-      device?: string
-      location?: {
-        latitude?: number
-        longitude?: number
-        altitude?: number
-      }
-      weather?: {
-        temperature?: number
-        humidity?: number
-        conditions?: string
-      }
-      references?: Array<{
-        type: string
-        id: string
-        description?: string
-      }>
-    }>(),
-    status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -91,19 +56,12 @@ export const notes = createTable(
     entityIdx: index('note_entity_idx').on(table.entityId, table.entityType),
     typeIdx: index('note_type_idx').on(table.type),
     createdByIdx: index('note_created_by_idx').on(table.createdById),
-    statusIdx: index('note_status_idx').on(table.status),
     createdAtIdx: index('note_created_at_idx').on(table.createdAt),
   })
 )
 
 // Relationships
-export const notesRelations = relations(notes, ({ one, many }) => ({
-  parent: one(notes, {
-    fields: [notes.parentId],
-    references: [notes.id],
-    relationName: 'parentNote',
-  }),
-  children: many(notes, { relationName: 'parentNote' }),
+export const notesRelations = relations(notes, ({ one }) => ({
   createdBy: one(users, {
     fields: [notes.createdById],
     references: [users.id],

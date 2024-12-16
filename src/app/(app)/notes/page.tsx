@@ -8,6 +8,7 @@ import { api } from '~/trpc/server'
 import { AppSheet } from '~/components/layout/app-sheet'
 import { NoteForm } from '~/components/notes/notes-form'
 import { type NoteWithRelations } from '~/server/db/schema'
+import { NotesDashboard } from '~/components/notes/notes-dashboard'
 
 export default async function NotesPage() {
   const session = await auth()
@@ -21,6 +22,11 @@ export default async function NotesPage() {
 
   const notes: NoteWithRelations[] = notesData.map((note) => ({
     ...note,
+    createdBy: {
+      id: note.createdBy.id,
+      name: note.createdBy.name ?? 'Unknown User',
+      image: note.createdBy.image ?? '/images/placeholder-avatar.png',
+    },
   }))
 
   return (
@@ -31,7 +37,32 @@ export default async function NotesPage() {
           <NoteForm mode="create" />
         </AppSheet>
       </div>
-      <DataTable columns={columns} data={notes} />
+
+      <Suspense
+        fallback={
+          <div className="space-y-4">
+            <Skeleton className="h-[150px]" />
+          </div>
+        }
+      >
+        <NotesDashboard notes={notes} />
+      </Suspense>
+
+      <Suspense fallback={<Skeleton className="h-[400px]" />}>
+        <div className="space-y-4">
+          {notes && (
+            <DataTable
+              columns={columns}
+              data={notes}
+              enableSorting
+              enableFiltering
+              enableColumnFilters
+              filterColumn="title"
+              filters={<NotesTableFilters />}
+            />
+          )}
+        </div>
+      </Suspense>
     </div>
   )
 }

@@ -27,7 +27,6 @@ export const noteRouter = createTRPCRouter({
 
       const conditions = [
         filters?.type ? eq(notes.type, filters.type) : undefined,
-        filters?.status ? eq(notes.status, filters.status) : undefined,
         filters?.entityType
           ? eq(notes.entityType, filters.entityType)
           : undefined,
@@ -40,12 +39,11 @@ export const noteRouter = createTRPCRouter({
         offset: cursor ?? 0,
         orderBy: [desc(notes.createdAt)],
         with: {
-          parent: true,
-          children: true,
           createdBy: {
             columns: {
               id: true,
               name: true,
+              image: true,
               email: true,
             },
           },
