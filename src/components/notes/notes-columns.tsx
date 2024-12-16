@@ -20,6 +20,8 @@ import {
   Link as LinkIcon,
   Columns2,
   Ruler,
+  EyeIcon,
+  PencilIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
@@ -33,7 +35,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 
 interface NotesTableFiltersProps {
-  table?: Table<NoteWithRelations>
+  table: Table<NoteWithRelations>
 }
 
 export function NotesTableFilters({ table }: NotesTableFiltersProps) {
@@ -51,6 +53,22 @@ export function NotesTableFilters({ table }: NotesTableFiltersProps) {
     return Array.from(types).map((type) => ({
       label: type.charAt(0).toUpperCase() + type.slice(1),
       value: type,
+    }))
+  }, [table])
+
+  // Get tags for the filter - Fixed to handle multiple tags
+  const tags = React.useMemo(() => {
+    const tagsSet = new Set<string>()
+    table.getFilteredRowModel().rows.forEach((row) => {
+      const noteTags = row.original.properties?.tags
+      if (noteTags && Array.isArray(noteTags)) {
+        noteTags.forEach((tag) => tagsSet.add(tag))
+      }
+    })
+    return Array.from(tagsSet).map((tag) => ({
+      label: tag,
+      value: tag,
+      icon: () => <Tag className="h-4 w-4" />,
     }))
   }, [table])
 
@@ -101,6 +119,15 @@ export function NotesTableFilters({ table }: NotesTableFiltersProps) {
           options={[{ label: 'None', value: 'none' }, ...entityTypes]}
         />
       )}
+
+      {tags.length > 0 && (
+        <DataTableFacetedFilter
+          column={table.getColumn('tags')}
+          title="Tags"
+          options={tags}
+        />
+      )}
+
       <DataTableFacetedFilter
         column={table.getColumn('createdBy')}
         title="Created By"
@@ -158,7 +185,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
       }[note.type]
 
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-nowrap">
           {icon}
           <span className="capitalize">{note.type}</span>
         </div>
@@ -179,7 +206,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
       return (
         <Link
           href={`/notes/${note.id}`}
-          className="font-medium hover:underline"
+          className="font-medium hover:underline text-nowrap"
         >
           {note.title}
         </Link>
@@ -198,7 +225,8 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
     enableColumnFilter: true,
   },
   {
-    accessorKey: 'properties.tags',
+    id: 'tags',
+    accessorFn: (row) => row.properties?.tags,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Tags" />
     ),
@@ -206,7 +234,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
       const tags = row.original.properties?.tags
       if (!tags?.length) return null
       return (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 text-nowrap">
           {tags.map((tag) => (
             <Badge key={tag} variant="secondary">
               <Tag className="mr-1 h-3 w-3" />
@@ -215,6 +243,11 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
           ))}
         </div>
       )
+    },
+    filterFn: (row, id, value: string[]) => {
+      const tags = row.original.properties?.tags
+      if (!tags) return false
+      return value.some((filterValue) => tags.includes(filterValue))
     },
     enableColumnFilter: true,
   },
@@ -229,7 +262,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
       return (
         <Link
           href={`/${note.entityType}s/${note.entityId}`}
-          className="flex items-center gap-1 hover:underline"
+          className="flex items-center gap-1 hover:underline text-nowrap"
         >
           <LinkIcon className="h-3 w-3" />
           <span className="capitalize">{note.entityType}</span>
@@ -249,7 +282,7 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
     cell: ({ row }) => {
       const note = row.original
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-nowrap">
           <Avatar className="h-8 w-8">
             <AvatarImage src={note.createdBy.image} alt={note.createdBy.name} />
             <AvatarFallback>
@@ -272,9 +305,34 @@ export const columns: ColumnDef<NoteWithRelations>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-nowrap">
           <CalendarIcon className="h-4 w-4 text-muted-foreground" />
           <span>{format(row.original.createdAt, 'PPp')}</span>
+        </div>
+      )
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex justify-end">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/notes/${row.original.id}`}>
+              <EyeIcon className="h-3 w-3" />
+            </Link>
+          </Button>
+          <AppSheet
+            mode="edit"
+            entity="note"
+            trigger={
+              <Button variant="ghost" size="icon">
+                <PencilIcon className="h-3 w-3" />
+              </Button>
+            }
+          >
+            <NoteForm mode="edit" initialData={row.original} />
+          </AppSheet>
         </div>
       )
     },

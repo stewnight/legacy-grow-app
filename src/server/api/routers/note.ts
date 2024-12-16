@@ -65,8 +65,6 @@ export const noteRouter = createTRPCRouter({
       const note = await ctx.db.query.notes.findMany({
         where: eq(notes.entityId, input),
         with: {
-          parent: true,
-          children: true,
           createdBy: {
             columns: {
               id: true,
@@ -93,8 +91,6 @@ export const noteRouter = createTRPCRouter({
       const note = await ctx.db.query.notes.findFirst({
         where: eq(notes.id, input),
         with: {
-          parent: true,
-          children: true,
           createdBy: {
             columns: {
               id: true,
