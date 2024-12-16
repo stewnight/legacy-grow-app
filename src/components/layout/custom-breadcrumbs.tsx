@@ -35,10 +35,10 @@ export function CustomBreadcrumbs() {
           const path = `/${pathSegments.slice(0, index + 1).join('/')}`
           const isLast = index === pathSegments.length - 1
 
-          // Convert slug to readable text
-          const readableSegment = segment
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, (char) => char.toUpperCase())
+          // // Convert slug to readable text
+          // const readableSegment = segment
+          //   .replace(/-/g, ' ')
+          //   .replace(/\b\w/g, (char) => char.toUpperCase())
 
           return (
             <React.Fragment key={path}>
@@ -47,10 +47,14 @@ export function CustomBreadcrumbs() {
               </BreadcrumbSeparator>
               <BreadcrumbItem>
                 {isLast ? (
-                  <BreadcrumbPage>{readableSegment}</BreadcrumbPage>
+                  <BreadcrumbPage className="capitalize">
+                    {segment}
+                  </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={path}>{readableSegment}</Link>
+                    <Link className="capitalize" href={path}>
+                      {segment}
+                    </Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
