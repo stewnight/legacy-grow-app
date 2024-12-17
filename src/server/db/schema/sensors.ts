@@ -5,24 +5,22 @@ import {
   timestamp,
   json,
   uuid,
-  text,
   numeric,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
 import { sensorTypeEnum, statusEnum } from './enums'
-import { users } from './core'
-import { sensorReadings } from './sensorReadings'
-import { locations } from './locations'
-import { jobs } from './jobs'
-import { notes } from './notes'
-import { equipment } from './equipment'
+import { users, type User } from './core'
+import { sensorReadings, type SensorReading } from './sensorReadings'
+import { locations, type Location } from './locations'
+import { jobs, type Job } from './jobs'
+import { equipment, type Equipment } from './equipment'
+import { notes, type Note } from './notes'
 
 export const sensors = createTable(
   'sensor',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    identifier: varchar('identifier', { length: 100 }).notNull().unique(),
     type: sensorTypeEnum('type').notNull(),
     manufacturer: varchar('manufacturer', { length: 255 }),
     model: varchar('model', { length: 255 }),
@@ -73,10 +71,7 @@ export const sensors = createTable(
         performedBy: string
       }>
     }>(),
-    locationId: uuid('location_id')
-      .notNull()
-      .references(() => locations.id),
-    notes: text('notes'),
+    locationId: uuid('location_id').references(() => locations.id),
     status: statusEnum('status').default('active').notNull(),
     createdById: uuid('created_by')
       .notNull()
@@ -90,7 +85,6 @@ export const sensors = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    identifierIdx: index('sensor_identifier_idx').on(table.identifier),
     typeIdx: index('sensor_type_idx').on(table.type),
     statusIdx: index('sensor_status_idx').on(table.status),
     calibrationIdx: index('sensor_calibration_idx').on(table.nextCalibration),
@@ -135,3 +129,11 @@ export const selectSensorSchema = createSelectSchema(sensors)
 // Types
 export type Sensor = typeof sensors.$inferSelect
 export type NewSensor = typeof sensors.$inferInsert
+export type SensorWithRelations = Sensor & {
+  location?: Location
+  equipment?: Equipment
+  readings: SensorReading[]
+  createdBy: Pick<User, 'id' | 'name' | 'image'>
+  jobs: Job[]
+  notes: Note[]
+}

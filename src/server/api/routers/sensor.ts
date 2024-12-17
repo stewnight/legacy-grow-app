@@ -1,7 +1,11 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { sensors, insertSensorSchema } from '~/server/db/schema'
-import { eq, desc, like, and, type SQL } from 'drizzle-orm'
+import {
+  sensors,
+  insertSensorSchema,
+  type SensorWithRelations,
+} from '~/server/db/schema'
+import { eq, desc, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { sensorTypeEnum, statusEnum } from '~/server/db/schema/enums'
 
@@ -11,6 +15,18 @@ const sensorFiltersSchema = z.object({
   status: z.enum(statusEnum.enumValues).optional(),
   search: z.string().optional(),
 })
+
+// Schema for create/update
+const sensorInputSchema = insertSensorSchema
+  .extend({
+    calibrationInterval: z.number().min(0).optional(),
+  })
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    createdById: true,
+  })
 
 export const sensorRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -27,9 +43,7 @@ export const sensorRouter = createTRPCRouter({
       const conditions = [
         filters?.type ? eq(sensors.type, filters.type) : undefined,
         filters?.status ? eq(sensors.status, filters.status) : undefined,
-        filters?.search
-          ? like(sensors.identifier, `%${filters.search}%`)
-          : undefined,
+        filters?.search ? eq(sensors.id, filters.search) : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
       const items = await ctx.db.query.sensors.findMany({
@@ -42,9 +56,13 @@ export const sensorRouter = createTRPCRouter({
             columns: {
               id: true,
               name: true,
-              email: true,
+              image: true,
             },
           },
+          location: true,
+          equipment: true,
+          jobs: true,
+          notes: true,
         },
       })
 
@@ -67,13 +85,13 @@ export const sensorRouter = createTRPCRouter({
             columns: {
               id: true,
               name: true,
-              email: true,
+              image: true,
             },
           },
-          readings: {
-            limit: 100,
-            orderBy: [desc(sensors.createdAt)],
-          },
+          location: true,
+          equipment: true,
+          jobs: true,
+          notes: true,
         },
       })
 
@@ -88,21 +106,17 @@ export const sensorRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertSensorSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(sensorInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const { specifications, metadata, ...rest } = input
+      const { specifications, metadata, calibrationInterval, ...rest } = input
 
       const [sensor] = await ctx.db
         .insert(sensors)
         .values({
           ...rest,
+          calibrationInterval: calibrationInterval
+            ? calibrationInterval.toString()
+            : null,
           specifications:
             specifications as typeof sensors.$inferInsert.specifications,
           metadata: metadata as typeof sensors.$inferInsert.metadata,
@@ -124,21 +138,20 @@ export const sensorRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertSensorSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: sensorInputSchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { specifications, metadata, ...rest } = input.data
+      const { specifications, metadata, calibrationInterval, ...rest } =
+        input.data
 
       const [sensor] = await ctx.db
         .update(sensors)
         .set({
           ...rest,
+          calibrationInterval: calibrationInterval
+            ? calibrationInterval.toString()
+            : undefined,
           specifications:
             specifications as typeof sensors.$inferInsert.specifications,
           metadata: metadata as typeof sensors.$inferInsert.metadata,

@@ -85,6 +85,20 @@
       "when": 1734307850173,
       "tag": "0011_lucky_pretty_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1734389996776,
+      "tag": "0012_worthless_wind_dancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1734390475800,
+      "tag": "0013_brief_mister_fear",
+      "breakpoints": true
     }
   ]
 }

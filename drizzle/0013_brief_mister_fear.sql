@@ -1,0 +1,1 @@
+ALTER TABLE "legacy-grow-app_sensor" ALTER COLUMN "location_id" DROP NOT NULL;

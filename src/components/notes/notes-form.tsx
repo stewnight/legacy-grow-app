@@ -394,7 +394,7 @@ const EntitySelector = React.memo(function EntitySelector({
   )
   const sensorQuery = api.sensor.getAll.useQuery(
     { limit: 50 },
-    { enabled: entityType === 'sensors' }
+    { enabled: entityType === 'sensor' }
   )
   const processingQuery = api.processing.getAll.useQuery(
     { limit: 50 },
@@ -419,7 +419,7 @@ const EntitySelector = React.memo(function EntitySelector({
         return plantQuery
       case 'batch':
         return batchQuery
-      case 'sensors':
+      case 'sensor':
         return sensorQuery
       case 'processing':
         return processingQuery
@@ -464,8 +464,8 @@ const EntitySelector = React.memo(function EntitySelector({
         return item.identifier
       case 'plant':
         return `${item.identifier || item.id}`
-      case 'sensors':
-        return item.identifier
+      case 'sensor':
+        return item.id
       case 'processing':
       case 'harvest':
         return item.identifier || item.id
