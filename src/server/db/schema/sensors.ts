@@ -27,10 +27,7 @@ export const sensors = createTable(
     serialNumber: varchar('serial_number', { length: 100 }),
     lastCalibration: timestamp('last_calibration', { withTimezone: true }),
     nextCalibration: timestamp('next_calibration', { withTimezone: true }),
-    calibrationInterval: numeric('calibration_interval', {
-      precision: 5,
-      scale: 2,
-    }),
+    calibrationInterval: numeric('calibration_interval'),
     equipmentId: uuid('equipment_id').references(() => equipment.id, {
       onDelete: 'set null',
     }),

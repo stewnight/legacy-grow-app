@@ -18,7 +18,7 @@ const sensorFiltersSchema = z.object({
 
 // Schema for create/update
 const sensorInputSchema = insertSensorSchema.extend({
-  calibrationInterval: z.number().min(0).optional(),
+  calibrationInterval: z.number().min(0).nullish(),
   specifications: z
     .object({
       range: z.object({
@@ -48,7 +48,7 @@ const sensorInputSchema = insertSensorSchema.extend({
         })
         .optional(),
     })
-    .optional(),
+    .nullish(),
   metadata: z
     .object({
       installation: z.object({
@@ -56,9 +56,18 @@ const sensorInputSchema = insertSensorSchema.extend({
         by: z.string(),
         notes: z.string().optional(),
       }),
-      maintenance: z.array(z.unknown()).optional(),
+      maintenance: z
+        .array(
+          z.object({
+            date: z.string(),
+            type: z.string(),
+            description: z.string(),
+            performedBy: z.string(),
+          })
+        )
+        .optional(),
     })
-    .optional(),
+    .nullish(),
 })
 
 export const sensorRouter = createTRPCRouter({
@@ -143,15 +152,11 @@ export const sensorRouter = createTRPCRouter({
   create: protectedProcedure
     .input(sensorInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const { specifications, metadata, calibrationInterval, ...rest } = input
-
       const [sensor] = await ctx.db
         .insert(sensors)
         .values({
-          ...rest,
-          calibrationInterval: calibrationInterval?.toString() ?? null,
-          specifications: specifications ?? null,
-          metadata: metadata ?? null,
+          ...input,
+          calibrationInterval: input.calibrationInterval?.toString() ?? null,
           createdById: ctx.session.user.id,
         })
         .returning()
@@ -174,16 +179,12 @@ export const sensorRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { specifications, metadata, calibrationInterval, ...rest } =
-        input.data
-
       const [sensor] = await ctx.db
         .update(sensors)
         .set({
-          ...rest,
-          calibrationInterval: calibrationInterval?.toString() ?? undefined,
-          specifications: specifications ?? undefined,
-          metadata: metadata ?? undefined,
+          ...input.data,
+          calibrationInterval:
+            input.data.calibrationInterval?.toString() ?? null,
           updatedAt: new Date(),
         })
         .where(eq(sensors.id, input.id))

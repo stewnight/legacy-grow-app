@@ -78,7 +78,7 @@ export function NotesDashboard({ notes }: NotesDashboardProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none truncate max-w-[200px]">
+                    <p className="max-w-[200px] truncate text-sm font-medium leading-none">
                       {note.title}
                     </p>
                     <p className="text-xs text-muted-foreground">

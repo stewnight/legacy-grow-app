@@ -21,6 +21,8 @@
       0009_snapshot.json
       0010_snapshot.json
       0011_snapshot.json
+      0012_snapshot.json
+      0013_snapshot.json
     0000_next_silk_fever.sql
     0001_shocking_mindworm.sql
     0002_white_ma_gnuci.sql
@@ -33,6 +35,8 @@
     0009_silent_reavers.sql
     0010_polite_thanos.sql
     0011_lucky_pretty_boy.sql
+    0012_worthless_wind_dancer.sql
+    0013_brief_mister_fear.sql
   📁public
     📁screenshots
       desktop.png
@@ -75,6 +79,10 @@
             page.tsx
           page.tsx
         📁rooms
+          📁[id]
+            page.tsx
+          page.tsx
+        📁sensors
           📁[id]
             page.tsx
           page.tsx
@@ -145,6 +153,10 @@
       📁rooms
         rooms-columns.tsx
         rooms-form.tsx
+      📁sensors
+        sensors-columns.tsx
+        sensors-dashboard.tsx
+        sensors-form.tsx
       📁ui
         alert-dialog.tsx
         alert.tsx

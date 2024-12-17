@@ -263,19 +263,17 @@ erDiagram
 
     sensor {
         string id
-        string(100) identifier UK
         enum(temperature|humidity|co2|light|ph|ec|moisture|pressure|airflow) type
         string(255) manufacturer NULL
         string(255) model NULL
         string(100) serialNumber NULL
         date lastCalibration NULL
         date nextCalibration NULL
-        numeric(5,2) calibrationInterval NULL
+        string calibrationInterval NULL
         string equipmentId NULL
         json specifications NULL
         json metadata NULL
-        string locationId
-        string notes NULL
+        string locationId NULL
         enum(active|inactive|archived|maintenance) status
         string createdById
         date createdAt
@@ -298,7 +296,7 @@ erDiagram
 ## Summary
 
 - Total Tables: 18
-- Total Columns: 236
+- Total Columns: 234
 - Total Relations: 0
 
 ## Tables
@@ -632,19 +630,17 @@ erDiagram
 | Name | Type | Nullable | Default | Unique | Primary | References |
 |------|------|----------|----------|---------|----------|------------|
 | id | string | No | [object Object] | No | No | - |
-| identifier | string(100) | No | - | Yes | No | - |
 | type | enum(temperature|humidity|co2|light|ph|ec|moisture|pressure|airflow) | No | - | No | No | - |
 | manufacturer | string(255) | Yes | - | No | No | - |
 | model | string(255) | Yes | - | No | No | - |
 | serialNumber | string(100) | Yes | - | No | No | - |
 | lastCalibration | date | Yes | - | No | No | - |
 | nextCalibration | date | Yes | - | No | No | - |
-| calibrationInterval | numeric(5,2) | Yes | - | No | No | - |
+| calibrationInterval | string | Yes | - | No | No | - |
 | equipmentId | string | Yes | - | No | No | - |
 | specifications | json | Yes | - | No | No | - |
 | metadata | json | Yes | - | No | No | - |
-| locationId | string | No | - | No | No | - |
-| notes | string | Yes | - | No | No | - |
+| locationId | string | Yes | - | No | No | - |
 | status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
 | createdById | string | No | - | No | No | - |
 | createdAt | date | No | [object Object] | No | No | - |

@@ -2,7 +2,10 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { insertSensorSchema, type Sensor } from '~/server/db/schema'
+import {
+  insertSensorSchema,
+  type SensorWithRelations,
+} from '~/server/db/schema'
 import { Button } from '~/components/ui/button'
 import {
   Form,
@@ -38,20 +41,61 @@ type RouterOutputs = inferRouterOutputs<AppRouter>
 
 interface SensorFormProps {
   mode: 'create' | 'edit'
-  initialData?: Sensor
+  initialData?: SensorWithRelations
 }
 
-const sensorFormSchema = insertSensorSchema
-  .extend({
-    calibrationInterval: z.number().min(0).optional(),
-  })
-  .omit({
-    id: true,
-    createdAt: true,
-    updatedAt: true,
-    createdById: true,
-    equipmentId: true,
-  } as const)
+const sensorFormSchema = insertSensorSchema.extend({
+  calibrationInterval: z.number().min(0).optional(),
+  specifications: z
+    .object({
+      range: z.object({
+        min: z.number(),
+        max: z.number(),
+        unit: z.string(),
+      }),
+      accuracy: z.object({
+        value: z.number(),
+        unit: z.string(),
+      }),
+      resolution: z.object({
+        value: z.number(),
+        unit: z.string(),
+      }),
+      responseTime: z
+        .object({
+          value: z.number(),
+          unit: z.string(),
+        })
+        .optional(),
+      powerRequirements: z
+        .object({
+          voltage: z.number(),
+          current: z.number(),
+          type: z.enum(['AC', 'DC']),
+        })
+        .optional(),
+    })
+    .nullish(),
+  metadata: z
+    .object({
+      installation: z.object({
+        date: z.string(),
+        by: z.string(),
+        notes: z.string().optional(),
+      }),
+      maintenance: z
+        .array(
+          z.object({
+            date: z.string(),
+            type: z.string(),
+            description: z.string(),
+            performedBy: z.string(),
+          })
+        )
+        .optional(),
+    })
+    .nullish(),
+})
 
 type SensorFormValues = z.infer<typeof sensorFormSchema>
 
@@ -110,12 +154,15 @@ export function SensorForm({ mode, initialData }: SensorFormProps) {
       },
     })
 
-  const onSubmit = async (data: SensorFormValues) => {
+  const onSubmit = async (values: SensorFormValues) => {
     try {
       if (mode === 'create') {
-        createSensor(data)
+        createSensor(values)
       } else if (initialData?.id) {
-        updateSensor({ id: initialData.id, data })
+        updateSensor({
+          id: initialData.id,
+          data: values,
+        })
       }
     } catch (error) {
       toast({
@@ -166,7 +213,7 @@ export function SensorForm({ mode, initialData }: SensorFormProps) {
               <FormItem>
                 <FormLabel>Manufacturer</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -180,7 +227,7 @@ export function SensorForm({ mode, initialData }: SensorFormProps) {
               <FormItem>
                 <FormLabel>Model</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -195,7 +242,7 @@ export function SensorForm({ mode, initialData }: SensorFormProps) {
             <FormItem>
               <FormLabel>Serial Number</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -258,7 +305,10 @@ export function SensorForm({ mode, initialData }: SensorFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Location</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value ?? undefined}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select location" />
@@ -282,7 +332,10 @@ export function SensorForm({ mode, initialData }: SensorFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value ?? undefined}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />

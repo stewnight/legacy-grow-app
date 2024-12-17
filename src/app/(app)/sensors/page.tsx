@@ -53,14 +53,14 @@ export default async function SensorsPage() {
           </div>
         }
       >
-        <SensorsDashboard sensors={sensors} />
+        <SensorsDashboard sensors={sensors as SensorWithRelations[]} />
       </Suspense>
 
       <Suspense fallback={<Skeleton className="h-[400px]" />}>
         <div className="space-y-4">
           <DataTable
             columns={columns}
-            data={sensors}
+            data={sensors as SensorWithRelations[]}
             enableFiltering
             enableColumnFilters
             filters={<SensorsTableFilters />}

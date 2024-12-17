@@ -41,6 +41,10 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { NoteForm } from '../../../../components/notes/notes-form'
+import {
+  NoteWithRelations,
+  SensorWithRelations,
+} from '../../../../server/db/schema'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -129,7 +133,10 @@ export default function SensorPage({ params }: PageProps) {
               </Button>
             }
           >
-            <SensorForm mode="edit" initialData={sensor} />
+            <SensorForm
+              mode="edit"
+              initialData={sensor as SensorWithRelations}
+            />
           </AppSheet>
           <Button
             variant="outline"
@@ -292,10 +299,12 @@ export default function SensorPage({ params }: PageProps) {
                 <AppSheet mode="create" entity="note">
                   <NoteForm
                     mode="create"
-                    initialData={{
-                      entityType: 'sensor',
-                      entityId: sensor.id,
-                    }}
+                    initialData={
+                      {
+                        entityType: 'sensor',
+                        entityId: sensor.id,
+                      } as NoteWithRelations
+                    }
                   />
                 </AppSheet>
               </CardFooter>
