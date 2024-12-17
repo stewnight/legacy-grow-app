@@ -7,7 +7,6 @@ import {
 import { eq, desc, and, type SQL, gte, lte } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 
-// Schema for filters
 const sensorReadingFiltersSchema = z.object({
   sensorId: z.string().uuid().optional(),
   startDate: z.date().optional(),
@@ -38,13 +37,15 @@ export const sensorReadingRouter = createTRPCRouter({
           : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
-      const items = await ctx.db
-        .select()
-        .from(sensorReadings)
-        .where(conditions.length ? and(...conditions) : undefined)
-        .limit(limit + 1)
-        .offset(cursor ?? 0)
-        .orderBy(desc(sensorReadings.timestamp))
+      const items = await ctx.db.query.sensorReadings.findMany({
+        where: conditions.length ? and(...conditions) : undefined,
+        limit: limit + 1,
+        offset: cursor ?? 0,
+        orderBy: [desc(sensorReadings.timestamp)],
+        with: {
+          sensor: true,
+        },
+      })
 
       let nextCursor: typeof cursor | undefined = undefined
       if (items.length > limit) {
@@ -58,20 +59,21 @@ export const sensorReadingRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
-      const reading = await ctx.db
-        .select()
-        .from(sensorReadings)
-        .where(eq(sensorReadings.id, input))
-        .limit(1)
+      const reading = await ctx.db.query.sensorReadings.findFirst({
+        where: eq(sensorReadings.id, input),
+        with: {
+          sensor: true,
+        },
+      })
 
-      if (!reading[0]) {
+      if (!reading) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Sensor reading not found',
         })
       }
 
-      return reading[0]
+      return reading
     }),
 
   create: protectedProcedure
@@ -83,28 +85,14 @@ export const sensorReadingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { metadata, ...rest } = input
-
       const [reading] = await ctx.db
         .insert(sensorReadings)
-        .values({
-          ...rest,
-          metadata:
-            (metadata as typeof sensorReadings.$inferInsert.metadata) ?? null,
-        })
+        .values(input as typeof sensorReadings.$inferInsert)
         .returning()
-
-      if (!reading) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create sensor reading',
-        })
-      }
 
       return reading
     }),
 
-  // Bulk create for efficiency
   createMany: protectedProcedure
     .input(
       z.array(
@@ -118,13 +106,7 @@ export const sensorReadingRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const readings = await ctx.db
         .insert(sensorReadings)
-        .values(
-          input.map(({ metadata, ...rest }) => ({
-            ...rest,
-            metadata:
-              (metadata as typeof sensorReadings.$inferInsert.metadata) ?? null,
-          }))
-        )
+        .values(input as (typeof sensorReadings.$inferInsert)[])
         .returning()
 
       return readings

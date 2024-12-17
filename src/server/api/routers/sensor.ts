@@ -17,16 +17,49 @@ const sensorFiltersSchema = z.object({
 })
 
 // Schema for create/update
-const sensorInputSchema = insertSensorSchema
-  .extend({
-    calibrationInterval: z.number().min(0).optional(),
-  })
-  .omit({
-    id: true,
-    createdAt: true,
-    updatedAt: true,
-    createdById: true,
-  })
+const sensorInputSchema = insertSensorSchema.extend({
+  calibrationInterval: z.number().min(0).optional(),
+  specifications: z
+    .object({
+      range: z.object({
+        min: z.number(),
+        max: z.number(),
+        unit: z.string(),
+      }),
+      accuracy: z.object({
+        value: z.number(),
+        unit: z.string(),
+      }),
+      resolution: z.object({
+        value: z.number(),
+        unit: z.string(),
+      }),
+      responseTime: z
+        .object({
+          value: z.number(),
+          unit: z.string(),
+        })
+        .optional(),
+      powerRequirements: z
+        .object({
+          voltage: z.number(),
+          current: z.number(),
+          type: z.enum(['AC', 'DC']),
+        })
+        .optional(),
+    })
+    .optional(),
+  metadata: z
+    .object({
+      installation: z.object({
+        date: z.string(),
+        by: z.string(),
+        notes: z.string().optional(),
+      }),
+      maintenance: z.array(z.unknown()).optional(),
+    })
+    .optional(),
+})
 
 export const sensorRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -63,6 +96,7 @@ export const sensorRouter = createTRPCRouter({
           equipment: true,
           jobs: true,
           notes: true,
+          readings: true,
         },
       })
 
@@ -92,6 +126,7 @@ export const sensorRouter = createTRPCRouter({
           equipment: true,
           jobs: true,
           notes: true,
+          readings: true,
         },
       })
 
@@ -114,12 +149,9 @@ export const sensorRouter = createTRPCRouter({
         .insert(sensors)
         .values({
           ...rest,
-          calibrationInterval: calibrationInterval
-            ? calibrationInterval.toString()
-            : null,
-          specifications:
-            specifications as typeof sensors.$inferInsert.specifications,
-          metadata: metadata as typeof sensors.$inferInsert.metadata,
+          calibrationInterval: calibrationInterval?.toString() ?? null,
+          specifications: specifications ?? null,
+          metadata: metadata ?? null,
           createdById: ctx.session.user.id,
         })
         .returning()
@@ -149,12 +181,9 @@ export const sensorRouter = createTRPCRouter({
         .update(sensors)
         .set({
           ...rest,
-          calibrationInterval: calibrationInterval
-            ? calibrationInterval.toString()
-            : undefined,
-          specifications:
-            specifications as typeof sensors.$inferInsert.specifications,
-          metadata: metadata as typeof sensors.$inferInsert.metadata,
+          calibrationInterval: calibrationInterval?.toString() ?? undefined,
+          specifications: specifications ?? undefined,
+          metadata: metadata ?? undefined,
           updatedAt: new Date(),
         })
         .where(eq(sensors.id, input.id))

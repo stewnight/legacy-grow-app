@@ -9,7 +9,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { sensors } from './sensors'
+import { sensors, type Sensor } from './sensors'
 
 export const sensorReadings = createTable(
   'sensor_reading',
@@ -57,14 +57,12 @@ export const sensorReadingsRelations = relations(sensorReadings, ({ one }) => ({
 }))
 
 // Zod Schemas
-export const insertSensorReadingSchema = createInsertSchema(
-  sensorReadings
-).omit({
-  createdAt: true,
-  updatedAt: true,
-})
+export const insertSensorReadingSchema = createInsertSchema(sensorReadings)
 export const selectSensorReadingSchema = createSelectSchema(sensorReadings)
 
 // Types
 export type SensorReading = typeof sensorReadings.$inferSelect
 export type NewSensorReading = typeof sensorReadings.$inferInsert
+export type SensorReadingWithRelations = SensorReading & {
+  sensor: Sensor
+}

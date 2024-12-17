@@ -120,6 +120,7 @@ export const sensorsRelations = relations(sensors, ({ one, many }) => ({
 
 // Zod Schemas
 export const insertSensorSchema = createInsertSchema(sensors).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
   createdById: true,
@@ -132,8 +133,8 @@ export type NewSensor = typeof sensors.$inferInsert
 export type SensorWithRelations = Sensor & {
   location?: Location
   equipment?: Equipment
-  readings: SensorReading[]
+  readings?: SensorReading[]
   createdBy: Pick<User, 'id' | 'name' | 'image'>
-  jobs: Job[]
-  notes: Note[]
+  jobs?: Job[]
+  notes?: Note[]
 }

@@ -291,9 +291,10 @@ export default function SensorPage({ params }: PageProps) {
               <CardFooter>
                 <AppSheet mode="create" entity="note">
                   <NoteForm
+                    mode="create"
                     initialData={{
-                      entityId: sensor.id,
                       entityType: 'sensor',
+                      entityId: sensor.id,
                     }}
                   />
                 </AppSheet>

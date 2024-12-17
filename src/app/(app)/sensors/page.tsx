@@ -23,7 +23,7 @@ export default async function SensorsPage() {
     limit: 100,
   })
 
-  const sensors: SensorWithRelations[] = sensorsData.map((sensor) => ({
+  const sensors = sensorsData.map((sensor) => ({
     ...sensor,
     createdBy: {
       id: sensor.createdBy.id,
@@ -34,6 +34,7 @@ export default async function SensorsPage() {
     equipment: sensor.equipment,
     jobs: sensor.jobs ?? [],
     notes: sensor.notes ?? [],
+    readings: sensor.readings ?? [],
   }))
 
   return (
