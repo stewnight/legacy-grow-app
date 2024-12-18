@@ -1,78 +1,25 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
-import { type Processing } from '~/server/db/schema'
-import { DataTableColumnHeader } from '~/components/ui/data-table-column-header'
+import { type ProcessingWithRelations } from '~/server/db/schema/processing'
 import { Badge } from '~/components/ui/badge'
+import { DataTableColumnHeader } from '~/components/ui/data-table-column-header'
 import { format } from 'date-fns'
-import { Checkbox } from '~/components/ui/checkbox'
-import Link from 'next/link'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
-import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
-import { X } from 'lucide-react'
-import { type Table } from '@tanstack/react-table'
+import { AppSheet } from '~/components/layout/app-sheet'
+import { ProcessingForm } from './processing-form'
+import { EyeIcon, PencilIcon } from 'lucide-react'
+import Link from 'next/link'
 
-export const columns: ColumnDef<Processing>[] = [
-  {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'identifier',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Identifier" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <Link
-            href={`/processing/${row.original.id}`}
-            className="max-w-[500px] truncate font-medium hover:underline"
-          >
-            {row.getValue('identifier')}
-          </Link>
-        </div>
-      )
-    },
-  },
+export const columns: ColumnDef<ProcessingWithRelations>[] = [
   {
     accessorKey: 'type',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
     ),
     cell: ({ row }) => {
-      return (
-        <div className="flex w-[100px] items-center">
-          <Badge variant="outline">{row.getValue('type')}</Badge>
-        </div>
-      )
+      const type = row.getValue('type') as string
+      return <Badge variant="outline">{type}</Badge>
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
@@ -83,25 +30,23 @@ export const columns: ColumnDef<Processing>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Method" />
     ),
-    cell: ({ row }) => row.getValue('method'),
+    cell: ({ row }) => {
+      const method = row.getValue('method') as string
+      return <Badge>{method.replace('_', ' ')}</Badge>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
   },
   {
-    accessorKey: 'processStatus',
+    accessorKey: 'status',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const status = row.getValue('processStatus') as string
+      const status = row.getValue('status') as string
       return (
-        <Badge
-          variant={
-            status === 'active'
-              ? 'default'
-              : status === 'completed'
-                ? 'secondary'
-                : 'destructive'
-          }
-        >
+        <Badge variant={status === 'completed' ? 'default' : 'outline'}>
           {status}
         </Badge>
       )
@@ -111,43 +56,13 @@ export const columns: ColumnDef<Processing>[] = [
     },
   },
   {
-    accessorKey: 'startedAt',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Started" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex w-[100px] items-center">
-          {format(row.getValue('startedAt'), 'PP')}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: 'completedAt',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Completed" />
-    ),
-    cell: ({ row }) => {
-      const date = row.getValue('completedAt')
-      return (
-        <div className="flex w-[100px] items-center">
-          {date ? format(date as Date, 'PP') : '-'}
-        </div>
-      )
-    },
-  },
-  {
     accessorKey: 'inputWeight',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Input Weight" />
     ),
     cell: ({ row }) => {
-      return (
-        <div className="flex w-[100px] items-center">
-          {row.getValue('inputWeight')}g
-        </div>
-      )
+      const weight = row.getValue('inputWeight') as number
+      return <span>{weight}g</span>
     },
   },
   {
@@ -156,12 +71,8 @@ export const columns: ColumnDef<Processing>[] = [
       <DataTableColumnHeader column={column} title="Output Weight" />
     ),
     cell: ({ row }) => {
-      const weight = row.getValue('outputWeight')
-      return (
-        <div className="flex w-[100px] items-center">
-          {weight ? `${weight}g` : '-'}
-        </div>
-      )
+      const weight = row.getValue('outputWeight') as number | null
+      return weight ? <span>{weight}g</span> : null
     },
   },
   {
@@ -170,84 +81,63 @@ export const columns: ColumnDef<Processing>[] = [
       <DataTableColumnHeader column={column} title="Yield %" />
     ),
     cell: ({ row }) => {
-      const yield_ = row.getValue('yieldPercentage')
+      const yield_ = row.getValue('yieldPercentage') as number | null
+      return yield_ ? <span>{yield_.toFixed(2)}%</span> : null
+    },
+  },
+  {
+    accessorKey: 'startedAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Started" />
+    ),
+    cell: ({ row }) => {
+      const date = row.getValue('startedAt') as Date | null
+      return date ? <span>{format(date, 'PPp')}</span> : null
+    },
+  },
+  {
+    accessorKey: 'completedAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Completed" />
+    ),
+    cell: ({ row }) => {
+      const date = row.getValue('completedAt') as Date | null
+      return date ? <span>{format(date, 'PPp')}</span> : null
+    },
+  },
+  {
+    accessorKey: 'createdBy',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created By" />
+    ),
+    cell: ({ row }) => {
+      const user = row.original.createdBy
+      return user ? <span>{user.name}</span> : null
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
       return (
-        <div className="flex w-[100px] items-center">
-          {yield_ ? `${yield_}%` : '-'}
+        <div className="flex justify-end">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/processing/${row.original.id}`}>
+              <EyeIcon className="h-3 w-3" />
+            </Link>
+          </Button>
+          <AppSheet
+            mode="edit"
+            entity="processing"
+            trigger={
+              <Button variant="ghost" size="icon">
+                <PencilIcon className="h-3 w-3" />
+              </Button>
+            }
+          >
+            <ProcessingForm mode="edit" />
+          </AppSheet>
         </div>
       )
     },
   },
 ]
-
-interface ProcessingTableFiltersProps {
-  table?: Table<Processing>
-}
-
-export function ProcessingTableFilters({ table }: ProcessingTableFiltersProps) {
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
-        <Input
-          placeholder="Search identifier..."
-          value={
-            (table?.getColumn('identifier')?.getFilterValue() as string) ?? ''
-          }
-          onChange={(event) =>
-            table?.getColumn('identifier')?.setFilterValue(event.target.value)
-          }
-          className="h-8 w-[150px] lg:w-[250px]"
-        />
-        {table?.getColumn('type') && (
-          <Select
-            value={(table?.getColumn('type')?.getFilterValue() as string) ?? ''}
-            onValueChange={(value) =>
-              table?.getColumn('type')?.setFilterValue(value)
-            }
-          >
-            <SelectTrigger className="h-8 w-[150px]">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="drying">Drying</SelectItem>
-              <SelectItem value="curing">Curing</SelectItem>
-              <SelectItem value="extraction">Extraction</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        {table?.getColumn('processStatus') && (
-          <Select
-            value={
-              (table?.getColumn('processStatus')?.getFilterValue() as string) ??
-              ''
-            }
-            onValueChange={(value) =>
-              table?.getColumn('processStatus')?.setFilterValue(value)
-            }
-          >
-            <SelectTrigger className="h-8 w-[150px]">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        {table?.getColumn('identifier')?.getFilterValue() ||
-        table?.getColumn('type')?.getFilterValue() ||
-        table?.getColumn('processStatus')?.getFilterValue() ? (
-          <Button
-            variant="ghost"
-            onClick={() => table?.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
-          >
-            Reset
-            <X className="ml-2 h-4 w-4" />
-          </Button>
-        ) : null}
-      </div>
-    </div>
-  )
-}

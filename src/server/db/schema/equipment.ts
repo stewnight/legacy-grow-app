@@ -13,6 +13,7 @@ import { sensors } from './sensors'
 import { locations } from './locations'
 import { notes } from './notes'
 import { jobs } from './jobs'
+import { processing } from './processing'
 
 // ================== EQUIPMENT ==================
 export const equipment = createTable(
@@ -114,8 +115,15 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
     references: [users.id],
     relationName: 'equipmentCreator',
   }),
-  sensors: many(sensors, { relationName: 'equipmentSensors' }),
-  notes: many(notes, { relationName: 'equipmentNotes' }),
+  processing: many(processing, {
+    relationName: 'equipmentProcessing',
+  }),
+  sensors: many(sensors, {
+    relationName: 'equipmentSensors',
+  }),
+  notes: many(notes, {
+    relationName: 'equipmentNotes',
+  }),
 }))
 
 // ================== SCHEMAS ==================

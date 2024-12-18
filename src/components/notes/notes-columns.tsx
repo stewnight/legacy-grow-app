@@ -35,7 +35,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 
 interface NotesTableFiltersProps {
-  table: Table<NoteWithRelations>
+  table?: Table<NoteWithRelations>
 }
 
 export function NotesTableFilters({ table }: NotesTableFiltersProps) {

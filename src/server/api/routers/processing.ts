@@ -3,12 +3,20 @@ import { createTRPCRouter, protectedProcedure } from '../trpc'
 import { processing, insertProcessingSchema } from '~/server/db/schema'
 import { eq, desc, like, and, type SQL } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
-import { batchStatusEnum, harvestQualityEnum } from '~/server/db/schema/enums'
+import {
+  processingStatusEnum,
+  processingMethodEnum,
+  processingTypeEnum,
+} from '~/server/db/schema/enums'
 
 // Schema for filters
 const processingFiltersSchema = z.object({
-  status: z.enum(batchStatusEnum.enumValues).optional(),
-  quality: z.enum(harvestQualityEnum.enumValues).optional(),
+  type: z.enum(processingTypeEnum.enumValues).optional(),
+  method: z.enum(processingMethodEnum.enumValues).optional(),
+  status: z.enum(processingStatusEnum.enumValues).optional(),
+  harvestId: z.string().uuid().optional(),
+  batchId: z.string().uuid().optional(),
+  locationId: z.string().uuid().optional(),
   search: z.string().optional(),
 })
 
@@ -25,12 +33,18 @@ export const processingRouter = createTRPCRouter({
       const { limit, cursor, filters } = input
 
       const conditions = [
-        filters?.status
-          ? eq(processing.processStatus, filters.status)
+        filters?.type ? eq(processing.type, filters.type) : undefined,
+        filters?.method ? eq(processing.method, filters.method) : undefined,
+        filters?.status ? eq(processing.status, filters.status) : undefined,
+        filters?.harvestId
+          ? eq(processing.harvestId, filters.harvestId)
           : undefined,
-        filters?.quality ? eq(processing.quality, filters.quality) : undefined,
+        filters?.batchId ? eq(processing.batchId, filters.batchId) : undefined,
+        filters?.locationId
+          ? eq(processing.locationId, filters.locationId)
+          : undefined,
         filters?.search
-          ? like(processing.identifier, `%${filters.search}%`)
+          ? like(processing.id, `%${filters.search}%`)
           : undefined,
       ].filter((condition): condition is SQL => condition !== undefined)
 
@@ -45,6 +59,21 @@ export const processingRouter = createTRPCRouter({
               id: true,
               name: true,
               email: true,
+              image: true,
+            },
+          },
+          harvest: true,
+          batch: true,
+          location: true,
+          notes: {
+            with: {
+              createdBy: {
+                columns: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
             },
           },
         },
@@ -70,6 +99,21 @@ export const processingRouter = createTRPCRouter({
               id: true,
               name: true,
               email: true,
+              image: true,
+            },
+          },
+          harvest: true,
+          batch: true,
+          location: true,
+          notes: {
+            with: {
+              createdBy: {
+                columns: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
             },
           },
         },
@@ -86,26 +130,16 @@ export const processingRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      insertProcessingSchema.omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        createdById: true,
-      })
-    )
+    .input(insertProcessingSchema)
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, labResults, ...rest } = input
-
       const [process] = await ctx.db
         .insert(processing)
         .values({
-          ...rest,
-          properties: properties as typeof processing.$inferInsert.properties,
-          metadata: metadata as typeof processing.$inferInsert.metadata,
-          labResults: labResults as typeof processing.$inferInsert.labResults,
+          ...input,
           createdById: ctx.session.user.id,
-        })
+          properties: input.properties || {},
+          labResults: input.labResults || {},
+        } as typeof processing.$inferInsert)
         .returning()
 
       if (!process) {
@@ -122,26 +156,16 @@ export const processingRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        data: insertProcessingSchema.partial().omit({
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          createdById: true,
-        }),
+        data: insertProcessingSchema.partial(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { properties, metadata, labResults, ...rest } = input.data
-
       const [process] = await ctx.db
         .update(processing)
         .set({
-          ...rest,
-          properties: properties as typeof processing.$inferInsert.properties,
-          metadata: metadata as typeof processing.$inferInsert.metadata,
-          labResults: labResults as typeof processing.$inferInsert.labResults,
+          ...input.data,
           updatedAt: new Date(),
-        })
+        } as typeof processing.$inferInsert)
         .where(eq(processing.id, input.id))
         .returning()
 

@@ -99,6 +99,13 @@
       "when": 1734390475800,
       "tag": "0013_brief_mister_fear",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1734412948703,
+      "tag": "0014_serious_paibok",
+      "breakpoints": true
     }
   ]
 }

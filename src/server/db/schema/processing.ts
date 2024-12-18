@@ -1,129 +1,116 @@
 import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  text,
-  numeric,
-} from 'drizzle-orm/pg-core'
+import { index, timestamp, json, uuid, numeric } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
+import {
+  processingTypeEnum,
+  processingMethodEnum,
+  processingStatusEnum,
+  harvestQualityEnum,
+} from './enums'
 import { users } from './core'
-import { batches } from './batches'
-import { harvests } from './harvests'
-import { locations } from './locations'
-import { jobs } from './jobs'
-import { notes } from './notes'
+import { type Batch, batches } from './batches'
+import { type Harvest, harvests } from './harvests'
+import { type Location, locations } from './locations'
+import { type Job, jobs } from './jobs'
+import { type Note, notes, NoteWithRelations } from './notes'
+import { type Equipment, equipment } from './equipment'
+import { type Sensor, sensors } from './sensors'
+import { z } from 'zod'
+
+// Schema for equipment settings in properties
+const equipmentSettingsSchema = z.object({
+  id: z.string(),
+  settings: z.record(z.unknown()).optional(),
+})
+
+// Schema for environment data
+const environmentSchema = z.object({
+  temperature: z.number().optional(),
+  humidity: z.number().optional(),
+  pressure: z.number().optional(),
+  lightLevel: z.number().optional(),
+  airflow: z.number().optional(),
+})
+
+// Schema for material tracking
+const materialSchema = z.object({
+  name: z.string(),
+  amount: z.number(),
+  unit: z.string(),
+  batchId: z.string().optional(),
+})
+
+// Schema for process stages
+const stageSchema = z.object({
+  name: z.string(),
+  startedAt: z.string(),
+  completedAt: z.string().optional(),
+  duration: z.number(),
+  conditions: z.record(z.unknown()).optional(),
+})
+
+// Schema for lab results
+const labResultsSchema = z.object({
+  testId: z.string().optional(),
+  results: z.record(z.unknown()).optional(),
+  testedAt: z.string().optional(),
+  testedBy: z.string().optional(),
+  certificateUrl: z.string().optional(),
+})
+
+// Main processing properties schema
+export const processingPropertiesSchema = z.object({
+  equipment: z.array(equipmentSettingsSchema).optional(),
+  environment: environmentSchema.optional(),
+  materials: z.array(materialSchema).optional(),
+  stages: z.array(stageSchema).optional(),
+  sensors: z.array(z.string()).optional(), // Array of sensor IDs
+  jobs: z.array(z.string()).optional(), // Array of job IDs
+})
 
 export const processing = createTable(
   'processing',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    identifier: varchar('identifier', { length: 100 }).notNull().unique(),
     harvestId: uuid('harvest_id')
       .notNull()
-      .references(() => harvests.id),
+      .references(() => harvests.id, { onDelete: 'cascade' }),
     batchId: uuid('batch_id')
       .notNull()
-      .references(() => batches.id),
+      .references(() => batches.id, { onDelete: 'cascade' }),
     locationId: uuid('location_id')
       .notNull()
       .references(() => locations.id),
-    // Processing type and method
-    type: varchar('type', { length: 50 }).notNull(), // drying, curing, extraction, etc.
-    method: varchar('method', { length: 100 }).notNull(), // specific technique used
+
+    // Processing details
+    type: processingTypeEnum('type').notNull(),
+    method: processingMethodEnum('method').notNull(),
+    status: processingStatusEnum('status').default('pending').notNull(),
+
     // Weight tracking
     inputWeight: numeric('input_weight', { precision: 10, scale: 3 }).notNull(),
     outputWeight: numeric('output_weight', { precision: 10, scale: 3 }),
     yieldPercentage: numeric('yield_percentage', { precision: 5, scale: 2 }),
+
     // Timing
-    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
-    duration: numeric('duration', { precision: 10, scale: 2 }), // in hours
-    processStatus: batchStatusEnum('process_status')
-      .default('active')
-      .notNull(),
+    estimatedDuration: numeric('estimated_duration', {
+      precision: 10,
+      scale: 2,
+    }),
+    actualDuration: numeric('actual_duration', { precision: 10, scale: 2 }),
+
+    // Quality and results
     quality: harvestQualityEnum('quality'),
-    properties: json('properties').$type<{
-      equipment?: Array<{
-        name: string
-        type: string
-        settings?: Record<string, unknown>
-      }>
-      environment?: {
-        temperature: number
-        humidity: number
-        pressure?: number
-        lightLevel?: number
-        airflow?: number
-      }
-      materials?: Array<{
-        name: string
-        amount: number
-        unit: string
-        batch?: string
-      }>
-      stages?: Array<{
-        name: string
-        duration: number
-        conditions?: Record<string, unknown>
-        completedAt?: string
-      }>
-    }>(),
-    labResults: json('lab_results').$type<{
-      potency?: {
-        thc: number
-        cbd: number
-        totalCannabinoids: number
-      }
-      terpenes?: Array<{
-        name: string
-        percentage: number
-      }>
-      contaminants?: {
-        microbial: boolean
-        metals: boolean
-        pesticides: boolean
-        solvents?: boolean
-      }
-      moisture?: number
-      density?: number
-      viscosity?: number
-      color?: string
-      testedAt?: string
-      testedBy?: string
-      certificateUrl?: string
-    }>(),
-    metadata: json('metadata').$type<{
-      operators?: Array<{
-        userId: string
-        role: string
-        hours: number
-      }>
-      qualityChecks?: Array<{
-        timestamp: string
-        parameter: string
-        value: unknown
-        operator: string
-      }>
-      notes?: string[]
-      images?: Array<{
-        url: string
-        type: string
-        timestamp: string
-      }>
-      costs?: {
-        labor: number
-        materials: number
-        energy: number
-        other?: number
-      }
-    }>(),
-    notes: text('notes'),
-    status: statusEnum('status').default('active').notNull(),
+
+    // JSON fields for detailed data
+    properties:
+      json('properties').$type<z.infer<typeof processingPropertiesSchema>>(),
+    labResults: json('lab_results').$type<z.infer<typeof labResultsSchema>>(),
+
+    // Metadata and tracking
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -136,7 +123,6 @@ export const processing = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    identifierIdx: index('processing_identifier_idx').on(table.identifier),
     harvestIdIdx: index('processing_harvest_id_idx').on(table.harvestId),
     batchIdIdx: index('processing_batch_id_idx').on(table.batchId),
     locationIdIdx: index('processing_location_id_idx').on(table.locationId),
@@ -144,9 +130,7 @@ export const processing = createTable(
       table.type,
       table.method
     ),
-    processStatusIdx: index('processing_status_idx').on(table.processStatus),
-    startedAtIdx: index('processing_started_at_idx').on(table.startedAt),
-    statusIdx: index('processing_general_status_idx').on(table.status),
+    statusIdx: index('processing_status_idx').on(table.status),
   })
 )
 
@@ -155,35 +139,57 @@ export const processingRelations = relations(processing, ({ one, many }) => ({
   harvest: one(harvests, {
     fields: [processing.harvestId],
     references: [harvests.id],
-    relationName: 'harvestProcessing',
+    relationName: 'processingHarvest',
   }),
   batch: one(batches, {
     fields: [processing.batchId],
     references: [batches.id],
-    relationName: 'batchProcessing',
+    relationName: 'processingBatch',
   }),
   location: one(locations, {
     fields: [processing.locationId],
     references: [locations.id],
-    relationName: 'locationProcessing',
+    relationName: 'processingLocation',
   }),
   createdBy: one(users, {
     fields: [processing.createdById],
     references: [users.id],
     relationName: 'processingCreator',
   }),
-  jobs: many(jobs, { relationName: 'processingJobs' }),
-  notes: many(notes, { relationName: 'processingNotes' }),
+  notes: many(notes, {
+    relationName: 'processingNotes',
+  }),
 }))
 
 // Zod Schemas
-export const insertProcessingSchema = createInsertSchema(processing).omit({
+export const insertProcessingSchema = createInsertSchema(processing, {
+  properties: (schema) => schema.properties.optional(),
+  labResults: (schema) => schema.labResults.optional(),
+  quality: (schema) => schema.quality.optional(),
+  outputWeight: (schema) => schema.outputWeight.optional(),
+  yieldPercentage: (schema) => schema.yieldPercentage.optional(),
+  startedAt: (schema) => schema.startedAt.optional(),
+  completedAt: (schema) => schema.completedAt.optional(),
+  estimatedDuration: (schema) => schema.estimatedDuration.optional(),
+  actualDuration: (schema) => schema.actualDuration.optional(),
+}).omit({
   createdAt: true,
   updatedAt: true,
   createdById: true,
 })
+
 export const selectProcessingSchema = createSelectSchema(processing)
 
 // Types
 export type Processing = typeof processing.$inferSelect
 export type NewProcessing = typeof processing.$inferInsert
+export type ProcessingWithRelations = Processing & {
+  harvest: Harvest
+  batch: Batch
+  location: Location
+  createdBy: { id: string; name: string; image: string }
+  notes?: NoteWithRelations[]
+  equipment?: Equipment[]
+  sensors?: Sensor[]
+  jobs?: Job[]
+}

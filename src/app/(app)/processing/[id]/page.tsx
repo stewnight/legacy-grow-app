@@ -40,7 +40,11 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { NoteForm } from '~/components/notes/notes-form'
-import { type NoteWithRelations } from '~/server/db/schema'
+import {
+  type NoteWithRelations,
+  type ProcessingWithRelations,
+} from '~/server/db/schema'
+import { useToast } from '~/hooks/use-toast'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -48,6 +52,8 @@ interface PageProps {
 
 export default function ProcessingPage({ params }: PageProps) {
   const resolvedParams = React.use(params)
+  const { toast } = useToast()
+  const utils = api.useUtils()
 
   const { data: process, isLoading } = api.processing.get.useQuery(
     resolvedParams.id,
@@ -55,12 +61,22 @@ export default function ProcessingPage({ params }: PageProps) {
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
     }
-  )
+  ) as { data: ProcessingWithRelations; isLoading: boolean }
 
-  const utils = api.useUtils()
   const { mutate: deleteProcessing } = api.processing.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      toast({
+        title: 'Processing deleted successfully',
+      })
+      await utils.processing.invalidate()
       window.location.href = '/processing'
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error deleting processing',
+        description: error.message,
+        variant: 'destructive',
+      })
     },
   })
 
@@ -93,7 +109,7 @@ export default function ProcessingPage({ params }: PageProps) {
               </Link>
             </Button>
             <h2 className="text-3xl font-bold tracking-tight">
-              {process.identifier}
+              {process.id?.slice(0, 8)}
             </h2>
           </div>
           <p className="text-muted-foreground">
@@ -110,12 +126,20 @@ export default function ProcessingPage({ params }: PageProps) {
               </Button>
             }
           >
-            <ProcessingForm mode="edit" initialData={process} />
+            <ProcessingForm mode="edit" />
           </AppSheet>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => deleteProcessing(process.id)}
+            onClick={() => {
+              if (
+                window.confirm(
+                  'Are you sure you want to delete this processing record?'
+                )
+              ) {
+                deleteProcessing(process.id)
+              }
+            }}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -126,9 +150,9 @@ export default function ProcessingPage({ params }: PageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
-            {process.processStatus === 'active' ? (
+            {process.status === 'completed' ? (
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-            ) : process.processStatus === 'completed' ? (
+            ) : process.status === 'in_progress' ? (
               <CheckCircle2 className="h-4 w-4 text-blue-500" />
             ) : (
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
@@ -136,7 +160,7 @@ export default function ProcessingPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">
-              {process.processStatus}
+              {process.status}
             </div>
             <p className="text-xs text-muted-foreground">Current status</p>
           </CardContent>
@@ -178,9 +202,9 @@ export default function ProcessingPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {process.duration?.toString() ?? 'N/A'} hours
+              {process.estimatedDuration?.toString() ?? 'N/A'} hours
             </div>
-            <p className="text-xs text-muted-foreground">Process duration</p>
+            <p className="text-xs text-muted-foreground">Estimated duration</p>
           </CardContent>
         </Card>
       </div>
@@ -190,8 +214,8 @@ export default function ProcessingPage({ params }: PageProps) {
           <TabsList className="w-full justify-start">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="environment">Environment</TabsTrigger>
-            <TabsTrigger value="lab-results">Lab Results</TabsTrigger>
-            <TabsTrigger value="operations">Operations</TabsTrigger>
+            <TabsTrigger value="equipment">Equipment</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
         </ScrollArea>
 
@@ -200,7 +224,9 @@ export default function ProcessingPage({ params }: PageProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Basic Information</CardTitle>
-                <CardDescription>Process details</CardDescription>
+                <CardDescription>
+                  Process details and configuration
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -216,7 +242,9 @@ export default function ProcessingPage({ params }: PageProps) {
                     Started At
                   </span>
                   <span className="font-medium">
-                    {format(process.startedAt, 'PPp')}
+                    {process.startedAt
+                      ? format(process.startedAt, 'PPp')
+                      : 'Not started'}
                   </span>
                 </div>
                 {process.completedAt && (
@@ -229,14 +257,6 @@ export default function ProcessingPage({ params }: PageProps) {
                     </span>
                   </div>
                 )}
-                {process.quality && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Quality
-                    </span>
-                    <Badge>{process.quality}</Badge>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -246,53 +266,61 @@ export default function ProcessingPage({ params }: PageProps) {
                 <CardDescription>Connected records</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Harvest</span>
-                  <Link
-                    href={`/harvests/${process.harvestId}`}
-                    className="flex items-center gap-1 font-medium hover:underline"
-                  >
-                    <LinkIcon className="h-3 w-3" />
-                    View Harvest
-                  </Link>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Batch</span>
-                  <Link
-                    href={`/batches/${process.batchId}`}
-                    className="flex items-center gap-1 font-medium hover:underline"
-                  >
-                    <LinkIcon className="h-3 w-3" />
-                    View Batch
-                  </Link>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Location
-                  </span>
-                  <Link
-                    href={`/locations/${process.locationId}`}
-                    className="flex items-center gap-1 font-medium hover:underline"
-                  >
-                    <LinkIcon className="h-3 w-3" />
-                    View Location
-                  </Link>
-                </div>
+                {process.harvestId && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Harvest
+                    </span>
+                    <Link
+                      href={`/harvests/${process.harvestId}`}
+                      className="flex items-center gap-1 font-medium hover:underline"
+                    >
+                      <LinkIcon className="h-3 w-3" />
+                      View Harvest
+                    </Link>
+                  </div>
+                )}
+                {process.batchId && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Batch</span>
+                    <Link
+                      href={`/batches/${process.batchId}`}
+                      className="flex items-center gap-1 font-medium hover:underline"
+                    >
+                      <LinkIcon className="h-3 w-3" />
+                      View Batch
+                    </Link>
+                  </div>
+                )}
+                {process.locationId && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Location
+                    </span>
+                    <Link
+                      href={`/locations/${process.locationId}`}
+                      className="flex items-center gap-1 font-medium hover:underline"
+                    >
+                      <LinkIcon className="h-3 w-3" />
+                      View Location
+                    </Link>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
         <TabsContent value="environment">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Environmental Conditions</CardTitle>
-                <CardDescription>Process environment</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.properties?.environment ? (
-                  <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Environmental Conditions</CardTitle>
+              <CardDescription>Process environment data</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {process.properties?.environment ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {process.properties.environment.temperature && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Thermometer className="h-4 w-4" />
@@ -304,6 +332,8 @@ export default function ProcessingPage({ params }: PageProps) {
                         {process.properties.environment.temperature}°C
                       </span>
                     </div>
+                  )}
+                  {process.properties.environment.humidity && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Droplets className="h-4 w-4" />
@@ -315,340 +345,128 @@ export default function ProcessingPage({ params }: PageProps) {
                         {process.properties.environment.humidity}%
                       </span>
                     </div>
-                    {process.properties.environment.pressure && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Gauge className="h-4 w-4" />
-                          <span className="text-sm text-muted-foreground">
-                            Pressure
-                          </span>
-                        </div>
-                        <span className="font-medium">
-                          {process.properties.environment.pressure} hPa
-                        </span>
-                      </div>
-                    )}
-                    {process.properties.environment.airflow && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Wind className="h-4 w-4" />
-                          <span className="text-sm text-muted-foreground">
-                            Airflow
-                          </span>
-                        </div>
-                        <span className="font-medium">
-                          {process.properties.environment.airflow} m/s
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No environmental data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Equipment Used</CardTitle>
-                <CardDescription>Process equipment</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.properties?.equipment &&
-                process.properties.equipment.length > 0 ? (
-                  <div className="space-y-4">
-                    {process.properties.equipment.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start justify-between"
-                      >
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {item.type}
-                          </p>
-                        </div>
-                        {item.settings && (
-                          <Badge variant="outline">
-                            {Object.keys(item.settings).length} settings
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No equipment data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="lab-results">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Potency Analysis</CardTitle>
-                <CardDescription>Lab test results</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.labResults?.potency ? (
-                  <div className="space-y-4">
+                  )}
+                  {process.properties.environment.pressure && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">THC</span>
-                      <span className="font-medium">
-                        {process.labResults.potency.thc}%
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">CBD</span>
-                      <span className="font-medium">
-                        {process.labResults.potency.cbd}%
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Total Cannabinoids
-                      </span>
-                      <span className="font-medium">
-                        {process.labResults.potency.totalCannabinoids}%
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No potency data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quality Control</CardTitle>
-                <CardDescription>Contaminant testing</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.labResults?.contaminants ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Microbial
-                      </span>
-                      {process.labResults.contaminants.microbial ? (
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      ) : (
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Heavy Metals
-                      </span>
-                      {process.labResults.contaminants.metals ? (
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      ) : (
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Pesticides
-                      </span>
-                      {process.labResults.contaminants.pesticides ? (
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      ) : (
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      )}
-                    </div>
-                    {process.labResults.contaminants.solvents !== undefined && (
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Gauge className="h-4 w-4" />
                         <span className="text-sm text-muted-foreground">
-                          Residual Solvents
+                          Pressure
                         </span>
-                        {process.labResults.contaminants.solvents ? (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        ) : (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        )}
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No contaminant data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="operations">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Operators</CardTitle>
-                <CardDescription>Staff involved</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.metadata?.operators &&
-                process.metadata.operators.length > 0 ? (
-                  <div className="space-y-4">
-                    {process.metadata.operators.map((operator, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          <div>
-                            <p className="font-medium">{operator.role}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {operator.hours} hours
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No operator data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quality Checks</CardTitle>
-                <CardDescription>Process verification</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.metadata?.qualityChecks &&
-                process.metadata.qualityChecks.length > 0 ? (
-                  <div className="space-y-4">
-                    {process.metadata.qualityChecks.map((check, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ClipboardCheck className="h-4 w-4" />
-                          <div>
-                            <p className="font-medium">{check.parameter}</p>
-                            <p className="text-sm text-muted-foreground">
-                              by {check.operator}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="text-sm">
-                          {format(new Date(check.timestamp), 'PP')}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No quality check data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Cost Analysis</CardTitle>
-                <CardDescription>Process expenses</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {process.metadata?.costs ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Labor
-                      </span>
                       <span className="font-medium">
-                        ${process.metadata.costs.labor}
+                        {process.properties.environment.pressure} hPa
                       </span>
                     </div>
+                  )}
+                  {process.properties.environment.airflow && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Materials
-                      </span>
-                      <span className="font-medium">
-                        ${process.metadata.costs.materials}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Energy
-                      </span>
-                      <span className="font-medium">
-                        ${process.metadata.costs.energy}
-                      </span>
-                    </div>
-                    {process.metadata.costs.other && (
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Wind className="h-4 w-4" />
                         <span className="text-sm text-muted-foreground">
-                          Other
-                        </span>
-                        <span className="font-medium">
-                          ${process.metadata.costs.other}
+                          Airflow
                         </span>
                       </div>
-                    )}
-                    <div className="border-t pt-4">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">Total</span>
-                        <span className="font-bold">
-                          $
-                          {process.metadata.costs.labor +
-                            process.metadata.costs.materials +
-                            process.metadata.costs.energy +
-                            (process.metadata.costs.other ?? 0)}
-                        </span>
-                      </div>
+                      <span className="font-medium">
+                        {process.properties.environment.airflow} m/s
+                      </span>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No cost data available
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Notes</CardTitle>
-                <CardDescription>Additional information</CardDescription>
-              </CardHeader>
-              <CardContent>
+                  )}
+                </div>
+              ) : (
                 <p className="text-sm text-muted-foreground">
-                  {process.notes || 'No notes available'}
+                  No environmental data available
                 </p>
-              </CardContent>
-              <CardFooter>
-                <AppSheet mode="create" entity="note">
-                  <NoteForm
-                    mode="create"
-                    initialData={
-                      {
-                        entityType: 'processing',
-                        entityId: process.id,
-                      } as NoteWithRelations
-                    }
-                  />
-                </AppSheet>
-              </CardFooter>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="equipment">
+          <Card>
+            <CardHeader>
+              <CardTitle>Equipment Used</CardTitle>
+              <CardDescription>Process equipment and settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {process.properties?.equipment &&
+              process.properties.equipment.length > 0 ? (
+                <div className="space-y-4">
+                  {process.properties.equipment.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start justify-between"
+                    >
+                      <div>
+                        <p className="font-medium">{item.id}</p>
+                        {item.settings && (
+                          <p className="text-sm text-muted-foreground">
+                            {Object.entries(item.settings)
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No equipment data available
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notes</CardTitle>
+              <CardDescription>
+                Additional information and comments
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {process.notes && process.notes.length > 0 ? (
+                <div className="space-y-4">
+                  {process.notes.map((note) => (
+                    <div key={note.id} className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">{note.title}</h4>
+                        <Badge variant="outline">{note.type}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {note.content}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{format(note.createdAt, 'PPp')}</span>
+                        <span>•</span>
+                        <span>{note.createdById}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No notes available
+                </p>
+              )}
+            </CardContent>
+            <CardFooter>
+              <AppSheet mode="create" entity="note">
+                <NoteForm
+                  mode="create"
+                  initialData={
+                    {
+                      entityType: 'processing',
+                      entityId: process.id,
+                    } as NoteWithRelations
+                  }
+                />
+              </AppSheet>
+            </CardFooter>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

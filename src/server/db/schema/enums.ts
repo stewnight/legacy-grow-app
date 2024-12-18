@@ -237,6 +237,43 @@ export const maintenanceTypeEnum = pgEnum('maintenance_type', [
   'condition-based',
 ])
 
+// Add these new enums
+export const processingTypeEnum = pgEnum('processing_type', [
+  'drying',
+  'curing',
+  'extraction',
+  'trimming',
+  'packaging',
+  'testing',
+])
+
+export const processingMethodEnum = pgEnum('processing_method', [
+  // Drying methods
+  'hang_dry',
+  'rack_dry',
+  'freeze_dry',
+  // Curing methods
+  'jar_cure',
+  'bulk_cure',
+  // Extraction methods
+  'co2',
+  'ethanol',
+  'hydrocarbon',
+  'solventless',
+  // Trimming methods
+  'hand_trim',
+  'machine_trim',
+])
+
+export const processingStatusEnum = pgEnum('processing_status', [
+  'pending',
+  'in_progress',
+  'completed',
+  'cancelled',
+  'failed',
+  'on_hold',
+])
+
 // Export types for all enums
 export type LogLevel = (typeof logLevelEnum.enumValues)[number]
 export type SystemLogSource = (typeof systemLogSourceEnum.enumValues)[number]
@@ -264,3 +301,6 @@ export type EquipmentStatus = (typeof equipmentStatusEnum.enumValues)[number]
 export type MaintenanceFrequency =
   (typeof maintenanceFrequencyEnum.enumValues)[number]
 export type MaintenanceType = (typeof maintenanceTypeEnum.enumValues)[number]
+export type ProcessingType = (typeof processingTypeEnum.enumValues)[number]
+export type ProcessingMethod = (typeof processingMethodEnum.enumValues)[number]
+export type ProcessingStatus = (typeof processingStatusEnum.enumValues)[number]
