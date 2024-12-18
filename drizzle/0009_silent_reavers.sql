@@ -1,2 +1,0 @@
-CREATE TYPE "public"."maintenance_type" AS ENUM('preventive', 'corrective', 'predictive', 'condition-based');--> statement-breakpoint
-ALTER TYPE "public"."job_entity_type" ADD VALUE 'equipment' BEFORE 'plant';
