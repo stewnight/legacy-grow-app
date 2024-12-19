@@ -95,17 +95,16 @@ export const sensors = createTable(
 )
 
 export const sensorsRelations = relations(sensors, ({ one, many }) => ({
-  location: one(locations, {
-    fields: [sensors.locationId],
-    references: [locations.id],
-    relationName: 'sensorLocation',
-  }),
   equipment: one(equipment, {
     fields: [sensors.equipmentId],
     references: [equipment.id],
     relationName: 'equipmentSensors',
   }),
-  readings: many(sensorReadings, { relationName: 'sensorReadings' }),
+  location: one(locations, {
+    fields: [sensors.locationId],
+    references: [locations.id],
+    relationName: 'locationSensors',
+  }),
   createdBy: one(users, {
     fields: [sensors.createdById],
     references: [users.id],

@@ -68,6 +68,7 @@ export const users = createTable(
       mode: 'date',
       withTimezone: true,
     }),
+    password: varchar('password', { length: 255 }),
     image: varchar('image', { length: 255 }),
     role: userRoleEnum('role').notNull().default('user'),
     active: boolean('active').default(true),

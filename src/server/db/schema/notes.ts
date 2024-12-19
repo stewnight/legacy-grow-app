@@ -67,20 +67,10 @@ export const notesRelations = relations(notes, ({ one }) => ({
     references: [users.id],
     relationName: 'noteCreator',
   }),
-  equipment: one(equipment, {
-    fields: [notes.entityId],
-    references: [equipment.id],
-    relationName: 'equipmentNotes',
-  }),
   plant: one(plants, {
     fields: [notes.entityId],
     references: [plants.id],
     relationName: 'plantNotes',
-  }),
-  batch: one(batches, {
-    fields: [notes.entityId],
-    references: [batches.id],
-    relationName: 'batchNotes',
   }),
   harvest: one(harvests, {
     fields: [notes.entityId],
@@ -91,6 +81,11 @@ export const notesRelations = relations(notes, ({ one }) => ({
     fields: [notes.entityId],
     references: [locations.id],
     relationName: 'locationNotes',
+  }),
+  batch: one(batches, {
+    fields: [notes.entityId],
+    references: [batches.id],
+    relationName: 'batchNotes',
   }),
   job: one(jobs, {
     fields: [notes.entityId],
@@ -106,6 +101,11 @@ export const notesRelations = relations(notes, ({ one }) => ({
     fields: [notes.entityId],
     references: [sensors.id],
     relationName: 'sensorNotes',
+  }),
+  equipment: one(equipment, {
+    fields: [notes.entityId],
+    references: [equipment.id],
+    relationName: 'equipmentNotes',
   }),
 }))
 
