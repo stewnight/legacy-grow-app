@@ -5,15 +5,15 @@ import { createTable } from '../utils'
 import {
   processingTypeEnum,
   processingMethodEnum,
-  processingStatusEnum,
-  harvestQualityEnum,
+  commonStatusEnum,
+  qualityGradeEnum,
 } from './enums'
 import { users } from './core'
 import { type Batch, batches } from './batches'
 import { type Harvest, harvests } from './harvests'
 import { type Location, locations } from './locations'
 import { type Job, jobs } from './jobs'
-import { type Note, notes, NoteWithRelations } from './notes'
+import { type Note, notes } from './notes'
 import { type Equipment, equipment } from './equipment'
 import { type Sensor, sensors } from './sensors'
 import { z } from 'zod'
@@ -51,7 +51,7 @@ const stageSchema = z.object({
 })
 
 // Schema for lab results
-const labResultsSchema = z.object({
+export const processingLabResultsSchema = z.object({
   testId: z.string().optional(),
   results: z.record(z.unknown()).optional(),
   testedAt: z.string().optional(),
@@ -67,6 +67,8 @@ export const processingPropertiesSchema = z.object({
   stages: z.array(stageSchema).optional(),
   sensors: z.array(z.string()).optional(), // Array of sensor IDs
   jobs: z.array(z.string()).optional(), // Array of job IDs
+  notes: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
 })
 
 export const processing = createTable(
@@ -86,7 +88,8 @@ export const processing = createTable(
     // Processing details
     type: processingTypeEnum('type').notNull(),
     method: processingMethodEnum('method').notNull(),
-    status: processingStatusEnum('status').default('pending').notNull(),
+    status: commonStatusEnum('status').default('pending').notNull(),
+    quality: qualityGradeEnum('quality'),
 
     // Weight tracking
     inputWeight: numeric('input_weight', { precision: 10, scale: 3 }).notNull(),
@@ -102,13 +105,11 @@ export const processing = createTable(
     }),
     actualDuration: numeric('actual_duration', { precision: 10, scale: 2 }),
 
-    // Quality and results
-    quality: harvestQualityEnum('quality'),
-
     // JSON fields for detailed data
     properties:
       json('properties').$type<z.infer<typeof processingPropertiesSchema>>(),
-    labResults: json('lab_results').$type<z.infer<typeof labResultsSchema>>(),
+    labResults:
+      json('lab_results').$type<z.infer<typeof processingLabResultsSchema>>(),
 
     // Metadata and tracking
     createdById: uuid('created_by')
@@ -123,14 +124,19 @@ export const processing = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    harvestIdIdx: index('processing_harvest_id_idx').on(table.harvestId),
     batchIdIdx: index('processing_batch_id_idx').on(table.batchId),
+    harvestIdIdx: index('processing_harvest_id_idx').on(table.harvestId),
     locationIdIdx: index('processing_location_id_idx').on(table.locationId),
     typeMethodIdx: index('processing_type_method_idx').on(
       table.type,
       table.method
     ),
     statusIdx: index('processing_status_idx').on(table.status),
+    qualityIdx: index('processing_quality_idx').on(table.quality),
+    timingIdx: index('processing_timing_idx').on(
+      table.startedAt,
+      table.completedAt
+    ),
   })
 )
 
@@ -139,7 +145,7 @@ export const processingRelations = relations(processing, ({ one, many }) => ({
   harvest: one(harvests, {
     fields: [processing.harvestId],
     references: [harvests.id],
-    relationName: 'processingHarvest',
+    relationName: 'harvestProcessing',
   }),
   batch: one(batches, {
     fields: [processing.batchId],
@@ -159,6 +165,9 @@ export const processingRelations = relations(processing, ({ one, many }) => ({
   notes: many(notes, {
     relationName: 'processingNotes',
   }),
+  jobs: many(jobs, {
+    relationName: 'processingJobs',
+  }),
 }))
 
 // Zod Schemas
@@ -173,6 +182,7 @@ export const insertProcessingSchema = createInsertSchema(processing, {
   estimatedDuration: (schema) => schema.estimatedDuration.optional(),
   actualDuration: (schema) => schema.actualDuration.optional(),
 }).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
   createdById: true,
@@ -188,8 +198,6 @@ export type ProcessingWithRelations = Processing & {
   batch: Batch
   location: Location
   createdBy: { id: string; name: string; image: string }
-  notes?: NoteWithRelations[]
-  equipment?: Equipment[]
-  sensors?: Sensor[]
+  notes?: Note[]
   jobs?: Job[]
 }

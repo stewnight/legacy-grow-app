@@ -10,7 +10,7 @@ import {
 } from '~/components/ui/card'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow, format } from 'date-fns'
 import { Badge } from '~/components/ui/badge'
 import {
   BarChart,
@@ -24,6 +24,25 @@ import {
 
 interface ProcessingDashboardProps {
   processing: Processing[]
+}
+
+type Row = {
+  original: Processing
+}
+
+function getStatusVariant(status: string) {
+  switch (status) {
+    case 'completed':
+      return 'secondary'
+    case 'in_progress':
+      return 'default'
+    case 'pending':
+      return 'secondary'
+    case 'cancelled':
+      return 'destructive'
+    default:
+      return 'outline'
+  }
 }
 
 export function ProcessingDashboard({ processing }: ProcessingDashboardProps) {
@@ -44,22 +63,71 @@ export function ProcessingDashboard({ processing }: ProcessingDashboardProps) {
 
   // Get active processes
   const activeProcesses = processing.filter(
-    (proc) => proc.processStatus === 'active'
+    (proc) => proc.status === 'in_progress'
   )
 
   // Get recent processes (last 5)
   const recentProcesses = [...processing]
-    .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
+    .sort((a, b) => {
+      if (!a.startedAt || !b.startedAt) return 0
+      return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+    })
     .slice(0, 5)
 
   // Prepare data for yield chart
   const yieldData = processing
     .filter((proc) => proc.yieldPercentage !== null)
     .map((proc) => ({
-      id: proc.identifier,
+      id: proc.id.slice(0, 8),
       yield: Number(proc.yieldPercentage) || 0,
     }))
     .slice(-10)
+
+  const sortedProcessing = processing.sort((a, b) => {
+    if (!a.startedAt || !b.startedAt) return 0
+    return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+  })
+
+  // Replace processStatus with status
+  const statusCounts = processing.reduce(
+    (acc, curr) => {
+      const status = curr.status
+      acc[status] = (acc[status] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
+
+  // Use id instead of identifier
+  const columns = [
+    {
+      accessorKey: 'id',
+      header: 'ID',
+      cell: ({ row }: { row: Row }) => (
+        <div className="font-medium">{row.original.id.slice(0, 8)}</div>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }: { row: Row }) => (
+        <Badge
+          variant={getStatusVariant(row.original.status)}
+          className="capitalize"
+        >
+          {row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'startedAt',
+      header: 'Started',
+      cell: ({ row }: { row: Row }) => {
+        const date = row.original.startedAt
+        return date ? format(new Date(date), 'PPp') : '-'
+      },
+    },
+  ]
 
   return (
     <ScrollArea className="w-full whitespace-nowrap rounded-md">
@@ -121,23 +189,25 @@ export function ProcessingDashboard({ processing }: ProcessingDashboardProps) {
                 <div key={proc.id} className="flex items-center gap-4">
                   <Badge
                     variant={
-                      proc.processStatus === 'active'
+                      proc.status === 'in_progress'
                         ? 'default'
-                        : proc.processStatus === 'completed'
+                        : proc.status === 'completed'
                           ? 'secondary'
                           : 'destructive'
                     }
                   >
-                    {proc.processStatus}
+                    {proc.status}
                   </Badge>
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {proc.identifier}
+                      {proc.id.slice(0, 8)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(proc.startedAt, {
-                        addSuffix: true,
-                      })}
+                      {proc.startedAt
+                        ? formatDistanceToNow(new Date(proc.startedAt), {
+                            addSuffix: true,
+                          })
+                        : 'Not started'}
                     </p>
                   </div>
                 </div>

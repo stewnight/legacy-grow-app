@@ -28,13 +28,18 @@ import {
   insertProcessingSchema,
   type ProcessingWithRelations,
   processingPropertiesSchema,
+  processingLabResultsSchema,
 } from '~/server/db/schema/processing'
 import { DatePicker } from '~/components/ui/date-picker'
 import { Loader2 } from 'lucide-react'
 import { type TRPCClientErrorLike } from '@trpc/client'
 import { type AppRouter } from '~/server/api/root'
+import React from 'react'
 
 type FormData = z.infer<typeof insertProcessingSchema>
+
+type ProcessingProperties = z.infer<typeof processingPropertiesSchema>
+type ProcessingLabResults = z.infer<typeof processingLabResultsSchema>
 
 interface ProcessingFormProps {
   mode?: 'create' | 'edit'
@@ -49,21 +54,21 @@ export function ProcessingForm({
   const form = useForm<FormData>({
     resolver: zodResolver(insertProcessingSchema),
     defaultValues: {
-      type: initialData?.type || 'drying',
-      method: initialData?.method || 'hang_dry',
-      status: initialData?.status || 'pending',
-      harvestId: initialData?.harvestId || '',
-      batchId: initialData?.batchId || '',
-      locationId: initialData?.locationId || '',
-      inputWeight: initialData?.inputWeight?.toString() || '0',
+      type: initialData?.type ?? 'drying',
+      method: initialData?.method ?? 'hang_dry',
+      status: initialData?.status ?? 'pending',
+      harvestId: initialData?.harvestId ?? '',
+      batchId: initialData?.batchId ?? '',
+      locationId: initialData?.locationId ?? '',
+      inputWeight: initialData?.inputWeight?.toString() ?? '0',
       startedAt: initialData?.startedAt,
       completedAt: initialData?.completedAt,
       estimatedDuration: initialData?.estimatedDuration?.toString(),
       actualDuration: initialData?.actualDuration?.toString(),
       outputWeight: initialData?.outputWeight?.toString(),
       yieldPercentage: initialData?.yieldPercentage?.toString(),
-      properties: initialData?.properties || {},
-      labResults: initialData?.labResults || {},
+      properties: initialData?.properties ?? {},
+      labResults: initialData?.labResults ?? {},
     },
   })
 
@@ -110,17 +115,11 @@ export function ProcessingForm({
         harvestId: data.harvestId,
         batchId: data.batchId,
         locationId: data.locationId,
-        inputWeight: parseFloat(data.inputWeight),
-        outputWeight: data.outputWeight ? parseFloat(data.outputWeight) : null,
-        yieldPercentage: data.yieldPercentage
-          ? parseFloat(data.yieldPercentage)
-          : null,
-        estimatedDuration: data.estimatedDuration
-          ? parseFloat(data.estimatedDuration)
-          : null,
-        actualDuration: data.actualDuration
-          ? parseFloat(data.actualDuration)
-          : null,
+        inputWeight: data.inputWeight,
+        outputWeight: data.outputWeight || null,
+        yieldPercentage: data.yieldPercentage || null,
+        estimatedDuration: data.estimatedDuration || null,
+        actualDuration: data.actualDuration || null,
         properties: data.properties || {},
         labResults: data.labResults || {},
       }
@@ -150,9 +149,16 @@ export function ProcessingForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Harvest</FormLabel>
-                <FormControl>
-                  <Input {...field} required />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select harvest" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <HarvestSelector onSelect={field.onChange} />
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -164,9 +170,16 @@ export function ProcessingForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Batch</FormLabel>
-                <FormControl>
-                  <Input {...field} required />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select batch" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <BatchSelector onSelect={field.onChange} />
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -178,9 +191,16 @@ export function ProcessingForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Location</FormLabel>
-                <FormControl>
-                  <Input {...field} required />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <LocationSelector onSelect={field.onChange} />
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -367,3 +387,111 @@ export function ProcessingForm({
     </Form>
   )
 }
+
+const HarvestSelector = React.memo(function HarvestSelector({
+  onSelect,
+}: {
+  onSelect: (value: string) => void
+}) {
+  const { data, isLoading } = api.harvest.getAll.useQuery(
+    { limit: 50 },
+    {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  )
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!data?.items?.length) {
+    return <SelectItem value="none">No harvests found</SelectItem>
+  }
+
+  return (
+    <>
+      {data.items.map((harvest) => (
+        <SelectItem key={harvest.id} value={harvest.id}>
+          {harvest.id.slice(0, 8)}
+        </SelectItem>
+      ))}
+    </>
+  )
+})
+
+const BatchSelector = React.memo(function BatchSelector({
+  onSelect,
+}: {
+  onSelect: (value: string) => void
+}) {
+  const { data, isLoading } = api.batch.getAll.useQuery(
+    { limit: 50 },
+    {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  )
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!data?.items?.length) {
+    return <SelectItem value="none">No batches found</SelectItem>
+  }
+
+  return (
+    <>
+      {data.items.map((batch) => (
+        <SelectItem key={batch.id} value={batch.id}>
+          {batch.identifier || batch.id.slice(0, 8)}
+        </SelectItem>
+      ))}
+    </>
+  )
+})
+
+const LocationSelector = React.memo(function LocationSelector({
+  onSelect,
+}: {
+  onSelect: (value: string) => void
+}) {
+  const { data, isLoading } = api.location.getAll.useQuery(
+    { limit: 50 },
+    {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  )
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!data?.items?.length) {
+    return <SelectItem value="none">No locations found</SelectItem>
+  }
+
+  return (
+    <>
+      {data.items.map((location) => (
+        <SelectItem key={location.id} value={location.id}>
+          {location.name}
+        </SelectItem>
+      ))}
+    </>
+  )
+})

@@ -1,18 +1,9 @@
 'use client'
 
-import * as React from 'react'
 import { api } from '~/trpc/react'
+import { notFound, useRouter } from 'next/navigation'
+import React from 'react'
 import { format } from 'date-fns'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from '~/components/ui/card'
-import { notFound } from 'next/navigation'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -30,46 +21,63 @@ import {
   Droplets,
   Wind,
   Gauge,
-  Users,
-  ClipboardCheck,
-  Receipt,
 } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import { Badge } from '~/components/ui/badge'
+import { ScrollArea } from '~/components/ui/scroll-area'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { AppSheet } from '~/components/layout/app-sheet'
 import { ProcessingForm } from '~/components/processing/processing-form'
-import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
-import { ScrollArea } from '~/components/ui/scroll-area'
 import { NoteForm } from '~/components/notes/notes-form'
-import {
-  type NoteWithRelations,
-  type ProcessingWithRelations,
-} from '~/server/db/schema'
 import { useToast } from '~/hooks/use-toast'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
+function getStatusVariant(status: string) {
+  switch (status) {
+    case 'completed':
+      return 'success'
+    case 'in_progress':
+      return 'default'
+    case 'pending':
+      return 'secondary'
+    case 'cancelled':
+      return 'destructive'
+    default:
+      return 'outline'
+  }
+}
+
 export default function ProcessingPage({ params }: PageProps) {
   const resolvedParams = React.use(params)
-  const { toast } = useToast()
   const utils = api.useUtils()
+  const router = useRouter()
+  const { toast } = useToast()
 
-  const { data: process, isLoading } = api.processing.get.useQuery(
+  const { data: processing, isLoading } = api.processing.getById.useQuery(
     resolvedParams.id,
     {
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
     }
-  ) as { data: ProcessingWithRelations; isLoading: boolean }
+  )
 
   const { mutate: deleteProcessing } = api.processing.delete.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       toast({
         title: 'Processing deleted successfully',
       })
-      await utils.processing.invalidate()
-      window.location.href = '/processing'
+      router.push('/processing')
     },
     onError: (error) => {
       toast({
@@ -94,8 +102,8 @@ export default function ProcessingPage({ params }: PageProps) {
     )
   }
 
-  if (!process) {
-    return notFound()
+  if (!processing) {
+    notFound()
   }
 
   return (
@@ -109,11 +117,11 @@ export default function ProcessingPage({ params }: PageProps) {
               </Link>
             </Button>
             <h2 className="text-3xl font-bold tracking-tight">
-              {process.id?.slice(0, 8)}
+              {processing.id?.slice(0, 8)}
             </h2>
           </div>
           <p className="text-muted-foreground">
-            {process.type} - {process.method}
+            {processing.type} - {processing.method}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -137,7 +145,7 @@ export default function ProcessingPage({ params }: PageProps) {
                   'Are you sure you want to delete this processing record?'
                 )
               ) {
-                deleteProcessing(process.id)
+                deleteProcessing(processing.id)
               }
             }}
           >
@@ -150,9 +158,9 @@ export default function ProcessingPage({ params }: PageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
-            {process.status === 'completed' ? (
+            {processing.status === 'completed' ? (
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-            ) : process.status === 'in_progress' ? (
+            ) : processing.status === 'in_progress' ? (
               <CheckCircle2 className="h-4 w-4 text-blue-500" />
             ) : (
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
@@ -160,7 +168,7 @@ export default function ProcessingPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">
-              {process.status}
+              {processing.status}
             </div>
             <p className="text-xs text-muted-foreground">Current status</p>
           </CardContent>
@@ -173,7 +181,7 @@ export default function ProcessingPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {process.yieldPercentage?.toString() ?? 'N/A'}%
+              {processing.yieldPercentage?.toString() ?? 'N/A'}%
             </div>
             <p className="text-xs text-muted-foreground">Process yield</p>
           </CardContent>
@@ -186,8 +194,8 @@ export default function ProcessingPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {process.inputWeight.toString()}g →{' '}
-              {process.outputWeight?.toString() ?? 'N/A'}g
+              {processing.inputWeight.toString()}g →{' '}
+              {processing.outputWeight?.toString() ?? 'N/A'}g
             </div>
             <p className="text-xs text-muted-foreground">
               Input to output weight
@@ -202,7 +210,7 @@ export default function ProcessingPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {process.estimatedDuration?.toString() ?? 'N/A'} hours
+              {processing.estimatedDuration?.toString() ?? 'N/A'} hours
             </div>
             <p className="text-xs text-muted-foreground">Estimated duration</p>
           </CardContent>
@@ -231,29 +239,29 @@ export default function ProcessingPage({ params }: PageProps) {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Type</span>
-                  <Badge variant="outline">{process.type}</Badge>
+                  <Badge variant="outline">{processing.type}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Method</span>
-                  <span className="font-medium">{process.method}</span>
+                  <span className="font-medium">{processing.method}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     Started At
                   </span>
                   <span className="font-medium">
-                    {process.startedAt
-                      ? format(process.startedAt, 'PPp')
+                    {processing.startedAt
+                      ? format(processing.startedAt, 'PPp')
                       : 'Not started'}
                   </span>
                 </div>
-                {process.completedAt && (
+                {processing.completedAt && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Completed At
                     </span>
                     <span className="font-medium">
-                      {format(process.completedAt, 'PPp')}
+                      {format(processing.completedAt, 'PPp')}
                     </span>
                   </div>
                 )}
@@ -266,13 +274,13 @@ export default function ProcessingPage({ params }: PageProps) {
                 <CardDescription>Connected records</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {process.harvestId && (
+                {processing.harvestId && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Harvest
                     </span>
                     <Link
-                      href={`/harvests/${process.harvestId}`}
+                      href={`/harvests/${processing.harvestId}`}
                       className="flex items-center gap-1 font-medium hover:underline"
                     >
                       <LinkIcon className="h-3 w-3" />
@@ -280,11 +288,11 @@ export default function ProcessingPage({ params }: PageProps) {
                     </Link>
                   </div>
                 )}
-                {process.batchId && (
+                {processing.batchId && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Batch</span>
                     <Link
-                      href={`/batches/${process.batchId}`}
+                      href={`/batches/${processing.batchId}`}
                       className="flex items-center gap-1 font-medium hover:underline"
                     >
                       <LinkIcon className="h-3 w-3" />
@@ -292,13 +300,13 @@ export default function ProcessingPage({ params }: PageProps) {
                     </Link>
                   </div>
                 )}
-                {process.locationId && (
+                {processing.locationId && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Location
                     </span>
                     <Link
-                      href={`/locations/${process.locationId}`}
+                      href={`/locations/${processing.locationId}`}
                       className="flex items-center gap-1 font-medium hover:underline"
                     >
                       <LinkIcon className="h-3 w-3" />
@@ -318,9 +326,9 @@ export default function ProcessingPage({ params }: PageProps) {
               <CardDescription>Process environment data</CardDescription>
             </CardHeader>
             <CardContent>
-              {process.properties?.environment ? (
+              {processing.properties?.environment ? (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {process.properties.environment.temperature && (
+                  {processing.properties.environment.temperature && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Thermometer className="h-4 w-4" />
@@ -329,11 +337,11 @@ export default function ProcessingPage({ params }: PageProps) {
                         </span>
                       </div>
                       <span className="font-medium">
-                        {process.properties.environment.temperature}°C
+                        {processing.properties.environment.temperature}°C
                       </span>
                     </div>
                   )}
-                  {process.properties.environment.humidity && (
+                  {processing.properties.environment.humidity && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Droplets className="h-4 w-4" />
@@ -342,11 +350,11 @@ export default function ProcessingPage({ params }: PageProps) {
                         </span>
                       </div>
                       <span className="font-medium">
-                        {process.properties.environment.humidity}%
+                        {processing.properties.environment.humidity}%
                       </span>
                     </div>
                   )}
-                  {process.properties.environment.pressure && (
+                  {processing.properties.environment.pressure && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Gauge className="h-4 w-4" />
@@ -355,11 +363,11 @@ export default function ProcessingPage({ params }: PageProps) {
                         </span>
                       </div>
                       <span className="font-medium">
-                        {process.properties.environment.pressure} hPa
+                        {processing.properties.environment.pressure} hPa
                       </span>
                     </div>
                   )}
-                  {process.properties.environment.airflow && (
+                  {processing.properties.environment.airflow && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Wind className="h-4 w-4" />
@@ -368,7 +376,7 @@ export default function ProcessingPage({ params }: PageProps) {
                         </span>
                       </div>
                       <span className="font-medium">
-                        {process.properties.environment.airflow} m/s
+                        {processing.properties.environment.airflow} m/s
                       </span>
                     </div>
                   )}
@@ -389,10 +397,10 @@ export default function ProcessingPage({ params }: PageProps) {
               <CardDescription>Process equipment and settings</CardDescription>
             </CardHeader>
             <CardContent>
-              {process.properties?.equipment &&
-              process.properties.equipment.length > 0 ? (
+              {processing.properties?.equipment &&
+              processing.properties.equipment.length > 0 ? (
                 <div className="space-y-4">
-                  {process.properties.equipment.map((item, index) => (
+                  {processing.properties.equipment.map((item, index) => (
                     <div
                       key={index}
                       className="flex items-start justify-between"
@@ -428,9 +436,9 @@ export default function ProcessingPage({ params }: PageProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {process.notes && process.notes.length > 0 ? (
+              {processing.notes && processing.notes.length > 0 ? (
                 <div className="space-y-4">
-                  {process.notes.map((note) => (
+                  {processing.notes.map((note) => (
                     <div key={note.id} className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <h4 className="font-medium">{note.title}</h4>
@@ -442,7 +450,7 @@ export default function ProcessingPage({ params }: PageProps) {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{format(note.createdAt, 'PPp')}</span>
                         <span>•</span>
-                        <span>{note.createdById}</span>
+                        <span>{note.createdBy.name}</span>
                       </div>
                     </div>
                   ))}
@@ -457,12 +465,10 @@ export default function ProcessingPage({ params }: PageProps) {
               <AppSheet mode="create" entity="note">
                 <NoteForm
                   mode="create"
-                  initialData={
-                    {
-                      entityType: 'processing',
-                      entityId: process.id,
-                    } as NoteWithRelations
-                  }
+                  initialData={{
+                    entityType: 'processing',
+                    entityId: processing.id,
+                  }}
                 />
               </AppSheet>
             </CardFooter>

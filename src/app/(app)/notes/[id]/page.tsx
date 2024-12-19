@@ -10,7 +10,7 @@ import {
   CardTitle,
   CardDescription,
 } from '~/components/ui/card'
-import { notFound } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import Link from 'next/link'
 import {
@@ -43,16 +43,17 @@ interface PageProps {
 
 export default function NotePage({ params }: PageProps) {
   const resolvedParams = React.use(params)
+  const router = useRouter()
+  const utils = api.useUtils()
 
   const { data: note, isLoading } = api.note.get.useQuery(resolvedParams.id, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
 
-  const utils = api.useUtils()
   const { mutate: deleteNote } = api.note.delete.useMutation({
     onSuccess: () => {
-      window.location.href = '/notes'
+      router.push('/notes')
     },
   })
 

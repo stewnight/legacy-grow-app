@@ -87,7 +87,7 @@ export const locationTypeEnum = pgEnum('location_type', [
   'pot',
 ])
 
-// Operations enums
+// Sensor and monitoring enums
 export const sensorTypeEnum = pgEnum('sensor_type', [
   'temperature',
   'humidity',
@@ -100,6 +100,7 @@ export const sensorTypeEnum = pgEnum('sensor_type', [
   'airflow',
 ])
 
+// Job and task enums
 export const jobStatusEnum = pgEnum('job_status', [
   'pending',
   'in_progress',
@@ -143,8 +144,20 @@ export const jobEntityTypeEnum = pgEnum('job_entity_type', [
   'none',
 ])
 
-// Processing and harvest enums
-export const harvestQualityEnum = pgEnum('harvest_quality', [
+// Consolidated status enums
+export const commonStatusEnum = pgEnum('common_status', [
+  'pending',
+  'in_progress',
+  'completed',
+  'cancelled',
+  'failed',
+  'on_hold',
+  'archived',
+  'maintenance',
+])
+
+// Quality related enums
+export const qualityGradeEnum = pgEnum('quality_grade', [
   'A',
   'B',
   'C',
@@ -152,26 +165,39 @@ export const harvestQualityEnum = pgEnum('harvest_quality', [
   'F',
 ])
 
+// Processing specific enums
+export const processingTypeEnum = pgEnum('processing_type', [
+  'drying',
+  'curing',
+  'extraction',
+  'trimming',
+  'packaging',
+  'testing',
+])
+
+export const processingMethodEnum = pgEnum('processing_method', [
+  'hang_dry',
+  'rack_dry',
+  'freeze_dry',
+  'jar_cure',
+  'bulk_cure',
+  'co2',
+  'ethanol',
+  'hydrocarbon',
+  'solventless',
+  'hand_trim',
+  'machine_trim',
+])
+
+// Note and media enums
 export const noteTypeEnum = pgEnum('note_type', [
   'text',
   'voice',
   'image',
   'file',
-  'checklist',
-  'measurement',
 ])
 
-export const destroyReasonEnum = pgEnum('destroy_reason', [
-  'died',
-  'pest',
-  'disease',
-  'male',
-  'hermaphrodite',
-  'quality',
-  'regulatory',
-  'other',
-])
-
+// Facility and equipment enums
 export const buildingTypeEnum = pgEnum('building_type', [
   'indoor',
   'outdoor',
@@ -197,7 +223,6 @@ export const statusEnum = pgEnum('status', [
   'maintenance',
 ])
 
-// Equipment related enums
 export const equipmentTypeEnum = pgEnum('equipment_type', [
   'hvac',
   'lighting',
@@ -237,44 +262,28 @@ export const maintenanceTypeEnum = pgEnum('maintenance_type', [
   'condition-based',
 ])
 
-// Add these new enums
-export const processingTypeEnum = pgEnum('processing_type', [
-  'drying',
-  'curing',
-  'extraction',
-  'trimming',
-  'packaging',
-  'testing',
+export const destroyReasonEnum = pgEnum('destroy_reason', [
+  'died',
+  'pest',
+  'disease',
+  'male',
+  'hermaphrodite',
+  'quality',
+  'regulatory',
+  'other',
 ])
 
-export const processingMethodEnum = pgEnum('processing_method', [
-  // Drying methods
-  'hang_dry',
-  'rack_dry',
-  'freeze_dry',
-  // Curing methods
-  'jar_cure',
-  'bulk_cure',
-  // Extraction methods
-  'co2',
-  'ethanol',
-  'hydrocarbon',
-  'solventless',
-  // Trimming methods
-  'hand_trim',
-  'machine_trim',
-])
+// Enum values export for reuse
+export const enumValues = {
+  status: commonStatusEnum.enumValues,
+  quality: qualityGradeEnum.enumValues,
+  processingType: processingTypeEnum.enumValues,
+  processingMethod: processingMethodEnum.enumValues,
+  noteType: noteTypeEnum.enumValues,
+  sensorType: sensorTypeEnum.enumValues,
+} as const
 
-export const processingStatusEnum = pgEnum('processing_status', [
-  'pending',
-  'in_progress',
-  'completed',
-  'cancelled',
-  'failed',
-  'on_hold',
-])
-
-// Export types for all enums
+// Type exports
 export type LogLevel = (typeof logLevelEnum.enumValues)[number]
 export type SystemLogSource = (typeof systemLogSourceEnum.enumValues)[number]
 export type UserRole = (typeof userRoleEnum.enumValues)[number]
@@ -289,18 +298,18 @@ export type SensorType = (typeof sensorTypeEnum.enumValues)[number]
 export type JobStatus = (typeof jobStatusEnum.enumValues)[number]
 export type JobPriority = (typeof jobPriorityEnum.enumValues)[number]
 export type JobCategory = (typeof jobCategoryEnum.enumValues)[number]
-export type HarvestQuality = (typeof harvestQualityEnum.enumValues)[number]
+export type JobEntityType = (typeof jobEntityTypeEnum.enumValues)[number]
+export type CommonStatus = (typeof commonStatusEnum.enumValues)[number]
+export type QualityGrade = (typeof qualityGradeEnum.enumValues)[number]
+export type ProcessingType = (typeof processingTypeEnum.enumValues)[number]
+export type ProcessingMethod = (typeof processingMethodEnum.enumValues)[number]
 export type NoteType = (typeof noteTypeEnum.enumValues)[number]
-export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]
 export type BuildingType = (typeof buildingTypeEnum.enumValues)[number]
 export type RoomType = (typeof roomTypeEnum.enumValues)[number]
 export type Status = (typeof statusEnum.enumValues)[number]
-export type JobEntityType = (typeof jobEntityTypeEnum.enumValues)[number]
 export type EquipmentType = (typeof equipmentTypeEnum.enumValues)[number]
 export type EquipmentStatus = (typeof equipmentStatusEnum.enumValues)[number]
 export type MaintenanceFrequency =
   (typeof maintenanceFrequencyEnum.enumValues)[number]
 export type MaintenanceType = (typeof maintenanceTypeEnum.enumValues)[number]
-export type ProcessingType = (typeof processingTypeEnum.enumValues)[number]
-export type ProcessingMethod = (typeof processingMethodEnum.enumValues)[number]
-export type ProcessingStatus = (typeof processingStatusEnum.enumValues)[number]
+export type DestroyReason = (typeof destroyReasonEnum.enumValues)[number]

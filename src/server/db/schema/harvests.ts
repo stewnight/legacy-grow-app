@@ -1,111 +1,85 @@
 import { relations, sql } from 'drizzle-orm'
-import {
-  index,
-  varchar,
-  timestamp,
-  json,
-  uuid,
-  text,
-  date,
-  numeric,
-} from 'drizzle-orm/pg-core'
+import { index, timestamp, json, uuid, numeric } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { createTable } from '../utils'
-import { batchStatusEnum, harvestQualityEnum, statusEnum } from './enums'
+import { commonStatusEnum, qualityGradeEnum } from './enums'
 import { users } from './core'
-import { batches } from './batches'
-import { locations } from './locations'
-import { processing } from './processing'
-import { jobs } from './jobs'
-import { notes } from './notes'
+import { type Batch, batches } from './batches'
+import { type Location, locations } from './locations'
+import { type Job, jobs } from './jobs'
+import { type Note, notes } from './notes'
+import { type Processing, processing } from './processing'
+import { z } from 'zod'
+
+// Schema for lab results
+export const labResultsSchema = z.object({
+  testId: z.string().optional(),
+  results: z.record(z.unknown()).optional(),
+  testedAt: z.string().optional(),
+  testedBy: z.string().optional(),
+  certificateUrl: z.string().optional(),
+})
+
+// Schema for harvest properties
+export const harvestPropertiesSchema = z.object({
+  method: z.string().optional(),
+  conditions: z.record(z.unknown()).optional(),
+  notes: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  environment: z
+    .object({
+      temperature: z.number().optional(),
+      humidity: z.number().optional(),
+      light: z.number().optional(),
+      co2: z.number().optional(),
+    })
+    .optional(),
+  equipment: z
+    .array(
+      z.object({
+        id: z.string(),
+        settings: z.record(z.unknown()).optional(),
+      })
+    )
+    .optional(),
+})
 
 export const harvests = createTable(
   'harvest',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    identifier: varchar('identifier', { length: 100 }).notNull().unique(),
     batchId: uuid('batch_id')
       .notNull()
-      .references(() => batches.id),
+      .references(() => batches.id, { onDelete: 'cascade' }),
     locationId: uuid('location_id')
       .notNull()
       .references(() => locations.id),
-    harvestDate: date('harvest_date').notNull(),
-    // Weight tracking with 3 decimal places for precision
-    wetWeight: numeric('wet_weight', { precision: 10, scale: 3 }),
+
+    // Status and quality
+    status: commonStatusEnum('status').default('pending').notNull(),
+    quality: qualityGradeEnum('quality'),
+
+    // Weight tracking
+    wetWeight: numeric('wet_weight', { precision: 10, scale: 3 }).notNull(),
     dryWeight: numeric('dry_weight', { precision: 10, scale: 3 }),
-    trimWeight: numeric('trim_weight', { precision: 10, scale: 3 }),
     wasteWeight: numeric('waste_weight', { precision: 10, scale: 3 }),
-    quality: harvestQualityEnum('quality'),
-    harvestStatus: batchStatusEnum('harvest_status')
-      .default('active')
-      .notNull(),
-    properties: json('properties').$type<{
-      dryingConditions?: {
-        temperature: number
-        humidity: number
-        duration: number
-        method: string
-      }
-      trimming?: {
-        method: string
-        machine?: string
-        team?: string[]
-        duration?: number
-      }
-      yield?: {
-        expected: number
-        actual: number
-        variance: number
-        unit: string
-      }
-      categories?: Array<{
-        name: string
-        weight: number
-        grade?: string
-      }>
-    }>(),
-    labResults: json('lab_results').$type<{
-      thc?: number
-      cbd?: number
-      moisture?: number
-      terpenes?: Array<{
-        name: string
-        percentage: number
-      }>
-      microbials?: {
-        passed: boolean
-        details?: Record<string, number>
-      }
-      metals?: {
-        passed: boolean
-        details?: Record<string, number>
-      }
-      pesticides?: {
-        passed: boolean
-        details?: Record<string, number>
-      }
-      testedAt?: string
-      testedBy?: string
-      certificateUrl?: string
-    }>(),
-    metadata: json('metadata').$type<{
-      environmentalConditions?: {
-        temperature: number
-        humidity: number
-        light: number
-      }
-      team?: string[]
-      equipment?: string[]
-      notes?: string[]
-      images?: Array<{
-        url: string
-        type: string
-        timestamp: string
-      }>
-    }>(),
-    notes: text('notes'),
-    status: statusEnum('status').default('active').notNull(),
+    yieldPercentage: numeric('yield_percentage', { precision: 5, scale: 2 }),
+
+    // Timing
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    estimatedDuration: numeric('estimated_duration', {
+      precision: 10,
+      scale: 2,
+    }),
+    actualDuration: numeric('actual_duration', { precision: 10, scale: 2 }),
+
+    // JSON fields for detailed data
+    properties:
+      json('properties').$type<z.infer<typeof harvestPropertiesSchema>>(),
+    labResults: json('lab_results').$type<z.infer<typeof labResultsSchema>>(),
+
+    // Metadata and tracking
     createdById: uuid('created_by')
       .notNull()
       .references(() => users.id),
@@ -118,13 +92,14 @@ export const harvests = createTable(
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    identifierIdx: index('harvest_identifier_idx').on(table.identifier),
     batchIdIdx: index('harvest_batch_id_idx').on(table.batchId),
     locationIdIdx: index('harvest_location_id_idx').on(table.locationId),
-    harvestDateIdx: index('harvest_date_idx').on(table.harvestDate),
+    statusIdx: index('harvest_status_idx').on(table.status),
     qualityIdx: index('harvest_quality_idx').on(table.quality),
-    harvestStatusIdx: index('harvest_status_idx').on(table.harvestStatus),
-    statusIdx: index('harvest_general_status_idx').on(table.status),
+    timingIdx: index('harvest_timing_idx').on(
+      table.startedAt,
+      table.completedAt
+    ),
   })
 )
 
@@ -133,31 +108,58 @@ export const harvestsRelations = relations(harvests, ({ one, many }) => ({
   batch: one(batches, {
     fields: [harvests.batchId],
     references: [batches.id],
-    relationName: 'batchHarvest',
+    relationName: 'harvestBatch',
   }),
   location: one(locations, {
     fields: [harvests.locationId],
     references: [locations.id],
-    relationName: 'locationHarvests',
+    relationName: 'harvestLocation',
   }),
   createdBy: one(users, {
     fields: [harvests.createdById],
     references: [users.id],
     relationName: 'harvestCreator',
   }),
-  processing: many(processing, { relationName: 'harvestProcessing' }),
-  jobs: many(jobs, { relationName: 'harvestJobs' }),
-  notes: many(notes, { relationName: 'harvestNotes' }),
+  notes: many(notes, {
+    relationName: 'harvestNotes',
+  }),
+  jobs: many(jobs, {
+    relationName: 'harvestJobs',
+  }),
+  processing: many(processing, {
+    relationName: 'harvestProcessing',
+  }),
 }))
 
 // Zod Schemas
-export const insertHarvestSchema = createInsertSchema(harvests).omit({
+export const insertHarvestSchema = createInsertSchema(harvests, {
+  properties: (schema) => schema.properties.optional(),
+  labResults: (schema) => schema.labResults.optional(),
+  quality: (schema) => schema.quality.optional(),
+  dryWeight: (schema) => schema.dryWeight.optional(),
+  wasteWeight: (schema) => schema.wasteWeight.optional(),
+  yieldPercentage: (schema) => schema.yieldPercentage.optional(),
+  startedAt: (schema) => schema.startedAt.optional(),
+  completedAt: (schema) => schema.completedAt.optional(),
+  estimatedDuration: (schema) => schema.estimatedDuration.optional(),
+  actualDuration: (schema) => schema.actualDuration.optional(),
+}).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
   createdById: true,
 })
+
 export const selectHarvestSchema = createSelectSchema(harvests)
 
 // Types
 export type Harvest = typeof harvests.$inferSelect
 export type NewHarvest = typeof harvests.$inferInsert
+export type HarvestWithRelations = Harvest & {
+  batch: Batch
+  location: Location
+  createdBy: { id: string; name: string; image: string }
+  notes?: Note[]
+  jobs?: Job[]
+  processing?: Processing[]
+}

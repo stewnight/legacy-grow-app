@@ -1,6 +1,8 @@
 import { DrizzleAdapter } from '@auth/drizzle-adapter'
 import { type DefaultSession, type NextAuthConfig } from 'next-auth'
 import DiscordProvider from 'next-auth/providers/discord'
+import Credentials from 'next-auth/providers/credentials'
+import Resend from 'next-auth/providers/resend'
 
 import { db } from '~/server/db'
 import {
@@ -38,6 +40,34 @@ declare module 'next-auth' {
  */
 export const authConfig = {
   providers: [
+    Resend,
+    Credentials({
+      name: 'Credentials',
+      credentials: {
+        email: {
+          label: 'Email',
+          type: 'email',
+          placeholder: 'high@legacy.ag',
+        },
+        password: { label: 'Password', type: 'password' },
+      },
+      authorize: async (credentials) => {
+        let user = null
+        const pwHash = saltAndHashPassword(credentials.password)
+
+        // logic to verify if the user exists
+        user = await getUserFromDb(credentials.email, pwHash)
+
+        if (!user) {
+          // No user found, so this is their first attempt to login
+          // Optionally, this is also the place you could do a user registration
+          throw new Error('Invalid credentials.')
+        }
+
+        // return user object with their profile data
+        return user
+      },
+    }),
     DiscordProvider,
     /**
      * ...add more providers here.
