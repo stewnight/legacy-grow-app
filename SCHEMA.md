@@ -71,6 +71,7 @@ erDiagram
         string(255) name NULL
         string(255) email UK
         date emailVerified NULL
+        string(255) password NULL
         string(255) image NULL
         enum(user|admin|manager|viewer) role
         boolean active NULL
@@ -128,21 +129,20 @@ erDiagram
 
     harvest {
         string id
-        string(100) identifier UK
         string batchId
         string locationId
-        string harvestDate
-        numeric(10,3) wetWeight NULL
-        numeric(10,3) dryWeight NULL
-        numeric(10,3) trimWeight NULL
-        numeric(10,3) wasteWeight NULL
+        enum(pending|in_progress|completed|cancelled|failed|on_hold|archived|maintenance) status
         enum(A|B|C|D|F) quality NULL
-        enum(active|completed|pending|cancelled|archived) harvestStatus
+        numeric(10,3) wetWeight
+        numeric(10,3) dryWeight NULL
+        numeric(10,3) wasteWeight NULL
+        numeric(5,2) yieldPercentage NULL
+        date startedAt NULL
+        date completedAt NULL
+        numeric(10,2) estimatedDuration NULL
+        numeric(10,2) actualDuration NULL
         json properties NULL
         json labResults NULL
-        json metadata NULL
-        string notes NULL
-        enum(active|inactive|archived|maintenance) status
         string createdById
         date createdAt
         date updatedAt
@@ -186,7 +186,7 @@ erDiagram
 
     note {
         string id
-        enum(text|voice|image|file|checklist|measurement) type
+        enum(text|voice|image|file) type
         string(255) title
         string content NULL
         string entityId NULL
@@ -222,25 +222,22 @@ erDiagram
 
     processing {
         string id
-        string(100) identifier UK
         string harvestId
         string batchId
         string locationId
-        string(50) type
-        string(100) method
+        enum(drying|curing|extraction|trimming|packaging|testing) type
+        enum(hang_dry|rack_dry|freeze_dry|jar_cure|bulk_cure|co2|ethanol|hydrocarbon|solventless|hand_trim|machine_trim) method
+        enum(pending|in_progress|completed|cancelled|failed|on_hold|archived|maintenance) status
+        enum(A|B|C|D|F) quality NULL
         numeric(10,3) inputWeight
         numeric(10,3) outputWeight NULL
         numeric(5,2) yieldPercentage NULL
-        date startedAt
+        date startedAt NULL
         date completedAt NULL
-        numeric(10,2) duration NULL
-        enum(active|completed|pending|cancelled|archived) processStatus
-        enum(A|B|C|D|F) quality NULL
+        numeric(10,2) estimatedDuration NULL
+        numeric(10,2) actualDuration NULL
         json properties NULL
         json labResults NULL
-        json metadata NULL
-        string notes NULL
-        enum(active|inactive|archived|maintenance) status
         string createdById
         date createdAt
         date updatedAt
@@ -296,7 +293,7 @@ erDiagram
 ## Summary
 
 - Total Tables: 18
-- Total Columns: 234
+- Total Columns: 231
 - Total Relations: 0
 
 ## Tables
@@ -394,6 +391,7 @@ erDiagram
 | name | string(255) | Yes | - | No | No | - |
 | email | string(255) | No | - | Yes | No | - |
 | emailVerified | date | Yes | - | No | No | - |
+| password | string(255) | Yes | - | No | No | - |
 | image | string(255) | Yes | - | No | No | - |
 | role | enum(user|admin|manager|viewer) | No | user | No | No | - |
 | active | boolean | Yes | true | No | No | - |
@@ -467,21 +465,20 @@ erDiagram
 | Name | Type | Nullable | Default | Unique | Primary | References |
 |------|------|----------|----------|---------|----------|------------|
 | id | string | No | [object Object] | No | No | - |
-| identifier | string(100) | No | - | Yes | No | - |
 | batchId | string | No | - | No | No | - |
 | locationId | string | No | - | No | No | - |
-| harvestDate | string | No | - | No | No | - |
-| wetWeight | numeric(10,3) | Yes | - | No | No | - |
-| dryWeight | numeric(10,3) | Yes | - | No | No | - |
-| trimWeight | numeric(10,3) | Yes | - | No | No | - |
-| wasteWeight | numeric(10,3) | Yes | - | No | No | - |
+| status | enum(pending|in_progress|completed|cancelled|failed|on_hold|archived|maintenance) | No | pending | No | No | - |
 | quality | enum(A|B|C|D|F) | Yes | - | No | No | - |
-| harvestStatus | enum(active|completed|pending|cancelled|archived) | No | active | No | No | - |
+| wetWeight | numeric(10,3) | No | - | No | No | - |
+| dryWeight | numeric(10,3) | Yes | - | No | No | - |
+| wasteWeight | numeric(10,3) | Yes | - | No | No | - |
+| yieldPercentage | numeric(5,2) | Yes | - | No | No | - |
+| startedAt | date | Yes | - | No | No | - |
+| completedAt | date | Yes | - | No | No | - |
+| estimatedDuration | numeric(10,2) | Yes | - | No | No | - |
+| actualDuration | numeric(10,2) | Yes | - | No | No | - |
 | properties | json | Yes | - | No | No | - |
 | labResults | json | Yes | - | No | No | - |
-| metadata | json | Yes | - | No | No | - |
-| notes | string | Yes | - | No | No | - |
-| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
 | createdById | string | No | - | No | No | - |
 | createdAt | date | No | [object Object] | No | No | - |
 | updatedAt | date | No | [object Object] | No | No | - |
@@ -537,7 +534,7 @@ erDiagram
 | Name | Type | Nullable | Default | Unique | Primary | References |
 |------|------|----------|----------|---------|----------|------------|
 | id | string | No | [object Object] | No | No | - |
-| type | enum(text|voice|image|file|checklist|measurement) | No | text | No | No | - |
+| type | enum(text|voice|image|file) | No | text | No | No | - |
 | title | string(255) | No | - | No | No | - |
 | content | string | Yes | - | No | No | - |
 | entityId | string | Yes | - | No | No | - |
@@ -581,25 +578,22 @@ erDiagram
 | Name | Type | Nullable | Default | Unique | Primary | References |
 |------|------|----------|----------|---------|----------|------------|
 | id | string | No | [object Object] | No | No | - |
-| identifier | string(100) | No | - | Yes | No | - |
 | harvestId | string | No | - | No | No | - |
 | batchId | string | No | - | No | No | - |
 | locationId | string | No | - | No | No | - |
-| type | string(50) | No | - | No | No | - |
-| method | string(100) | No | - | No | No | - |
+| type | enum(drying|curing|extraction|trimming|packaging|testing) | No | - | No | No | - |
+| method | enum(hang_dry|rack_dry|freeze_dry|jar_cure|bulk_cure|co2|ethanol|hydrocarbon|solventless|hand_trim|machine_trim) | No | - | No | No | - |
+| status | enum(pending|in_progress|completed|cancelled|failed|on_hold|archived|maintenance) | No | pending | No | No | - |
+| quality | enum(A|B|C|D|F) | Yes | - | No | No | - |
 | inputWeight | numeric(10,3) | No | - | No | No | - |
 | outputWeight | numeric(10,3) | Yes | - | No | No | - |
 | yieldPercentage | numeric(5,2) | Yes | - | No | No | - |
-| startedAt | date | No | - | No | No | - |
+| startedAt | date | Yes | - | No | No | - |
 | completedAt | date | Yes | - | No | No | - |
-| duration | numeric(10,2) | Yes | - | No | No | - |
-| processStatus | enum(active|completed|pending|cancelled|archived) | No | active | No | No | - |
-| quality | enum(A|B|C|D|F) | Yes | - | No | No | - |
+| estimatedDuration | numeric(10,2) | Yes | - | No | No | - |
+| actualDuration | numeric(10,2) | Yes | - | No | No | - |
 | properties | json | Yes | - | No | No | - |
 | labResults | json | Yes | - | No | No | - |
-| metadata | json | Yes | - | No | No | - |
-| notes | string | Yes | - | No | No | - |
-| status | enum(active|inactive|archived|maintenance) | No | active | No | No | - |
 | createdById | string | No | - | No | No | - |
 | createdAt | date | No | [object Object] | No | No | - |
 | updatedAt | date | No | [object Object] | No | No | - |

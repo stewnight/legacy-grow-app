@@ -11,32 +11,8 @@
       _journal.json
       0000_snapshot.json
       0001_snapshot.json
-      0002_snapshot.json
-      0003_snapshot.json
-      0004_snapshot.json
-      0005_snapshot.json
-      0006_snapshot.json
-      0007_snapshot.json
-      0008_snapshot.json
-      0009_snapshot.json
-      0010_snapshot.json
-      0011_snapshot.json
-      0012_snapshot.json
-      0013_snapshot.json
-    0000_next_silk_fever.sql
-    0001_shocking_mindworm.sql
-    0002_white_ma_gnuci.sql
-    0003_unique_gwen_stacy.sql
-    0004_futuristic_talon.sql
-    0005_spooky_thor.sql
-    0006_breezy_venus.sql
-    0007_damp_cargill.sql
-    0008_thin_proudstar.sql
-    0009_silent_reavers.sql
-    0010_polite_thanos.sql
-    0011_lucky_pretty_boy.sql
-    0012_worthless_wind_dancer.sql
-    0013_brief_mister_fear.sql
+    0000_big_hairball.sql
+    0001_next_rhino.sql
   📁public
     📁screenshots
       desktop.png
@@ -75,6 +51,10 @@
             page.tsx
           page.tsx
         📁plants
+          📁[id]
+            page.tsx
+          page.tsx
+        📁processing
           📁[id]
             page.tsx
           page.tsx
@@ -150,6 +130,10 @@
       📁plants
         plants-columns.tsx
         plants-form.tsx
+      📁processing
+        processing-columns.tsx
+        processing-dashboard.tsx
+        processing-form.tsx
       📁rooms
         rooms-columns.tsx
         rooms-form.tsx
@@ -199,6 +183,7 @@
         toaster.tsx
         tooltip.tsx
       icons.tsx
+      invite-user-dialog.tsx
       session-provider.tsx
       theme-provider.tsx
       theme-toggle.tsx
@@ -229,6 +214,7 @@
       📁auth
         config.ts
         index.ts
+        utils.ts
       📁db
         📁schema
           batches.ts

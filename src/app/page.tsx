@@ -22,7 +22,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center">
+    <div className="relative flex min-h-screen items-center justify-center">
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -35,15 +35,15 @@ export default function LandingPage() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center text-white space-y-8 px-4">
+      <div className="relative z-10 space-y-8 px-4 text-center text-white">
         <h1 className="text-5xl font-bold tracking-tight">
           Welcome to Legacy Grow
         </h1>
-        <p className="text-xl max-w-2xl mx-auto text-gray-200">
+        <p className="mx-auto max-w-2xl text-xl text-gray-200">
           A modern cultivation management system designed for efficiency and
           compliance.
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex justify-center gap-4">
           <Button
             size="lg"
             onClick={() => router.push('/auth/signin')}
