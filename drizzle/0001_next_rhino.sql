@@ -1,1 +1,0 @@
-ALTER TABLE "legacy-grow-app_user" ADD COLUMN "password" varchar(255);
